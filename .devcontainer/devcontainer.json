@@ -1,0 +1,7 @@
+{
+  "name": "learn-p5",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "remoteUser": "node"
+}
