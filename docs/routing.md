@@ -11,7 +11,7 @@ Currently the app will have the following routes:
 - /home (or the index route )
 - /support
 - /about
-- /reference
+- /reference/[module]/[symbol]
 
 ## The route views (in detail)
 
