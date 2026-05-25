@@ -53,6 +53,9 @@ This page contains help and info on how to report bugs or check the current know
 
 This describes briefly about the app and its inspirations.
 
-## Other link types
+## `/ref`
 
-In the lesson descriptions, library symbols are shown as links which take the user to a `/reference/[symbol]` page that shows the information about a symbol and how it is used in a simple example. It will also show some meta on where the symbol is found in the source, taking the user to GitHub if they wish to inspect the source.
+In the lesson descriptions, library symbols are shown as links which take the user to a `/ref/[symbol]` page that shows the information about a symbol and how it is used in a simple example.
+
+> [!NOTE]
+> It could also show some meta on where the symbol is found in the source, taking the user to GitHub if they wish to inspect the source.

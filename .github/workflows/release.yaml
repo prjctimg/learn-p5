@@ -9,18 +9,17 @@ jobs:
   Gradle:
     runs-on: ubuntu-latest
     steps:
-      - name: checkout code
+      - name: Checkout
         uses: actions/checkout@v2
-      - name: setup jdk
+      - name: Setup JDK
         uses: actions/setup-java@v1
         with:
           java-version: 11
-      - name: Make Gradle executable
-        run: chmod +x ./gradlew
-      - name: Build
-        run: ./gradlew assembleRelease
-      - name: Releasing
+      - name: Build app
+        run: chmod +x ./gradlew &&
+          ./gradlew assembleRelease
+      - name: Release
         uses: sangatdesai/release-apk@main
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           APP_FOLDER: app

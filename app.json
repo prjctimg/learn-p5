@@ -8,7 +8,7 @@
     "scheme": "learnp5",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/p5.icon"
     },
     "android": {
       "adaptiveIcon": {
