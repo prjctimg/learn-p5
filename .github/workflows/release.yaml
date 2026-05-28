@@ -5,6 +5,9 @@ on:
     tags:
       - "*"
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -35,7 +38,10 @@ jobs:
       - name: Build release APK
         run: cd android && ./gradlew assembleRelease
 
+      - name: Find APK
+        run: find android/app/build/outputs -name "*.apk" -type f
+
       - name: Upload APK to release
         uses: softprops/action-gh-release@v2
         with:
-          files: android/app/build/outputs/apk/release/app-release-unsigned.apk
+          files: android/app/build/outputs/apk/release/*.apk
