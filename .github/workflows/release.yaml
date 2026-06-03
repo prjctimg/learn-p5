@@ -35,13 +35,25 @@ jobs:
       - name: Prebuild native project
         run: npx expo prebuild --platform android --clean
 
-      - name: Build release APK
-        run: npx expo run:android --variant release --no-install --no-bundler
+      - name: Configure ABI splits for per-architecture APKs
+        run: |
+          sed -i '/android {/a\
+          \    splits {\
+          \        abi {\
+          \            enable true\
+          \            reset()\
+          \            include "arm64-v8a", "armeabi-v7a"\
+          \            universalApk false\
+          \        }\
+          \    }' android/app/build.gradle
 
-      - name: Find APK
+      - name: Build release APKs (per ABI)
+        run: cd android && ./gradlew assembleRelease
+
+      - name: List split APKs
         run: find android -name "*.apk" -type f
 
-      - name: Upload APK to release
+      - name: Upload split APKs to release
         uses: softprops/action-gh-release@v2
         with:
           files: android/**/*.apk
