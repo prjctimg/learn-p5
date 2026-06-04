@@ -12,7 +12,7 @@ export default function Index() {
     <View className="flex-1 items-center justify-center px-6 gap-6 bg-surface dark:bg-surface-dark">
       <Pressable
         onPress={openDrawer}
-        className="absolute top-4 left-4 z-10 w-10 h-10 items-center justify-center rounded-full bg-surface-dim dark:bg-[#333]"
+        className="absolute top-4 left-4 z-10 w-10 h-10 items-center justify-center rounded-full bg-surface-dim dark:bg-surface-dim-dark"
         accessibilityRole="button"
         accessibilityLabel="Open navigation menu"
       >

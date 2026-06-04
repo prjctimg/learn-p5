@@ -21,7 +21,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <DrawerProvider>
         <ThemeProvider>
-          <Stack />
+          <Stack screenOptions={{ headerShown: false }} />
           <SideDrawer />
         </ThemeProvider>
       </DrawerProvider>

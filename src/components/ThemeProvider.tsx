@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
-import { View, useColorScheme } from "react-native";
+import { createContext, useContext, type ReactNode } from "react";
+import { useColorScheme } from "nativewind";
 
 type ThemeColorScheme = "light" | "dark";
 
@@ -24,32 +24,17 @@ interface ThemeProviderProps {
 }
 
 export default function ThemeProvider({ children }: ThemeProviderProps) {
-  const systemScheme = useColorScheme();
-  const [manualScheme, setManualScheme] = useState<ThemeColorScheme | null>(
-    null,
-  );
-
-  const colorScheme: ThemeColorScheme =
-    manualScheme ?? (systemScheme === "dark" ? "dark" : "light");
-
-  const toggleTheme = () => {
-    setManualScheme((prev) => (prev === "dark" ? "light" : "dark"));
-  };
-
-  const setColorScheme = (scheme: ThemeColorScheme) => {
-    setManualScheme(scheme);
-  };
+  const { colorScheme, toggleColorScheme, setColorScheme } = useColorScheme();
 
   return (
-    <ThemeContext.Provider value={{ colorScheme, toggleTheme, setColorScheme }}>
-      <View
-        className={`flex-1 ${colorScheme === "dark" ? "dark" : ""}`}
-        style={{
-          backgroundColor: colorScheme === "dark" ? "#121212" : "#FFFFFF",
-        }}
-      >
-        {children}
-      </View>
+    <ThemeContext.Provider
+      value={{
+        colorScheme: colorScheme ?? "light",
+        toggleTheme: toggleColorScheme,
+        setColorScheme: (scheme) => setColorScheme(scheme),
+      }}
+    >
+      {children}
     </ThemeContext.Provider>
   );
 }
