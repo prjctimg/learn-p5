@@ -2,7 +2,7 @@
   "expo": {
     "name": "learn-p5",
     "slug": "learn-p5",
-    "version": "0.2.3",
+    "version": "0.2.5",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "learnp5",
