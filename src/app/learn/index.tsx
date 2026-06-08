@@ -1,10 +1,7 @@
 import { View, Text, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import Header from "../../components/Header";
-import Button from "../../components/Button";
 import ChallengeCard from "../../components/ChallengeCard";
-import StatsCard from "../../components/StatsCard";
-import RecentSketchCard from "../../components/RecentSketchCard";
 
 export default function Learn() {
   const router = useRouter();
@@ -26,55 +23,16 @@ export default function Learn() {
           Ready to create something amazing today?
         </Text>
 
-        <View className="mt-6">
-          <Button
-            title="Start Learning"
-            onPress={() => router.push("/learn")}
-            variant="primary"
-            accessibilityLabel="Start learning p5.js"
-          />
-        </View>
-
         <Text className="font-headline text-2xl font-bold text-on-surface dark:text-on-surface-dark mt-8 mb-4">
-          Daily Challenge
+          Up next
         </Text>
 
         <ChallengeCard
           title="Sine Wave Harmony"
-          level="Beginner"
-          duration="15 mins"
-          code="sin(angle) * amplitude;"
-          comment="// Use math to create motion"
-          onTry={() => router.push("/learn/exercise-1")}
+          moduleName="Shapes"
+          description="Learn how to draw circles and use math to create motion with trigonometric functions."
+          onContinue={() => router.push("/learn/exercise-1")}
         />
-
-        <View className="mt-6">
-          <StatsCard
-            items={[
-              { icon: "🔥", value: "12", label: "Day Streak" },
-              { icon: "🧩", value: "45", label: "Projects Done" },
-            ]}
-          />
-        </View>
-
-        <Text className="font-headline text-2xl font-bold text-on-surface dark:text-on-surface-dark mt-8 mb-4">
-          Recent Sketches
-        </Text>
-
-        <View className="gap-3">
-          <RecentSketchCard
-            title="Perlin Noise Terrain"
-            timeAgo="2 hours ago"
-            thumbnailLabel="PN"
-            onPress={() => {}}
-          />
-          <RecentSketchCard
-            title="Particle System v2"
-            timeAgo="Yesterday"
-            thumbnailLabel="PS"
-            onPress={() => {}}
-          />
-        </View>
       </ScrollView>
     </View>
   );

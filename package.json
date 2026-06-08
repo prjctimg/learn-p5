@@ -1,7 +1,7 @@
 {
   "name": "learn-p5",
   "main": "expo-router/entry",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -41,6 +41,8 @@
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
+    "eslint": "^9.0.0",
+    "eslint-config-expo": "~55.0.1",
     "postcss": "^8.5.15",
     "tailwindcss": "^3.4.17",
     "typescript": "~5.9.2"

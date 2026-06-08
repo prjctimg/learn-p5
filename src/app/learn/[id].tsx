@@ -3,9 +3,10 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import Header from "../../components/Header";
 import Button from "../../components/Button";
 
-const exercises: Record<string, { title: string; instruction: string }> = {
+const exercises: Record<string, { title: string; module: string; instruction: string }> = {
   "exercise-1": {
     title: "Exercise 1: The First Circle",
+    module: "Shapes",
     instruction:
       'Modify the circle() function parameters to draw a circle at the exact center of the canvas.',
   },

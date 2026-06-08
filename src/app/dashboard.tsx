@@ -55,10 +55,10 @@ export default function Dashboard() {
             </View>
             <View className="bg-surface-dim dark:bg-surface-dim-dark rounded-xl px-5 py-4">
               <Text className="font-headline text-lg font-bold text-on-surface dark:text-on-surface-dark">
-                Daily Challenge
+                Up next
               </Text>
               <Text className="font-body text-sm text-text-secondary dark:text-text-secondary-dark mt-1">
-                A new sketch exercise every day
+                Continue your next exercise
               </Text>
             </View>
           </View>
