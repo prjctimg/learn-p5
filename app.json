@@ -2,7 +2,7 @@
   "expo": {
     "name": "learn-p5",
     "slug": "learn-p5",
-    "version": "0.2.5",
+    "version": "0.2.6",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "learnp5",
@@ -39,7 +39,10 @@
         "expo-build-properties",
         {
           "android": {
-            "abiFilters": ["arm64-v8a", "armeabi-v7a"],
+            "abiFilters": [
+              "arm64-v8a",
+              "armeabi-v7a"
+            ],
             "useLegacyPackaging": true,
             "enableProguardInReleaseBuilds": true
           }
