@@ -1,5 +1,6 @@
 declare module "react-native-webview" {
   import type { ViewProps } from "react-native";
+  import type { Component } from "react";
 
   interface WebViewSourceHtml {
     html: string;
@@ -11,6 +12,10 @@ declare module "react-native-webview" {
     headers?: Record<string, string>;
   }
 
+  interface WebViewNativeEvent {
+    nativeEvent: { data: string };
+  }
+
   interface WebViewProps extends ViewProps {
     source: WebViewSourceHtml | WebViewSourceUri;
     javaScriptEnabled?: boolean;
@@ -19,7 +24,13 @@ declare module "react-native-webview" {
     scrollEnabled?: boolean;
     bounces?: boolean;
     allowFileAccess?: boolean;
+    onMessage?: (event: WebViewNativeEvent) => void;
+    keyboardDisplayRequiresUserAction?: boolean;
+    hideKeyboardAccessoryView?: boolean;
+    overScrollMode?: "always" | "content" | "never";
   }
 
-  export class WebView extends React.Component<WebViewProps> {}
+  export default class WebView extends Component<WebViewProps> {
+    postMessage: (data: string) => void;
+  }
 }
