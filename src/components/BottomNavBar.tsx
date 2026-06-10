@@ -22,7 +22,7 @@ const tabs: TabItem[] = [
     label: "Editor",
     icon: "code-tags",
     iconFilled: "code-tags",
-    href: "/learn/exercise-1",
+    href: "/learn/shapes/exercise-1",
     matchPath: (p) => p.startsWith("/learn/") && p !== "/learn",
   },
   {

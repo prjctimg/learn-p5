@@ -29,15 +29,3 @@ function draw() {
   fill(255, 178, 187);
   circle(mouseX, mouseY, 50);
 }`;
-
-export const EXERCISE_SOLUTIONS: Record<string, string> = {
-  "exercise-1": `function setup() {
-  createCanvas(400, 400);
-}
-
-function draw() {
-  background(20);
-  fill(255, 178, 187);
-  circle(200, 200, 50);
-}`,
-};
