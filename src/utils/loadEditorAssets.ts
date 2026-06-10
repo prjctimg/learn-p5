@@ -27,14 +27,14 @@ export async function loadEditorAssets(): Promise<EditorAssets> {
       readAsset(require("../../assets/codemirror/codemirror.css")),
       readAsset(require("../../assets/codemirror/foldgutter.css")),
       readAsset(require("../../assets/codemirror/material.css")),
-      readAsset(require("../../assets/codemirror/codemirror.js")),
-      readAsset(require("../../assets/codemirror/javascript.js")),
-      readAsset(require("../../assets/codemirror/matchbrackets.js")),
-      readAsset(require("../../assets/codemirror/active-line.js")),
-      readAsset(require("../../assets/codemirror/foldcode.js")),
-      readAsset(require("../../assets/codemirror/brace-fold.js")),
-      readAsset(require("../../assets/codemirror/indent-fold.js")),
-      readAsset(require("../../assets/codemirror/foldgutter.js")),
+      readAsset(require("../../assets/codemirror/codemirror.cmjs")),
+      readAsset(require("../../assets/codemirror/javascript.cmjs")),
+      readAsset(require("../../assets/codemirror/matchbrackets.cmjs")),
+      readAsset(require("../../assets/codemirror/active-line.cmjs")),
+      readAsset(require("../../assets/codemirror/foldcode.cmjs")),
+      readAsset(require("../../assets/codemirror/brace-fold.cmjs")),
+      readAsset(require("../../assets/codemirror/indent-fold.cmjs")),
+      readAsset(require("../../assets/codemirror/foldgutter.cmjs")),
     ]);
 
   cached = {

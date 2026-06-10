@@ -1,7 +1,7 @@
 {
   "name": "learn-p5",
   "main": "expo-router/entry",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
