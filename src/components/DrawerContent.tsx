@@ -1,9 +1,10 @@
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, StyleSheet } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { usePathname, useRouter } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useThemeContext } from "./ThemeProvider";
+import { Colors } from "../constants/Colors";
 
 const logoPaths = [
   "M16.254,27.631v7.998h0.359c0.715-1.113,1.65-2.248,2.805-3.402c1.153-1.154,2.567-2.188,4.239-3.105c1.671-0.912,3.561-1.67,5.671-2.268c2.107-0.596,4.477-0.896,7.103-0.896c4.06,0,7.8,0.777,11.223,2.328c3.422,1.555,6.368,3.684,8.836,6.389c2.466,2.707,4.376,5.891,5.73,9.551c1.353,3.662,2.03,7.602,2.03,11.82s-0.657,8.178-1.971,11.879c-1.312,3.701-3.185,6.924-5.611,9.67c-2.429,2.746-5.372,4.938-8.835,6.566c-3.463,1.631-7.384,2.447-11.76,2.447c-4.06,0-7.781-0.836-11.163-2.506c-3.385-1.672-5.99-3.939-7.82-6.807h-0.238v36.295H2.525V27.631H16.254z M49.684,56.045c0-2.229-0.339-4.438-1.015-6.627c-0.678-2.188-1.692-4.158-3.045-5.91c-1.354-1.748-3.064-3.162-5.134-4.238c-2.07-1.074-4.497-1.611-7.282-1.611c-2.627,0-4.976,0.557-7.044,1.672c-2.07,1.115-3.842,2.549-5.313,4.297c-1.474,1.752-2.587,3.742-3.343,5.971c-0.758,2.229-1.134,4.459-1.134,6.686c0,2.229,0.376,4.438,1.134,6.625c0.756,2.191,1.869,4.16,3.343,5.912c1.472,1.75,3.243,3.164,5.313,4.236c2.068,1.076,4.417,1.611,7.044,1.611c2.785,0,5.212-0.555,7.282-1.67c2.069-1.115,3.78-2.547,5.134-4.299c1.353-1.75,2.367-3.74,3.045-5.969C49.345,60.502,49.684,58.273,49.684,56.045z",
@@ -38,6 +39,7 @@ export default function DrawerContent({ onClose }: DrawerContentProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { colorScheme } = useThemeContext();
+  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
   const isActive = (route: string) =>
     pathname === route || pathname.startsWith(route + "/");
@@ -48,104 +50,189 @@ export default function DrawerContent({ onClose }: DrawerContentProps) {
   };
 
   return (
-    <View className="flex-1 bg-surface dark:bg-surface-dark">
+    <View style={[styles.container, { backgroundColor: colors.surface }]}>
       <View
-        style={{ paddingTop: insets.top }}
-        className="justify-end px-6 pb-6 bg-primary"
+        style={[styles.header, { paddingTop: insets.top, backgroundColor: colors.primary }]}
       >
         <Svg width={60} height={28} viewBox="0 0 250 114">
           {logoPaths.map((d, i) => (
             <Path key={`logo-path-${i}`} d={d} fill="#FFFFFF" />
           ))}
         </Svg>
-        <Text className="text-white font-headline text-2xl font-bold mt-3">
+        <Text style={[styles.logoText, { color: "#FFFFFF" }]}>
           Learn p5.js
         </Text>
-        <Text className="text-white/70 font-body text-sm">
+        <Text style={[styles.tagline, { color: "rgba(255, 255, 255, 0.7)" }]}>
           I should write something catchy or dynamic here ?
         </Text>
       </View>
 
-      <View className="px-6 pt-6 pb-4">
-        <Text className="font-headline text-xl font-bold text-on-surface dark:text-on-surface-dark">
+      <View style={styles.body}>
+        <Text style={[styles.greeting, { color: colors.onSurface }]}>
           Hello, Coder!
         </Text>
-        <Text className="font-body text-sm text-text-secondary dark:text-text-secondary-dark mt-1">
+        <Text style={[styles.levelText, { color: colors.textSecondary }]}>
           Level 3 · 84% to next level
         </Text>
 
-        <View className="h-2 bg-surface-dim dark:bg-surface-dim-dark rounded-full mt-4 overflow-hidden">
-          <View className="h-full w-[84%] bg-primary rounded-full" />
+        <View style={[styles.progressBarBg, { backgroundColor: colors.surfaceDim }]}>
+          <View style={[styles.progressBarFill, { backgroundColor: colors.primary }]} />
         </View>
 
-        <View className="flex-row gap-3 mt-4">
-          <View className="flex-1 bg-primary/10 rounded-xl px-4 py-3 items-center">
-            <Text className="font-headline text-xl font-bold text-primary">
-              3
-            </Text>
-            <Text className="font-body text-xs text-text-secondary dark:text-text-secondary-dark mt-0.5">
-              Level
-            </Text>
+        <View style={styles.statsRow}>
+          <View style={[styles.statCard, { backgroundColor: colors.primary + "1A" }]}>
+            <Text style={[styles.statValue, { color: colors.primary }]}>3</Text>
+            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Level</Text>
           </View>
-          <View className="flex-1 bg-primary/10 rounded-xl px-4 py-3 items-center">
-            <Text className="font-headline text-xl font-bold text-primary">
-              2.4k
-            </Text>
-            <Text className="font-body text-xs text-text-secondary dark:text-text-secondary-dark mt-0.5">
-              XP
-            </Text>
+          <View style={[styles.statCard, { backgroundColor: colors.primary + "1A" }]}>
+            <Text style={[styles.statValue, { color: colors.primary }]}>2.4k</Text>
+            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>XP</Text>
           </View>
-          <View className="flex-1 bg-primary/10 rounded-xl px-4 py-3 items-center">
-            <Text className="font-headline text-xl font-bold text-primary">
-              7
-            </Text>
-            <Text className="font-body text-xs text-text-secondary dark:text-text-secondary-dark mt-0.5">
-              Streak
-            </Text>
+          <View style={[styles.statCard, { backgroundColor: colors.primary + "1A" }]}>
+            <Text style={[styles.statValue, { color: colors.primary }]}>7</Text>
+            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Streak</Text>
           </View>
         </View>
       </View>
 
-      <View className="flex-1 pt-2">
+      <View style={styles.navList}>
         {navItems.map((item) => (
           <Pressable
             key={item.href}
             onPress={() => navigate(item.href)}
-            className={`flex-row items-center px-6 py-4 mx-3 rounded-xl ${isActive(item.href) ? "bg-primary/10" : ""
-              }`}
+            style={[
+              styles.navItem,
+              isActive(item.href) && { backgroundColor: colors.primary + "1A" },
+            ]}
             accessibilityRole="button"
             accessibilityLabel={item.label}
           >
-            <View className="w-8 items-center">
+            <View style={styles.iconContainer}>
               <MaterialCommunityIcons
                 name={item.icon}
                 size={24}
-                color={
-                  isActive(item.href)
-                    ? "#ED225D"
-                    : colorScheme === "dark"
-                    ? "#9CA3AF"
-                    : "#6B7280"
-                }
+                color={isActive(item.href) ? colors.primary : colors.textSecondary}
               />
             </View>
-            <Text
-              className={`font-body text-base ml-3 ${isActive(item.href)
-                ? "text-primary font-semibold"
-                : "text-on-surface dark:text-on-surface-dark"
-                }`}
-            >
+            <Text style={[
+              styles.navLabel,
+              isActive(item.href)
+                ? { color: colors.primary, fontWeight: "600" }
+                : { color: colors.onSurface },
+            ]}>
               {item.label}
             </Text>
           </Pressable>
         ))}
       </View>
 
-      <View className="px-6 py-4 border-t border-outline/10 dark:border-outline-dark/20">
-        <Text className="font-mono text-xs text-center text-text-secondary dark:text-text-secondary-dark">
+      <View style={[styles.footer, {
+        borderTopWidth: 1,
+        borderColor: colorScheme === "dark" ? colors.outline + "33" : colors.outline + "1A",
+      }]}>
+        <Text style={[styles.versionLabel, { color: colors.textSecondary }]}>
           v2.0.5
         </Text>
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  header: {
+    justifyContent: "flex-end",
+    paddingHorizontal: 24,
+    paddingBottom: 24,
+  },
+  logoText: {
+    fontFamily: "SpaceGrotesk",
+    fontSize: 24,
+    fontWeight: "700",
+    marginTop: 12,
+  },
+  tagline: {
+    fontFamily: "Inter",
+    fontSize: 13,
+  },
+  body: {
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 16,
+  },
+  greeting: {
+    fontFamily: "SpaceGrotesk",
+    fontSize: 20,
+    fontWeight: "700",
+  },
+  levelText: {
+    fontFamily: "Inter",
+    fontSize: 13,
+    marginTop: 4,
+  },
+  progressBarBg: {
+    height: 8,
+    borderRadius: 9999,
+    overflow: "hidden",
+    marginTop: 16,
+  },
+  progressBarFill: {
+    height: "100%",
+    width: "84%",
+    borderRadius: 9999,
+  },
+  statsRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 16,
+  },
+  statCard: {
+    flex: 1,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    alignItems: "center",
+  },
+  statValue: {
+    fontFamily: "SpaceGrotesk",
+    fontSize: 20,
+    fontWeight: "700",
+  },
+  statLabel: {
+    fontFamily: "Inter",
+    fontSize: 11,
+    marginTop: 2,
+  },
+  navList: {
+    flex: 1,
+    paddingTop: 8,
+  },
+  navItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    marginHorizontal: 12,
+    borderRadius: 12,
+  },
+  iconContainer: {
+    width: 32,
+    alignItems: "center",
+  },
+  navLabel: {
+    fontFamily: "Inter",
+    fontSize: 16,
+    marginLeft: 12,
+  },
+  footer: {
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+  },
+  versionLabel: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 11,
+    textAlign: "center",
+  },
+});

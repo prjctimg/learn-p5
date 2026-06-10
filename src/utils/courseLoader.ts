@@ -71,7 +71,10 @@ async function loadCourseFile(
 ): Promise<Course> {
   const asset = Asset.fromModule(assetModule);
   await asset.downloadAsync();
-  const content = await FileSystem.readAsStringAsync(asset.localUri!);
+  if (!asset.localUri) {
+    throw new Error(`Asset failed to download: no local URI available`);
+  }
+  const content = await FileSystem.readAsStringAsync(asset.localUri);
   const { data } = parseFrontmatter(content);
   return validateCourse(data as unknown as RawCourse);
 }
@@ -97,8 +100,4 @@ export async function loadExercise(
   const course = await loadCourse(courseSlug);
   if (!course) return null;
   return course.lessons.find((l) => l.id === exerciseId) ?? null;
-}
-
-function invalidateCourseCache(): void {
-  cachedCourses = null;
 }

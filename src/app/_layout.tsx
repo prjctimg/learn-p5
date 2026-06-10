@@ -6,7 +6,6 @@ import LoadingPage from "../components/LoadingPage";
 import ThemeProvider from "../components/ThemeProvider";
 import DrawerProvider from "../contexts/DrawerContext";
 import SideDrawer from "../components/SideDrawer";
-import "../global.css";
 
 SplashScreen.setOptions({ duration: 800, fade: true });
 

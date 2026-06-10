@@ -26,7 +26,9 @@ export function useOnboarding() {
           setData(JSON.parse(dataEntry[1]));
         }
       })
-      .catch(() => {})
+      .catch((e) => {
+        console.warn("Failed to load onboarding state:", e);
+      })
       .finally(() => setLoading(false));
   }, []);
 

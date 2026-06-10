@@ -1,16 +1,20 @@
 import { useEffect, useState } from "react";
-import { View, Text, FlatList, ActivityIndicator } from "react-native";
+import { View, Text, FlatList, ActivityIndicator, StyleSheet } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Header from "../../../components/Header";
 import ChallengeCard from "../../../components/ChallengeCard";
 import { loadCourse } from "../../../utils/courseLoader";
 import { Course } from "../../../data/types";
+import { useThemeContext } from "../../../components/ThemeProvider";
+import { Colors } from "../../../constants/Colors";
 
 export default function CourseDetail() {
   const { course } = useLocalSearchParams<{ course: string }>();
   const router = useRouter();
   const [courseData, setCourseData] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
+  const { colorScheme } = useThemeContext();
+  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
   useEffect(() => {
     if (!course) return;
@@ -21,9 +25,9 @@ export default function CourseDetail() {
 
   if (loading) {
     return (
-      <View className="flex-1 bg-surface dark:bg-surface-dark">
+      <View style={[styles.container, { backgroundColor: colors.surface }]}>
         <Header title="Course" />
-        <View className="flex-1 items-center justify-center">
+        <View style={styles.centeredContainer}>
           <ActivityIndicator size="large" color="#ED225D" />
         </View>
       </View>
@@ -32,13 +36,13 @@ export default function CourseDetail() {
 
   if (!courseData) {
     return (
-      <View className="flex-1 bg-surface dark:bg-surface-dark">
+      <View style={[styles.container, { backgroundColor: colors.surface }]}>
         <Header title="Course" />
-        <View className="flex-1 items-center justify-center px-6">
-          <Text className="font-headline text-xl font-bold text-on-surface dark:text-on-surface-dark">
+        <View style={styles.notFoundContainer}>
+          <Text style={[styles.notFoundTitle, { color: colors.onSurface }]}>
             Course not found
           </Text>
-          <Text className="font-body text-sm text-text-secondary dark:text-text-secondary-dark mt-2 text-center">
+          <Text style={[styles.notFoundSubtitle, { color: colors.textSecondary }]}>
             The course &ldquo;{course}&rdquo; doesn&apos;t exist yet.
           </Text>
         </View>
@@ -47,20 +51,20 @@ export default function CourseDetail() {
   }
 
   return (
-    <View className="flex-1 bg-surface dark:bg-surface-dark">
+    <View style={[styles.container, { backgroundColor: colors.surface }]}>
       <Header title={courseData.title} />
       <FlatList
-        className="flex-1 px-4 pt-6"
+        style={styles.flatList}
         contentContainerStyle={{ paddingBottom: 32 }}
         ListHeaderComponent={
           <>
-            <Text className="font-headline text-2xl font-bold text-on-surface dark:text-on-surface-dark">
+            <Text style={[styles.courseTitle, { color: colors.onSurface }]}>
               {courseData.title}
             </Text>
-            <Text className="font-body text-sm text-text-secondary dark:text-text-secondary-dark mt-2">
+            <Text style={[styles.courseDescription, { color: colors.textSecondary }]}>
               {courseData.description}
             </Text>
-            <Text className="font-headline text-lg font-bold text-on-surface dark:text-on-surface-dark mt-8 mb-4">
+            <Text style={[styles.lessonsHeader, { color: colors.onSurface }]}>
               Lessons
             </Text>
           </>
@@ -68,7 +72,7 @@ export default function CourseDetail() {
         data={courseData.lessons}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View className="mb-4">
+          <View style={styles.cardWrapper}>
             <ChallengeCard
               title={item.title}
               moduleName={item.module}
@@ -83,3 +87,56 @@ export default function CourseDetail() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  centeredContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  notFoundContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+  },
+  notFoundTitle: {
+    fontFamily: "SpaceGrotesk",
+    fontSize: 20,
+    fontWeight: "700",
+  },
+  notFoundSubtitle: {
+    fontFamily: "Inter",
+    fontSize: 13,
+    marginTop: 8,
+    textAlign: "center",
+  },
+  flatList: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 24,
+  },
+  courseTitle: {
+    fontFamily: "SpaceGrotesk",
+    fontSize: 24,
+    fontWeight: "700",
+  },
+  courseDescription: {
+    fontFamily: "Inter",
+    fontSize: 13,
+    marginTop: 8,
+  },
+  lessonsHeader: {
+    fontFamily: "SpaceGrotesk",
+    fontSize: 18,
+    fontWeight: "700",
+    marginTop: 32,
+    marginBottom: 16,
+  },
+  cardWrapper: {
+    marginBottom: 16,
+  },
+});

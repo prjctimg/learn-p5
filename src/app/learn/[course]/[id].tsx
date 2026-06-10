@@ -1,10 +1,12 @@
-import { useRef, useState, useEffect, useReducer } from "react";
-import { View, Text, Pressable } from "react-native";
+import { useRef, useState, useEffect, useReducer, useMemo } from "react";
+import { View, Text, Pressable, StyleSheet } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { WebView } from "react-native-webview";
 import { useDrawerContext } from "../../../contexts/DrawerContext";
+import { useThemeContext } from "../../../components/ThemeProvider";
+import { Colors } from "../../../constants/Colors";
 import ExerciseDescription from "../../../components/ExerciseDescription";
 import CodeEditor from "../../../components/CodeEditor";
 import ProgrammingKeyboard from "../../../components/ProgrammingKeyboard";
@@ -78,6 +80,164 @@ export default function Exercise() {
   const { openDrawer } = useDrawerContext();
   const [state, dispatch] = useReducer(exerciseReducer, INITIAL_STATE);
   const runCounter = useRef(0);
+  const { colorScheme } = useThemeContext();
+  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        loadingContainer: {
+          flex: 1,
+          backgroundColor: colors.surface,
+          alignItems: "center",
+          justifyContent: "center",
+        },
+        notFoundContainer: {
+          flex: 1,
+          backgroundColor: colors.surface,
+        },
+        notFoundInner: {
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          paddingHorizontal: 24,
+        },
+        notFoundTitle: {
+          fontFamily: "SpaceGrotesk",
+          fontSize: 20,
+          fontWeight: "700",
+          color: colors.onSurface,
+          marginTop: 16,
+        },
+        notFoundSubtitle: {
+          fontFamily: "Inter",
+          fontSize: 13,
+          color: colors.textSecondary,
+          marginTop: 8,
+          textAlign: "center",
+        },
+        notFoundButtonWrapper: {
+          marginTop: 24,
+        },
+        backButton: {
+          backgroundColor: colors.primary,
+          paddingHorizontal: 24,
+          paddingVertical: 12,
+          borderWidth: 2,
+          borderColor: colors.outline,
+        },
+        backButtonPressed: {
+          transform: [{ translateY: 2 }],
+        },
+        backButtonText: {
+          fontFamily: "SpaceGrotesk",
+          fontWeight: "900",
+          fontSize: 13,
+          textTransform: "uppercase",
+          letterSpacing: 0.5,
+          color: colors.onPrimary,
+        },
+        container: {
+          flex: 1,
+          backgroundColor: colors.surface,
+        },
+        header: {
+          flexDirection: "row",
+          alignItems: "center",
+          paddingHorizontal: 16,
+          paddingBottom: 12,
+          backgroundColor: colors.surface,
+          borderBottomWidth: 1,
+          borderBottomColor: colors.outlineVariant,
+        },
+        menuButton: {
+          padding: 8,
+        },
+        logoText: {
+          fontFamily: "SpaceGrotesk",
+          fontSize: 20,
+          fontWeight: "700",
+          color: colors.primary,
+          marginLeft: 8,
+          textTransform: "uppercase",
+          letterSpacing: -0.5,
+        },
+        spacer: {
+          flex: 1,
+        },
+        codeAreaContainer: {
+          flex: 1,
+        },
+        splitContainer: {
+          flexDirection: "row",
+          borderBottomWidth: 1,
+          borderBottomColor: colors.outlineVariant,
+          backgroundColor: colors.surface,
+        },
+        targetSolutionColumn: {
+          flex: 1,
+          flexDirection: "column",
+          borderRightWidth: 1,
+          borderRightColor: colors.outlineVariant,
+        },
+        panelHeader: {
+          height: 24,
+          backgroundColor: colors.surfaceContainerHigh,
+          paddingHorizontal: 8,
+          flexDirection: "row",
+          alignItems: "center",
+        },
+        targetHeaderText: {
+          fontSize: 9,
+          fontWeight: "700",
+          textTransform: "uppercase",
+          letterSpacing: 1,
+          color: colors.onSurfaceVariant,
+        },
+        yourOutputHeaderText: {
+          fontSize: 9,
+          fontWeight: "700",
+          textTransform: "uppercase",
+          letterSpacing: 1,
+          color: colors.primary,
+        },
+        targetPreview: {
+          flex: 1,
+          backgroundColor: colors.surfaceContainerLowest,
+          alignItems: "center",
+          justifyContent: "center",
+          overflow: "hidden",
+        },
+        solutionPlaceholder: {
+          width: 48,
+          height: 48,
+          borderRadius: 9999,
+          borderWidth: 2,
+          borderColor: colors.primaryContainer,
+          opacity: 0.5,
+        },
+        yourOutputColumn: {
+          flex: 1,
+          flexDirection: "column",
+        },
+        yourOutputPreview: {
+          flex: 1,
+          backgroundColor: "#000000",
+          alignItems: "center",
+          justifyContent: "center",
+          overflow: "hidden",
+        },
+        outputPlaceholder: {
+          width: 40,
+          height: 40,
+          borderRadius: 9999,
+          borderWidth: 2,
+          borderColor: colors.primary,
+          opacity: 0.5,
+        },
+      }),
+    [colorScheme]
+  );
 
   useEffect(() => {
     const load = async () => {
@@ -109,7 +269,7 @@ export default function Exercise() {
 
   if (state.loading) {
     return (
-      <View className="flex-1 bg-surface dark:bg-surface-dark items-center justify-center">
+      <View style={styles.loadingContainer}>
         <MaterialCommunityIcons name="loading" size={32} color="#ED225D" />
       </View>
     );
@@ -117,23 +277,26 @@ export default function Exercise() {
 
   if (!state.exercise) {
     return (
-      <View className="flex-1 bg-surface dark:bg-surface-dark">
-        <View className="flex-1 items-center justify-center px-6">
+      <View style={styles.notFoundContainer}>
+        <View style={styles.notFoundInner}>
           <MaterialCommunityIcons name="alert-circle-outline" size={48} color="#ED225D" />
-          <Text className="font-headline text-xl font-bold text-on-surface dark:text-on-surface-dark mt-4">
+          <Text style={styles.notFoundTitle}>
             Exercise not found
           </Text>
-          <Text className="font-body text-sm text-text-secondary dark:text-text-secondary-dark mt-2 text-center">
+          <Text style={styles.notFoundSubtitle}>
             The exercise &ldquo;{id}&rdquo; doesn&apos;t exist yet.
           </Text>
-          <View className="mt-6">
+          <View style={styles.notFoundButtonWrapper}>
             <Pressable
               onPress={() => router.push(`/learn/${course}`)}
-              className="bg-primary px-6 py-3 border-2 border-outline dark:border-outline-dark active:translate-y-0.5"
+              style={({ pressed }) => [
+                styles.backButton,
+                pressed && styles.backButtonPressed,
+              ]}
               accessibilityRole="button"
               accessibilityLabel="Back to course"
             >
-              <Text className="font-headline font-black text-sm uppercase tracking-wider text-on-primary">
+              <Text style={styles.backButtonText}>
                 Back to course
               </Text>
             </Pressable>
@@ -144,26 +307,25 @@ export default function Exercise() {
   }
 
   return (
-    <View className="flex-1 bg-surface dark:bg-surface-dark">
+    <View style={styles.container}>
       <View
-        style={{ paddingTop: insets.top + 4 }}
-        className="flex-row items-center px-4 pb-3 bg-background dark:bg-surface-dark border-b border-outline-variant dark:border-outline-variant-dark"
+        style={[styles.header, { paddingTop: insets.top + 4 }]}
       >
         <Pressable
           onPress={openDrawer}
-          className="p-2"
+          style={styles.menuButton}
           accessibilityRole="button"
           accessibilityLabel="Open navigation menu"
         >
           <MaterialCommunityIcons name="menu" size={24} color="#FFB2BB" />
         </Pressable>
-        <Text className="font-headline text-xl font-bold text-primary ml-2 uppercase tracking-tight">
+        <Text style={styles.logoText}>
           P5.LEARN
         </Text>
-        <View className="flex-1" />
+        <View style={styles.spacer} />
       </View>
 
-      <View className="flex-1">
+      <View style={styles.codeAreaContainer}>
         <ExerciseDescription
           title={state.exercise.title}
           moduleName={state.exercise.module}
@@ -171,14 +333,14 @@ export default function Exercise() {
           exerciseNumber={parseInt(id?.replace("exercise-", "") ?? "1", 10)}
         />
 
-        <View className="flex-row border-b border-outline-variant dark:border-outline-variant-dark bg-background dark:bg-surface-dark" style={{ height: 260 }}>
-          <View className="flex-1 flex-col border-r border-outline-variant dark:border-outline-variant-dark">
-            <View className="h-6 bg-surface-container-high dark:bg-surface-container-high-dark px-2 flex-row items-center">
-              <Text className="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant dark:text-on-surface-variant-dark">
+        <View style={[styles.splitContainer, { height: 260 }]}>
+          <View style={styles.targetSolutionColumn}>
+            <View style={styles.panelHeader}>
+              <Text style={styles.targetHeaderText}>
                 Target Solution
               </Text>
             </View>
-            <View className="flex-1 bg-surface-container-lowest dark:bg-surface-container-lowest-dark items-center justify-center overflow-hidden">
+            <View style={styles.targetPreview}>
               {state.solutionHTML && state.showSolution ? (
                 <WebView
                   source={{ html: state.solutionHTML }}
@@ -190,18 +352,18 @@ export default function Exercise() {
                   originWhitelist={["*"]}
                 />
               ) : (
-                <View className="w-12 h-12 rounded-full border-2 border-primary-container dark:border-primary-container opacity-50" />
+                <View style={styles.solutionPlaceholder} />
               )}
             </View>
           </View>
 
-          <View className="flex-1 flex-col">
-            <View className="h-6 bg-surface-container-high dark:bg-surface-container-high-dark px-2 flex-row items-center">
-              <Text className="text-[9px] font-bold uppercase tracking-widest text-primary">
+          <View style={styles.yourOutputColumn}>
+            <View style={styles.panelHeader}>
+              <Text style={styles.yourOutputHeaderText}>
                 Your Output
               </Text>
             </View>
-            <View className="flex-1 bg-black items-center justify-center overflow-hidden">
+            <View style={styles.yourOutputPreview}>
               {state.userHTML ? (
                 <WebView
                   source={{ html: state.userHTML }}
@@ -213,7 +375,7 @@ export default function Exercise() {
                   originWhitelist={["*"]}
                 />
               ) : (
-                <View className="w-10 h-10 rounded-full border-2 border-primary opacity-50" />
+                <View style={styles.outputPlaceholder} />
               )}
             </View>
           </View>

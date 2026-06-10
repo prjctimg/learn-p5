@@ -1,5 +1,7 @@
-import { View, Text, Pressable, ScrollView } from "react-native";
+import { View, Text, Pressable, ScrollView, StyleSheet } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useThemeContext } from "./ThemeProvider";
+import { Colors } from "../constants/Colors";
 
 const symbols = [
   "(", ")", "{", "}", "[", "]", ";", ",", "<", ">", "=", "+", "-", "*", "/", ".",
@@ -15,14 +17,20 @@ interface ProgrammingKeyboardProps {
 }
 
 function Key({ label, onPress }: { label: string; onPress: () => void }) {
+  const { colorScheme } = useThemeContext();
+  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+
   return (
     <Pressable
       onPress={onPress}
-      className="flex-shrink-0 px-3 py-2 bg-surface-container-high dark:bg-surface-container-high-dark rounded font-mono text-sm border border-outline-variant dark:border-outline-variant-dark active:bg-primary-container active:dark:bg-primary-container-dark"
+      style={({ pressed }) => [
+        styles.key,
+        { backgroundColor: pressed ? colors.primaryContainer : colors.surfaceContainerHigh, borderColor: colors.outlineVariant },
+      ]}
       accessibilityRole="button"
       accessibilityLabel={`Insert ${label}`}
     >
-      <Text className="font-mono text-sm text-primary-fixed-dim dark:text-primary-fixed-dim-dark">
+      <Text style={[styles.keyText, { color: colors.primaryFixedDim }]}>
         {label}
       </Text>
     </Pressable>
@@ -30,16 +38,19 @@ function Key({ label, onPress }: { label: string; onPress: () => void }) {
 }
 
 export default function ProgrammingKeyboard({ onInsert }: ProgrammingKeyboardProps) {
+  const { colorScheme } = useThemeContext();
+  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+
   return (
-    <View className="bg-surface-container-low dark:bg-surface-container-low-dark border-t border-outline-variant dark:border-outline-variant-dark" style={{ height: 256 }}>
+    <View style={[styles.container, { backgroundColor: colors.surfaceContainerLow, borderTopColor: colors.outlineVariant }]}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        className="border-b border-outline-variant dark:border-outline-variant-dark"
+        style={[styles.scrollView, { borderBottomColor: colors.outlineVariant }]}
       >
         <Pressable
           onPress={() => {}}
-          className="flex-shrink-0 px-4 py-2 bg-primary-container/20 items-center justify-center"
+          style={[styles.keyboardIconButton, { backgroundColor: colors.primaryContainer + "33" }]}
           accessibilityRole="button"
           accessibilityLabel="Keyboard"
         >
@@ -49,18 +60,21 @@ export default function ProgrammingKeyboard({ onInsert }: ProgrammingKeyboardPro
           <Pressable
             key={sym}
             onPress={() => onInsert(sym)}
-            className="flex-shrink-0 px-4 py-2 bg-surface-container dark:bg-surface-container-dark items-center justify-center active:bg-outline-variant dark:active:bg-outline-variant-dark"
+            style={({ pressed }) => [
+              styles.symbolButton,
+              { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
+            ]}
             accessibilityRole="button"
             accessibilityLabel={sym}
           >
-            <Text className="font-mono text-base text-on-surface-variant dark:text-on-surface-variant-dark">
+            <Text style={[styles.symbolText, { color: colors.onSurfaceVariant }]}>
               {sym}
             </Text>
           </Pressable>
         ))}
       </ScrollView>
 
-      <View className="p-2 flex-row flex-wrap gap-1.5">
+      <View style={styles.functionsContainer}>
         {p5Functions.map((fn) => (
           <Key key={fn} label={fn} onPress={() => onInsert(fn)} />
         ))}
@@ -68,3 +82,48 @@ export default function ProgrammingKeyboard({ onInsert }: ProgrammingKeyboardPro
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    height: 256,
+    borderTopWidth: 1,
+  },
+  scrollView: {
+    borderBottomWidth: 1,
+  },
+  keyboardIconButton: {
+    flexShrink: 0,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  symbolButton: {
+    flexShrink: 0,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  symbolText: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 16,
+  },
+  key: {
+    flexShrink: 0,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 4,
+    borderWidth: 1,
+  },
+  keyText: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 13,
+  },
+  functionsContainer: {
+    padding: 8,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+  },
+});

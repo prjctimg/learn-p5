@@ -1,5 +1,5 @@
 import { Redirect } from "expo-router";
-import { View, ActivityIndicator } from "react-native";
+import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { useOnboarding } from "../hooks/useOnboarding";
 
 export default function Index() {
@@ -7,7 +7,7 @@ export default function Index() {
 
   if (loading) {
     return (
-      <View className="flex-1 bg-[#2a0516] items-center justify-center">
+      <View style={styles.loading}>
         <ActivityIndicator color="#ED225D" />
       </View>
     );
@@ -19,3 +19,12 @@ export default function Index() {
 
   return <Redirect href="/dashboard" />;
 }
+
+const styles = StyleSheet.create({
+  loading: {
+    flex: 1,
+    backgroundColor: "#2a0516",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});

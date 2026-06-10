@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { View, Text, Switch, Pressable, ScrollView } from "react-native";
+import { View, Text, Switch, Pressable, ScrollView, StyleSheet } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as WebBrowser from "expo-web-browser";
 import * as Notifications from "expo-notifications";
 import Header from "../../components/Header";
 import { useThemeContext } from "../../components/ThemeProvider";
+import { Colors } from "../../constants/Colors";
 
 const SETTINGS_KEYS = {
   dailyReminder: "setting_dailyReminder",
@@ -19,6 +20,7 @@ const openFeedback = () => {
 
 export default function Settings() {
   const { colorScheme, toggleTheme } = useThemeContext();
+  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
   const [dailyReminder, setDailyReminder] = useState(false);
   const [snippetAlternatives, setSnippetAlternatives] = useState(false);
 
@@ -66,22 +68,22 @@ export default function Settings() {
   };
 
   return (
-    <View className="flex-1 bg-surface dark:bg-surface-dark">
+    <View style={[styles.container, { backgroundColor: colors.surface }]}>
       <Header title="Settings" />
       <ScrollView
-        className="flex-1 px-4 pt-6"
+        style={styles.scrollContent}
         contentContainerStyle={{ paddingBottom: 32 }}
       >
-        <Text className="font-label text-xs uppercase tracking-widest text-text-secondary dark:text-text-secondary-dark mb-3">
+        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
           Appearance
         </Text>
-        <View className="bg-surface-dim dark:bg-surface-dim-dark rounded-xl overflow-hidden border-2 border-outline dark:border-outline-dark">
-          <View className="flex-row items-center justify-between px-4 py-4">
-            <View className="flex-1">
-              <Text className="font-headline text-base font-bold text-on-surface dark:text-on-surface-dark">
+        <View style={[styles.card, { backgroundColor: colors.surfaceDim, borderColor: colors.outline }]}>
+          <View style={styles.cardRow}>
+            <View style={styles.flexChild}>
+              <Text style={[styles.settingTitle, { color: colors.onSurface }]}>
                 Dark Mode
               </Text>
-              <Text className="font-body text-xs text-text-secondary dark:text-text-secondary-dark mt-0.5">
+              <Text style={[styles.settingDescription, { color: colors.textSecondary }]}>
                 Switch between light and dark themes
               </Text>
             </View>
@@ -94,16 +96,16 @@ export default function Settings() {
           </View>
         </View>
 
-        <Text className="font-label text-xs uppercase tracking-widest text-text-secondary dark:text-text-secondary-dark mt-8 mb-3">
+        <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: 32 }]}>
           Learning
         </Text>
-        <View className="bg-surface-dim dark:bg-surface-dim-dark rounded-xl overflow-hidden border-2 border-outline dark:border-outline-dark">
-          <View className="flex-row items-center justify-between px-4 py-4 border-b border-outline/20">
-            <View className="flex-1">
-              <Text className="font-headline text-base font-bold text-on-surface dark:text-on-surface-dark">
+        <View style={[styles.card, { backgroundColor: colors.surfaceDim, borderColor: colors.outline }]}>
+          <View style={[styles.cardRow, { borderBottomWidth: 1, borderColor: colors.outline + "33" }]}>
+            <View style={styles.flexChild}>
+              <Text style={[styles.settingTitle, { color: colors.onSurface }]}>
                 Daily Reminder
               </Text>
-              <Text className="font-body text-xs text-text-secondary dark:text-text-secondary-dark mt-0.5">
+              <Text style={[styles.settingDescription, { color: colors.textSecondary }]}>
                 Get reminded to practice at 6:00 PM
               </Text>
             </View>
@@ -114,12 +116,12 @@ export default function Settings() {
               thumbColor="#ffffff"
             />
           </View>
-          <View className="flex-row items-center justify-between px-4 py-4">
-            <View className="flex-1">
-              <Text className="font-headline text-base font-bold text-on-surface dark:text-on-surface-dark">
+          <View style={styles.cardRow}>
+            <View style={styles.flexChild}>
+              <Text style={[styles.settingTitle, { color: colors.onSurface }]}>
                 Snippet Alternatives
               </Text>
-              <Text className="font-body text-xs text-text-secondary dark:text-text-secondary-dark mt-0.5">
+              <Text style={[styles.settingDescription, { color: colors.textSecondary }]}>
                 Show p5.js variants in other languages
               </Text>
             </View>
@@ -132,31 +134,35 @@ export default function Settings() {
           </View>
         </View>
 
-        <Text className="font-label text-xs uppercase tracking-widest text-text-secondary dark:text-text-secondary-dark mt-8 mb-3">
+        <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: 32 }]}>
           Feedback
         </Text>
         <Pressable
           onPress={openFeedback}
-          className="bg-surface-dim dark:bg-surface-dim-dark rounded-xl overflow-hidden border-2 border-outline dark:border-outline-dark px-4 py-4 active:opacity-80"
+          style={({ pressed }) => [
+            styles.feedbackButton,
+            { backgroundColor: colors.surfaceDim, borderColor: colors.outline },
+            pressed && styles.feedbackButtonActive,
+          ]}
           accessibilityRole="button"
           accessibilityLabel="Send feedback"
         >
-          <Text className="font-headline text-base font-bold text-on-surface dark:text-on-surface-dark">
+          <Text style={[styles.settingTitle, { color: colors.onSurface }]}>
             Send Feedback
           </Text>
-          <Text className="font-body text-xs text-text-secondary dark:text-text-secondary-dark mt-0.5">
+          <Text style={[styles.settingDescription, { color: colors.textSecondary }]}>
             Report bugs, suggest features, or share your thoughts
           </Text>
         </Pressable>
 
-        <Text className="font-label text-xs uppercase tracking-widest text-text-secondary dark:text-text-secondary-dark mt-8 mb-3">
+        <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: 32 }]}>
           About
         </Text>
-        <View className="bg-surface-dim dark:bg-surface-dim-dark rounded-xl overflow-hidden border-2 border-outline dark:border-outline-dark px-4 py-4">
-          <Text className="font-headline text-base font-bold text-on-surface dark:text-on-surface-dark">
+        <View style={[styles.card, { backgroundColor: colors.surfaceDim, borderColor: colors.outline, paddingHorizontal: 16, paddingVertical: 16 }]}>
+          <Text style={[styles.settingTitle, { color: colors.onSurface }]}>
             Learn p5.js
           </Text>
-          <Text className="font-mono text-xs text-text-secondary dark:text-text-secondary-dark mt-1">
+          <Text style={[styles.versionText, { color: colors.textSecondary }]}>
             Version 0.2.5
           </Text>
         </View>
@@ -164,3 +170,61 @@ export default function Settings() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  scrollContent: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 24,
+  },
+  sectionTitle: {
+    fontFamily: "Inter",
+    fontSize: 11,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    marginBottom: 12,
+  },
+  card: {
+    borderRadius: 12,
+    overflow: "hidden",
+    borderWidth: 2,
+  },
+  cardRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  flexChild: {
+    flex: 1,
+  },
+  settingTitle: {
+    fontFamily: "SpaceGrotesk",
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  settingDescription: {
+    fontFamily: "Inter",
+    fontSize: 11,
+    marginTop: 2,
+  },
+  feedbackButton: {
+    borderRadius: 12,
+    overflow: "hidden",
+    borderWidth: 2,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  feedbackButtonActive: {
+    opacity: 0.8,
+  },
+  versionText: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 11,
+    marginTop: 4,
+  },
+});

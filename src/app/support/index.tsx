@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { View, Text, Pressable, ScrollView } from "react-native";
+import { View, Text, Pressable, ScrollView, StyleSheet } from "react-native";
 import * as WebBrowser from "expo-web-browser";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Header from "../../components/Header";
+import { useThemeContext } from "../../components/ThemeProvider";
+import { Colors } from "../../constants/Colors";
 
 const faqs = [
   {
@@ -29,43 +31,161 @@ const openGitHubIssues = () => {
   );
 };
 
+const createStyles = (colors: Record<string, string>) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.surface,
+    },
+    scrollView: {
+      flex: 1,
+      paddingHorizontal: 16,
+      paddingTop: 24,
+    },
+    heading: {
+      fontFamily: "SpaceGrotesk",
+      fontSize: 18,
+      fontWeight: "700",
+      color: colors.onSurface,
+    },
+    subtitle: {
+      fontFamily: "Inter",
+      fontSize: 13,
+      color: colors.textSecondary,
+      marginTop: 4,
+    },
+    sectionLabel: {
+      fontFamily: "Inter",
+      fontSize: 11,
+      textTransform: "uppercase",
+      letterSpacing: 1,
+      color: colors.textSecondary,
+      marginTop: 32,
+      marginBottom: 12,
+    },
+    bugReportButton: {
+      backgroundColor: colors.surfaceDim,
+      borderRadius: 12,
+      overflow: "hidden",
+      borderWidth: 2,
+      borderColor: colors.outline,
+      paddingHorizontal: 16,
+      paddingVertical: 20,
+    },
+    bugReportButtonPressed: {
+      opacity: 0.8,
+    },
+    bugReportRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+    },
+    flex1: {
+      flex: 1,
+    },
+    cardTitle: {
+      fontFamily: "SpaceGrotesk",
+      fontSize: 16,
+      fontWeight: "700",
+      color: colors.onSurface,
+    },
+    cardSubtitle: {
+      fontFamily: "Inter",
+      fontSize: 11,
+      color: colors.textSecondary,
+      marginTop: 2,
+    },
+    faqContainer: {
+      backgroundColor: colors.surfaceDim,
+      borderRadius: 12,
+      overflow: "hidden",
+      borderWidth: 2,
+      borderColor: colors.outline,
+    },
+    faqItem: {
+      paddingHorizontal: 16,
+      paddingVertical: 16,
+    },
+    faqHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    faqQuestion: {
+      fontFamily: "SpaceGrotesk",
+      fontSize: 13,
+      fontWeight: "700",
+      color: colors.onSurface,
+      flex: 1,
+      paddingRight: 8,
+    },
+    faqAnswer: {
+      fontFamily: "Inter",
+      fontSize: 13,
+      color: colors.textSecondary,
+      marginTop: 12,
+      lineHeight: 20,
+    },
+    footer: {
+      marginTop: 40,
+      alignItems: "center",
+    },
+    footerVersion: {
+      fontFamily: "JetBrainsMono",
+      fontSize: 11,
+      color: colors.textSecondary,
+    },
+    footerInfo: {
+      fontFamily: "Inter",
+      fontSize: 11,
+      color: colors.textSecondary,
+      marginTop: 4,
+    },
+  });
+
 export default function Support() {
   const [expandedFaq, setExpandedFaq] = useState<string | null>(null);
+  const { colorScheme } = useThemeContext();
+  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const styles = createStyles(colors);
 
   return (
-    <View className="flex-1 bg-surface dark:bg-surface-dark">
+    <View style={styles.container}>
       <Header title="Support" />
       <ScrollView
-        className="flex-1 px-4 pt-6"
+        style={styles.scrollView}
         contentContainerStyle={{ paddingBottom: 32 }}
       >
-        <Text className="font-headline text-lg font-bold text-on-surface dark:text-on-surface-dark">
+        <Text style={styles.heading}>
           How can we help?
         </Text>
-        <Text className="font-body text-sm text-text-secondary dark:text-text-secondary-dark mt-1">
+        <Text style={styles.subtitle}>
           Find answers to common questions or report an issue.
         </Text>
 
-        <Text className="font-label text-xs uppercase tracking-widest text-text-secondary dark:text-text-secondary-dark mt-8 mb-3">
+        <Text style={styles.sectionLabel}>
           Report a Bug
         </Text>
         <Pressable
           onPress={openGitHubIssues}
-          className="bg-surface-dim dark:bg-surface-dim-dark rounded-xl overflow-hidden border-2 border-outline dark:border-outline-dark px-4 py-5 active:opacity-80"
+          style={({ pressed }) => [
+            styles.bugReportButton,
+            pressed && styles.bugReportButtonPressed,
+          ]}
           accessibilityRole="button"
           accessibilityLabel="Report a bug"
         >
-          <View className="flex-row items-center gap-3">
+          <View style={styles.bugReportRow}>
             <MaterialCommunityIcons
               name="bug-outline"
               size={28}
               color="#ED225D"
             />
-            <View className="flex-1">
-              <Text className="font-headline text-base font-bold text-on-surface dark:text-on-surface-dark">
+            <View style={styles.flex1}>
+              <Text style={styles.cardTitle}>
                 Open GitHub Issues
               </Text>
-              <Text className="font-body text-xs text-text-secondary dark:text-text-secondary-dark mt-0.5">
+              <Text style={styles.cardSubtitle}>
                 Check known issues or create a new bug report
               </Text>
             </View>
@@ -77,26 +197,28 @@ export default function Support() {
           </View>
         </Pressable>
 
-        <Text className="font-label text-xs uppercase tracking-widest text-text-secondary dark:text-text-secondary-dark mt-8 mb-3">
+        <Text style={styles.sectionLabel}>
           Frequently Asked Questions
         </Text>
-        <View className="bg-surface-dim dark:bg-surface-dim-dark rounded-xl overflow-hidden border-2 border-outline dark:border-outline-dark">
+        <View style={styles.faqContainer}>
           {faqs.map((faq, i) => {
             const isExpanded = expandedFaq === faq.q;
             return (
               <Pressable
                 key={faq.q}
                 onPress={() => setExpandedFaq(isExpanded ? null : faq.q)}
-                className={`px-4 py-4 ${
-                  i < faqs.length - 1
-                    ? "border-b border-outline/20"
-                    : ""
-                }`}
+                style={[
+                  styles.faqItem,
+                  i < faqs.length - 1 && {
+                    borderBottomWidth: 1,
+                    borderColor: colors.outline + "33",
+                  },
+                ]}
                 accessibilityRole="button"
                 accessibilityLabel={faq.q}
               >
-                <View className="flex-row items-center justify-between">
-                  <Text className="font-headline text-sm font-bold text-on-surface dark:text-on-surface-dark flex-1 pr-2">
+                <View style={styles.faqHeader}>
+                  <Text style={styles.faqQuestion}>
                     {faq.q}
                   </Text>
                   <MaterialCommunityIcons
@@ -106,7 +228,7 @@ export default function Support() {
                   />
                 </View>
                 {isExpanded && (
-                  <Text className="font-body text-sm text-text-secondary dark:text-text-secondary-dark mt-3 leading-5">
+                  <Text style={styles.faqAnswer}>
                     {faq.a}
                   </Text>
                 )}
@@ -115,11 +237,11 @@ export default function Support() {
           })}
         </View>
 
-        <View className="mt-10 items-center">
-          <Text className="font-mono text-xs text-text-secondary dark:text-text-secondary-dark">
+        <View style={styles.footer}>
+          <Text style={styles.footerVersion}>
             Learn p5.js v0.2.5
           </Text>
-          <Text className="font-body text-xs text-text-secondary dark:text-text-secondary-dark mt-1">
+          <Text style={styles.footerInfo}>
             Built with Expo & React Native
           </Text>
         </View>

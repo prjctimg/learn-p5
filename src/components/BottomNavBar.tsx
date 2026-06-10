@@ -1,6 +1,8 @@
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, StyleSheet } from "react-native";
 import { useRouter, usePathname } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useThemeContext } from "../components/ThemeProvider";
+import { Colors } from "../constants/Colors";
 
 interface TabItem {
   label: string;
@@ -44,20 +46,22 @@ const tabs: TabItem[] = [
 export default function BottomNavBar() {
   const router = useRouter();
   const pathname = usePathname();
+  const { colorScheme } = useThemeContext();
+  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
   return (
-    <View className="flex-row justify-around items-center px-2 py-2 bg-surface-container dark:bg-surface-container-dark border-t border-outline-variant dark:border-outline-variant-dark">
+    <View style={[styles.container, { backgroundColor: colors.surfaceContainer, borderTopColor: colors.outlineVariant }]}>
       {tabs.map((tab) => {
         const active = tab.matchPath(pathname);
         return (
           <Pressable
             key={tab.label}
             onPress={() => router.push(tab.href)}
-            className={`flex-col items-center justify-center px-4 py-1 active:scale-90 ${
-              active
-                ? "bg-primary-container dark:bg-primary-container-dark rounded-full"
-                : ""
-            }`}
+            style={({ pressed }) => [
+              styles.tab,
+              active && { backgroundColor: colors.primaryContainer, borderRadius: 9999 },
+              pressed && { transform: [{ scale: 0.9 }] },
+            ]}
             accessibilityRole="button"
             accessibilityLabel={tab.label}
             accessibilityState={{ selected: active }}
@@ -68,11 +72,12 @@ export default function BottomNavBar() {
               color={active ? "#5A001C" : "#E4BDC0"}
             />
             <Text
-              className={`font-label text-[10px] uppercase tracking-wider mt-0.5 ${
+              style={[
+                styles.tabLabel,
                 active
-                  ? "text-on-primary-container dark:text-on-primary-container-dark font-bold"
-                  : "text-on-surface-variant dark:text-on-surface-variant-dark"
-              }`}
+                  ? { color: colors.onPrimaryContainer, fontWeight: "700" }
+                  : { color: colors.onSurfaceVariant },
+              ]}
             >
               {tab.label}
             </Text>
@@ -82,3 +87,28 @@ export default function BottomNavBar() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    borderTopWidth: 1,
+  },
+  tab: {
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 4,
+  },
+  tabLabel: {
+    fontFamily: "Inter",
+    fontSize: 10,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginTop: 2,
+  },
+});
