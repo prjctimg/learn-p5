@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { View, Text, Pressable } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -9,16 +9,9 @@ import ExerciseDescription from "../../../components/ExerciseDescription";
 import CodeEditor from "../../../components/CodeEditor";
 import ProgrammingKeyboard from "../../../components/ProgrammingKeyboard";
 import BottomNavBar from "../../../components/BottomNavBar";
-import { buildSketchHTML, DEFAULT_SKETCH, EXERCISE_SOLUTIONS } from "../../../utils/sketchTemplate";
-
-const exercises: Record<string, { title: string; module: string; instruction: string }> = {
-  "exercise-1": {
-    title: "The First Circle",
-    module: "Shapes",
-    instruction:
-      'Modify the circle() function parameters to draw a circle at the exact center of the canvas.',
-  },
-};
+import { buildSketchHTML, DEFAULT_SKETCH } from "../../../utils/sketchTemplate";
+import { loadExercise } from "../../../utils/courseLoader";
+import { Lesson } from "../../../data/types";
 
 export default function Exercise() {
   const { course, id } = useLocalSearchParams<{ course: string; id: string }>();
@@ -26,7 +19,8 @@ export default function Exercise() {
   const insets = useSafeAreaInsets();
   const { openDrawer } = useDrawerContext();
 
-  const exercise = exercises[id ?? ""];
+  const [exercise, setExercise] = useState<Lesson | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const [code, setCode] = useState(DEFAULT_SKETCH);
   const [solutionHTML, setSolutionHTML] = useState("");
@@ -34,6 +28,21 @@ export default function Exercise() {
   const [isRunning, setIsRunning] = useState(false);
   const [showSolution, setShowSolution] = useState(false);
   const runCounter = useRef(0);
+
+  useEffect(() => {
+    if (!course || !id) {
+      setLoading(false);
+      return;
+    }
+    loadExercise(course, id)
+      .then((ex) => {
+        setExercise(ex);
+        if (ex?.startingCode) {
+          setCode(ex.startingCode);
+        }
+      })
+      .finally(() => setLoading(false));
+  }, [course, id]);
 
   const handleRun = useCallback(() => {
     if (!exercise) return;
@@ -45,9 +54,8 @@ export default function Exercise() {
     const userHtml = buildSketchHTML(code);
     setUserHTML(userHtml);
 
-    const solution = EXERCISE_SOLUTIONS[id ?? ""];
-    if (solution) {
-      setSolutionHTML(buildSketchHTML(solution));
+    if (exercise.solution) {
+      setSolutionHTML(buildSketchHTML(exercise.solution));
       setShowSolution(true);
     }
 
@@ -56,7 +64,7 @@ export default function Exercise() {
         setIsRunning(false);
       }
     }, 600);
-  }, [code, id, exercise]);
+  }, [code, exercise]);
 
   const handleInsert = useCallback(
     (text: string) => {
@@ -64,6 +72,14 @@ export default function Exercise() {
     },
     []
   );
+
+  if (loading) {
+    return (
+      <View className="flex-1 bg-surface dark:bg-surface-dark items-center justify-center">
+        <MaterialCommunityIcons name="loading" size={32} color="#ED225D" />
+      </View>
+    );
+  }
 
   if (!exercise) {
     return (
@@ -74,7 +90,7 @@ export default function Exercise() {
             Exercise not found
           </Text>
           <Text className="font-body text-sm text-text-secondary dark:text-text-secondary-dark mt-2 text-center">
-            The exercise "{id}" doesn't exist yet.
+            The exercise &ldquo;{id}&rdquo; doesn&apos;t exist yet.
           </Text>
           <View className="mt-6">
             <Pressable

@@ -1,30 +1,37 @@
-import { View, Text, ScrollView } from "react-native";
+import { useEffect, useState } from "react";
+import { View, Text, ScrollView, ActivityIndicator } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Header from "../../../components/Header";
 import ChallengeCard from "../../../components/ChallengeCard";
-
-const courses: Record<
-  string,
-  { title: string; description: string; lessons: { id: string; title: string; module: string; description: string }[] }
-> = {
-  shapes: {
-    title: "Shapes",
-    description: "Master the coordinate system and draw your first primitive shapes using code.",
-    lessons: [
-      {
-        id: "exercise-1",
-        title: "The First Circle",
-        module: "Shapes",
-        description: "Learn how to draw circles and use math to create motion with trigonometric functions.",
-      },
-    ],
-  },
-};
+import { loadCourse } from "../../../utils/courseLoader";
+import { Course } from "../../../data/types";
 
 export default function CourseDetail() {
   const { course } = useLocalSearchParams<{ course: string }>();
   const router = useRouter();
-  const courseData = courses[course ?? ""];
+  const [courseData, setCourseData] = useState<Course | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!course) {
+      setLoading(false);
+      return;
+    }
+    loadCourse(course)
+      .then(setCourseData)
+      .finally(() => setLoading(false));
+  }, [course]);
+
+  if (loading) {
+    return (
+      <View className="flex-1 bg-surface dark:bg-surface-dark">
+        <Header title="Course" />
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color="#ED225D" />
+        </View>
+      </View>
+    );
+  }
 
   if (!courseData) {
     return (
@@ -35,7 +42,7 @@ export default function CourseDetail() {
             Course not found
           </Text>
           <Text className="font-body text-sm text-text-secondary dark:text-text-secondary-dark mt-2 text-center">
-            The course "{course}" doesn't exist yet.
+            The course &ldquo;{course}&rdquo; doesn&apos;t exist yet.
           </Text>
         </View>
       </View>

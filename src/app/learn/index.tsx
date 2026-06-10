@@ -1,21 +1,23 @@
-import { View, Text, ScrollView } from "react-native";
+import { useEffect, useState } from "react";
+import { View, Text, ScrollView, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
 import Header from "../../components/Header";
 import ChallengeCard from "../../components/ChallengeCard";
-
-const courses = [
-  {
-    slug: "shapes",
-    title: "Shapes",
-    moduleName: "Fundamentals",
-    description:
-      "Master the coordinate system and draw your first primitive shapes using code.",
-    lessonCount: 1,
-  },
-];
+import { loadAllCourses } from "../../utils/courseLoader";
+import { Course } from "../../data/types";
 
 export default function Learn() {
   const router = useRouter();
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadAllCourses()
+      .then(setCourses)
+      .catch((e) => setError(e.message))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <View className="flex-1 bg-surface dark:bg-surface-dark">
@@ -38,12 +40,26 @@ export default function Learn() {
           Available Courses
         </Text>
 
+        {loading && (
+          <View className="items-center py-12">
+            <ActivityIndicator size="large" color="#ED225D" />
+          </View>
+        )}
+
+        {error && (
+          <View className="bg-error/10 border border-error/30 rounded-xl px-4 py-6 items-center">
+            <Text className="font-body text-sm text-error text-center">
+              Couldn&apos;t load courses: {error}
+            </Text>
+          </View>
+        )}
+
         {courses.map((course) => (
           <View key={course.slug} className="mb-4">
             <ChallengeCard
               title={course.title}
               moduleName={course.moduleName}
-              description={`${course.lessonCount} lesson${course.lessonCount > 1 ? "s" : ""} · ${course.description}`}
+              description={`${course.lessons.length} lesson${course.lessons.length > 1 ? "s" : ""} · ${course.description}`}
               onContinue={() => router.push(`/learn/${course.slug}`)}
             />
           </View>
