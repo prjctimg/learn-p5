@@ -3,6 +3,17 @@ import { useRouter } from "expo-router";
 import Header from "../../components/Header";
 import ChallengeCard from "../../components/ChallengeCard";
 
+const courses = [
+  {
+    slug: "shapes",
+    title: "Shapes",
+    moduleName: "Fundamentals",
+    description:
+      "Master the coordinate system and draw your first primitive shapes using code.",
+    lessonCount: 1,
+  },
+];
+
 export default function Learn() {
   const router = useRouter();
 
@@ -20,19 +31,23 @@ export default function Learn() {
           Hello, Coder!
         </Text>
         <Text className="font-body text-base text-text-secondary dark:text-text-secondary-dark mt-2">
-          Ready to create something amazing today?
+          Choose a course to begin your creative coding journey.
         </Text>
 
         <Text className="font-headline text-2xl font-bold text-on-surface dark:text-on-surface-dark mt-8 mb-4">
-          Up next
+          Available Courses
         </Text>
 
-        <ChallengeCard
-          title="Sine Wave Harmony"
-          moduleName="Shapes"
-          description="Learn how to draw circles and use math to create motion with trigonometric functions."
-          onContinue={() => router.push("/learn/exercise-1")}
-        />
+        {courses.map((course) => (
+          <View key={course.slug} className="mb-4">
+            <ChallengeCard
+              title={course.title}
+              moduleName={course.moduleName}
+              description={`${course.lessonCount} lesson${course.lessonCount > 1 ? "s" : ""} · ${course.description}`}
+              onContinue={() => router.push(`/learn/${course.slug}`)}
+            />
+          </View>
+        ))}
       </ScrollView>
     </View>
   );

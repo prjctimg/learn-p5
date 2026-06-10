@@ -4,12 +4,12 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { WebView } from "react-native-webview";
-import { useDrawerContext } from "../../contexts/DrawerContext";
-import ExerciseDescription from "../../components/ExerciseDescription";
-import CodeEditor from "../../components/CodeEditor";
-import ProgrammingKeyboard from "../../components/ProgrammingKeyboard";
-import BottomNavBar from "../../components/BottomNavBar";
-import { buildSketchHTML, DEFAULT_SKETCH, EXERCISE_SOLUTIONS } from "../../utils/sketchTemplate";
+import { useDrawerContext } from "../../../contexts/DrawerContext";
+import ExerciseDescription from "../../../components/ExerciseDescription";
+import CodeEditor from "../../../components/CodeEditor";
+import ProgrammingKeyboard from "../../../components/ProgrammingKeyboard";
+import BottomNavBar from "../../../components/BottomNavBar";
+import { buildSketchHTML, DEFAULT_SKETCH, EXERCISE_SOLUTIONS } from "../../../utils/sketchTemplate";
 
 const exercises: Record<string, { title: string; module: string; instruction: string }> = {
   "exercise-1": {
@@ -21,7 +21,7 @@ const exercises: Record<string, { title: string; module: string; instruction: st
 };
 
 export default function Exercise() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { course, id } = useLocalSearchParams<{ course: string; id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { openDrawer } = useDrawerContext();
@@ -78,13 +78,13 @@ export default function Exercise() {
           </Text>
           <View className="mt-6">
             <Pressable
-              onPress={() => router.push("/learn")}
+              onPress={() => router.push(`/learn/${course}`)}
               className="bg-primary px-6 py-3 border-2 border-outline dark:border-outline-dark active:translate-y-0.5"
               accessibilityRole="button"
-              accessibilityLabel="Back to Learn"
+              accessibilityLabel="Back to course"
             >
               <Text className="font-headline font-black text-sm uppercase tracking-wider text-on-primary">
-                Back to Learn
+                Back to course
               </Text>
             </Pressable>
           </View>

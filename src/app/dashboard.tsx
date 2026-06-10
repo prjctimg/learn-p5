@@ -1,7 +1,10 @@
-import { View, Text } from "react-native";
+import { View, Text, Pressable } from "react-native";
+import { useRouter } from "expo-router";
 import Header from "../components/Header";
 
 export default function Dashboard() {
+  const router = useRouter();
+
   return (
     <View className="flex-1 bg-surface dark:bg-surface-dark">
       <Header title="Dashboard" />
@@ -45,22 +48,32 @@ export default function Dashboard() {
             Quick Actions
           </Text>
           <View className="gap-3">
-            <View className="bg-surface-dim dark:bg-surface-dim-dark rounded-xl px-5 py-4">
+            <Pressable
+              onPress={() => router.push("/learn/shapes/exercise-1")}
+              className="bg-surface-dim dark:bg-surface-dim-dark rounded-xl px-5 py-4 active:opacity-80"
+              accessibilityRole="button"
+              accessibilityLabel="Continue Learning"
+            >
               <Text className="font-headline text-lg font-bold text-on-surface dark:text-on-surface-dark">
                 Continue Learning
               </Text>
               <Text className="font-body text-sm text-text-secondary dark:text-text-secondary-dark mt-1">
                 Pick up where you left off
               </Text>
-            </View>
-            <View className="bg-surface-dim dark:bg-surface-dim-dark rounded-xl px-5 py-4">
+            </Pressable>
+            <Pressable
+              onPress={() => router.push("/learn/shapes")}
+              className="bg-surface-dim dark:bg-surface-dim-dark rounded-xl px-5 py-4 active:opacity-80"
+              accessibilityRole="button"
+              accessibilityLabel="Up next"
+            >
               <Text className="font-headline text-lg font-bold text-on-surface dark:text-on-surface-dark">
                 Up next
               </Text>
               <Text className="font-body text-sm text-text-secondary dark:text-text-secondary-dark mt-1">
                 Continue your next exercise
               </Text>
-            </View>
+            </Pressable>
           </View>
         </View>
       </View>
