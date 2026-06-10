@@ -1,13 +1,12 @@
-import { View, Text, Pressable, ScrollView } from "react-native";
+import { View, Text, Pressable, ScrollView, StyleSheet } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
-  Easing,
 } from "react-native-reanimated";
 import {
   experienceOptions,
@@ -18,6 +17,8 @@ import {
   getPrevSlideId,
 } from "../../data/onboardingSlides";
 import { useOnboarding } from "../../hooks/useOnboarding";
+import { useThemeContext } from "../../components/ThemeProvider";
+import { Colors } from "../../constants/Colors";
 
 interface SlideData {
   title: string;
@@ -60,6 +61,8 @@ export default function OnboardingSlide() {
   const { data, updateData, completeOnboarding } = useOnboarding();
   const fadeAnim = useSharedValue(0);
   const slideAnim = useSharedValue(30);
+  const { colorScheme } = useThemeContext();
+  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: fadeAnim.value,
@@ -75,8 +78,8 @@ export default function OnboardingSlide() {
 
   if (!slide || !(slide in slideContent)) {
     return (
-      <View className="flex-1 bg-surface dark:bg-surface-dark items-center justify-center">
-        <Text className="font-headline text-xl text-on-surface dark:text-on-surface-dark">
+      <View style={[styles.flex1, { backgroundColor: colors.surface, alignItems: "center", justifyContent: "center" }]}>
+        <Text style={[styles.headlineXl, { color: colors.onSurface }]}>
           Slide not found
         </Text>
       </View>
@@ -108,15 +111,12 @@ export default function OnboardingSlide() {
   const isFirst = isFirstSlide(slide);
 
   return (
-    <View className="flex-1 bg-[#2a0516]">
-      <View
-        style={{ paddingTop: insets.top + 8 }}
-        className="flex-row items-center px-4 pb-3"
-      >
+    <View style={[styles.flex1, { backgroundColor: "#2a0516" }]}>
+      <View style={[styles.headerRow, { paddingTop: insets.top + 8 }]}>
         {!isFirst && (
           <Pressable
             onPress={handleBack}
-            className="w-10 h-10 items-center justify-center"
+            style={styles.backButton}
             accessibilityRole="button"
             accessibilityLabel="Go back"
           >
@@ -127,59 +127,58 @@ export default function OnboardingSlide() {
             />
           </Pressable>
         )}
-        <View className="flex-1" />
-        <Text className="font-headline text-xl font-bold uppercase tracking-tighter text-[#ffb2bb]">
+        <View style={styles.flex1} />
+        <Text style={styles.headerTitle}>
           LEARN P5.JS
         </Text>
-        <View className="flex-1" />
+        <View style={styles.flex1} />
       </View>
 
       <Animated.View
-        className="flex-1 px-6"
-        style={animatedStyle}
+        style={[styles.flex1, styles.contentPadding, animatedStyle]}
       >
         <ScrollView
-          className="flex-1"
+          style={styles.flex1}
           contentContainerStyle={{ paddingBottom: 120 }}
           showsVerticalScrollIndicator={false}
         >
           {slide === "1" && (
-            <View className="flex-1 justify-center pt-8">
-              <Text className="font-headline text-4xl md:text-5xl font-bold leading-tight tracking-tight text-[#ffd9e4]">
+            <View style={[styles.flex1, styles.justifyCenter, { paddingTop: 32 }]}>
+              <Text style={styles.welcomeTitle}>
                 {content.title}
               </Text>
-              <Text className="font-body text-base text-[#e4bdc0] mt-4 leading-relaxed">
+              <Text style={styles.welcomeSubtitle}>
                 {content.subtitle}
               </Text>
-              <View className="flex-row flex-wrap gap-3 mt-6">
+              <View style={[styles.flexRow, styles.flexWrap, { gap: 12, marginTop: 24 }]}>
                 {content.tags!.map((tag) => (
                   <View
                     key={tag}
-                    className="flex-row items-center px-4 py-2 border-2 border-white rounded-full bg-[#340d1f]"
+                    style={[styles.flexRow, styles.tagItem]}
                   >
-                    <View className="w-3 h-3 rounded-full bg-[#ff4f75] mr-2" />
-                    <Text className="font-label text-xs uppercase tracking-wider text-[#ffd9e4]">
+                    <View style={styles.tagDot} />
+                    <Text style={styles.tagLabel}>
                       {tag}
                     </Text>
                   </View>
                 ))}
               </View>
-              <View className="mt-10 border-2 border-white bg-black rounded-lg p-4">
-                <View className="flex-row justify-between items-center mb-2 border-b-2 border-white pb-2">
-                  <Text className="text-[#ffb2bb] font-bold text-[10px] uppercase">
+              <View style={[styles.codeBlock, { marginTop: 40 }]}>
+                <View style={[styles.flexRow, styles.codeBlockHeader]}>
+                  <Text style={styles.codeBlockLabel}>
                     sketch.js
                   </Text>
                 </View>
-                <Text className="font-mono text-xs text-[#ffb2bb]">
+                <Text style={styles.codeTextPink}>
                   function draw() {"{"}
                 </Text>
-                <Text className="font-mono text-xs text-white pl-4">
+                <Text style={styles.codeTextWhite}>
                   background(25);
                 </Text>
-                <Text className="font-mono text-xs text-[#ffb1c2] pl-4">
+                <Text style={styles.codeTextPink2}>
                   ellipse(mouseX, mouseY, 50, 50);
                 </Text>
-                <Text className="font-mono text-xs text-[#ffb2bb]">
+                <Text style={styles.codeTextPink}>
                   {"}"}
                 </Text>
               </View>
@@ -187,40 +186,28 @@ export default function OnboardingSlide() {
           )}
 
           {slide === "2" && (
-            <View className="flex-1 pt-8">
-              <Text className="font-headline text-2xl font-bold text-[#ffd9e4]">
+            <View style={[styles.flex1, { paddingTop: 32 }]}>
+              <Text style={styles.slideTitle}>
                 {content.title}
               </Text>
-              <Text className="font-body text-sm text-[#e4bdc0] mt-2">
+              <Text style={styles.slideSubtitle}>
                 {content.subtitle}
               </Text>
-              <View className="mt-8 gap-3">
+              <View style={{ marginTop: 32, gap: 12 }}>
                 {experienceOptions.map((opt) => {
                   const selected = data.experience === opt.value;
                   return (
                     <Pressable
                       key={opt.value}
                       onPress={() => updateData({ experience: opt.value })}
-                      className={`p-4 border-2 rounded-lg ${
-                        selected
-                          ? "bg-[#ff4f75] border-white"
-                          : "bg-[#340d1f] border-white/50"
-                      }`}
+                      style={[styles.optionCard, selected ? styles.optionCardSelected : styles.optionCardUnselected]}
                       accessibilityRole="button"
                       accessibilityLabel={opt.label}
                     >
-                      <Text
-                        className={`font-headline text-lg font-bold ${
-                          selected ? "text-black" : "text-[#ffd9e4]"
-                        }`}
-                      >
+                      <Text style={[styles.optionTitle, { color: selected ? "#000000" : "#ffd9e4" }]}>
                         {opt.label}
                       </Text>
-                      <Text
-                        className={`font-body text-sm mt-1 ${
-                          selected ? "text-black/70" : "text-[#e4bdc0]"
-                        }`}
-                      >
+                      <Text style={[styles.optionDesc, { color: selected ? "rgba(0,0,0,0.7)" : "#e4bdc0" }]}>
                         {opt.description}
                       </Text>
                     </Pressable>
@@ -231,37 +218,25 @@ export default function OnboardingSlide() {
           )}
 
           {slide === "3" && (
-            <View className="flex-1 pt-8">
-              <Text className="font-headline text-2xl font-bold text-[#ffd9e4]">
+            <View style={[styles.flex1, { paddingTop: 32 }]}>
+              <Text style={styles.slideTitle}>
                 {content.title}
               </Text>
-              <View className="mt-8 gap-4">
+              <View style={{ marginTop: 32, gap: 16 }}>
                 {pathOptions.map((opt) => {
                   const selected = data.path === opt.value;
                   return (
                     <Pressable
                       key={opt.value}
                       onPress={() => updateData({ path: opt.value })}
-                      className={`p-4 border-2 rounded-lg ${
-                        selected
-                          ? "bg-[#ff4f75] border-white"
-                          : "bg-[#340d1f] border-white/50"
-                      }`}
+                      style={[styles.optionCard, selected ? styles.optionCardSelected : styles.optionCardUnselected]}
                       accessibilityRole="button"
                       accessibilityLabel={opt.title}
                     >
-                      <Text
-                        className={`font-headline text-base font-bold ${
-                          selected ? "text-black" : "text-[#ffd9e4]"
-                        }`}
-                      >
+                      <Text style={[styles.pathTitle, { color: selected ? "#000000" : "#ffd9e4" }]}>
                         {opt.title}
                       </Text>
-                      <Text
-                        className={`font-body text-xs mt-1 ${
-                          selected ? "text-black/70" : "text-[#e4bdc0]"
-                        }`}
-                      >
+                      <Text style={[styles.pathDesc, { color: selected ? "rgba(0,0,0,0.7)" : "#e4bdc0" }]}>
                         {opt.description}
                       </Text>
                     </Pressable>
@@ -272,30 +247,30 @@ export default function OnboardingSlide() {
           )}
 
           {slide === "4" && (
-            <View className="flex-1 pt-8">
-              <Text className="font-headline text-3xl font-bold text-[#ffd9e4]">
+            <View style={[styles.flex1, { paddingTop: 32 }]}>
+              <Text style={styles.readyTitle}>
                 {content.title}
               </Text>
-              <Text className="font-body text-sm text-[#e4bdc0] mt-2">
+              <Text style={styles.slideSubtitle}>
                 {content.subtitle}
               </Text>
-              <View className="mt-8 gap-3">
+              <View style={{ marginTop: 32, gap: 12 }}>
                 {content.modules!.map((mod, i) => (
                   <View
                     key={mod.name}
-                    className="p-4 border-2 border-white bg-[#340d1f] rounded-lg"
+                    style={styles.moduleCard}
                   >
-                    <View className="flex-row items-center gap-3">
-                      <View className="w-8 h-8 rounded-full bg-[#ff4f75] items-center justify-center">
-                        <Text className="font-headline font-bold text-black">
+                    <View style={[styles.flexRow, { alignItems: "center", gap: 12 }]}>
+                      <View style={styles.moduleNumber}>
+                        <Text style={styles.moduleNumberText}>
                           {i + 1}
                         </Text>
                       </View>
-                      <View className="flex-1">
-                        <Text className="font-headline text-base font-bold text-[#ffd9e4]">
+                      <View style={styles.flex1}>
+                        <Text style={styles.moduleName}>
                           {mod.name}
                         </Text>
-                        <Text className="font-body text-xs text-[#e4bdc0] mt-0.5">
+                        <Text style={styles.moduleDesc}>
                           {mod.desc}
                         </Text>
                       </View>
@@ -303,7 +278,7 @@ export default function OnboardingSlide() {
                   </View>
                 ))}
               </View>
-              <Text className="font-headline text-xl font-bold text-center text-[#ffb2bb] mt-10">
+              <Text style={[styles.readyCta, { marginTop: 40 }]}>
                 Ready to code?
               </Text>
             </View>
@@ -311,17 +286,12 @@ export default function OnboardingSlide() {
         </ScrollView>
       </Animated.View>
 
-      <View
-        style={{ paddingBottom: insets.bottom + 16 }}
-        className="absolute bottom-0 left-0 right-0 px-6 pt-6 bg-gradient-to-t from-[#2a0516] via-[#2a0516]/90 to-transparent"
-      >
-        <View className="flex-row justify-center gap-2 mb-4">
+      <View style={[{ paddingBottom: insets.bottom + 16 }, styles.bottomBar]}>
+        <View style={[styles.flexRow, { justifyContent: "center", gap: 8, marginBottom: 16 }]}>
           {["1", "2", "3", "4"].map((dot) => (
             <View
               key={dot}
-              className={`w-2 h-2 rounded-full ${
-                dot === slide ? "bg-[#ED225D]" : "bg-white/30"
-              }`}
+              style={[styles.dot, { backgroundColor: dot === slide ? "#ED225D" : "rgba(255,255,255,0.3)" }]}
             />
           ))}
         </View>
@@ -329,22 +299,22 @@ export default function OnboardingSlide() {
         {isLast ? (
           <Pressable
             onPress={handleGetStarted}
-            className="w-full py-4 bg-[#ED225D] border-2 border-white rounded-lg items-center"
+            style={styles.ctaButton}
             accessibilityRole="button"
             accessibilityLabel="Get Started"
           >
-            <Text className="font-headline font-bold text-lg uppercase tracking-widest text-black">
+            <Text style={styles.ctaButtonText}>
               Start Learning
             </Text>
           </Pressable>
         ) : (
           <Pressable
             onPress={handleNext}
-            className="w-full py-4 bg-[#ED225D] border-2 border-white rounded-lg items-center"
+            style={styles.ctaButton}
             accessibilityRole="button"
             accessibilityLabel="Next"
           >
-            <Text className="font-headline font-bold text-lg uppercase tracking-widest text-black">
+            <Text style={styles.ctaButtonText}>
               Next
             </Text>
           </Pressable>
@@ -353,3 +323,229 @@ export default function OnboardingSlide() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  flex1: { flex: 1 },
+  flexRow: { flexDirection: "row" },
+  flexWrap: { flexWrap: "wrap" },
+  justifyCenter: { justifyContent: "center" },
+  contentPadding: { paddingHorizontal: 24 },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  headerTitle: {
+    fontFamily: "SpaceGrotesk",
+    fontSize: 20,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: -0.5,
+    color: "#ffb2bb",
+  },
+  welcomeTitle: {
+    fontFamily: "SpaceGrotesk",
+    fontSize: 36,
+    fontWeight: "700",
+    lineHeight: 45,
+    letterSpacing: -0.5,
+    color: "#ffd9e4",
+  },
+  welcomeSubtitle: {
+    fontFamily: "Inter",
+    fontSize: 16,
+    lineHeight: 24,
+    color: "#e4bdc0",
+    marginTop: 16,
+  },
+  tagItem: {
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderWidth: 2,
+    borderColor: "#FFFFFF",
+    borderRadius: 9999,
+    backgroundColor: "#340d1f",
+  },
+  tagDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 9999,
+    backgroundColor: "#ff4f75",
+    marginRight: 8,
+  },
+  tagLabel: {
+    fontFamily: "Inter",
+    fontSize: 11,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    color: "#ffd9e4",
+  },
+  codeBlock: {
+    borderWidth: 2,
+    borderColor: "#FFFFFF",
+    backgroundColor: "#000000",
+    padding: 16,
+  },
+  codeBlockHeader: {
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+    borderBottomWidth: 2,
+    borderBottomColor: "#FFFFFF",
+    paddingBottom: 8,
+  },
+  codeBlockLabel: {
+    color: "#ffb2bb",
+    fontWeight: "700",
+    fontSize: 10,
+    textTransform: "uppercase",
+  },
+  codeTextPink: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 11,
+    color: "#ffb2bb",
+  },
+  codeTextWhite: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 11,
+    color: "#FFFFFF",
+    paddingLeft: 16,
+  },
+  codeTextPink2: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 11,
+    color: "#ffb1c2",
+    paddingLeft: 16,
+  },
+  slideTitle: {
+    fontFamily: "SpaceGrotesk",
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#ffd9e4",
+  },
+  slideSubtitle: {
+    fontFamily: "Inter",
+    fontSize: 13,
+    color: "#e4bdc0",
+    marginTop: 8,
+  },
+  optionCard: {
+    padding: 16,
+    borderWidth: 2,
+  },
+  optionCardSelected: {
+    backgroundColor: "#ff4f75",
+    borderColor: "#FFFFFF",
+  },
+  optionCardUnselected: {
+    backgroundColor: "#340d1f",
+    borderColor: "rgba(255,255,255,0.5)",
+  },
+  optionTitle: {
+    fontFamily: "SpaceGrotesk",
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  optionDesc: {
+    fontFamily: "Inter",
+    fontSize: 13,
+    marginTop: 4,
+  },
+  pathTitle: {
+    fontFamily: "SpaceGrotesk",
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  pathDesc: {
+    fontFamily: "Inter",
+    fontSize: 11,
+    marginTop: 4,
+  },
+  readyTitle: {
+    fontFamily: "SpaceGrotesk",
+    fontSize: 30,
+    fontWeight: "700",
+    color: "#ffd9e4",
+  },
+  moduleCard: {
+    padding: 16,
+    borderWidth: 2,
+    borderColor: "#FFFFFF",
+    backgroundColor: "#340d1f",
+  },
+  moduleNumber: {
+    width: 32,
+    height: 32,
+    borderRadius: 9999,
+    backgroundColor: "#ff4f75",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  moduleNumberText: {
+    fontFamily: "SpaceGrotesk",
+    fontWeight: "700",
+    color: "#000000",
+  },
+  moduleName: {
+    fontFamily: "SpaceGrotesk",
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#ffd9e4",
+  },
+  moduleDesc: {
+    fontFamily: "Inter",
+    fontSize: 11,
+    color: "#e4bdc0",
+    marginTop: 2,
+  },
+  readyCta: {
+    fontFamily: "SpaceGrotesk",
+    fontSize: 20,
+    fontWeight: "700",
+    textAlign: "center",
+    color: "#ffb2bb",
+  },
+  bottomBar: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    backgroundColor: "#2a0516",
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 9999,
+  },
+  ctaButton: {
+    width: "100%",
+    paddingVertical: 16,
+    backgroundColor: "#ED225D",
+    borderWidth: 2,
+    borderColor: "#FFFFFF",
+    alignItems: "center",
+  },
+  ctaButtonText: {
+    fontFamily: "SpaceGrotesk",
+    fontWeight: "700",
+    fontSize: 18,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    color: "#000000",
+  },
+  headlineXl: {
+    fontFamily: "SpaceGrotesk",
+    fontSize: 20,
+    fontWeight: "700",
+  },
+});

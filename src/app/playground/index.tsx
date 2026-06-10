@@ -1,19 +1,51 @@
-import { View, Text } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import Header from "../../components/Header";
+import { useThemeContext } from "../../components/ThemeProvider";
+import { Colors } from "../../constants/Colors";
 
 export default function Playground() {
+  const { colorScheme } = useThemeContext();
+  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+
   return (
-    <View className="flex-1 bg-surface dark:bg-surface-dark">
+    <View style={[styles.container, { backgroundColor: colors.surface }]}>
       <Header title="Playground" />
-      <View className="flex-1 items-center justify-center px-6">
-        <Text className="text-4xl mb-4">🎮</Text>
-        <Text className="font-headline text-2xl font-bold text-on-surface dark:text-on-surface-dark">
+      <View style={styles.centerContent}>
+        <Text style={styles.emoji}>🎮</Text>
+        <Text style={[styles.heading, { color: colors.onSurface }]}>
           Coming Soon
         </Text>
-        <Text className="font-body text-base text-text-secondary dark:text-text-secondary-dark mt-2 text-center">
+        <Text style={[styles.description, { color: colors.textSecondary }]}>
           Experiment with p5.js sketches in a free-form playground.
         </Text>
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  centerContent: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+  },
+  emoji: {
+    fontSize: 36,
+    marginBottom: 16,
+  },
+  heading: {
+    fontFamily: "SpaceGrotesk",
+    fontSize: 24,
+    fontWeight: "700",
+  },
+  description: {
+    fontFamily: "Inter",
+    fontSize: 16,
+    marginTop: 8,
+    textAlign: "center",
+  },
+});

@@ -1,6 +1,8 @@
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDrawerContext } from "../contexts/DrawerContext";
+import { useThemeContext } from "../components/ThemeProvider";
+import { Colors } from "../constants/Colors";
 
 interface HeaderProps {
   title: string;
@@ -11,29 +13,33 @@ interface HeaderProps {
 export default function Header({ title, subtitle, right }: HeaderProps) {
   const insets = useSafeAreaInsets();
   const { openDrawer } = useDrawerContext();
+  const { colorScheme } = useThemeContext();
+  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
   return (
     <View
-      style={{ paddingTop: insets.top + 8 }}
-      className="flex-row items-center justify-between px-4 pb-3 bg-surface dark:bg-surface-dark"
+      style={[
+        styles.header,
+        { paddingTop: insets.top + 8, backgroundColor: colors.surface },
+      ]}
     >
-      <View className="flex-row items-center gap-3">
+      <View style={styles.leftSection}>
         <Pressable
           onPress={openDrawer}
-          className="w-10 h-10 items-center justify-center rounded-full bg-surface-dim dark:bg-surface-dim-dark"
+          style={[styles.menuButton, { backgroundColor: colors.surfaceDim }]}
           accessibilityRole="button"
           accessibilityLabel="Open navigation menu"
         >
-          <Text className="text-xl text-on-surface dark:text-on-surface-dark font-bold leading-none">
+          <Text style={[styles.menuIcon, { color: colors.onSurface }]}>
             ☰
           </Text>
         </Pressable>
         <View>
-          <Text className="font-headline text-xl font-bold text-on-surface dark:text-on-surface-dark">
+          <Text style={[styles.title, { color: colors.onSurface }]}>
             {title}
           </Text>
           {subtitle && (
-            <Text className="font-body text-xs text-text-secondary dark:text-text-secondary-dark -mt-0.5">
+            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
               {subtitle}
             </Text>
           )}
@@ -43,3 +49,39 @@ export default function Header({ title, subtitle, right }: HeaderProps) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+  },
+  leftSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  menuButton: {
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 9999,
+  },
+  menuIcon: {
+    fontSize: 20,
+    fontWeight: "700",
+  },
+  title: {
+    fontFamily: "SpaceGrotesk",
+    fontSize: 20,
+    fontWeight: "700",
+  },
+  subtitle: {
+    fontFamily: "Inter",
+    fontSize: 11,
+    marginTop: -2,
+  },
+});

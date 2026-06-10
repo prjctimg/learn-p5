@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Pressable, View } from "react-native";
+import { Pressable, View, StyleSheet } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -72,17 +72,15 @@ export default function SideDrawer() {
   return (
     <>
       <Animated.View
-        className="absolute inset-0 bg-black z-40"
-        style={backdropStyle}
+        style={[styles.backdrop, backdropStyle]}
         pointerEvents={isOpen ? "auto" : "none"}
       >
-        <Pressable onPress={closeDrawer} className="flex-1" />
+        <Pressable onPress={closeDrawer} style={styles.backdropPressable} />
       </Animated.View>
 
       <GestureDetector gesture={closeGesture}>
         <Animated.View
-          className="absolute left-0 top-0 bottom-0 z-50 w-72 shadow-2xl"
-          style={drawerStyle}
+          style={[styles.drawer, drawerStyle]}
         >
           <DrawerContent onClose={closeDrawer} />
         </Animated.View>
@@ -90,9 +88,45 @@ export default function SideDrawer() {
 
       {!isOpen && (
         <GestureDetector gesture={openGesture}>
-          <View className="absolute left-0 top-0 bottom-0 w-6 z-30" />
+          <View style={styles.openEdge} />
         </GestureDetector>
       )}
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  backdrop: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    backgroundColor: "#000000",
+    zIndex: 40,
+  },
+  backdropPressable: {
+    flex: 1,
+  },
+  drawer: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    zIndex: 50,
+    width: DRAWER_WIDTH,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 25 },
+    shadowOpacity: 0.25,
+    shadowRadius: 50,
+    elevation: 25,
+  },
+  openEdge: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 24,
+    zIndex: 30,
+  },
+});

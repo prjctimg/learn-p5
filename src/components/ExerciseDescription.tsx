@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useThemeContext } from "./ThemeProvider";
+import { Colors } from "../constants/Colors";
 import { P5_FUNCTION_NAMES } from "../data/p5Symbols";
 
 const SYMBOL_PATTERN = new RegExp(
@@ -50,6 +52,8 @@ export default function ExerciseDescription({
 }: ExerciseDescriptionProps) {
   const [expanded, setExpanded] = useState(true);
   const router = useRouter();
+  const { colorScheme } = useThemeContext();
+  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
   const parts = parseInstruction(instruction);
 
@@ -63,18 +67,18 @@ export default function ExerciseDescription({
   };
 
   return (
-    <View className="bg-surface-container dark:bg-surface-container-dark px-4 py-3 border-b border-outline-variant dark:border-outline-variant-dark">
-      <View className="flex-row justify-between items-start">
-        <View className="flex-1 mr-2">
-          <Text className="text-primary font-bold text-xs uppercase tracking-wider mb-1">
+    <View style={[styles.container, { backgroundColor: colors.surfaceContainer, borderBottomColor: colors.outlineVariant }]}>
+      <View style={styles.row}>
+        <View style={styles.content}>
+          <Text style={[styles.title, { color: colors.primary }]}>
             Exercise {exerciseNumber}: {title}
           </Text>
-          <Text className="text-on-surface-variant dark:text-on-surface-variant-dark text-sm leading-relaxed">
+          <Text style={[styles.instruction, { color: colors.onSurfaceVariant }]}>
             {displayParts.map((part, i) =>
               part.isSymbol ? (
                 <Text
                   key={`sym-${part.text}`}
-                  className="text-primary font-bold underline"
+                  style={[styles.symbol, { color: colors.primary }]}
                   onPress={() => handleSymbolPress(part.text)}
                 >
                   {part.text}
@@ -87,7 +91,7 @@ export default function ExerciseDescription({
         </View>
         <Pressable
           onPress={() => setExpanded((p) => !p)}
-          className="p-1"
+          style={styles.chevronButton}
           accessibilityRole="button"
           accessibilityLabel={expanded ? "Collapse description" : "Expand description"}
         >
@@ -101,3 +105,38 @@ export default function ExerciseDescription({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  content: {
+    flex: 1,
+    marginRight: 8,
+  },
+  title: {
+    fontWeight: "700",
+    fontSize: 11,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginBottom: 4,
+  },
+  instruction: {
+    fontSize: 13,
+    lineHeight: 24,
+  },
+  symbol: {
+    fontWeight: "700",
+    textDecorationLine: "underline",
+  },
+  chevronButton: {
+    padding: 4,
+  },
+});
