@@ -18,10 +18,10 @@ export default function SideDrawer() {
   const backdropOpacity = useSharedValue(0);
 
   useEffect(() => {
-    translateX.value = withTiming(isOpen ? 0 : -DRAWER_WIDTH, {
+    translateX.set(withTiming(isOpen ? 0 : -DRAWER_WIDTH, {
       duration: 300,
-    });
-    backdropOpacity.value = withTiming(isOpen ? 0.5 : 0, { duration: 300 });
+    }));
+    backdropOpacity.set(withTiming(isOpen ? 0.5 : 0, { duration: 300 }));
   }, [isOpen]);
 
   const backdropStyle = useAnimatedStyle(() => ({

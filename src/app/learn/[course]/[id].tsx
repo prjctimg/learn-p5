@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback, useEffect } from "react";
+import { useRef, useState, useEffect, useReducer } from "react";
 import { View, Text, Pressable } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -13,67 +13,101 @@ import { buildSketchHTML, DEFAULT_SKETCH } from "../../../utils/sketchTemplate";
 import { loadExercise } from "../../../utils/courseLoader";
 import { Lesson } from "../../../data/types";
 
+interface ExerciseState {
+  exercise: Lesson | null;
+  loading: boolean;
+  code: string;
+  solutionHTML: string;
+  userHTML: string;
+  isRunning: boolean;
+  showSolution: boolean;
+}
+
+type ExerciseAction =
+  | { type: "LOAD_START" }
+  | { type: "LOAD_DONE"; exercise: Lesson | null }
+  | { type: "SET_CODE"; code: string }
+  | { type: "APPEND_CODE"; text: string }
+  | { type: "RUN_START" }
+  | { type: "RUN_DONE" };
+
+function exerciseReducer(state: ExerciseState, action: ExerciseAction): ExerciseState {
+  switch (action.type) {
+    case "LOAD_START":
+      return { ...state, loading: true };
+    case "LOAD_DONE":
+      return {
+        ...state,
+        loading: false,
+        exercise: action.exercise,
+        code: action.exercise?.startingCode ?? state.code,
+      };
+    case "SET_CODE":
+      return { ...state, code: action.code };
+    case "APPEND_CODE":
+      return { ...state, code: state.code + action.text };
+    case "RUN_START":
+      return {
+        ...state,
+        isRunning: true,
+        userHTML: buildSketchHTML(state.code),
+        solutionHTML: state.exercise?.solution ? buildSketchHTML(state.exercise.solution) : "",
+        showSolution: !!state.exercise?.solution,
+      };
+    case "RUN_DONE":
+      return { ...state, isRunning: false };
+    default:
+      return state;
+  }
+}
+
+const INITIAL_STATE: ExerciseState = {
+  exercise: null,
+  loading: true,
+  code: DEFAULT_SKETCH,
+  solutionHTML: "",
+  userHTML: "",
+  isRunning: false,
+  showSolution: false,
+};
+
 export default function Exercise() {
   const { course, id } = useLocalSearchParams<{ course: string; id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { openDrawer } = useDrawerContext();
-
-  const [exercise, setExercise] = useState<Lesson | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  const [code, setCode] = useState(DEFAULT_SKETCH);
-  const [solutionHTML, setSolutionHTML] = useState("");
-  const [userHTML, setUserHTML] = useState("");
-  const [isRunning, setIsRunning] = useState(false);
-  const [showSolution, setShowSolution] = useState(false);
+  const [state, dispatch] = useReducer(exerciseReducer, INITIAL_STATE);
   const runCounter = useRef(0);
 
   useEffect(() => {
-    if (!course || !id) {
-      setLoading(false);
-      return;
-    }
-    loadExercise(course, id)
-      .then((ex) => {
-        setExercise(ex);
-        if (ex?.startingCode) {
-          setCode(ex.startingCode);
-        }
-      })
-      .finally(() => setLoading(false));
+    const load = async () => {
+      if (!course || !id) return;
+      dispatch({ type: "LOAD_START" });
+      const ex = await loadExercise(course, id);
+      dispatch({ type: "LOAD_DONE", exercise: ex });
+    };
+    load();
   }, [course, id]);
 
-  const handleRun = useCallback(() => {
-    if (!exercise) return;
+  const handleRun = () => {
+    if (!state.exercise) return;
     runCounter.current += 1;
     const counter = runCounter.current;
 
-    setIsRunning(true);
-
-    const userHtml = buildSketchHTML(code);
-    setUserHTML(userHtml);
-
-    if (exercise.solution) {
-      setSolutionHTML(buildSketchHTML(exercise.solution));
-      setShowSolution(true);
-    }
+    dispatch({ type: "RUN_START" });
 
     setTimeout(() => {
       if (counter === runCounter.current) {
-        setIsRunning(false);
+        dispatch({ type: "RUN_DONE" });
       }
     }, 600);
-  }, [code, exercise]);
+  };
 
-  const handleInsert = useCallback(
-    (text: string) => {
-      setCode((prev) => prev + text);
-    },
-    []
-  );
+  const handleInsert = (text: string) => {
+    dispatch({ type: "APPEND_CODE", text });
+  };
 
-  if (loading) {
+  if (state.loading) {
     return (
       <View className="flex-1 bg-surface dark:bg-surface-dark items-center justify-center">
         <MaterialCommunityIcons name="loading" size={32} color="#ED225D" />
@@ -81,7 +115,7 @@ export default function Exercise() {
     );
   }
 
-  if (!exercise) {
+  if (!state.exercise) {
     return (
       <View className="flex-1 bg-surface dark:bg-surface-dark">
         <View className="flex-1 items-center justify-center px-6">
@@ -131,9 +165,9 @@ export default function Exercise() {
 
       <View className="flex-1">
         <ExerciseDescription
-          title={exercise.title}
-          moduleName={exercise.module}
-          instruction={exercise.instruction}
+          title={state.exercise.title}
+          moduleName={state.exercise.module}
+          instruction={state.exercise.instruction}
           exerciseNumber={parseInt(id?.replace("exercise-", "") ?? "1", 10)}
         />
 
@@ -145,9 +179,9 @@ export default function Exercise() {
               </Text>
             </View>
             <View className="flex-1 bg-surface-container-lowest dark:bg-surface-container-lowest-dark items-center justify-center overflow-hidden">
-              {solutionHTML && showSolution ? (
+              {state.solutionHTML && state.showSolution ? (
                 <WebView
-                  source={{ html: solutionHTML }}
+                  source={{ html: state.solutionHTML }}
                   style={{ flex: 1, width: "100%" }}
                   scrollEnabled={false}
                   bounces={false}
@@ -168,9 +202,9 @@ export default function Exercise() {
               </Text>
             </View>
             <View className="flex-1 bg-black items-center justify-center overflow-hidden">
-              {userHTML ? (
+              {state.userHTML ? (
                 <WebView
-                  source={{ html: userHTML }}
+                  source={{ html: state.userHTML }}
                   style={{ flex: 1, width: "100%" }}
                   scrollEnabled={false}
                   bounces={false}
@@ -186,10 +220,10 @@ export default function Exercise() {
         </View>
 
         <CodeEditor
-          code={code}
-          onChange={setCode}
+          code={state.code}
+          onChange={(c) => dispatch({ type: "SET_CODE", code: c })}
           onRun={handleRun}
-          isRunning={isRunning}
+          isRunning={state.isRunning}
         />
 
         <ProgrammingKeyboard onInsert={handleInsert} />

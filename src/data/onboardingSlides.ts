@@ -72,7 +72,7 @@ export const pathOptions: PathOption[] = [
   },
 ];
 
-export function getSlideIndex(id: string): number {
+function getSlideIndex(id: string): number {
   return slides.findIndex((s) => s.id === id);
 }
 
@@ -96,4 +96,4 @@ export function isFirstSlide(id: string): boolean {
   return getSlideIndex(id) === 0;
 }
 
-export default slides;
+

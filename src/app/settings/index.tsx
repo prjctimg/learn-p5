@@ -11,6 +11,12 @@ const SETTINGS_KEYS = {
   snippetAlternatives: "setting_snippetAlternatives",
 };
 
+const openFeedback = () => {
+  WebBrowser.openBrowserAsync(
+    "https://github.com/anomalyco/learn-p5/issues/new"
+  );
+};
+
 export default function Settings() {
   const { colorScheme, toggleTheme } = useThemeContext();
   const [dailyReminder, setDailyReminder] = useState(false);
@@ -56,12 +62,6 @@ export default function Settings() {
     await AsyncStorage.setItem(
       SETTINGS_KEYS.snippetAlternatives,
       value.toString()
-    );
-  };
-
-  const openFeedback = () => {
-    WebBrowser.openBrowserAsync(
-      "https://github.com/anomalyco/learn-p5/issues/new"
     );
   };
 

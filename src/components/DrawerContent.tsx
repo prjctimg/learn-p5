@@ -55,7 +55,7 @@ export default function DrawerContent({ onClose }: DrawerContentProps) {
       >
         <Svg width={60} height={28} viewBox="0 0 250 114">
           {logoPaths.map((d, i) => (
-            <Path key={i} d={d} fill="#FFFFFF" />
+            <Path key={`logo-path-${i}`} d={d} fill="#FFFFFF" />
           ))}
         </Svg>
         <Text className="text-white font-headline text-2xl font-bold mt-3">

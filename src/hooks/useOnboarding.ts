@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ONBOARDING_KEY = "hasCompletedOnboarding";
@@ -30,39 +30,33 @@ export function useOnboarding() {
       .finally(() => setLoading(false));
   }, []);
 
-  const completeOnboarding = useCallback(
-    async (onboardingData?: OnboardingData) => {
-      const finalData = onboardingData ?? data;
-      await AsyncStorage.multiSet([
-        [ONBOARDING_KEY, "true"],
-        [ONBOARDING_DATA_KEY, JSON.stringify(finalData)],
-      ]);
-      setData(finalData);
-      setIsOnboardingComplete(true);
-    },
-    [data]
-  );
+  const completeOnboarding = async (onboardingData?: OnboardingData) => {
+    const finalData = onboardingData ?? data;
+    await AsyncStorage.multiSet([
+      [ONBOARDING_KEY, "true"],
+      [ONBOARDING_DATA_KEY, JSON.stringify(finalData)],
+    ]);
+    setData(finalData);
+    setIsOnboardingComplete(true);
+  };
 
-  const updateData = useCallback(
-    async (updates: Partial<OnboardingData>) => {
-      const newData = { ...data, ...updates };
-      setData(newData);
-      await AsyncStorage.setItem(
-        ONBOARDING_DATA_KEY,
-        JSON.stringify(newData)
-      );
-    },
-    [data]
-  );
+  const updateData = async (updates: Partial<OnboardingData>) => {
+    const newData = { ...data, ...updates };
+    setData(newData);
+    await AsyncStorage.setItem(
+      ONBOARDING_DATA_KEY,
+      JSON.stringify(newData)
+    );
+  };
 
-  const resetOnboarding = useCallback(async () => {
+  const resetOnboarding = async () => {
     await AsyncStorage.multiSet([
       [ONBOARDING_KEY, "false"],
       [ONBOARDING_DATA_KEY, JSON.stringify({ experience: null, path: null })],
     ]);
     setIsOnboardingComplete(false);
     setData({ experience: null, path: null });
-  }, []);
+  };
 
   return {
     loading,

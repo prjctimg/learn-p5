@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { View, Text, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, FlatList, ActivityIndicator } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Header from "../../../components/Header";
 import ChallengeCard from "../../../components/ChallengeCard";
@@ -13,10 +13,7 @@ export default function CourseDetail() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!course) {
-      setLoading(false);
-      return;
-    }
+    if (!course) return;
     loadCourse(course)
       .then(setCourseData)
       .finally(() => setLoading(false));
@@ -52,34 +49,37 @@ export default function CourseDetail() {
   return (
     <View className="flex-1 bg-surface dark:bg-surface-dark">
       <Header title={courseData.title} />
-      <ScrollView
+      <FlatList
         className="flex-1 px-4 pt-6"
         contentContainerStyle={{ paddingBottom: 32 }}
-      >
-        <Text className="font-headline text-2xl font-bold text-on-surface dark:text-on-surface-dark">
-          {courseData.title}
-        </Text>
-        <Text className="font-body text-sm text-text-secondary dark:text-text-secondary-dark mt-2">
-          {courseData.description}
-        </Text>
-
-        <Text className="font-headline text-lg font-bold text-on-surface dark:text-on-surface-dark mt-8 mb-4">
-          Lessons
-        </Text>
-
-        {courseData.lessons.map((lesson) => (
-          <View key={lesson.id} className="mb-4">
+        ListHeaderComponent={
+          <>
+            <Text className="font-headline text-2xl font-bold text-on-surface dark:text-on-surface-dark">
+              {courseData.title}
+            </Text>
+            <Text className="font-body text-sm text-text-secondary dark:text-text-secondary-dark mt-2">
+              {courseData.description}
+            </Text>
+            <Text className="font-headline text-lg font-bold text-on-surface dark:text-on-surface-dark mt-8 mb-4">
+              Lessons
+            </Text>
+          </>
+        }
+        data={courseData.lessons}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <View className="mb-4">
             <ChallengeCard
-              title={lesson.title}
-              moduleName={lesson.module}
-              description={lesson.description}
+              title={item.title}
+              moduleName={item.module}
+              description={item.description}
               onContinue={() =>
-                router.push(`/learn/${course}/${lesson.id}`)
+                router.push(`/learn/${course}/${item.id}`)
               }
             />
           </View>
-        ))}
-      </ScrollView>
+        )}
+      />
     </View>
   );
 }

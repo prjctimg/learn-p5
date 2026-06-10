@@ -18,7 +18,7 @@ export default function About() {
       <View className="flex-1 items-center justify-center px-6">
         <Svg width={120} height={55} viewBox="0 0 250 114">
           {logoPaths.map((d, i) => (
-            <Path key={i} d={d} fill={Colors.light.primary} />
+            <Path key={`about-path-${i}`} d={d} fill={Colors.light.primary} />
           ))}
         </Svg>
         <Text className="font-headline text-3xl font-bold text-on-surface dark:text-on-surface-dark mt-6">

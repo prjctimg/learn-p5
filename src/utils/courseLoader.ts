@@ -99,6 +99,6 @@ export async function loadExercise(
   return course.lessons.find((l) => l.id === exerciseId) ?? null;
 }
 
-export function invalidateCourseCache(): void {
+function invalidateCourseCache(): void {
   cachedCourses = null;
 }

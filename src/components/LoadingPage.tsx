@@ -26,12 +26,12 @@ export default function LoadingPage({ onFinish }: { onFinish: () => void }) {
   }));
 
   useEffect(() => {
-    opacity.value = withTiming(1, { duration: 1000, easing: Easing.out(Easing.ease) });
-    translateY.value = withTiming(0, { duration: 1000, easing: Easing.out(Easing.ease) });
+    opacity.set(withTiming(1, { duration: 1000, easing: Easing.out(Easing.ease) }));
+    translateY.set(withTiming(0, { duration: 1000, easing: Easing.out(Easing.ease) }));
 
     const t = setTimeout(onFinish, 2200);
     return () => clearTimeout(t);
-  }, []);
+  }, [onFinish]);
 
   return (
     <Animated.View
@@ -40,7 +40,7 @@ export default function LoadingPage({ onFinish }: { onFinish: () => void }) {
     >
       <Svg width={200} height={91} viewBox="0 0 250 114">
         {paths.map((d, i) => (
-          <Path key={i} d={d} fill={Colors.light.primary} />
+          <Path key={`load-path-${i}`} d={d} fill={Colors.light.primary} />
         ))}
       </Svg>
     </Animated.View>

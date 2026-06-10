@@ -23,14 +23,14 @@ const faqs = [
   },
 ];
 
-export default function Support() {
-  const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+const openGitHubIssues = () => {
+  WebBrowser.openBrowserAsync(
+    "https://github.com/anomalyco/learn-p5/issues"
+  );
+};
 
-  const openGitHubIssues = () => {
-    WebBrowser.openBrowserAsync(
-      "https://github.com/anomalyco/learn-p5/issues"
-    );
-  };
+export default function Support() {
+  const [expandedFaq, setExpandedFaq] = useState<string | null>(null);
 
   return (
     <View className="flex-1 bg-surface dark:bg-surface-dark">
@@ -82,11 +82,11 @@ export default function Support() {
         </Text>
         <View className="bg-surface-dim dark:bg-surface-dim-dark rounded-xl overflow-hidden border-2 border-outline dark:border-outline-dark">
           {faqs.map((faq, i) => {
-            const isExpanded = expandedFaq === i;
+            const isExpanded = expandedFaq === faq.q;
             return (
               <Pressable
-                key={i}
-                onPress={() => setExpandedFaq(isExpanded ? null : i)}
+                key={faq.q}
+                onPress={() => setExpandedFaq(isExpanded ? null : faq.q)}
                 className={`px-4 py-4 ${
                   i < faqs.length - 1
                     ? "border-b border-outline/20"

@@ -1,8 +1,13 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { View, Text, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { P5_FUNCTION_NAMES } from "../data/p5Symbols";
+
+const SYMBOL_PATTERN = new RegExp(
+  `\\b(${P5_FUNCTION_NAMES.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b`,
+  "g"
+);
 
 interface ExerciseDescriptionProps {
   title: string;
@@ -12,23 +17,17 @@ interface ExerciseDescriptionProps {
 }
 
 function parseInstruction(
-  text: string,
-  symbolNames: string[]
+  text: string
 ): { text: string; isSymbol: boolean }[] {
   if (!text) return [{ text: "", isSymbol: false }];
-
-  const symbolPattern = new RegExp(
-    `\\b(${symbolNames
-      .map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
-      .join("|")})\\b`,
-    "g"
-  );
 
   const parts: { text: string; isSymbol: boolean }[] = [];
   let lastIndex = 0;
   let match: RegExpExecArray | null;
 
-  while ((match = symbolPattern.exec(text)) !== null) {
+  SYMBOL_PATTERN.lastIndex = 0;
+
+  while ((match = SYMBOL_PATTERN.exec(text)) !== null) {
     if (match.index > lastIndex) {
       parts.push({ text: text.slice(lastIndex, match.index), isSymbol: false });
     }
@@ -52,15 +51,11 @@ export default function ExerciseDescription({
   const [expanded, setExpanded] = useState(true);
   const router = useRouter();
 
-  const parts = useMemo(
-    () => parseInstruction(instruction, P5_FUNCTION_NAMES),
-    [instruction]
-  );
+  const parts = parseInstruction(instruction);
 
   const displayParts =
     expanded ? parts : parseInstruction(
-        `${instruction.slice(0, 60)}...`,
-        P5_FUNCTION_NAMES
+        `${instruction.slice(0, 60)}...`
       ).slice(0, 10);
 
   const handleSymbolPress = (name: string) => {
@@ -78,14 +73,14 @@ export default function ExerciseDescription({
             {displayParts.map((part, i) =>
               part.isSymbol ? (
                 <Text
-                  key={i}
+                  key={`sym-${part.text}`}
                   className="text-primary font-bold underline"
                   onPress={() => handleSymbolPress(part.text)}
                 >
                   {part.text}
                 </Text>
               ) : (
-                <Text key={i}>{part.text}</Text>
+                <Text key={`txt-${part.text}-${i}`}>{part.text}</Text>
               )
             )}
           </Text>

@@ -3,7 +3,12 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useEffect, useRef } from "react";
-import { Animated } from "react-native";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  Easing,
+} from "react-native-reanimated";
 import {
   experienceOptions,
   pathOptions,
@@ -53,25 +58,20 @@ export default function OnboardingSlide() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { data, updateData, completeOnboarding } = useOnboarding();
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(30)).current;
+  const fadeAnim = useSharedValue(0);
+  const slideAnim = useSharedValue(30);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: fadeAnim.value,
+    transform: [{ translateY: slideAnim.value }],
+  }));
 
   useEffect(() => {
-    fadeAnim.setValue(0);
-    slideAnim.setValue(30);
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 400,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 400,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [slide, fadeAnim, slideAnim]);
+    fadeAnim.value = 0;
+    slideAnim.value = 30;
+    fadeAnim.value = withTiming(1, { duration: 400 });
+    slideAnim.value = withTiming(0, { duration: 400 });
+  }, [slide]);
 
   if (!slide || !(slide in slideContent)) {
     return (
@@ -136,7 +136,7 @@ export default function OnboardingSlide() {
 
       <Animated.View
         className="flex-1 px-6"
-        style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}
+        style={animatedStyle}
       >
         <ScrollView
           className="flex-1"

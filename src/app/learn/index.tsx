@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { View, Text, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, FlatList } from "react-native";
 import { useRouter } from "expo-router";
 import Header from "../../components/Header";
 import ChallengeCard from "../../components/ChallengeCard";
@@ -28,43 +28,50 @@ export default function Learn() {
           </Text>
         </View>
       } />
-      <ScrollView className="flex-1 px-4 pt-6" contentContainerStyle={{ paddingBottom: 32 }}>
-        <Text className="font-headline text-5xl font-black tracking-tighter text-on-surface dark:text-on-surface-dark">
-          Hello, Coder!
-        </Text>
-        <Text className="font-body text-base text-text-secondary dark:text-text-secondary-dark mt-2">
-          Choose a course to begin your creative coding journey.
-        </Text>
-
-        <Text className="font-headline text-2xl font-bold text-on-surface dark:text-on-surface-dark mt-8 mb-4">
-          Available Courses
-        </Text>
-
-        {loading && (
-          <View className="items-center py-12">
-            <ActivityIndicator size="large" color="#ED225D" />
-          </View>
-        )}
-
-        {error && (
-          <View className="bg-error/10 border border-error/30 rounded-xl px-4 py-6 items-center">
-            <Text className="font-body text-sm text-error text-center">
-              Couldn&apos;t load courses: {error}
+      <FlatList
+        className="flex-1 px-4 pt-6"
+        contentContainerStyle={{ paddingBottom: 32 }}
+        ListHeaderComponent={
+          <>
+            <Text className="font-headline text-5xl font-black tracking-tighter text-on-surface dark:text-on-surface-dark">
+              Hello, Coder!
             </Text>
-          </View>
-        )}
-
-        {courses.map((course) => (
-          <View key={course.slug} className="mb-4">
+            <Text className="font-body text-base text-text-secondary dark:text-text-secondary-dark mt-2">
+              Choose a course to begin your creative coding journey.
+            </Text>
+            <Text className="font-headline text-2xl font-bold text-on-surface dark:text-on-surface-dark mt-8 mb-4">
+              Available Courses
+            </Text>
+          </>
+        }
+        data={loading ? [] : courses}
+        keyExtractor={(item) => item.slug}
+        renderItem={({ item }) => (
+          <View className="mb-4">
             <ChallengeCard
-              title={course.title}
-              moduleName={course.moduleName}
-              description={`${course.lessons.length} lesson${course.lessons.length > 1 ? "s" : ""} · ${course.description}`}
-              onContinue={() => router.push(`/learn/${course.slug}`)}
+              title={item.title}
+              moduleName={item.moduleName}
+              description={`${item.lessons.length} lesson${item.lessons.length > 1 ? "s" : ""} · ${item.description}`}
+              onContinue={() => router.push(`/learn/${item.slug}`)}
             />
           </View>
-        ))}
-      </ScrollView>
+        )}
+        ListEmptyComponent={
+          loading ? (
+            <View className="items-center py-12">
+              <Text className="font-body text-sm text-text-secondary dark:text-text-secondary-dark">
+                Loading...
+              </Text>
+            </View>
+          ) : error ? (
+            <View className="bg-error/10 border border-error/30 rounded-xl px-4 py-6 items-center">
+              <Text className="font-body text-sm text-error text-center">
+                Couldn&apos;t load courses: {error}
+              </Text>
+            </View>
+          ) : null
+        }
+      />
     </View>
   );
 }

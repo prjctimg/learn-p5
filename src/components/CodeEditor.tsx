@@ -1,4 +1,5 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
+import { StyleSheet } from "react-native";
 import { View, Text, TextInput, Pressable, ScrollView } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
@@ -10,6 +11,21 @@ interface CodeEditorProps {
 }
 
 const LINE_HEIGHT = 22;
+
+const styles = StyleSheet.create({
+  hiddenInput: {
+    fontFamily: "JetBrainsMono, monospace",
+    fontSize: 13,
+    lineHeight: LINE_HEIGHT,
+    color: "transparent",
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 10,
+  },
+});
 
 function highlightLine(line: string) {
   const tokens: { text: string; style: string }[] = [];
@@ -57,7 +73,7 @@ export default function CodeEditor({
   isRunning,
 }: CodeEditorProps) {
   const inputRef = useRef<TextInput>(null);
-  const [selection, setSelection] = useState({ start: 0, end: 0 });
+  const selectionRef = useRef({ start: 0, end: 0 });
   const lines = code.split("\n");
 
   return (
@@ -65,9 +81,9 @@ export default function CodeEditor({
       <ScrollView className="flex-1 px-4 py-3" horizontal={false}>
         <View className="flex-row">
           <View className="pr-3 mr-3 border-r border-outline-variant dark:border-outline-variant-dark">
-            {lines.map((_, i) => (
+            {lines.map((line, i) => (
               <View
-                key={i}
+                key={line || `empty-${i}`}
                 style={{ height: LINE_HEIGHT }}
                 className="flex-row items-center justify-end"
               >
@@ -83,23 +99,12 @@ export default function CodeEditor({
               ref={inputRef}
               value={code}
               onChangeText={onChange}
-              onSelectionChange={(e) => setSelection(e.nativeEvent.selection)}
+              onSelectionChange={(e) => { selectionRef.current = e.nativeEvent.selection; }}
               multiline
               autoCapitalize="none"
               autoCorrect={false}
               spellCheck={false}
-              style={{
-                fontFamily: "JetBrainsMono, monospace",
-                fontSize: 13,
-                lineHeight: LINE_HEIGHT,
-                color: "transparent",
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                zIndex: 10,
-              }}
+              style={styles.hiddenInput}
               accessibilityLabel="Code editor"
             />
 
@@ -108,7 +113,7 @@ export default function CodeEditor({
                 const tokens = highlightLine(line);
                 return (
                   <View
-                    key={i}
+                    key={`${line}-${i}`}
                     style={{ height: LINE_HEIGHT }}
                     className="flex-row items-center"
                   >
