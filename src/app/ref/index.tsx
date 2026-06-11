@@ -39,7 +39,7 @@ function SymbolDetail({ symbol }: { symbol: string }) {
             onPress={() => router.push("/ref")}
             style={({ pressed }) => [
               styles.browseButton,
-              { backgroundColor: colors.primary, borderColor: colors.outline, marginTop: 24 },
+              { backgroundColor: colors.primary, marginTop: 24 },
               pressed && { transform: [{ translateY: 2 }] },
             ]}
             accessibilityRole="button"
@@ -82,7 +82,7 @@ function SymbolDetail({ symbol }: { symbol: string }) {
             <Text style={[styles.sectionTitle, { color: colors.onSurface, marginBottom: 12 }]}>
               Syntax
             </Text>
-            <View style={[styles.syntaxBox, { backgroundColor: colors.surfaceDim, borderColor: colors.outline, marginBottom: 24 }]}>
+            <View style={[styles.syntaxBox, { backgroundColor: colors.surfaceDim, marginBottom: 24 }]}>
               <Text style={[styles.syntaxText, { color: colors.onSurface, lineHeight: 24 }]}>
                 {sym.syntax}
               </Text>
@@ -94,7 +94,7 @@ function SymbolDetail({ symbol }: { symbol: string }) {
           </>
         }
         renderItem={({ item }) => (
-          <View style={[styles.flexRow, styles.paramRow, { borderColor: colors.outlineVariant }]}>
+          <View style={[styles.flexRow, styles.paramRow]}>
             <View style={styles.flex1}>
               <Text style={[styles.paramNameText, { color: colors.onSurface }]}>
                 {item.name}
@@ -155,7 +155,6 @@ export default function Reference() {
                 style={({ pressed }) => [
                   styles.flexRow,
                   styles.symbolRow,
-                  { borderColor: colors.outlineVariant },
                   pressed && { opacity: 0.6 },
                 ]}
                 accessibilityRole="button"
@@ -188,20 +187,20 @@ const styles = StyleSheet.create({
   flex1: { flex: 1 },
   flexRow: { flexDirection: "row" },
   headlineXl: {
-    fontFamily: "SpaceGrotesk",
+    fontFamily: "JetBrainsMono",
     fontSize: 20,
     fontWeight: "700",
   },
   bodySm: {
-    fontFamily: "Inter",
-    fontSize: 13,
+    fontFamily: "JetBrainsMono",
+    fontSize: 16,
   },
   bodyBase: {
-    fontFamily: "Inter",
+    fontFamily: "JetBrainsMono",
     fontSize: 16,
   },
   bodyXs: {
-    fontFamily: "Inter",
+    fontFamily: "JetBrainsMono",
     fontSize: 11,
   },
   monoSm: {
@@ -212,17 +211,16 @@ const styles = StyleSheet.create({
   browseButton: {
     paddingHorizontal: 24,
     paddingVertical: 12,
-    borderWidth: 2,
   },
   browseButtonText: {
-    fontFamily: "SpaceGrotesk",
+    fontFamily: "JetBrainsMono",
     fontWeight: "900",
     fontSize: 13,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   symbolNameText: {
-    fontFamily: "SpaceGrotesk",
+    fontFamily: "JetBrainsMono",
     fontSize: 30,
     fontWeight: "900",
   },
@@ -232,51 +230,49 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   moduleBadgeText: {
-    fontFamily: "Inter",
+    fontFamily: "JetBrainsMono",
     fontSize: 11,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   sectionTitle: {
-    fontFamily: "SpaceGrotesk",
+    fontFamily: "JetBrainsMono",
     fontSize: 18,
     fontWeight: "700",
   },
   syntaxBox: {
-    borderWidth: 2,
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
   syntaxText: {
     fontFamily: "JetBrainsMono",
-    fontSize: 13,
+    fontSize: 16,
   },
   paramRow: {
-    borderBottomWidth: 1,
     paddingVertical: 12,
   },
   paramNameText: {
     fontFamily: "JetBrainsMono",
-    fontSize: 13,
+    fontSize: 16,
     fontWeight: "700",
   },
   paramDescText: {
-    fontFamily: "Inter",
-    fontSize: 13,
+    fontFamily: "JetBrainsMono",
+    fontSize: 16,
   },
   paramTypeText: {
-    fontFamily: "Inter",
+    fontFamily: "JetBrainsMono",
     fontSize: 11,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   refListTitle: {
-    fontFamily: "SpaceGrotesk",
+    fontFamily: "JetBrainsMono",
     fontSize: 24,
     fontWeight: "700",
   },
   moduleGroupTitle: {
-    fontFamily: "SpaceGrotesk",
+    fontFamily: "JetBrainsMono",
     fontSize: 18,
     fontWeight: "700",
     textTransform: "uppercase",
@@ -285,6 +281,5 @@ const styles = StyleSheet.create({
   symbolRow: {
     alignItems: "center",
     paddingVertical: 12,
-    borderBottomWidth: 1,
   },
 });

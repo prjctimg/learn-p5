@@ -5,6 +5,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Header from "../../components/Header";
 import { useThemeContext } from "../../components/ThemeProvider";
 import { Colors } from "../../constants/Colors";
+import { APP_VERSION } from "../../constants/Version";
 
 const faqs = [
   {
@@ -43,19 +44,19 @@ const createStyles = (colors: Record<string, string>) =>
       paddingTop: 24,
     },
     heading: {
-      fontFamily: "SpaceGrotesk",
+      fontFamily: "JetBrainsMono",
       fontSize: 18,
       fontWeight: "700",
       color: colors.onSurface,
     },
     subtitle: {
-      fontFamily: "Inter",
-      fontSize: 13,
+      fontFamily: "JetBrainsMono",
+      fontSize: 16,
       color: colors.textSecondary,
       marginTop: 4,
     },
     sectionLabel: {
-      fontFamily: "Inter",
+      fontFamily: "JetBrainsMono",
       fontSize: 11,
       textTransform: "uppercase",
       letterSpacing: 1,
@@ -67,8 +68,6 @@ const createStyles = (colors: Record<string, string>) =>
       backgroundColor: colors.surfaceDim,
       borderRadius: 12,
       overflow: "hidden",
-      borderWidth: 2,
-      borderColor: colors.outline,
       paddingHorizontal: 16,
       paddingVertical: 20,
     },
@@ -84,13 +83,13 @@ const createStyles = (colors: Record<string, string>) =>
       flex: 1,
     },
     cardTitle: {
-      fontFamily: "SpaceGrotesk",
+      fontFamily: "JetBrainsMono",
       fontSize: 16,
       fontWeight: "700",
       color: colors.onSurface,
     },
     cardSubtitle: {
-      fontFamily: "Inter",
+      fontFamily: "JetBrainsMono",
       fontSize: 11,
       color: colors.textSecondary,
       marginTop: 2,
@@ -99,8 +98,6 @@ const createStyles = (colors: Record<string, string>) =>
       backgroundColor: colors.surfaceDim,
       borderRadius: 12,
       overflow: "hidden",
-      borderWidth: 2,
-      borderColor: colors.outline,
     },
     faqItem: {
       paddingHorizontal: 16,
@@ -112,16 +109,16 @@ const createStyles = (colors: Record<string, string>) =>
       justifyContent: "space-between",
     },
     faqQuestion: {
-      fontFamily: "SpaceGrotesk",
-      fontSize: 13,
+      fontFamily: "JetBrainsMono",
+      fontSize: 16,
       fontWeight: "700",
       color: colors.onSurface,
       flex: 1,
       paddingRight: 8,
     },
     faqAnswer: {
-      fontFamily: "Inter",
-      fontSize: 13,
+      fontFamily: "JetBrainsMono",
+      fontSize: 16,
       color: colors.textSecondary,
       marginTop: 12,
       lineHeight: 20,
@@ -136,7 +133,7 @@ const createStyles = (colors: Record<string, string>) =>
       color: colors.textSecondary,
     },
     footerInfo: {
-      fontFamily: "Inter",
+      fontFamily: "JetBrainsMono",
       fontSize: 11,
       color: colors.textSecondary,
       marginTop: 4,
@@ -207,13 +204,7 @@ export default function Support() {
               <Pressable
                 key={faq.q}
                 onPress={() => setExpandedFaq(isExpanded ? null : faq.q)}
-                style={[
-                  styles.faqItem,
-                  i < faqs.length - 1 && {
-                    borderBottomWidth: 1,
-                    borderColor: colors.outline + "33",
-                  },
-                ]}
+                style={styles.faqItem}
                 accessibilityRole="button"
                 accessibilityLabel={faq.q}
               >
@@ -239,7 +230,7 @@ export default function Support() {
 
         <View style={styles.footer}>
           <Text style={styles.footerVersion}>
-            Learn p5.js v0.2.5
+            Learn p5.js {APP_VERSION}
           </Text>
           <Text style={styles.footerInfo}>
             Built with Expo & React Native

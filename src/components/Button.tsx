@@ -34,13 +34,9 @@ export default function Button({
         variant === "primary"
           ? {
               backgroundColor: colors.primary,
-              borderWidth: 2,
-              borderColor: colors.outline,
             }
           : {
-              backgroundColor: colorScheme === "dark" ? "transparent" : "#FFFFFF",
-              borderWidth: 2,
-              borderColor: colors.primary,
+              backgroundColor: colorScheme === "dark" ? colors.surfaceContainerHigh : "#FFFFFF",
             },
         pressed && !disabled && { opacity: 0.9 },
         pressed && variant === "primary" && {
@@ -76,14 +72,14 @@ const styles = StyleSheet.create({
     minHeight: 52,
   },
   primaryText: {
-    fontFamily: "SpaceGrotesk",
+    fontFamily: "JetBrainsMono",
     fontWeight: "900",
     fontSize: 20,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   outlineText: {
-    fontFamily: "SpaceGrotesk",
+    fontFamily: "JetBrainsMono",
     fontWeight: "700",
     fontSize: 20,
     textTransform: "uppercase",
