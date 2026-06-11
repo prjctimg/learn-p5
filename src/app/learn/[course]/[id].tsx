@@ -10,10 +10,10 @@ import { Colors } from "../../../constants/Colors";
 import ExerciseDescription from "../../../components/ExerciseDescription";
 import CodeEditor from "../../../components/CodeEditor";
 import ProgrammingKeyboard from "../../../components/ProgrammingKeyboard";
-import BottomNavBar from "../../../components/BottomNavBar";
 import { buildSketchHTML, DEFAULT_SKETCH } from "../../../utils/sketchTemplate";
 import { loadExercise } from "../../../utils/courseLoader";
 import { Lesson } from "../../../data/types";
+import { P5_FUNCTION_NAMES } from "../../../data/p5Symbols";
 
 interface ExerciseState {
   exercise: Lesson | null;
@@ -103,15 +103,15 @@ export default function Exercise() {
           paddingHorizontal: 24,
         },
         notFoundTitle: {
-          fontFamily: "SpaceGrotesk",
+          fontFamily: "JetBrainsMono",
           fontSize: 20,
           fontWeight: "700",
           color: colors.onSurface,
           marginTop: 16,
         },
         notFoundSubtitle: {
-          fontFamily: "Inter",
-          fontSize: 13,
+          fontFamily: "JetBrainsMono",
+          fontSize: 16,
           color: colors.textSecondary,
           marginTop: 8,
           textAlign: "center",
@@ -123,14 +123,12 @@ export default function Exercise() {
           backgroundColor: colors.primary,
           paddingHorizontal: 24,
           paddingVertical: 12,
-          borderWidth: 2,
-          borderColor: colors.outline,
         },
         backButtonPressed: {
           transform: [{ translateY: 2 }],
         },
         backButtonText: {
-          fontFamily: "SpaceGrotesk",
+          fontFamily: "JetBrainsMono",
           fontWeight: "900",
           fontSize: 13,
           textTransform: "uppercase",
@@ -147,14 +145,12 @@ export default function Exercise() {
           paddingHorizontal: 16,
           paddingBottom: 12,
           backgroundColor: colors.surface,
-          borderBottomWidth: 1,
-          borderBottomColor: colors.outlineVariant,
         },
         menuButton: {
           padding: 8,
         },
         logoText: {
-          fontFamily: "SpaceGrotesk",
+          fontFamily: "JetBrainsMono",
           fontSize: 20,
           fontWeight: "700",
           color: colors.primary,
@@ -170,15 +166,11 @@ export default function Exercise() {
         },
         splitContainer: {
           flexDirection: "row",
-          borderBottomWidth: 1,
-          borderBottomColor: colors.outlineVariant,
           backgroundColor: colors.surface,
         },
         targetSolutionColumn: {
           flex: 1,
           flexDirection: "column",
-          borderRightWidth: 1,
-          borderRightColor: colors.outlineVariant,
         },
         panelHeader: {
           height: 24,
@@ -212,8 +204,7 @@ export default function Exercise() {
           width: 48,
           height: 48,
           borderRadius: 9999,
-          borderWidth: 2,
-          borderColor: colors.primaryContainer,
+          backgroundColor: colors.primaryContainer,
           opacity: 0.5,
         },
         yourOutputColumn: {
@@ -231,8 +222,7 @@ export default function Exercise() {
           width: 40,
           height: 40,
           borderRadius: 9999,
-          borderWidth: 2,
-          borderColor: colors.primary,
+          backgroundColor: colors.primary,
           opacity: 0.5,
         },
       }),
@@ -260,12 +250,18 @@ export default function Exercise() {
       if (counter === runCounter.current) {
         dispatch({ type: "RUN_DONE" });
       }
-    }, 600);
+    }, 2000);
   };
 
   const handleInsert = (text: string) => {
     dispatch({ type: "APPEND_CODE", text });
   };
+
+  const exerciseSymbols = useMemo(() => {
+    if (!state.exercise) return [];
+    const code = (state.exercise.startingCode + " " + (state.exercise.solution ?? "")).toLowerCase();
+    return P5_FUNCTION_NAMES.filter((fn) => code.includes(fn.toLowerCase()));
+  }, [state.exercise]);
 
   if (state.loading) {
     return (
@@ -350,6 +346,7 @@ export default function Exercise() {
                   javaScriptEnabled
                   domStorageEnabled
                   originWhitelist={["*"]}
+                  onError={(_e) => console.warn("Solution WebView error")}
                 />
               ) : (
                 <View style={styles.solutionPlaceholder} />
@@ -373,6 +370,7 @@ export default function Exercise() {
                   javaScriptEnabled
                   domStorageEnabled
                   originWhitelist={["*"]}
+                  onError={(_e) => console.warn("User WebView error")}
                 />
               ) : (
                 <View style={styles.outputPlaceholder} />
@@ -388,9 +386,7 @@ export default function Exercise() {
           isRunning={state.isRunning}
         />
 
-        <ProgrammingKeyboard onInsert={handleInsert} />
-
-        <BottomNavBar />
+        <ProgrammingKeyboard onInsert={handleInsert} exerciseSymbols={exerciseSymbols} />
       </View>
     </View>
   );

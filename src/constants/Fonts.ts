@@ -1,7 +1,7 @@
 export const Fonts = {
-  headline: "SpaceGrotesk",
-  display: "SpaceGrotesk",
-  body: "Inter",
-  label: "Inter",
+  headline: "JetBrainsMono",
+  display: "JetBrainsMono",
+  body: "JetBrainsMono",
+  label: "JetBrainsMono",
   mono: "JetBrainsMono",
 } as const;

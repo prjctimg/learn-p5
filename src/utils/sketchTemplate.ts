@@ -27,5 +27,5 @@ export const DEFAULT_SKETCH = `function setup() {
 function draw() {
   background(20);
   fill(255, 178, 187);
-  circle(mouseX, mouseY, 50);
+  circle(200, 200, 50);
 }`;

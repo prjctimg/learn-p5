@@ -75,12 +75,12 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   title: {
-    fontFamily: "SpaceGrotesk",
+    fontFamily: "JetBrainsMono",
     fontSize: 20,
     fontWeight: "700",
   },
   subtitle: {
-    fontFamily: "Inter",
+    fontFamily: "JetBrainsMono",
     fontSize: 11,
     marginTop: -2,
   },

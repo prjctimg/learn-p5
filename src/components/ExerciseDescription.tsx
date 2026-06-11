@@ -67,7 +67,7 @@ export default function ExerciseDescription({
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.surfaceContainer, borderBottomColor: colors.outlineVariant }]}>
+    <View style={[styles.container, { backgroundColor: colors.surfaceContainer }]}>
       <View style={styles.row}>
         <View style={styles.content}>
           <Text style={[styles.title, { color: colors.primary }]}>
@@ -110,7 +110,6 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderBottomWidth: 1,
   },
   row: {
     flexDirection: "row",
@@ -129,7 +128,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   instruction: {
-    fontSize: 13,
+    fontSize: 16,
     lineHeight: 24,
   },
   symbol: {
