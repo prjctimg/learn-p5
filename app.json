@@ -29,13 +29,17 @@
         "expo-build-properties",
         {
           "android": {
-            "abiFilters": ["arm64-v8a", "armeabi-v7a"],
+            "abiFilters": [
+              "arm64-v8a",
+              "armeabi-v7a"
+            ],
             "ndkVersion": "27.1.12297006",
             "useLegacyPackaging": true,
             "enableProguardInReleaseBuilds": true
           }
         }
-      ]
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,
