@@ -47,9 +47,10 @@ const singleSymbols = [
 interface ProgrammingKeyboardProps {
   onInsert: (text: string) => void;
   exerciseSymbols?: string[];
+  onToggleKeyboard?: () => void;
 }
 
-export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [] }: ProgrammingKeyboardProps) {
+export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], onToggleKeyboard }: ProgrammingKeyboardProps) {
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
   const [hintType, setHintType] = useState<"string" | "array" | null>(null);
@@ -90,9 +91,17 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [] }: 
         style={styles.symbolsRow}
         contentContainerStyle={styles.symbolsContent}
       >
-        <View style={[styles.keyboardIcon, { backgroundColor: colors.primaryContainer + "33" }]}>
+        <Pressable
+          onPress={onToggleKeyboard}
+          style={({ pressed }) => [
+            styles.keyboardIcon,
+            { backgroundColor: pressed ? colors.primaryContainer : colors.primaryContainer + "33" },
+          ]}
+          accessibilityRole="button"
+          accessibilityLabel="Toggle system keyboard"
+        >
           <MaterialCommunityIcons name="keyboard-outline" size={20} color="#ED225D" />
-        </View>
+        </Pressable>
         {pairedSymbols.map((pair) => {
           const hinted = pair.hintTrigger && pair.hintTrigger === hintType;
           return (

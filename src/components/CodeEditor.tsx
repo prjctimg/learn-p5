@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, type RefObject } from "react";
 import { StyleSheet, View, Text, TextInput, Pressable, ScrollView } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useThemeContext } from "./ThemeProvider";
@@ -9,63 +9,86 @@ interface CodeEditorProps {
   onChange: (code: string) => void;
   onRun: () => void;
   isRunning: boolean;
+  inputRef?: RefObject<TextInput | null>;
 }
 
 const LINE_HEIGHT = 22;
 
 type SyntaxColorKey = "textSecondary" | "primary" | "onSurface" | "primaryContainer" | "primaryFixedDim";
 
-function highlightLine(line: string) {
-  const tokens: { text: string; colorKey: SyntaxColorKey | "" }[] = [];
+const INLINE_COMMENT_RE = /(\/\/.*)/;
+const KEYWORD_RE = /\b(function|if|else|for|while|return|let|const|var|new|this|class)\b/g;
+const P5_FUNC_RE = /\b(setup|draw|createCanvas|background|fill|stroke|noFill|noStroke|strokeWeight|circle|ellipse|rect|line|point|triangle|quad|arc|text|textSize|textAlign|mouseX|mouseY|mousePressed|keyPressed|width|height|frameCount|random|map|sin|cos|PI|TWO_PI|HALF_PI|push|pop|translate|rotate|scale|colorMode|color|red|green|blue|alpha|lerpColor|dist|constrain|millis|second|minute|hour|day|month|year)\b/g;
+const NUMBER_RE = /\b\d+(\.\d+)?\b/g;
+const STRING_RE = /("[^"]*"|'[^']*'|`[^`]*`)/g;
 
-  if (line.trim().startsWith("//")) {
-    tokens.push({ text: line, colorKey: "textSecondary" });
-    return tokens;
-  }
+interface Token {
+  text: string;
+  colorKey: SyntaxColorKey | "";
+}
 
-  const patterns: [RegExp, SyntaxColorKey][] = [
-    [/\b(function|if|else|for|while|return|let|const|var|new|this|class)\b/g, "primary"],
-    [/\b(setup|draw|createCanvas|background|fill|stroke|noFill|noStroke|strokeWeight|circle|ellipse|rect|line|point|triangle|quad|arc|text|textSize|textAlign|mouseX|mouseY|mousePressed|keyPressed|width|height|frameCount|random|map|sin|cos|PI|TWO_PI|HALF_PI|push|pop|translate|rotate|scale|colorMode|color|red|green|blue|alpha|lerpColor|dist|constrain|millis|second|minute|hour|day|month|year)\b/g, "onSurface"],
-    [/\b\d+(\.\d+)?\b/g, "primaryContainer"],
-    [/("[^"]*"|'[^']*'|`[^`]*`)/g, "primaryFixedDim"],
-  ];
-
+function tokenizeCode(codePart: string): Token[] {
   const allMatches: { index: number; text: string; colorKey: SyntaxColorKey }[] = [];
+  const patterns: [RegExp, SyntaxColorKey][] = [
+    [KEYWORD_RE, "primary"],
+    [P5_FUNC_RE, "onSurface"],
+    [NUMBER_RE, "primaryContainer"],
+    [STRING_RE, "primaryFixedDim"],
+  ];
   for (const [re, colorKey] of patterns) {
+    re.lastIndex = 0;
     let match;
-    while ((match = re.exec(line)) !== null) {
+    while ((match = re.exec(codePart)) !== null) {
       allMatches.push({ index: match.index, text: match[0], colorKey });
     }
   }
   allMatches.sort((a, b) => a.index - b.index);
 
+  const tokens: Token[] = [];
   let lastEnd = 0;
   for (const m of allMatches) {
     if (m.index < lastEnd) continue;
     if (m.index > lastEnd) {
-      tokens.push({ text: line.slice(lastEnd, m.index), colorKey: "" });
+      tokens.push({ text: codePart.slice(lastEnd, m.index), colorKey: "" });
     }
     tokens.push({ text: m.text, colorKey: m.colorKey });
     lastEnd = m.index + m.text.length;
   }
-  if (lastEnd < line.length) {
-    tokens.push({ text: line.slice(lastEnd), colorKey: "" });
+  if (lastEnd < codePart.length) {
+    tokens.push({ text: codePart.slice(lastEnd), colorKey: "" });
   }
   return tokens;
 }
 
+function highlightLine(line: string): Token[] {
+  const trimmed = line.trim();
+  if (trimmed.startsWith("//")) {
+    return [{ text: line, colorKey: "textSecondary" }];
+  }
+
+  const commentMatch = line.match(INLINE_COMMENT_RE);
+  if (commentMatch && commentMatch.index !== undefined && commentMatch.index > 0) {
+    const codePart = line.slice(0, commentMatch.index);
+    const commentPart = commentMatch[1];
+    return [
+      ...tokenizeCode(codePart),
+      { text: commentPart, colorKey: "textSecondary" },
+    ];
+  }
+
+  return tokenizeCode(line);
+}
+
 const createStyles = (colors: Record<string, string>) =>
   StyleSheet.create({
-    hiddenInput: {
-      fontFamily: "JetBrainsMono, monospace",
+    input: {
+      fontFamily: "JetBrainsMono",
       fontSize: 15,
       lineHeight: LINE_HEIGHT,
       color: "transparent",
-      position: "absolute",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
+      paddingHorizontal: 0,
+      paddingVertical: 0,
+      margin: 0,
       zIndex: 10,
     },
     container: {
@@ -77,8 +100,10 @@ const createStyles = (colors: Record<string, string>) =>
       paddingHorizontal: 16,
       paddingVertical: 12,
     },
-    flexRow: {
+    contentWrapper: {
+      position: "relative",
       flexDirection: "row",
+      minHeight: "100%",
     },
     gutter: {
       paddingRight: 12,
@@ -88,6 +113,7 @@ const createStyles = (colors: Record<string, string>) =>
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "flex-end",
+      height: LINE_HEIGHT,
     },
     gutterNumber: {
       fontSize: 11,
@@ -96,20 +122,26 @@ const createStyles = (colors: Record<string, string>) =>
       opacity: 0.4,
       textAlign: "right",
     },
-    codeContainer: {
+    codeArea: {
       flex: 1,
+      position: "relative",
     },
     overlay: {
-      paddingVertical: 0,
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
     },
     codeLine: {
       flexDirection: "row",
       alignItems: "center",
+      height: LINE_HEIGHT,
     },
     codeText: {
       fontFamily: "JetBrainsMono",
       fontSize: 15,
-      lineHeight: 13,
+      lineHeight: LINE_HEIGHT,
     },
     runButton: {
       position: "absolute",
@@ -137,9 +169,10 @@ export default function CodeEditor({
   onChange,
   onRun,
   isRunning,
+  inputRef: externalRef,
 }: CodeEditorProps) {
-  const inputRef = useRef<TextInput>(null);
-  const selectionRef = useRef({ start: 0, end: 0 });
+  const internalRef = useRef<TextInput>(null);
+  const inputRef = externalRef ?? internalRef;
   const lines = code.split("\n");
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
@@ -155,34 +188,29 @@ export default function CodeEditor({
 
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.scrollView} horizontal={false}>
-        <View style={styles.flexRow}>
+      <ScrollView style={styles.scrollView} horizontal={false} keyboardShouldPersistTaps="handled">
+        <View style={styles.contentWrapper}>
           <View style={styles.gutter}>
             {lines.map((line, i) => (
-              <View
-                key={line || `empty-${i}`}
-                style={{ height: LINE_HEIGHT }}
-              >
-                <View style={styles.gutterLine}>
-                  <Text style={styles.gutterNumber}>
-                    {i + 1}
-                  </Text>
-                </View>
+              <View key={line || `empty-${i}`} style={styles.gutterLine}>
+                <Text style={styles.gutterNumber}>
+                  {i + 1}
+                </Text>
               </View>
             ))}
           </View>
 
-          <View style={styles.codeContainer}>
+          <View style={styles.codeArea}>
             <TextInput
               ref={inputRef}
               value={code}
               onChangeText={onChange}
-              onSelectionChange={(e) => { selectionRef.current = e.nativeEvent.selection; }}
               multiline
               autoCapitalize="none"
               autoCorrect={false}
               spellCheck={false}
-              style={styles.hiddenInput}
+              showSoftInputOnFocus={false}
+              style={styles.input}
               accessibilityLabel="Code editor"
             />
 
@@ -190,29 +218,24 @@ export default function CodeEditor({
               {lines.map((line, i) => {
                 const tokens = highlightLine(line);
                 return (
-                  <View
-                    key={`${line}-${i}`}
-                    style={{ height: LINE_HEIGHT }}
-                  >
-                    <View style={styles.codeLine}>
-                      {tokens.length === 0 ? (
-                        <Text style={[styles.codeText, { color: colors.onSurface }]}>
-                          {" "}
+                  <View key={`${line}-${i}`} style={styles.codeLine}>
+                    {tokens.length === 0 ? (
+                      <Text style={[styles.codeText, { color: colors.onSurface }]}>
+                        {" "}
+                      </Text>
+                    ) : (
+                      tokens.map((t, j) => (
+                        <Text
+                          key={j}
+                          style={[
+                            styles.codeText,
+                            { color: t.colorKey ? syntaxColors[t.colorKey] : colors.onSurface },
+                          ]}
+                        >
+                          {t.text}
                         </Text>
-                      ) : (
-                        tokens.map((t, j) => (
-                          <Text
-                            key={j}
-                            style={[
-                              styles.codeText,
-                              { color: t.colorKey ? syntaxColors[t.colorKey] : colors.onSurface },
-                            ]}
-                          >
-                            {t.text}
-                          </Text>
-                        ))
-                      )}
-                    </View>
+                      ))
+                    )}
                   </View>
                 );
               })}
