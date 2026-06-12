@@ -23,6 +23,7 @@ interface ExerciseState {
   userHTML: string;
   isRunning: boolean;
   showSolution: boolean;
+  selectedTab: "solution" | "output";
 }
 
 type ExerciseAction =
@@ -31,7 +32,8 @@ type ExerciseAction =
   | { type: "SET_CODE"; code: string }
   | { type: "APPEND_CODE"; text: string }
   | { type: "RUN_START" }
-  | { type: "RUN_DONE" };
+  | { type: "RUN_DONE" }
+  | { type: "SET_TAB"; tab: "solution" | "output" };
 
 function exerciseReducer(state: ExerciseState, action: ExerciseAction): ExerciseState {
   switch (action.type) {
@@ -58,6 +60,8 @@ function exerciseReducer(state: ExerciseState, action: ExerciseAction): Exercise
       };
     case "RUN_DONE":
       return { ...state, isRunning: false };
+    case "SET_TAB":
+      return { ...state, selectedTab: action.tab };
     default:
       return state;
   }
@@ -71,6 +75,7 @@ const INITIAL_STATE: ExerciseState = {
   userHTML: "",
   isRunning: false,
   showSolution: false,
+  selectedTab: "output",
 };
 
 export default function Exercise() {
@@ -175,38 +180,35 @@ export default function Exercise() {
         codeAreaContainer: {
           flex: 1,
         },
-        splitContainer: {
+        tabBar: {
           flexDirection: "row",
           backgroundColor: colors.surface,
         },
-        targetSolutionColumn: {
+        tabButton: {
           flex: 1,
-          flexDirection: "column",
-        },
-        panelHeader: {
-          height: 24,
-          backgroundColor: colors.surfaceContainerHigh,
-          paddingHorizontal: 8,
-          flexDirection: "row",
+          height: 28,
+          justifyContent: "center",
           alignItems: "center",
+          backgroundColor: colors.surfaceContainerHigh,
         },
-        targetHeaderText: {
+        tabButtonActive: {
+          backgroundColor: colors.surface,
+        },
+        tabButtonText: {
           fontSize: 9,
           fontWeight: "700",
           textTransform: "uppercase",
           letterSpacing: 1,
-          color: colors.onSurfaceVariant,
         },
-        yourOutputHeaderText: {
-          fontSize: 9,
-          fontWeight: "700",
-          textTransform: "uppercase",
-          letterSpacing: 1,
+        tabButtonTextActive: {
           color: colors.primary,
         },
-        targetPreview: {
+        tabButtonTextInactive: {
+          color: colors.onSurfaceVariant,
+        },
+        previewContainer: {
           flex: 1,
-          backgroundColor: colors.surfaceContainerLowest,
+          backgroundColor: "#000000",
           alignItems: "center",
           justifyContent: "center",
           overflow: "hidden",
@@ -217,17 +219,6 @@ export default function Exercise() {
           borderRadius: 9999,
           backgroundColor: colors.primaryContainer,
           opacity: 0.5,
-        },
-        yourOutputColumn: {
-          flex: 1,
-          flexDirection: "column",
-        },
-        yourOutputPreview: {
-          flex: 1,
-          backgroundColor: "#000000",
-          alignItems: "center",
-          justifyContent: "center",
-          overflow: "hidden",
         },
         outputPlaceholder: {
           width: 40,
@@ -340,53 +331,86 @@ export default function Exercise() {
           exerciseNumber={parseInt(id?.replace("exercise-", "") ?? "1", 10)}
         />
 
-        <View style={[styles.splitContainer, { height: 260 }]}>
-          <View style={styles.targetSolutionColumn}>
-            <View style={styles.panelHeader}>
-              <Text style={styles.targetHeaderText}>
-                Target Solution
-              </Text>
-            </View>
-            <View style={styles.targetPreview}>
-              {state.solutionHTML && state.showSolution ? (
-                <WebView
-                  source={{ html: state.solutionHTML }}
-                  style={{ flex: 1, width: "100%" }}
-                  scrollEnabled={false}
-                  bounces={false}
-                  javaScriptEnabled
-                  domStorageEnabled
-                  originWhitelist={["*"]}
-                  onError={(_e) => console.warn("Solution WebView error")}
-                />
-              ) : (
-                <View style={styles.solutionPlaceholder} />
-              )}
-            </View>
-          </View>
-
-          <View style={styles.yourOutputColumn}>
-            <View style={styles.panelHeader}>
-              <Text style={styles.yourOutputHeaderText}>
+        <View style={{ height: 260 }}>
+          <View style={styles.tabBar}>
+            {state.showSolution && (
+              <Pressable
+                onPress={() => dispatch({ type: "SET_TAB", tab: "solution" })}
+                style={({ pressed }) => [
+                  styles.tabButton,
+                  state.selectedTab === "solution" && styles.tabButtonActive,
+                  pressed && { opacity: 0.8 },
+                ]}
+                accessibilityRole="button"
+                accessibilityLabel="Show target solution"
+              >
+                <Text
+                  style={[
+                    styles.tabButtonText,
+                    state.selectedTab === "solution"
+                      ? styles.tabButtonTextActive
+                      : styles.tabButtonTextInactive,
+                  ]}
+                >
+                  Target Solution
+                </Text>
+              </Pressable>
+            )}
+            <Pressable
+              onPress={() => dispatch({ type: "SET_TAB", tab: "output" })}
+              style={({ pressed }) => [
+                styles.tabButton,
+                state.selectedTab === "output" && styles.tabButtonActive,
+                pressed && { opacity: 0.8 },
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel="Show your output"
+            >
+              <Text
+                style={[
+                  styles.tabButtonText,
+                  state.selectedTab === "output"
+                    ? styles.tabButtonTextActive
+                    : styles.tabButtonTextInactive,
+                ]}
+              >
                 Your Output
               </Text>
-            </View>
-            <View style={styles.yourOutputPreview}>
-              {state.userHTML ? (
-                <WebView
-                  source={{ html: state.userHTML }}
-                  style={{ flex: 1, width: "100%" }}
-                  scrollEnabled={false}
-                  bounces={false}
-                  javaScriptEnabled
-                  domStorageEnabled
-                  originWhitelist={["*"]}
-                  onError={(_e) => console.warn("User WebView error")}
-                />
-              ) : (
-                <View style={styles.outputPlaceholder} />
-              )}
-            </View>
+            </Pressable>
+          </View>
+
+          <View style={styles.previewContainer}>
+            {state.selectedTab === "solution" && state.solutionHTML && state.showSolution ? (
+              <WebView
+                source={{ html: state.solutionHTML }}
+                style={{ flex: 1, width: "100%" }}
+                scrollEnabled={false}
+                bounces={false}
+                javaScriptEnabled
+                domStorageEnabled
+                originWhitelist={["*"]}
+                onError={(_e) => console.warn("Solution WebView error")}
+              />
+            ) : state.selectedTab === "output" && state.userHTML ? (
+              <WebView
+                source={{ html: state.userHTML }}
+                style={{ flex: 1, width: "100%" }}
+                scrollEnabled={false}
+                bounces={false}
+                javaScriptEnabled
+                domStorageEnabled
+                originWhitelist={["*"]}
+                onError={(_e) => console.warn("User WebView error")}
+              />
+            ) : (
+              <View
+                style={
+                  state.selectedTab === "solution"
+                    ? styles.solutionPlaceholder
+                    : styles.outputPlaceholder
+                }
+              />
+            )}
           </View>
         </View>
 
