@@ -1,5 +1,5 @@
 import { useRef, useEffect, useReducer, useMemo, useCallback } from "react";
-import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
+import { View, Text, Pressable, StyleSheet } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -8,7 +8,7 @@ import { useDrawerContext } from "../../../contexts/DrawerContext";
 import { useThemeContext } from "../../../components/ThemeProvider";
 import { Colors } from "../../../constants/Colors";
 import ExerciseDescription from "../../../components/ExerciseDescription";
-import CodeEditor from "../../../components/CodeEditor";
+import CodeEditor, { type CodeEditorHandle } from "../../../components/CodeEditor";
 import ProgrammingKeyboard from "../../../components/ProgrammingKeyboard";
 import { buildSketchHTML, DEFAULT_SKETCH } from "../../../utils/sketchTemplate";
 import { loadExercise } from "../../../utils/courseLoader";
@@ -30,7 +30,7 @@ type ExerciseAction =
   | { type: "LOAD_START" }
   | { type: "LOAD_DONE"; exercise: Lesson | null }
   | { type: "SET_CODE"; code: string }
-  | { type: "APPEND_CODE"; text: string }
+  | { type: "APPEND_CODE"; text: string; cursorOffset?: number }
   | { type: "RUN_START" }
   | { type: "RUN_DONE" }
   | { type: "SET_TAB"; tab: "solution" | "output" };
@@ -87,17 +87,7 @@ export default function Exercise() {
   const runCounter = useRef(0);
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
-  const systemKeyboardRef = useRef(false);
-  const codeInputRef = useRef<TextInput>(null);
-
-  const toggleSystemKeyboard = useCallback(() => {
-    systemKeyboardRef.current = !systemKeyboardRef.current;
-    if (systemKeyboardRef.current) {
-      setTimeout(() => codeInputRef.current?.focus(), 100);
-    } else {
-      codeInputRef.current?.blur();
-    }
-  }, []);
+  const codeEditorRef = useRef<CodeEditorHandle>(null);
 
   const styles = useMemo(
     () =>
@@ -181,11 +171,10 @@ export default function Exercise() {
           flex: 1,
         },
         tabBar: {
-          flexDirection: "row",
+          flexDirection: "column",
           backgroundColor: colors.surface,
         },
         tabButton: {
-          flex: 1,
           height: 28,
           justifyContent: "center",
           alignItems: "center",
@@ -255,8 +244,8 @@ export default function Exercise() {
     }, 2000);
   };
 
-  const handleInsert = (text: string) => {
-    dispatch({ type: "APPEND_CODE", text });
+  const handleInsert = (text: string, cursorOffset?: number) => {
+    codeEditorRef.current?.insertText(text, cursorOffset);
   };
 
   const exerciseSymbols = useMemo(() => {
@@ -415,17 +404,16 @@ export default function Exercise() {
         </View>
 
         <CodeEditor
+          ref={codeEditorRef}
           code={state.code}
           onChange={(c) => dispatch({ type: "SET_CODE", code: c })}
           onRun={handleRun}
           isRunning={state.isRunning}
-          inputRef={codeInputRef}
         />
 
         <ProgrammingKeyboard
           onInsert={handleInsert}
           exerciseSymbols={exerciseSymbols}
-          onToggleKeyboard={toggleSystemKeyboard}
         />
       </View>
     </View>

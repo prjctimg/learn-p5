@@ -13,15 +13,15 @@ interface P5FunctionDef {
 const p5Functions: P5FunctionDef[] = [
   { label: "setup", insert: "function setup() {\n  \n}", paramTypes: [] },
   { label: "draw", insert: "function draw() {\n  \n}", paramTypes: [] },
-  { label: "createCanvas", insert: "createCanvas(400, 400)", paramTypes: ["number", "number"] },
-  { label: "background", insert: "background(220)", paramTypes: ["number", "string"] },
-  { label: "fill", insert: "fill(255, 255, 255)", paramTypes: ["number", "string"] },
-  { label: "circle", insert: "circle(200, 200, 50)", paramTypes: ["number", "number", "number"] },
-  { label: "stroke", insert: "stroke(0)", paramTypes: ["number", "string"] },
-  { label: "strokeWeight", insert: "strokeWeight(4)", paramTypes: ["number"] },
-  { label: "line", insert: "line(0, 0, 400, 400)", paramTypes: ["number", "number", "number", "number"] },
-  { label: "rect", insert: "rect(100, 100, 200, 200)", paramTypes: ["number", "number", "number", "number"] },
-  { label: "ellipse", insert: "ellipse(200, 200, 300, 150)", paramTypes: ["number", "number", "number", "number"] },
+  { label: "createCanvas", insert: "createCanvas()", paramTypes: ["number", "number"] },
+  { label: "background", insert: "background()", paramTypes: ["number", "string"] },
+  { label: "fill", insert: "fill()", paramTypes: ["number", "string"] },
+  { label: "circle", insert: "circle()", paramTypes: ["number", "number", "number"] },
+  { label: "stroke", insert: "stroke()", paramTypes: ["number", "string"] },
+  { label: "strokeWeight", insert: "strokeWeight()", paramTypes: ["number"] },
+  { label: "line", insert: "line()", paramTypes: ["number", "number", "number", "number"] },
+  { label: "rect", insert: "rect()", paramTypes: ["number", "number", "number", "number"] },
+  { label: "ellipse", insert: "ellipse()", paramTypes: ["number", "number", "number", "number"] },
   { label: "noStroke", insert: "noStroke()", paramTypes: [] },
 ];
 
@@ -45,7 +45,7 @@ const singleSymbols = [
 ];
 
 interface ProgrammingKeyboardProps {
-  onInsert: (text: string) => void;
+  onInsert: (text: string, cursorOffset?: number) => void;
   exerciseSymbols?: string[];
   onToggleKeyboard?: () => void;
 }
@@ -56,7 +56,9 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
   const [hintType, setHintType] = useState<"string" | "array" | null>(null);
 
   const handleFunctionPress = useCallback((fn: P5FunctionDef) => {
-    onInsert(fn.insert);
+    const parenIndex = fn.insert.indexOf("()");
+    const cursorOffset = parenIndex >= 0 ? parenIndex + 1 : undefined;
+    onInsert(fn.insert, cursorOffset);
     const hasString = fn.paramTypes.some((p) => p === "string");
     const hasArray = fn.paramTypes.some((p) => p === "array");
     if (hasString) {
@@ -75,7 +77,7 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
 
   const handlePairedPress = useCallback((pair: PairedSymbol) => {
     setHintType(null);
-    onInsert(pair.open + pair.close);
+    onInsert(pair.open + pair.close, 1);
   }, [onInsert]);
 
   const handleExercisePress = useCallback((sym: string) => {

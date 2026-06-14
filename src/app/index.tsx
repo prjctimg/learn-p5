@@ -1,16 +1,14 @@
+import { useState } from "react";
 import { Redirect } from "expo-router";
-import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { useOnboarding } from "../hooks/useOnboarding";
+import SplashScreen from "../components/SplashScreen";
 
 export default function Index() {
   const { loading, isOnboardingComplete } = useOnboarding();
+  const [splashDone, setSplashDone] = useState(false);
 
-  if (loading) {
-    return (
-      <View style={styles.loading}>
-        <ActivityIndicator color="#ED225D" />
-      </View>
-    );
+  if (!splashDone) {
+    return <SplashScreen loading={loading} onFinish={() => setSplashDone(true)} />;
   }
 
   if (!isOnboardingComplete) {
@@ -19,12 +17,3 @@ export default function Index() {
 
   return <Redirect href="/dashboard" />;
 }
-
-const styles = StyleSheet.create({
-  loading: {
-    flex: 1,
-    backgroundColor: "#2a0516",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});

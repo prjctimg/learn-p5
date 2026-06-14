@@ -28,7 +28,7 @@ const faqs = [
 
 const openGitHubIssues = () => {
   WebBrowser.openBrowserAsync(
-    "https://github.com/anomalyco/learn-p5/issues"
+    "https://github.com/prjctimg/learn-p5/issues"
   );
 };
 

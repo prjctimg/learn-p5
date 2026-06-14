@@ -19,6 +19,12 @@ declare module "react-native-webview" {
     };
   }
 
+  interface WebViewMessageEvent {
+    nativeEvent: {
+      data: string;
+    };
+  }
+
   interface WebViewProps extends ViewProps {
     source: WebViewSourceHtml | WebViewSourceUri;
     javaScriptEnabled?: boolean;
@@ -28,7 +34,10 @@ declare module "react-native-webview" {
     bounces?: boolean;
     allowFileAccess?: boolean;
     onError?: (event: WebViewErrorEvent) => void;
+    onMessage?: (event: WebViewMessageEvent) => void;
   }
 
-  export class WebView extends React.Component<WebViewProps> {}
+  export class WebView extends React.Component<WebViewProps> {
+    postMessage(data: string): void;
+  }
 }
