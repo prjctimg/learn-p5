@@ -3,7 +3,8 @@
   "main": "expo-router/entry",
   "version": "0.4.1",
   "scripts": {
-    "start": "expo start",
+    "start": "npm run gen-version && expo start",
+    "gen-version": "sh scripts/gen-version.sh",
     "android": "expo start --android",
     "web": "expo start --web",
     "lint": "expo lint"

@@ -5,7 +5,6 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Header from "../../components/Header";
 import { useThemeContext } from "../../components/ThemeProvider";
 import { Colors } from "../../constants/Colors";
-import { APP_VERSION } from "../../constants/Version";
 
 const faqs = [
   {
@@ -127,11 +126,6 @@ const createStyles = (colors: Record<string, string>) =>
       marginTop: 40,
       alignItems: "center",
     },
-    footerVersion: {
-      fontFamily: "JetBrainsMono",
-      fontSize: 11,
-      color: colors.textSecondary,
-    },
     footerInfo: {
       fontFamily: "JetBrainsMono",
       fontSize: 11,
@@ -229,11 +223,8 @@ export default function Support() {
         </View>
 
         <View style={styles.footer}>
-          <Text style={styles.footerVersion}>
-            Learn p5.js {APP_VERSION}
-          </Text>
           <Text style={styles.footerInfo}>
-            Built with Expo & React Native
+            p5.js is a JS client-side library for creative coding
           </Text>
         </View>
       </ScrollView>

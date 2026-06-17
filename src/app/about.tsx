@@ -3,7 +3,7 @@ import Svg, { Path } from "react-native-svg";
 import { Colors } from "../constants/Colors";
 import Header from "../components/Header";
 import { useThemeContext } from "../components/ThemeProvider";
-import { APP_VERSION } from "../constants/Version";
+import { APP_VERSION } from "../constants/Version.generated";
 
 const logoPaths = [
   "M16.254,27.631v7.998h0.359c0.715-1.113,1.65-2.248,2.805-3.402c1.153-1.154,2.567-2.188,4.239-3.105c1.671-0.912,3.561-1.67,5.671-2.268c2.107-0.596,4.477-0.896,7.103-0.896c4.06,0,7.8,0.777,11.223,2.328c3.422,1.555,6.368,3.684,8.836,6.389c2.466,2.707,4.376,5.891,5.73,9.551c1.353,3.662,2.03,7.602,2.03,11.82s-0.657,8.178-1.971,11.879c-1.312,3.701-3.185,6.924-5.611,9.67c-2.429,2.746-5.372,4.938-8.835,6.566c-3.463,1.631-7.384,2.447-11.76,2.447c-4.06,0-7.781-0.836-11.163-2.506c-3.385-1.672-5.99-3.939-7.82-6.807h-0.238v36.295H2.525V27.631H16.254z M49.684,56.045c0-2.229-0.339-4.438-1.015-6.627c-0.678-2.188-1.692-4.158-3.045-5.91c-1.354-1.748-3.064-3.162-5.134-4.238c-2.07-1.074-4.497-1.611-7.282-1.611c-2.627,0-4.976,0.557-7.044,1.672c-2.07,1.115-3.842,2.549-5.313,4.297c-1.474,1.752-2.587,3.742-3.343,5.971c-0.758,2.229-1.134,4.459-1.134,6.686c0,2.229,0.376,4.438,1.134,6.625c0.756,2.191,1.869,4.16,3.343,5.912c1.472,1.75,3.243,3.164,5.313,4.236c2.068,1.076,4.417,1.611,7.044,1.611c2.785,0,5.212-0.555,7.282-1.67c2.069-1.115,3.78-2.547,5.134-4.299c1.353-1.75,2.367-3.74,3.045-5.969C49.345,60.502,49.684,58.273,49.684,56.045z",
@@ -39,9 +39,6 @@ export default function About() {
           through guided exercises, challenges, and real-time code execution.
         </Text>
         <View style={styles.footer}>
-          <Text style={[styles.footerText, { color: colors.textSecondary }]}>
-            Built with Expo & React Native
-          </Text>
           <Text style={[styles.footerMono, { color: colors.textSecondary }]}>
             p5.js is a JS client-side library for creative coding
           </Text>
@@ -83,10 +80,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 24,
     maxWidth: 300,
-  },
-  footerText: {
-    fontFamily: "JetBrainsMono",
-    fontSize: 13,
   },
   footer: {
     marginTop: 40,
