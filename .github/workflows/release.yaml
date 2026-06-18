@@ -21,7 +21,18 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm i
+        run: |
+          NPM_INSTALLED=false
+          for i in 1 2 3; do
+            echo "Attempt $i to install npm dependencies..."
+            npm ci && NPM_INSTALLED=true && echo "npm install succeeded" && break
+            echo "npm install failed (attempt $i)"
+            if [ $i -lt 3 ]; then sleep 10; fi
+          done
+          if [ "$NPM_INSTALLED" != "true" ]; then
+            echo "Failed to install npm dependencies after 3 attempts"
+            exit 1
+          fi
 
       - name: Setup JDK
         uses: actions/setup-java@v4
@@ -34,6 +45,7 @@ jobs:
 
       - name: Install NDK
         run: |
+          NDK_INSTALLED=false
           for i in 1 2 3; do
             echo "Attempt $i to install NDK 27.1.12297006..."
             yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
@@ -41,14 +53,30 @@ jobs:
             NDK_DIR="$ANDROID_SDK_ROOT/ndk/27.1.12297006"
             if [ -d "$NDK_DIR" ]; then
               echo "NDK installed successfully at $NDK_DIR"
+              NDK_INSTALLED=true
               break
             fi
             echo "NDK directory not found, retrying..."
             sleep 10
           done
+          if [ "$NDK_INSTALLED" != "true" ]; then
+            echo "Failed to install NDK after 3 attempts"
+            exit 1
+          fi
 
       - name: Prebuild native project
-        run: npx expo prebuild --platform android --clean
+        run: |
+          PREBUILT=false
+          for i in 1 2 3; do
+            echo "Attempt $i to prebuild native project..."
+            npx expo prebuild --platform android --clean && PREBUILT=true && break
+            echo "prebuild failed (attempt $i)"
+            if [ $i -lt 3 ]; then sleep 10; fi
+          done
+          if [ "$PREBUILT" != "true" ]; then
+            echo "Failed to prebuild native project after 3 attempts"
+            exit 1
+          fi
 
       - name: Configure ABI splits for per-architecture APKs
         run: |
