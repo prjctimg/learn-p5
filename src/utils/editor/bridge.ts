@@ -1,9 +1,10 @@
 export const bridgeScript = `
-import { basicSetup, EditorView, EditorState, keymap } from 'codemirror';
+import { basicSetup, EditorView } from 'codemirror';
+import { EditorState } from '@codemirror/state';
+import { keymap } from '@codemirror/view';
 import { javascript } from '@codemirror/lang-javascript';
 import { indentSelection } from '@codemirror/commands';
-import { syntaxHighlighting, defaultHighlightStyle } from '@codemirror/language';
-import { HighlightStyle } from '@codemirror/highlight';
+import { syntaxHighlighting, defaultHighlightStyle, HighlightStyle } from '@codemirror/language';
 import { tags } from '@lezer/highlight';
 
 const p5Theme = EditorView.theme({

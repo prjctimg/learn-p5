@@ -1,4 +1,4 @@
 #!/bin/sh
 set -e
-VERSION=$(node -p "require('./package.json').version")
-echo "export const APP_VERSION = \"v$VERSION\";" > src/constants/Version.generated.ts
+VERSION=$(git describe --tags --abbrev=0 2>/dev/null || node -p "require('./package.json').version")
+echo "export const APP_VERSION = \"$VERSION\";" > src/constants/Version.generated.ts

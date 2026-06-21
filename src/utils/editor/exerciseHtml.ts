@@ -227,13 +227,12 @@ const SOLUTION_CODE = ${solutionArg};
 
 async function initEditor() {
   try {
-    const codemirror = await import('codemirror');
+    const { basicSetup, EditorView } = await import('codemirror');
     const { javascript } = await import('@codemirror/lang-javascript');
-    const { syntaxHighlighting } = await import('@codemirror/language');
-    const { HighlightStyle } = await import('@codemirror/highlight');
+    const { syntaxHighlighting, HighlightStyle } = await import('@codemirror/language');
+    const { EditorState } = await import('@codemirror/state');
+    const { keymap } = await import('@codemirror/view');
     const { tags } = await import('@lezer/highlight');
-
-    const { basicSetup, EditorView, EditorState, keymap } = codemirror;
 
     const p5Theme = EditorView.theme({
       '&': { backgroundColor: '${editorBg}', color: '${fg}' },

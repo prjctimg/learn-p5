@@ -317,14 +317,13 @@ export default function Exercise() {
   }, [webViewReady]);
 
   const handleToggleKeyboard = useCallback(() => {
-    setKeyboardVisible((prev) => !prev);
+    setKeyboardVisible((prev) => {
+      if (prev && webViewRef.current) {
+        webViewRef.current.postMessage(JSON.stringify({ type: "focus" }));
+      }
+      return !prev;
+    });
   }, []);
-
-  useEffect(() => {
-    if (!keyboardVisible && webViewRef.current && webViewReady) {
-      webViewRef.current.postMessage(JSON.stringify({ type: "focus" }));
-    }
-  }, [keyboardVisible, webViewReady]);
 
   useEffect(() => {
     const showSub = Keyboard.addListener("keyboardDidShow", () => {
@@ -466,6 +465,7 @@ export default function Exercise() {
           originWhitelist={["*"]}
           scrollEnabled={true}
           bounces={false}
+          keyboardDisplayRequiresUserAction={false}
         />
       )}
 
