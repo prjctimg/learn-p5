@@ -148,12 +148,12 @@ export function getExerciseHtml(params: {
   .cm-editor { height: 100%; font-size: 22px; background: ${editorBg}; }
   .cm-editor .cm-scroller { font-family: 'JetBrains Mono', monospace; overflow: auto; }
   .cm-editor.cm-focused { outline: none; }
-  .cm-editor .cm-gutters { background: ${editorBg}; border-right: 1px solid #292A2E; color: #6B7280; }
-  .cm-editor .cm-activeLineGutter { background: rgba(255,255,255,0.03); }
-  .cm-editor .cm-activeLine { background: rgba(255,255,255,0.03); }
+  .cm-editor .cm-gutters { background: ${editorBg}; border-right: 1px solid ${params.colorScheme === 'dark' ? '#292A2E' : '#E5E7EB'}; color: ${params.colorScheme === 'dark' ? '#6B7280' : '#9CA3AF'}; }
+  .cm-editor .cm-activeLineGutter { background: ${params.colorScheme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}; }
+  .cm-editor .cm-activeLine { background: ${params.colorScheme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}; }
   .cm-editor .cm-cursor { border-left-color: #ED225D; }
   .cm-editor .cm-selectionBackground,
-  .cm-editor.cm-focused .cm-selectionBackground { background: rgba(237, 34, 93, 0.2) !important; }
+  .cm-editor.cm-focused .cm-selectionBackground { background: ${params.colorScheme === 'dark' ? 'rgba(237, 34, 93, 0.2)' : 'rgba(237, 34, 93, 0.15)'} !important; }
   .cm-editor .cm-matchingBracket {
     background: rgba(237, 34, 93, 0.3);
     outline: 1px solid #ED225D;
@@ -200,101 +200,122 @@ ${JSON.stringify({ imports: importMap }, null, 2)}
 </script>
 
 <script type="module">
-${getBridgeScript(params.startingCode, params.solution, editorBg)}
+${getBridgeScript(params.startingCode, params.solution, editorBg, params.colorScheme)}
 </script>
 
 </body>
 </html>`;
 }
 
-function getBridgeScript(startingCode: string, solution: string, editorBg: string): string {
+function getBridgeScript(startingCode: string, solution: string, editorBg: string, colorScheme: "light" | "dark"): string {
+  const isDark = colorScheme === "dark";
   const codeArg = jsString(startingCode);
   const solutionArg = jsString(solution);
 
+  const fg = isDark ? '#E3E2E7' : '#1F2937';
+  const gutterFg = isDark ? '#6B7280' : '#9CA3AF';
+  const gutterBorder = isDark ? '#292A2E' : '#E5E7EB';
+  const activeBg = isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)';
+  const selBg = isDark ? 'rgba(237,34,93,0.2)' : 'rgba(237,34,93,0.15)';
+  const fnColor = isDark ? '#FFB2BB' : '#ED225D';
+  const commentColor = isDark ? '#6B7280' : '#9CA3AF';
+
   return `
-import { basicSetup, EditorView, EditorState, keymap } from 'codemirror';
-import { javascript } from '@codemirror/lang-javascript';
-import { syntaxHighlighting } from '@codemirror/language';
-import { HighlightStyle } from '@codemirror/highlight';
-import { tags } from '@lezer/highlight';
-
-const p5Theme = EditorView.theme({
-  '&': { backgroundColor: '${editorBg}', color: '#E3E2E7' },
-  '.cm-content': { caretColor: '#ED225D', fontFamily: "'JetBrains Mono', monospace" },
-  '.cm-gutters': { backgroundColor: '${editorBg}', color: '#6B7280', borderRight: '1px solid #292A2E' },
-  '.cm-activeLineGutter': { backgroundColor: 'rgba(255,255,255,0.03)' },
-  '.cm-activeLine': { backgroundColor: 'rgba(255,255,255,0.03)' },
-  '.cm-cursor': { borderLeftColor: '#ED225D', borderLeftWidth: '2px' },
-  '.cm-selectionBackground': { backgroundColor: 'rgba(237, 34, 93, 0.2)' },
-  '.cm-matchingBracket': { backgroundColor: 'rgba(237, 34, 93, 0.3)', outline: '1px solid #ED225D' },
-});
-
-const p5Highlight = HighlightStyle.define([
-  { tag: tags.keyword, color: '#ED225D' },
-  { tag: tags.definitionKeyword, color: '#ED225D', fontWeight: 'bold' },
-  { tag: tags.moduleKeyword, color: '#ED225D' },
-  { tag: tags.controlKeyword, color: '#ED225D' },
-  { tag: tags.operator, color: '#E3E2E7' },
-  { tag: tags.arithmeticOperator, color: '#E3E2E7' },
-  { tag: tags.logicOperator, color: '#E3E2E7' },
-  { tag: tags.compareOperator, color: '#E3E2E7' },
-  { tag: tags.punctuation, color: '#E3E2E7' },
-  { tag: tags.separator, color: '#E3E2E7' },
-  { tag: tags.brace, color: '#E3E2E7' },
-  { tag: tags.bracket, color: '#E3E2E7' },
-  { tag: tags.paren, color: '#E3E2E7' },
-  { tag: tags.number, color: '#FF4F75' },
-  { tag: tags.string, color: '#22C55E' },
-  { tag: tags.bool, color: '#FF4F75' },
-  { tag: tags.null, color: '#FF4F75' },
-  { tag: tags.variableName, color: '#E3E2E7' },
-  { tag: tags.definition(tags.variableName), color: '#FFB2BB' },
-  { tag: tags.function(tags.variableName), color: '#FFB2BB' },
-  { tag: tags.definition(tags.function(tags.variableName)), color: '#FFB2BB' },
-  { tag: tags.propertyName, color: '#FFB2BB' },
-  { tag: tags.attributeName, color: '#FFB2BB' },
-  { tag: tags.labelName, color: '#FFB2BB' },
-  { tag: tags.comment, color: '#6B7280', fontStyle: 'italic' },
-  { tag: tags.self, color: '#ED225D' },
-  { tag: tags.typeName, color: '#FFB2BB' },
-  { tag: tags.className, color: '#FFB2BB' },
-  { tag: tags.standard(tags.tagName), color: '#ED225D' },
-  { tag: tags.meta, color: '#FFB2BB' },
-  { tag: tags.invalid, color: '#ED225D' },
-  { tag: tags.modifier, color: '#ED225D' },
-  { tag: tags.constant(tags.variableName), color: '#FF4F75' },
-  { tag: tags.special(tags.variableName), color: '#FF4F75' },
-]);
-
 let view;
+const INITIAL_CODE = ${codeArg};
 const SOLUTION_CODE = ${solutionArg};
 
-function createEditor(initialCode) {
-  const state = EditorState.create({
-    doc: initialCode || '',
-    extensions: [
-      basicSetup,
-      javascript(),
-      p5Theme,
-      syntaxHighlighting(p5Highlight),
-      keymap.of([{ key: 'Ctrl-s', run: () => true }, { key: 'Cmd-s', run: () => true }]),
-      EditorView.updateListener.of((update) => {
-        if (update.docChanged) {
-          postCodeChange(update.state.doc.toString());
-        }
-      }),
-    ],
-  });
-  view = new EditorView({ state, parent: document.getElementById('editor') });
-  postReady();
-  setTimeout(function() {
-    view.dom.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }, 300);
+async function initEditor() {
+  try {
+    const codemirror = await import('codemirror');
+    const { javascript } = await import('@codemirror/lang-javascript');
+    const { syntaxHighlighting } = await import('@codemirror/language');
+    const { HighlightStyle } = await import('@codemirror/highlight');
+    const { tags } = await import('@lezer/highlight');
+
+    const { basicSetup, EditorView, EditorState, keymap } = codemirror;
+
+    const p5Theme = EditorView.theme({
+      '&': { backgroundColor: '${editorBg}', color: '${fg}' },
+      '.cm-content': { caretColor: '#ED225D', fontFamily: "'JetBrains Mono', monospace" },
+      '.cm-gutters': { backgroundColor: '${editorBg}', color: '${gutterFg}', borderRight: '1px solid ${gutterBorder}' },
+      '.cm-activeLineGutter': { backgroundColor: '${activeBg}' },
+      '.cm-activeLine': { backgroundColor: '${activeBg}' },
+      '.cm-cursor': { borderLeftColor: '#ED225D', borderLeftWidth: '2px' },
+      '.cm-selectionBackground': { backgroundColor: '${selBg}' },
+      '.cm-matchingBracket': { backgroundColor: 'rgba(237, 34, 93, 0.3)', outline: '1px solid #ED225D' },
+    });
+
+    const p5Highlight = HighlightStyle.define([
+      { tag: tags.keyword, color: '#ED225D' },
+      { tag: tags.definitionKeyword, color: '#ED225D', fontWeight: 'bold' },
+      { tag: tags.moduleKeyword, color: '#ED225D' },
+      { tag: tags.controlKeyword, color: '#ED225D' },
+      { tag: tags.operator, color: '${fg}' },
+      { tag: tags.arithmeticOperator, color: '${fg}' },
+      { tag: tags.logicOperator, color: '${fg}' },
+      { tag: tags.compareOperator, color: '${fg}' },
+      { tag: tags.punctuation, color: '${fg}' },
+      { tag: tags.separator, color: '${fg}' },
+      { tag: tags.brace, color: '${fg}' },
+      { tag: tags.bracket, color: '${fg}' },
+      { tag: tags.paren, color: '${fg}' },
+      { tag: tags.number, color: '#FF4F75' },
+      { tag: tags.string, color: '#22C55E' },
+      { tag: tags.bool, color: '#FF4F75' },
+      { tag: tags.null, color: '#FF4F75' },
+      { tag: tags.variableName, color: '${fg}' },
+      { tag: tags.definition(tags.variableName), color: '${fnColor}' },
+      { tag: tags.function(tags.variableName), color: '${fnColor}' },
+      { tag: tags.definition(tags.function(tags.variableName)), color: '${fnColor}' },
+      { tag: tags.propertyName, color: '${fnColor}' },
+      { tag: tags.attributeName, color: '${fnColor}' },
+      { tag: tags.labelName, color: '${fnColor}' },
+      { tag: tags.comment, color: '${commentColor}', fontStyle: 'italic' },
+      { tag: tags.self, color: '#ED225D' },
+      { tag: tags.typeName, color: '${fnColor}' },
+      { tag: tags.className, color: '${fnColor}' },
+      { tag: tags.standard(tags.tagName), color: '#ED225D' },
+      { tag: tags.meta, color: '${fnColor}' },
+      { tag: tags.invalid, color: '#ED225D' },
+      { tag: tags.modifier, color: '#ED225D' },
+      { tag: tags.constant(tags.variableName), color: '#FF4F75' },
+      { tag: tags.special(tags.variableName), color: '#FF4F75' },
+    ]);
+
+    const state = EditorState.create({
+      doc: INITIAL_CODE || '',
+      extensions: [
+        basicSetup,
+        javascript(),
+        p5Theme,
+        syntaxHighlighting(p5Highlight),
+        keymap.of([{ key: 'Ctrl-s', run: function() { return true; } }, { key: 'Cmd-s', run: function() { return true; } }]),
+        EditorView.updateListener.of(function(update) {
+          if (update.docChanged) {
+            postCodeChange(update.state.doc.toString());
+          }
+        }),
+      ],
+    });
+    view = new EditorView({ state, parent: document.getElementById('editor') });
+    postReady();
+    setTimeout(function() {
+      view.dom.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 300);
+  } catch(e) {
+    console.error('Editor init failed:', e);
+    var editorEl = document.getElementById('editor');
+    if (editorEl) {
+      editorEl.innerHTML = '<div style="color:#ED225D;padding:16px;font-family:sans-serif">\\u26A0 Editor failed to load. Check your connection.</div>';
+    }
+    postReady();
+  }
 }
 
 function postCodeChange(code) {
   if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'codeChange', code }));
+    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'codeChange', code: code }));
   }
 }
 
@@ -306,17 +327,13 @@ function postReady() {
 
 function postOpenRef(symbol) {
   if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'openRef', symbol }));
+    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'openRef', symbol: symbol }));
   }
 }
 
 function renderSketch(containerId, code) {
   var container = document.getElementById(containerId);
   if (!container) return;
-
-  var scriptId = containerId + '-script';
-  var oldScript = document.getElementById(scriptId);
-  if (oldScript) oldScript.remove();
 
   if (container.__p5) {
     container.__p5.remove();
@@ -326,8 +343,10 @@ function renderSketch(containerId, code) {
 
   if (!code) return;
 
+  delete window.setup;
+  delete window.draw;
+
   var script = document.createElement('script');
-  script.id = scriptId;
   script.textContent = code;
   document.body.appendChild(script);
 
@@ -335,6 +354,7 @@ function renderSketch(containerId, code) {
     container.__p5 = new p5(undefined, container);
   } catch(e) {
     console.error('Sketch render error:', e);
+    container.innerHTML = '<div style="color:#ED225D;padding:16px;font-family:sans-serif">\\u26A0 ' + e.message + '</div>';
   }
 }
 
@@ -377,14 +397,38 @@ function handleMessage(data) {
         if (scroller) scroller.style.fontSize = msg.fontSize + 'px';
         break;
       case 'runSketch':
-        renderAllSketches(view.state.doc.toString(), SOLUTION_CODE);
+        if (!view) { console.error('Editor not initialized'); break; }
+        var userCode = view.state.doc.toString();
+        renderAllSketches(userCode, SOLUTION_CODE);
+        if (SOLUTION_CODE && userCode.trim() === SOLUTION_CODE.trim()) {
+          if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+            window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'exerciseComplete' }));
+          }
+        }
         setTimeout(function() {
           var el = document.getElementById('user-sketch');
           if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 100);
         break;
+      case 'showCompletion':
+        var banner = document.getElementById('completion-banner');
+        if (!banner) {
+          banner = document.createElement('div');
+          banner.id = 'completion-banner';
+          banner.style.cssText = 'background:#22C55E;color:#fff;padding:12px 16px;font-family:sans-serif;display:flex;align-items:center;justify-content:space-between;font-size:16px';
+          banner.innerHTML = '<span style="font-weight:700">\\u2713 Exercise completed!</span><a id="next-lesson-link" style="color:#fff;text-decoration:underline;font-weight:700;cursor:pointer">Next \\u2192</a>';
+          document.body.insertBefore(banner, document.body.firstChild);
+          document.getElementById('next-lesson-link').addEventListener('click', function() {
+            if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+              window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'goToNextLesson' }));
+            }
+          });
+        }
+        break;
     }
-  } catch(e) {}
+  } catch(e) {
+    console.error('handleMessage error:', e);
+  }
 }
 
 window.addEventListener('message', function(event) { handleMessage(event.data); });
@@ -409,6 +453,6 @@ if (solutionToggle) {
   });
 }
 
-createEditor(${codeArg});
+initEditor();
 `;
 }

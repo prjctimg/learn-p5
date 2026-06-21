@@ -9,7 +9,7 @@ import { useDrawerContext } from "../../../contexts/DrawerContext";
 import { useThemeContext } from "../../../components/ThemeProvider";
 import { Colors } from "../../../constants/Colors";
 import ProgrammingKeyboard from "../../../components/ProgrammingKeyboard";
-import { loadExercise } from "../../../utils/courseLoader";
+import { loadExercise, loadCourse } from "../../../utils/courseLoader";
 import { Lesson } from "../../../data/types";
 import { P5_FUNCTION_NAMES, ONCE_ONLY_P5_FUNCTIONS } from "../../../data/p5Symbols";
 import { getExerciseHtml } from "../../../utils/editor/exerciseHtml";
@@ -19,6 +19,7 @@ interface ExerciseState {
   loading: boolean;
   code: string;
   isRunning: boolean;
+  completed: boolean;
 }
 
 type ExerciseAction =
@@ -28,19 +29,27 @@ type ExerciseAction =
   | { type: "APPEND_CODE"; text: string; cursorOffset?: number }
   | { type: "RUN_START" }
   | { type: "RUN_DONE" }
-  | { type: "SET_WEBVIEW_READY" };
+  | { type: "EXERCISE_COMPLETE" };
 
 function exerciseReducer(state: ExerciseState, action: ExerciseAction): ExerciseState {
   switch (action.type) {
     case "LOAD_START":
       return { ...state, loading: true };
-    case "LOAD_DONE":
+    case "LOAD_DONE": {
+      const ex = action.exercise;
+      let code = ex?.startingCode ?? "";
+      const hasSetup = /function\s+setup\s*\(/.test(code);
+      const hasDraw = /function\s+draw\s*\(/.test(code);
+      if (!hasSetup || !hasDraw) {
+        code = 'function setup() {\n  createCanvas(400, 400);\n}\n\nfunction draw() {\n  background(20);\n}\n';
+      }
       return {
         ...state,
         loading: false,
-        exercise: action.exercise,
-        code: action.exercise?.startingCode ?? state.code,
+        exercise: ex ? { ...ex, startingCode: code } : null,
+        code,
       };
+    }
     case "SET_CODE":
       return { ...state, code: action.code };
     case "APPEND_CODE":
@@ -49,6 +58,8 @@ function exerciseReducer(state: ExerciseState, action: ExerciseAction): Exercise
       return { ...state, isRunning: true };
     case "RUN_DONE":
       return { ...state, isRunning: false };
+    case "EXERCISE_COMPLETE":
+      return { ...state, completed: true };
     default:
       return state;
   }
@@ -64,8 +75,8 @@ export default function Exercise() {
     loading: true,
     code: "",
     isRunning: false,
+    completed: false,
   });
-  const runCounter = useRef(0);
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
   const webViewRef = useRef<WebView>(null);
@@ -245,16 +256,29 @@ export default function Exercise() {
           case "openRef":
             router.push(`/ref?symbol=${msg.symbol}`);
             break;
+          case "exerciseComplete":
+            dispatch({ type: "EXERCISE_COMPLETE" });
+            break;
+          case "goToNextLesson":
+            loadCourse(course).then((courseData) => {
+              if (!courseData) return;
+              const currentIndex = courseData.lessons.findIndex((l) => l.id === id);
+              if (currentIndex >= 0 && currentIndex < courseData.lessons.length - 1) {
+                const nextLesson = courseData.lessons[currentIndex + 1];
+                router.replace(`/learn/${course}/${nextLesson.id}`);
+              } else {
+                router.replace(`/learn/${course}`);
+              }
+            });
+            break;
         }
       } catch {}
     },
-    [router]
+    [router, course, id]
   );
 
   const handleRun = () => {
     if (!state.exercise) return;
-    runCounter.current += 1;
-    const counter = runCounter.current;
 
     dispatch({ type: "RUN_START" });
 
@@ -264,20 +288,33 @@ export default function Exercise() {
       );
     }
 
-    setTimeout(() => {
-      if (counter === runCounter.current) {
-        dispatch({ type: "RUN_DONE" });
-      }
-    }, 2000);
+    dispatch({ type: "RUN_DONE" });
   };
+
+  const pendingInserts = useRef<Array<{ text: string; cursorOffset?: number }>>([]);
 
   const handleInsert = (text: string, cursorOffset?: number) => {
     if (webViewRef.current && webViewReady) {
       webViewRef.current.postMessage(
         JSON.stringify({ type: "insert", text, cursorOffset })
       );
+    } else {
+      pendingInserts.current.push({ text, cursorOffset });
     }
   };
+
+  useEffect(() => {
+    if (webViewReady && pendingInserts.current.length > 0) {
+      for (const item of pendingInserts.current) {
+        if (webViewRef.current) {
+          webViewRef.current.postMessage(
+            JSON.stringify({ type: "insert", text: item.text, cursorOffset: item.cursorOffset })
+          );
+        }
+      }
+      pendingInserts.current = [];
+    }
+  }, [webViewReady]);
 
   const handleToggleKeyboard = useCallback(() => {
     setKeyboardVisible((prev) => !prev);
@@ -307,6 +344,45 @@ export default function Exercise() {
       if (val) setCodeBackground(val);
     });
   }, []);
+
+  useEffect(() => {
+    if (!state.completed || !state.exercise) return;
+
+    const key = `${course}/${state.exercise.id}`;
+
+    AsyncStorage.getItem("completedLessons").then((val) => {
+      const arr: string[] = val ? JSON.parse(val) : [];
+      if (!arr.includes(key)) {
+        arr.push(key);
+        AsyncStorage.setItem("completedLessons", JSON.stringify(arr));
+      }
+    });
+
+    if (webViewRef.current && webViewReady) {
+      webViewRef.current.postMessage(
+        JSON.stringify({ type: "showCompletion" })
+      );
+    }
+
+    loadCourse(course).then((courseData) => {
+      if (!courseData) return;
+      AsyncStorage.getItem("completedLessons").then((val) => {
+        const completed: string[] = val ? JSON.parse(val) : [];
+        const allDone = courseData.lessons.every((l) =>
+          completed.includes(`${course}/${l.id}`)
+        );
+        if (allDone) {
+          AsyncStorage.getItem("completedCourses").then((prev) => {
+            const arr: string[] = prev ? JSON.parse(prev) : [];
+            if (!arr.includes(course)) {
+              arr.push(course);
+              AsyncStorage.setItem("completedCourses", JSON.stringify(arr));
+            }
+          });
+        }
+      });
+    });
+  }, [state.completed, state.exercise, course, webViewReady]);
 
   const exerciseSymbols = useMemo(() => {
     if (!state.exercise) return [];

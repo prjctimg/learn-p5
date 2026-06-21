@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { View, Text, FlatList, ActivityIndicator, StyleSheet } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Header from "../../../components/Header";
 import ChallengeCard from "../../../components/ChallengeCard";
 import { loadCourse } from "../../../utils/courseLoader";
@@ -13,15 +14,24 @@ export default function CourseDetail() {
   const router = useRouter();
   const [courseData, setCourseData] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
+  const [completedLessons, setCompletedLessons] = useState<string[]>([]);
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
-  useEffect(() => {
+  const loadData = useCallback(async () => {
     if (!course) return;
-    loadCourse(course)
-      .then(setCourseData)
-      .finally(() => setLoading(false));
+    const data = await loadCourse(course);
+    setCourseData(data);
+    try {
+      const val = await AsyncStorage.getItem("completedLessons");
+      if (val) setCompletedLessons(JSON.parse(val));
+    } catch {}
+    setLoading(false);
   }, [course]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   if (loading) {
     return (
@@ -71,18 +81,31 @@ export default function CourseDetail() {
         }
         data={courseData.lessons}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.cardWrapper}>
-            <ChallengeCard
-              title={item.title}
-              moduleName={item.module}
-              description={item.description}
-              onContinue={() =>
-                router.push(`/learn/${course}/${item.id}`)
-              }
-            />
-          </View>
-        )}
+        renderItem={({ item, index }) => {
+          let isLocked = false;
+          for (let j = 0; j < index; j++) {
+            const prevLesson = courseData.lessons[j];
+            if (!completedLessons.includes(`${course}/${prevLesson.id}`)) {
+              isLocked = true;
+              break;
+            }
+          }
+          return (
+            <View style={styles.cardWrapper}>
+              <ChallengeCard
+                title={item.title}
+                moduleName={item.module}
+                description={item.description}
+                locked={isLocked}
+                onContinue={
+                  isLocked
+                    ? undefined
+                    : () => router.push(`/learn/${course}/${item.id}`)
+                }
+              />
+            </View>
+          );
+        }}
       />
     </View>
   );
