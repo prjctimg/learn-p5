@@ -385,57 +385,72 @@ function getBridgeScript(startingCode: string, solution: string, editorBg: strin
   const constColor = isDark ? '#FF4F75' : '#D31D4E';
 
   return `
-var _CM = typeof CM !== 'undefined' ? CM : null;
-var basicSetup = _CM.basicSetup;
-var EditorView = _CM.EditorView;
-var EditorState = _CM.EditorState;
-var keymap = _CM.keymap;
-var syntaxHighlighting = _CM.syntaxHighlighting;
-var HighlightStyle = _CM.HighlightStyle;
-var javascript = _CM.javascript;
-var tags = _CM.tags;
-var indentSelection = _CM.indentSelection;
-var syntaxTree = _CM.syntaxTree;
-var ViewPlugin = _CM.ViewPlugin;
-var Decoration = _CM.Decoration;
-var DecorationSet = _CM.DecorationSet;
+var _CM, basicSetup, EditorView, EditorState, keymap, syntaxHighlighting, HighlightStyle, javascript, tags, indentSelection, syntaxTree, ViewPlugin, Decoration, DecorationSet, CM_READY = false;
+try {
+  _CM = CM;
+  basicSetup = _CM.basicSetup;
+  EditorView = _CM.EditorView;
+  EditorState = _CM.EditorState;
+  keymap = _CM.keymap;
+  syntaxHighlighting = _CM.syntaxHighlighting;
+  HighlightStyle = _CM.HighlightStyle;
+  javascript = _CM.javascript;
+  tags = _CM.tags;
+  indentSelection = _CM.indentSelection;
+  syntaxTree = _CM.syntaxTree;
+  ViewPlugin = _CM.ViewPlugin;
+  Decoration = _CM.Decoration;
+  DecorationSet = _CM.DecorationSet;
+  CM_READY = true;
+} catch(e) {}
 
 let view;
 const INITIAL_CODE = ${codeArg};
 const SOLUTION_CODE = ${solutionArg};
 const CODE_FONT_SIZE = ${codeFontSize ?? 22};
+const EDITOR_BG = '${editorBg}';
 
-const p5FnMark = Decoration.mark({ class: 'cm-p5-fn' });
-
-function computeP5Decos(v) {
-  var decos = [];
-  syntaxTree(v.state).iterate({
-    enter: function(n) {
-      if (n.name === 'CallExpression' || n.name === 'NewExpression') {
-        var callee = n.node.firstChild;
-        if (callee && callee.name === 'Identifier') {
-          var name = v.state.sliceDoc(callee.from, callee.to);
-          if (${JSON.stringify(P5_FUNCTION_NAMES)}.indexOf(name) >= 0) {
-            decos.push(p5FnMark.range(callee.from, callee.to));
+var p5FnPlugin = null;
+if (CM_READY) {
+  var p5FnMark = Decoration.mark({ class: 'cm-p5-fn' });
+  function computeP5Decos(v) {
+    var decos = [];
+    syntaxTree(v.state).iterate({
+      enter: function(n) {
+        if (n.name === 'CallExpression' || n.name === 'NewExpression') {
+          var callee = n.node.firstChild;
+          if (callee && callee.name === 'Identifier') {
+            var name = v.state.sliceDoc(callee.from, callee.to);
+            if (${JSON.stringify(P5_FUNCTION_NAMES)}.indexOf(name) >= 0) {
+              decos.push(p5FnMark.range(callee.from, callee.to));
+            }
           }
         }
       }
+    });
+    return DecorationSet.create(v.state, decos);
+  }
+  function P5FnPlugin(view) { this.decorations = computeP5Decos(view); }
+  P5FnPlugin.prototype.update = function(update) {
+    if (update.docChanged || update.viewportChanged) {
+      this.decorations = computeP5Decos(update.view);
     }
+  };
+  p5FnPlugin = ViewPlugin.fromClass(P5FnPlugin, {
+    decorations: function(v) { return v.decorations; }
   });
-  return DecorationSet.create(v.state, decos);
 }
 
-function P5FnPlugin(view) { this.decorations = computeP5Decos(view); }
-P5FnPlugin.prototype.update = function(update) {
-  if (update.docChanged || update.viewportChanged) {
-    this.decorations = computeP5Decos(update.view);
-  }
-};
-var p5FnPlugin = ViewPlugin.fromClass(P5FnPlugin, {
-  decorations: function(v) { return v.decorations; }
-});
-
 function initEditor() {
+  if (!CM_READY) {
+    var editorEl = document.getElementById('editor');
+    if (editorEl) {
+      editorEl.innerHTML = '<div style="color:#6B7280;padding:20px;font-family:sans-serif;text-align:center">Code editor bundle unavailable. Type code below.</div><textarea id="cm-fallback" style="width:100%;height:400px;background:' + EDITOR_BG + ';color:${fg};font-family:JetBrains Mono,monospace;font-size:' + CODE_FONT_SIZE + 'px;border:none;outline:none;resize:none;padding:12px">' + INITIAL_CODE + '</textarea>';
+    }
+    postReady();
+    postEditorReady();
+    return;
+  }
   try {
     const p5Theme = EditorView.theme({
       '&': { backgroundColor: '${editorBg}', color: '${fg}' },
@@ -544,6 +559,13 @@ function postOpenRef(symbol) {
   }
 }
 
+function wrapInstanceCode(code) {
+  return code.replace(
+    /\\bfunction\\s+(setup|draw|preload|mousePressed|mouseReleased|mouseClicked|mouseMoved|mouseDragged|mouseWheel|keyPressed|keyReleased|keyTyped|touchStarted|touchMoved|touchEnded|windowResized|doubleClicked|deviceMoved|deviceTurned|deviceShaken)\\s*\\(/g,
+    'p.$1 = function('
+  );
+}
+
 function renderSketch(containerId, code) {
   var container = document.getElementById(containerId);
   if (!container) return;
@@ -556,15 +578,13 @@ function renderSketch(containerId, code) {
 
   if (!code) return;
 
-  delete window.setup;
-  delete window.draw;
-
-  var script = document.createElement('script');
-  script.textContent = code;
-  document.body.appendChild(script);
-
   try {
-    container.__p5 = new p5(undefined, container);
+    var wrapped = wrapInstanceCode(code);
+    container.__p5 = new p5(function(p) {
+      with(p) {
+        eval(wrapped);
+      }
+    }, container);
   } catch(e) {
     console.error('Sketch render error:', e);
     container.innerHTML = '<div style="color:#ED225D;padding:16px;font-family:sans-serif">\\u26A0 ' + e.message + '</div>';
@@ -690,8 +710,14 @@ function handleMessage(data) {
         }
         break;
       case 'runSketch':
-        if (!view) { console.error('Editor not initialized'); break; }
-        var userCode = view.state.doc.toString();
+        var userCode;
+        if (view) {
+          userCode = view.state.doc.toString();
+        } else {
+          var ta = document.getElementById('cm-fallback');
+          userCode = ta ? ta.value : '';
+        }
+        if (!userCode) break;
         renderSketch('user-sketch', userCode);
         if (typeof window.__tutRun === 'function') window.__tutRun();
         if (SOLUTION_CODE && normalizeCode(userCode) === normalizeCode(SOLUTION_CODE)) {
@@ -736,8 +762,8 @@ if (solutionToggle) {
 var copyBtn = document.getElementById('copyBtn');
 if (copyBtn) {
   copyBtn.addEventListener('click', function() {
-    if (view) {
-      var code = view.state.doc.toString();
+    var code = view ? view.state.doc.toString() : (document.getElementById('cm-fallback') ? document.getElementById('cm-fallback').value : '');
+    if (code) {
       navigator.clipboard.writeText(code).then(function() {
         copyBtn.textContent = 'Copied!';
         copyBtn.classList.add('copied');
@@ -754,7 +780,7 @@ var solRunBtn = document.getElementById('solution-run-btn');
 var solutionHasRun = false;
 if (solRunBtn) {
   solRunBtn.addEventListener('click', function() {
-    if (view && SOLUTION_CODE) {
+    if (SOLUTION_CODE) {
       renderSketch('solution-sketch', SOLUTION_CODE);
       if (!solutionHasRun) {
         solutionHasRun = true;
@@ -770,12 +796,14 @@ if (solRunBtn) {
 }
 
 initEditor();
-if (CODE_FONT_SIZE) {
-  var scroller = view && view.dom && view.dom.querySelector('.cm-scroller');
-  if (scroller) scroller.style.fontSize = CODE_FONT_SIZE + 'px';
+if (CM_READY && view) {
+  if (CODE_FONT_SIZE) {
+    var scroller = view.dom.querySelector('.cm-scroller');
+    if (scroller) scroller.style.fontSize = CODE_FONT_SIZE + 'px';
+  }
+  var cmContent = view.dom.querySelector('.cm-content');
+  if (cmContent) cmContent.setAttribute('inputmode', 'none');
 }
-var cmContent = view && view.dom && view.dom.querySelector('.cm-content');
-if (cmContent) cmContent.setAttribute('inputmode', 'none');
 renderSketch('user-sketch', INITIAL_CODE);
 if (typeof window.__tutPreview === 'function') window.__tutPreview();
 

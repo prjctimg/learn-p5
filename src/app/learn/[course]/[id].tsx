@@ -186,26 +186,6 @@ export default function Exercise() {
         webview: {
           flex: 1,
         },
-        runButton: {
-          position: "absolute",
-          right: 24,
-          bottom: 260,
-          width: 56,
-          height: 56,
-          borderRadius: 9999,
-          backgroundColor: colors.primary,
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 50,
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 12 },
-          shadowOpacity: 0.25,
-          shadowRadius: 25,
-          elevation: 12,
-        },
-        runButtonPressed: {
-          transform: [{ scale: 0.9 }],
-        },
         showKeyboardFab: {
           position: "absolute",
           left: 24,
@@ -521,24 +501,6 @@ export default function Exercise() {
         />
       )}
 
-      <Pressable
-        onPress={handleRun}
-        disabled={state.isRunning}
-        style={({ pressed }) => [
-          styles.runButton,
-          pressed && styles.runButtonPressed,
-        ]}
-        accessibilityRole="button"
-        accessibilityLabel="Run sketch"
-        accessibilityState={{ disabled: state.isRunning }}
-      >
-        <MaterialCommunityIcons
-          name={state.isRunning ? "reload" : "play"}
-          size={28}
-          color="#FFFFFF"
-        />
-      </Pressable>
-
       <Toast
         visible={toastVisible}
         message="✓ Exercise completed!"
@@ -557,6 +519,8 @@ export default function Exercise() {
           onNewline={handleNewline}
           onFormat={handleFormat}
           onCursorMove={handleCursorMove}
+          onRun={handleRun}
+          isRunning={state.isRunning}
           keyboardVisible={keyboardVisible}
           usedFunctions={usedFunctions}
           height={keyboardHeight === "small" ? 180 : keyboardHeight === "tall" ? 320 : 240}

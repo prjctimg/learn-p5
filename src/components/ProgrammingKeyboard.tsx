@@ -1,5 +1,5 @@
-import { useState, useCallback } from "react";
-import { View, Text, Pressable, ScrollView, Modal, StyleSheet } from "react-native";
+import { useState, useCallback, useRef, useEffect } from "react";
+import { View, Text, Pressable, ScrollView, Modal, StyleSheet, Animated } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useThemeContext } from "./ThemeProvider";
 import { Colors } from "../constants/Colors";
@@ -56,17 +56,32 @@ interface ProgrammingKeyboardProps {
   onBackspace?: () => void;
   onNewline?: () => void;
   onFormat?: () => void;
+  onRun?: () => void;
+  isRunning?: boolean;
   onCursorMove?: (direction: 'left' | 'right' | 'up' | 'down') => void;
   keyboardVisible?: boolean;
   usedFunctions?: string[];
   height?: number;
 }
 
-export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], onToggleKeyboard, onRequestSystemKeyboard, onBackspace, onNewline, onFormat, onCursorMove, keyboardVisible = true, usedFunctions = [], height = 240 }: ProgrammingKeyboardProps) {
+export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], onToggleKeyboard, onRequestSystemKeyboard, onBackspace, onNewline, onFormat, onRun, isRunning, onCursorMove, keyboardVisible = true, usedFunctions = [], height = 240 }: ProgrammingKeyboardProps) {
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
   const [hintType, setHintType] = useState<"string" | "array" | null>(null);
   const [popupSymbol, setPopupSymbol] = useState<string | null>(null);
+  const popupScale = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (popupSymbol) {
+      popupScale.setValue(0);
+      Animated.spring(popupScale, {
+        toValue: 1,
+        damping: 8,
+        stiffness: 200,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [popupSymbol, popupScale]);
 
   const handleFunctionPress = useCallback((fn: P5FunctionDef) => {
     const parenIndex = fn.insert.indexOf("()");
@@ -149,51 +164,6 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
           accessibilityLabel="Format code"
         >
           <MaterialCommunityIcons name="code-tags" size={18} color={colors.onSurfaceVariant} />
-        </Pressable>
-        <View style={styles.arrowSeparator} />
-        <Pressable
-          onPress={() => onCursorMove?.('left')}
-          style={({ pressed }) => [
-            styles.arrowBtn,
-            { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
-          ]}
-          accessibilityRole="button"
-          accessibilityLabel="Move cursor left"
-        >
-          <MaterialCommunityIcons name="arrow-left-bold" size={16} color={colors.onSurfaceVariant} />
-        </Pressable>
-        <Pressable
-          onPress={() => onCursorMove?.('right')}
-          style={({ pressed }) => [
-            styles.arrowBtn,
-            { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
-          ]}
-          accessibilityRole="button"
-          accessibilityLabel="Move cursor right"
-        >
-          <MaterialCommunityIcons name="arrow-right-bold" size={16} color={colors.onSurfaceVariant} />
-        </Pressable>
-        <Pressable
-          onPress={() => onCursorMove?.('up')}
-          style={({ pressed }) => [
-            styles.arrowBtn,
-            { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
-          ]}
-          accessibilityRole="button"
-          accessibilityLabel="Move cursor up"
-        >
-          <MaterialCommunityIcons name="arrow-up-bold" size={16} color={colors.onSurfaceVariant} />
-        </Pressable>
-        <Pressable
-          onPress={() => onCursorMove?.('down')}
-          style={({ pressed }) => [
-            styles.arrowBtn,
-            { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
-          ]}
-          accessibilityRole="button"
-          accessibilityLabel="Move cursor down"
-        >
-          <MaterialCommunityIcons name="arrow-down-bold" size={16} color={colors.onSurfaceVariant} />
         </Pressable>
         {pairedSymbols.map((pair) => {
           const hinted = pair.hintTrigger && pair.hintTrigger === hintType;
@@ -288,9 +258,83 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
         })}
       </View>
 
+      <View style={styles.bottomCluster}>
+        <View style={styles.dpad}>
+          <View style={styles.dpadRow}>
+            <Pressable
+              onPress={() => onCursorMove?.('up')}
+              style={({ pressed }) => [
+                styles.dpadBtn,
+                { backgroundColor: pressed ? colors.primaryContainer : colors.surfaceContainer },
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel="Move cursor up"
+            >
+              <MaterialCommunityIcons name="chevron-up" size={18} color={colors.onSurfaceVariant} />
+            </Pressable>
+          </View>
+          <View style={styles.dpadRow}>
+            <Pressable
+              onPress={() => onCursorMove?.('left')}
+              style={({ pressed }) => [
+                styles.dpadBtn,
+                { backgroundColor: pressed ? colors.primaryContainer : colors.surfaceContainer },
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel="Move cursor left"
+            >
+              <MaterialCommunityIcons name="chevron-left" size={18} color={colors.onSurfaceVariant} />
+            </Pressable>
+            <View style={styles.dpadCenter} />
+            <Pressable
+              onPress={() => onCursorMove?.('right')}
+              style={({ pressed }) => [
+                styles.dpadBtn,
+                { backgroundColor: pressed ? colors.primaryContainer : colors.surfaceContainer },
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel="Move cursor right"
+            >
+              <MaterialCommunityIcons name="chevron-right" size={18} color={colors.onSurfaceVariant} />
+            </Pressable>
+          </View>
+          <View style={styles.dpadRow}>
+            <Pressable
+              onPress={() => onCursorMove?.('down')}
+              style={({ pressed }) => [
+                styles.dpadBtn,
+                { backgroundColor: pressed ? colors.primaryContainer : colors.surfaceContainer },
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel="Move cursor down"
+            >
+              <MaterialCommunityIcons name="chevron-down" size={18} color={colors.onSurfaceVariant} />
+            </Pressable>
+          </View>
+        </View>
+        <Pressable
+          onPress={onRun}
+          disabled={isRunning}
+          style={({ pressed }) => [
+            styles.runBtn,
+            { backgroundColor: colors.primary },
+            pressed && { opacity: 0.8 },
+          ]}
+          accessibilityRole="button"
+          accessibilityLabel="Run sketch"
+          accessibilityState={{ disabled: isRunning }}
+        >
+          <MaterialCommunityIcons
+            name={isRunning ? "reload" : "play"}
+            size={24}
+            color="#FFFFFF"
+          />
+        </Pressable>
+      </View>
+
       <Modal transparent visible={popupSymbol !== null} onRequestClose={() => setPopupSymbol(null)}>
         <Pressable style={styles.popupOverlay} onPress={() => setPopupSymbol(null)}>
-          <Pressable style={[styles.popupCard, { backgroundColor: colors.surfaceContainerHigh }]}>
+          <Animated.View style={[styles.popupCard, { backgroundColor: colors.surfaceContainerHigh, transform: [{ scale: popupScale }] }]}>
             {popupSymbol && (() => {
               const ref = P5_SYMBOLS.find(s => s.name === popupSymbol);
               return ref ? (
@@ -308,7 +352,7 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
                 <Text style={[popupTextStyles.popupTitle, { color: colors.onSurface }]}>{popupSymbol}</Text>
               );
             })()}
-          </Pressable>
+          </Animated.View>
         </Pressable>
       </Modal>
     </View>
@@ -365,19 +409,44 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: Spacing.xs,
   },
-  arrowSeparator: {
-    width: 1,
-    height: 18,
-    backgroundColor: "#6B7280",
-    marginHorizontal: Spacing.xs,
+  bottomCluster: {
+    position: "absolute",
+    right: 8,
+    bottom: 8,
+    flexDirection: "row",
+    alignItems: "flex-end",
+    gap: 8,
   },
-  arrowBtn: {
-    flexShrink: 0,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 6,
+  dpad: {
+    gap: 2,
+  },
+  dpadRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 2,
+  },
+  dpadBtn: {
+    width: 32,
+    height: 32,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: Spacing.xs,
+    borderRadius: 6,
+  },
+  dpadCenter: {
+    width: 32,
+    height: 32,
+  },
+  runBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 8,
   },
   symbolButton: {
     flexShrink: 0,

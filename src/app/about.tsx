@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, Pressable, Linking, StyleSheet } from "react-native";
 import { WebView } from "react-native-webview";
 import Svg, { Path } from "react-native-svg";
 import { Colors } from "../constants/Colors";
@@ -17,22 +17,24 @@ const logoPaths = [
   "M124.086,45.836c-1.473-3.301-3.521-6.088-6.148-8.357c-2.626-2.268-5.711-4-9.252-5.193c-3.543-1.193-7.384-1.791-11.521-1.791c-1.513,0-3.204,0.082-5.074,0.238c-1.871,0.162-3.482,0.439-4.835,0.838l0.835-18.268h34.504V0.41H74.481l-1.433,46.201c1.271-0.635,2.725-1.232,4.357-1.791c1.631-0.555,3.302-1.053,5.014-1.49c1.711-0.438,3.463-0.775,5.254-1.016c1.791-0.238,3.481-0.357,5.074-0.357c2.307,0,4.576,0.258,6.805,0.775c2.228,0.518,4.238,1.434,6.029,2.746s3.242,3.045,4.358,5.193c1.113,2.148,1.671,4.855,1.671,8.119c0,2.547-0.418,4.836-1.254,6.865c-0.835,2.027-1.97,3.721-3.401,5.072c-1.434,1.355-3.104,2.389-5.016,3.104c-1.91,0.719-3.939,1.076-6.089,1.076c-3.819,0-7.124-1.016-9.909-3.045c-2.787-2.029-4.775-4.715-5.97-8.059l-0.159,0.059l-10.368,9.715c2.097,3.42,4.8,6.281,8.14,8.553c4.854,3.301,10.823,4.955,17.909,4.955c4.218,0,8.197-0.678,11.938-2.029c3.74-1.352,7.004-3.303,9.79-5.852c2.785-2.545,4.994-5.67,6.627-9.371c1.63-3.701,2.446-7.898,2.446-12.596C126.295,52.939,125.559,49.141,124.086,45.836z",
 ];
 
-const PROCESSING_SKETCH = `function setup() {
-  createCanvas(250, 250);
-}
-function draw() {
-  var u = width / 8;
-  background(255);
-  strokeCap(SQUARE);
-  strokeWeight(1.5 * u);
-  stroke(5, 100, 255);
-  bezier(4*u, 1*u, 7*u, 1*u, 7*u, 5*u, 4*u, 5*u);
-  stroke(30, 50, 170);
-  line(1*u, 6*u, 4*u, 2*u);
-  stroke(130, 175, 255);
-  line(1*u, 3*u, 2*u, 5*u);
-  noLoop();
-}`;
+const PROCESSING_SKETCH = `new p5(function(p) {
+  p.setup = function() {
+    p.createCanvas(250, 250);
+  };
+  p.draw = function() {
+    var u = p.width / 8;
+    p.background(255);
+    p.strokeCap(p.SQUARE);
+    p.strokeWeight(1.5 * u);
+    p.stroke(5, 100, 255);
+    p.bezier(4*u, 1*u, 7*u, 1*u, 7*u, 5*u, 4*u, 5*u);
+    p.stroke(30, 50, 170);
+    p.line(1*u, 6*u, 4*u, 2*u);
+    p.stroke(130, 175, 255);
+    p.line(1*u, 3*u, 2*u, 5*u);
+    p.noLoop();
+  };
+});`;
 
 function buildProcessingHtml(): string {
   return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><style>*{margin:0;padding:0;box-sizing:border-box}html,body{width:100%;height:100%;overflow:hidden;background:transparent;display:flex;align-items:center;justify-content:center}canvas{display:block}</style></head><body><script>' + p5Source + '<\/script><script>' + PROCESSING_SKETCH.replace(/<\/script>/gi, '<\\/script>') + '<\/script></body></html>';
@@ -75,10 +77,11 @@ export default function About() {
 
         </Text>
         <View style={styles.footer}>
-          <Text style={[styles.footerMono, { color: colors.textSecondary }]}>
-            <a href="https://processing.org" >  What's Processing ?
-            </a>
-          </Text>
+          <Pressable onPress={() => Linking.openURL("https://processing.org")}>
+            <Text style={[styles.footerMono, { color: colors.primary }]}>
+              {"  "}What's Processing ?
+            </Text>
+          </Pressable>
         </View>
       </View>
     </View>
