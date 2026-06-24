@@ -1,4 +1,4 @@
-import { CODEMIRROR_BUNDLE } from "./codemirror-bundle.generated";
+import { importMap } from "./importmap";
 import { p5Source } from "../p5Source";
 import { P5_FUNCTION_NAMES } from "../../data/p5Symbols";
 import { Colors } from "../../constants/Colors";
@@ -345,8 +345,10 @@ ${
 <div class="scroll-whitespace"></div>
 
 <script>${p5Source}</script>
-<script>${CODEMIRROR_BUNDLE}</script>
-<script>
+<script type="importmap">
+${JSON.stringify({ imports: importMap }, null, 2)}
+</script>
+<script type="module">
 ${getBridgeScript(params.startingCode, params.solution, editorBg, params.colorScheme, params.exerciseNumber, fontSize)}
 </script>
 
@@ -385,63 +387,41 @@ function getBridgeScript(startingCode: string, solution: string, editorBg: strin
   const constColor = isDark ? '#FF4F75' : '#D31D4E';
 
   return `
-var _CM, basicSetup, EditorView, EditorState, keymap, syntaxHighlighting, HighlightStyle, javascript, tags, indentSelection, syntaxTree, ViewPlugin, Decoration, DecorationSet, CM_READY = false;
-try {
-  _CM = CM;
-  basicSetup = _CM.basicSetup;
-  EditorView = _CM.EditorView;
-  EditorState = _CM.EditorState;
-  keymap = _CM.keymap;
-  syntaxHighlighting = _CM.syntaxHighlighting;
-  HighlightStyle = _CM.HighlightStyle;
-  javascript = _CM.javascript;
-  tags = _CM.tags;
-  indentSelection = _CM.indentSelection;
-  syntaxTree = _CM.syntaxTree;
-  ViewPlugin = _CM.ViewPlugin;
-  Decoration = _CM.Decoration;
-  DecorationSet = _CM.DecorationSet;
-  CM_READY = true;
-} catch(e) {}
-
 let view;
 const INITIAL_CODE = ${codeArg};
 const SOLUTION_CODE = ${solutionArg};
 const CODE_FONT_SIZE = ${codeFontSize ?? 22};
 const EDITOR_BG = '${editorBg}';
+let CM_READY = false;
 
-var p5FnPlugin = null;
-if (CM_READY) {
-  var p5FnMark = Decoration.mark({ class: 'cm-p5-fn' });
-  function computeP5Decos(v) {
-    var decos = [];
-    syntaxTree(v.state).iterate({
-      enter: function(n) {
-        if (n.name === 'CallExpression' || n.name === 'NewExpression') {
-          var callee = n.node.firstChild;
-          if (callee && callee.name === 'Identifier') {
-            var name = v.state.sliceDoc(callee.from, callee.to);
-            if (${JSON.stringify(P5_FUNCTION_NAMES)}.indexOf(name) >= 0) {
-              decos.push(p5FnMark.range(callee.from, callee.to));
-            }
-          }
-        }
-      }
-    });
-    return DecorationSet.create(v.state, decos);
+(async function() {
+  let basicSetup, EditorView, EditorState, keymap, syntaxHighlighting, HighlightStyle, javascript, tags, indentSelection, syntaxTree, ViewPlugin, Decoration, DecorationSet;
+  try {
+    const cm = await import('codemirror');
+    basicSetup = cm.basicSetup;
+    const viewMod = await import('@codemirror/view');
+    EditorView = viewMod.EditorView;
+    keymap = viewMod.keymap;
+    ViewPlugin = viewMod.ViewPlugin;
+    Decoration = viewMod.Decoration;
+    DecorationSet = viewMod.DecorationSet;
+    const stateMod = await import('@codemirror/state');
+    EditorState = stateMod.EditorState;
+    const langMod = await import('@codemirror/language');
+    syntaxHighlighting = langMod.syntaxHighlighting;
+    HighlightStyle = langMod.HighlightStyle;
+    syntaxTree = langMod.syntaxTree;
+    const jsMod = await import('@codemirror/lang-javascript');
+    javascript = jsMod.javascript;
+    const cmdMod = await import('@codemirror/commands');
+    indentSelection = cmdMod.indentSelection;
+    const hlMod = await import('@lezer/highlight');
+    tags = hlMod.tags;
+    CM_READY = true;
+  } catch(e) {
+    console.error('CM load failed:', e);
   }
-  function P5FnPlugin(view) { this.decorations = computeP5Decos(view); }
-  P5FnPlugin.prototype.update = function(update) {
-    if (update.docChanged || update.viewportChanged) {
-      this.decorations = computeP5Decos(update.view);
-    }
-  };
-  p5FnPlugin = ViewPlugin.fromClass(P5FnPlugin, {
-    decorations: function(v) { return v.decorations; }
-  });
-}
 
-function initEditor() {
   if (!CM_READY) {
     var editorEl = document.getElementById('editor');
     if (editorEl) {
@@ -451,7 +431,36 @@ function initEditor() {
     postEditorReady();
     return;
   }
+
   try {
+    var p5FnMark = Decoration.mark({ class: 'cm-p5-fn' });
+    function computeP5Decos(v) {
+      var decos = [];
+      syntaxTree(v.state).iterate({
+        enter: function(n) {
+          if (n.name === 'CallExpression' || n.name === 'NewExpression') {
+            var callee = n.node.firstChild;
+            if (callee && callee.name === 'Identifier') {
+              var name = v.state.sliceDoc(callee.from, callee.to);
+              if (${JSON.stringify(P5_FUNCTION_NAMES)}.indexOf(name) >= 0) {
+                decos.push(p5FnMark.range(callee.from, callee.to));
+              }
+            }
+          }
+        }
+      });
+      return DecorationSet.create(v.state, decos);
+    }
+    function P5FnPlugin(view) { this.decorations = computeP5Decos(view); }
+    P5FnPlugin.prototype.update = function(update) {
+      if (update.docChanged || update.viewportChanged) {
+        this.decorations = computeP5Decos(update.view);
+      }
+    };
+    var p5FnPlugin = ViewPlugin.fromClass(P5FnPlugin, {
+      decorations: function(v) { return v.decorations; }
+    });
+
     const p5Theme = EditorView.theme({
       '&': { backgroundColor: '${editorBg}', color: '${fg}' },
       '.cm-content': { caretColor: '#ED225D', fontFamily: "'JetBrains Mono', monospace" },
@@ -533,7 +542,7 @@ function initEditor() {
     postReady();
     postEditorReady();
   }
-}
+})();
 
 function postCodeChange(code) {
   if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {

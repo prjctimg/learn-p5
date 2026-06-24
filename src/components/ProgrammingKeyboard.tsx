@@ -45,7 +45,7 @@ const pairedSymbols: PairedSymbol[] = [
 ];
 
 const singleSymbols = [
-  ";", ",", "=", "+", "-", "*", "/", ".",
+  ".", ";", ",", "=", "+", "-", "*", "/",
 ];
 
 interface ProgrammingKeyboardProps {
@@ -115,96 +115,90 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
 
   return (
     <View style={[styles.container, { backgroundColor: colors.surfaceContainerLow, height }]}>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.symbolsRow}
-        contentContainerStyle={styles.symbolsContent}
-      >
-        <Pressable
-          onPress={keyboardVisible ? onRequestSystemKeyboard : onToggleKeyboard}
-          style={({ pressed }) => [
-            styles.keyboardIcon,
-            { backgroundColor: pressed ? colors.primaryContainer : colors.primaryContainer + "33" },
-          ]}
-          accessibilityRole="button"
-          accessibilityLabel={keyboardVisible ? "Show system keyboard" : "Show in-app keyboard"}
+      <View style={styles.toolbarRow}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.symbolsRow}
+          contentContainerStyle={styles.symbolsContent}
         >
-          <MaterialCommunityIcons name={keyboardVisible ? "keyboard-outline" : "keyboard-variant"} size={20} color="#ED225D" />
-        </Pressable>
-        <Pressable
-          onPress={onBackspace}
-          style={({ pressed }) => [
-            styles.editorBtn,
-            { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
-          ]}
-          accessibilityRole="button"
-          accessibilityLabel="Backspace"
-        >
-          <MaterialCommunityIcons name="backspace" size={18} color={colors.onSurfaceVariant} />
-        </Pressable>
-        <Pressable
-          onPress={onNewline}
-          style={({ pressed }) => [
-            styles.editorBtn,
-            { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
-          ]}
-          accessibilityRole="button"
-          accessibilityLabel="New line"
-        >
-          <MaterialCommunityIcons name="keyboard-return" size={18} color={colors.onSurfaceVariant} />
-        </Pressable>
-        <Pressable
-          onPress={onFormat}
-          style={({ pressed }) => [
-            styles.editorBtn,
-            { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
-          ]}
-          accessibilityRole="button"
-          accessibilityLabel="Format code"
-        >
-          <MaterialCommunityIcons name="code-tags" size={18} color={colors.onSurfaceVariant} />
-        </Pressable>
-        {pairedSymbols.map((pair) => {
-          const hinted = pair.hintTrigger && pair.hintTrigger === hintType;
-          return (
-            <Pressable
-              key={pair.display}
-              onPress={() => handlePairedPress(pair)}
-              style={({ pressed }) => [
-                styles.symbolButton,
-                {
-                  backgroundColor: hinted
-                    ? pressed ? colors.primaryContainer : colors.primaryContainer + "4D"
-                    : pressed ? colors.outlineVariant : colors.surfaceContainer,
-                },
-              ]}
-              accessibilityRole="button"
-              accessibilityLabel={pair.display}
-            >
-              <Text style={[styles.symbolText, { color: hinted ? colors.primary : colors.onSurfaceVariant }]}>
-                {pair.display}
-              </Text>
-            </Pressable>
-          );
-        })}
-        {singleSymbols.map((sym) => (
           <Pressable
-            key={sym}
-            onPress={() => handleSinglePress(sym)}
+            onPress={keyboardVisible ? onRequestSystemKeyboard : onToggleKeyboard}
             style={({ pressed }) => [
-              styles.symbolButton,
+              styles.keyboardIcon,
+              { backgroundColor: pressed ? colors.primaryContainer : colors.primaryContainer + "33" },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel={keyboardVisible ? "Show system keyboard" : "Show in-app keyboard"}
+          >
+            <MaterialCommunityIcons name={keyboardVisible ? "keyboard-outline" : "keyboard-variant"} size={20} color="#ED225D" />
+          </Pressable>
+          <Pressable
+            onPress={onFormat}
+            style={({ pressed }) => [
+              styles.keyboardIcon,
               { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
             ]}
             accessibilityRole="button"
-            accessibilityLabel={sym}
+            accessibilityLabel="Format code"
           >
-            <Text style={[styles.symbolText, { color: colors.onSurfaceVariant }]}>
-              {sym}
-            </Text>
+            <MaterialCommunityIcons name="code-tags" size={18} color={colors.onSurfaceVariant} />
           </Pressable>
-        ))}
-      </ScrollView>
+          {pairedSymbols.map((pair) => {
+            const hinted = pair.hintTrigger && pair.hintTrigger === hintType;
+            return (
+              <Pressable
+                key={pair.display}
+                onPress={() => handlePairedPress(pair)}
+                style={({ pressed }) => [
+                  styles.symbolButton,
+                  {
+                    backgroundColor: hinted
+                      ? pressed ? colors.primaryContainer : colors.primaryContainer + "4D"
+                      : pressed ? colors.outlineVariant : colors.surfaceContainer,
+                  },
+                ]}
+                accessibilityRole="button"
+                accessibilityLabel={pair.display}
+              >
+                <Text style={[styles.symbolText, { color: hinted ? colors.primary : colors.onSurfaceVariant }]}>
+                  {pair.display}
+                </Text>
+              </Pressable>
+            );
+          })}
+          {singleSymbols.map((sym) => (
+            <Pressable
+              key={sym}
+              onPress={() => handleSinglePress(sym)}
+              style={({ pressed }) => [
+                styles.symbolButton,
+                { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel={sym}
+            >
+              <Text style={[styles.symbolText, { color: colors.onSurfaceVariant }]}>
+                {sym}
+              </Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+        <Pressable
+          onPress={onRun}
+          disabled={isRunning}
+          style={[styles.toolbarRunBtn, { backgroundColor: colors.primary }]}
+          accessibilityRole="button"
+          accessibilityLabel="Run sketch"
+          accessibilityState={{ disabled: isRunning }}
+        >
+          <MaterialCommunityIcons
+            name={isRunning ? "reload" : "play"}
+            size={20}
+            color="#FFFFFF"
+          />
+        </Pressable>
+      </View>
 
       {exerciseSymbols.length > 0 && (
         <View style={styles.exerciseRow}>
@@ -270,7 +264,7 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
               accessibilityRole="button"
               accessibilityLabel="Move cursor up"
             >
-              <MaterialCommunityIcons name="chevron-up" size={18} color={colors.onSurfaceVariant} />
+              <MaterialCommunityIcons name="chevron-up" size={20} color={colors.onSurfaceVariant} />
             </Pressable>
           </View>
           <View style={styles.dpadRow}>
@@ -283,7 +277,7 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
               accessibilityRole="button"
               accessibilityLabel="Move cursor left"
             >
-              <MaterialCommunityIcons name="chevron-left" size={18} color={colors.onSurfaceVariant} />
+              <MaterialCommunityIcons name="chevron-left" size={20} color={colors.onSurfaceVariant} />
             </Pressable>
             <View style={styles.dpadCenter} />
             <Pressable
@@ -295,7 +289,7 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
               accessibilityRole="button"
               accessibilityLabel="Move cursor right"
             >
-              <MaterialCommunityIcons name="chevron-right" size={18} color={colors.onSurfaceVariant} />
+              <MaterialCommunityIcons name="chevron-right" size={20} color={colors.onSurfaceVariant} />
             </Pressable>
           </View>
           <View style={styles.dpadRow}>
@@ -308,27 +302,31 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
               accessibilityRole="button"
               accessibilityLabel="Move cursor down"
             >
-              <MaterialCommunityIcons name="chevron-down" size={18} color={colors.onSurfaceVariant} />
+              <MaterialCommunityIcons name="chevron-down" size={20} color={colors.onSurfaceVariant} />
             </Pressable>
           </View>
         </View>
         <Pressable
-          onPress={onRun}
-          disabled={isRunning}
+          onPress={onBackspace}
           style={({ pressed }) => [
-            styles.runBtn,
-            { backgroundColor: colors.primary },
-            pressed && { opacity: 0.8 },
+            styles.actionBtn,
+            { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
           ]}
           accessibilityRole="button"
-          accessibilityLabel="Run sketch"
-          accessibilityState={{ disabled: isRunning }}
+          accessibilityLabel="Backspace"
         >
-          <MaterialCommunityIcons
-            name={isRunning ? "reload" : "play"}
-            size={24}
-            color="#FFFFFF"
-          />
+          <MaterialCommunityIcons name="backspace" size={22} color={colors.onSurfaceVariant} />
+        </Pressable>
+        <Pressable
+          onPress={onNewline}
+          style={({ pressed }) => [
+            styles.actionBtn,
+            { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
+          ]}
+          accessibilityRole="button"
+          accessibilityLabel="New line"
+        >
+          <MaterialCommunityIcons name="keyboard-return" size={22} color={colors.onSurfaceVariant} />
         </Pressable>
       </View>
 
@@ -384,14 +382,30 @@ const popupTextStyles = StyleSheet.create({
 const styles = StyleSheet.create({
   container: {
   },
+  toolbarRow: {
+    flexDirection: "row",
+    position: "relative",
+  },
   symbolsRow: {
     maxHeight: 44,
+    flex: 1,
+    paddingRight: 48,
   },
   symbolsContent: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: Spacing.sm,
     gap: Spacing.xs,
+  },
+  toolbarRunBtn: {
+    position: "absolute",
+    right: 6,
+    top: 6,
+    bottom: 6,
+    width: 40,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
   },
   keyboardIcon: {
     flexShrink: 0,
@@ -401,52 +415,39 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: Spacing.xs,
   },
-  editorBtn: {
-    flexShrink: 0,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: Spacing.xs,
-  },
   bottomCluster: {
     position: "absolute",
-    right: 8,
-    bottom: 8,
+    right: 12,
+    bottom: 12,
     flexDirection: "row",
     alignItems: "flex-end",
-    gap: 8,
+    gap: 12,
   },
   dpad: {
-    gap: 2,
+    gap: 3,
   },
   dpadRow: {
     flexDirection: "row",
     justifyContent: "center",
-    gap: 2,
+    gap: 3,
   },
   dpadBtn: {
-    width: 32,
-    height: 32,
+    width: 44,
+    height: 44,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 6,
+    borderRadius: 8,
   },
   dpadCenter: {
-    width: 32,
-    height: 32,
+    width: 44,
+    height: 44,
   },
-  runBtn: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+  actionBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 8,
   },
   symbolButton: {
     flexShrink: 0,
