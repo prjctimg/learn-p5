@@ -1,5 +1,5 @@
 import { useMemo, useState, useCallback, useRef, useEffect } from "react";
-import { View, Text, Pressable, ScrollView, StyleSheet, Animated, Modal } from "react-native";
+import { View, Text, Pressable, ScrollView, StyleSheet, Animated } from "react-native";
 import { useRouter, useFocusEffect } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useThemeContext } from "../components/ThemeProvider";
@@ -7,8 +7,6 @@ import { Colors } from "../constants/Colors";
 import Header from "../components/Header";
 import { loadAllCourses } from "../utils/courseLoader";
 import { Lesson, Course } from "../data/types";
-
-const GREETING_KEY = "last_greeting_date";
 
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -60,7 +58,6 @@ export default function Dashboard() {
   }, [courses, nextExercise]);
 
   const greeting = useMemo(() => getGreeting(), []);
-  const [showGreetingModal, setShowGreetingModal] = useState(false);
 
   const progressAnim = useRef(new Animated.Value(0)).current;
 
@@ -77,22 +74,6 @@ export default function Dashboard() {
       useNativeDriver: false,
     }).start();
   }, [progress, progressAnim]);
-
-  useFocusEffect(
-    useCallback(() => {
-      AsyncStorage.getItem(GREETING_KEY).then((val) => {
-        const today = new Date().toDateString();
-        if (val !== today) {
-          setShowGreetingModal(true);
-        }
-      });
-    }, [])
-  );
-
-  const dismissGreeting = useCallback(() => {
-    setShowGreetingModal(false);
-    AsyncStorage.setItem(GREETING_KEY, new Date().toDateString());
-  }, []);
 
   const progressWidth = progressAnim.interpolate({
     inputRange: [0, 1],
@@ -268,50 +249,6 @@ export default function Dashboard() {
           color: colors.textSecondary,
           textAlign: "center",
         },
-        modalOverlay: {
-          flex: 1,
-          backgroundColor: "rgba(0,0,0,0.55)",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 32,
-        },
-        modalCard: {
-          width: "100%",
-          backgroundColor: colors.surfaceContainerHighest,
-          borderRadius: 16,
-          padding: 28,
-          alignItems: "center",
-        },
-        modalGreeting: {
-          fontFamily: "SpaceGrotesk",
-          fontSize: 28,
-          fontWeight: "700",
-          color: colors.onSurface,
-          textAlign: "center",
-        },
-        modalMessage: {
-          fontFamily: "Inter",
-          fontSize: 16,
-          color: colors.onSurfaceVariant,
-          textAlign: "center",
-          marginTop: 8,
-          lineHeight: 22,
-        },
-        modalButton: {
-          marginTop: 24,
-          backgroundColor: colors.primary,
-          borderRadius: 8,
-          paddingHorizontal: 28,
-          paddingVertical: 12,
-        },
-        modalButtonText: {
-          fontFamily: "JetBrainsMono",
-          fontSize: 13,
-          fontWeight: "700",
-          textTransform: "uppercase",
-          letterSpacing: 0.5,
-          color: colors.onPrimary,
-        },
       }),
     [colorScheme]
   );
@@ -319,30 +256,6 @@ export default function Dashboard() {
   return (
     <View style={styles.container}>
       <Header title="Dashboard" />
-      <Modal
-        visible={showGreetingModal}
-        transparent
-        animationType="fade"
-        onRequestClose={dismissGreeting}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalGreeting}>{greeting}, Coder!</Text>
-            <Text style={styles.modalMessage}>
-              Ready to continue your p5.js journey?
-            </Text>
-            <Pressable
-              onPress={dismissGreeting}
-              style={({ pressed }) => [
-                styles.modalButton,
-                pressed && { opacity: 0.8 },
-              ]}
-            >
-              <Text style={styles.modalButtonText}>Let's Code</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
       <ScrollView
         style={styles.inner}
         contentContainerStyle={{ paddingBottom: 32 }}

@@ -1,8 +1,7 @@
-import { importMap } from "./importmap";
 import { p5Source } from "../p5Source";
 import { P5_FUNCTION_NAMES, P5_SYMBOLS } from "../../data/p5Symbols";
 import { Colors } from "../../constants/Colors";
-import { CODEMIRROR_BUNDLE } from "./codemirror-bundle.generated";
+import { buildImportMap } from "./cmCache";
 
 const SYMBOL_PATTERN = new RegExp(
   `\\b(${P5_FUNCTION_NAMES.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b(?=\\()`,
@@ -55,6 +54,7 @@ export function getExerciseHtml(params: {
   colorScheme: "light" | "dark";
   codeBackground?: string;
   codeFontSize?: number;
+  cachedSources?: Record<string, string> | null;
 }): string {
   const colors = Colors[params.colorScheme === "dark" ? "dark" : "light"];
   const editorBg = params.codeBackground && params.codeBackground !== "auto" ? params.codeBackground : colors.surfaceContainerLowest;
@@ -349,9 +349,8 @@ ${
 <div class="scroll-whitespace"></div>
 
 <script>${p5Source}</script>
-<script>${CODEMIRROR_BUNDLE}</script>
 <script type="importmap">
-${JSON.stringify({ imports: importMap }, null, 2)}
+${buildImportMap(params.cachedSources ?? null)}
 </script>
 <script type="module">
 ${getBridgeScript(params.startingCode, params.solution, editorBg, params.colorScheme, params.exerciseNumber, fontSize)}
@@ -402,45 +401,28 @@ let CM_READY = false;
 (async function() {
   let basicSetup, EditorView, EditorState, keymap, syntaxHighlighting, HighlightStyle, javascript, tags, indentSelection, syntaxTree, ViewPlugin, Decoration, DecorationSet, autocompletion;
   try {
-    if (typeof CM !== 'undefined') {
-      basicSetup = CM.basicSetup;
-      EditorView = CM.EditorView;
-      EditorState = CM.EditorState;
-      keymap = CM.keymap;
-      syntaxHighlighting = CM.syntaxHighlighting;
-      HighlightStyle = CM.HighlightStyle;
-      syntaxTree = CM.syntaxTree;
-      javascript = CM.javascript;
-      indentSelection = CM.indentSelection;
-      tags = CM.tags;
-      ViewPlugin = CM.ViewPlugin;
-      Decoration = CM.Decoration;
-      DecorationSet = CM.DecorationSet;
-      autocompletion = CM.autocompletion;
-    } else {
-      const cm = await import('codemirror');
-      basicSetup = cm.basicSetup;
-      const viewMod = await import('@codemirror/view');
-      EditorView = viewMod.EditorView;
-      keymap = viewMod.keymap;
-      ViewPlugin = viewMod.ViewPlugin;
-      Decoration = viewMod.Decoration;
-      DecorationSet = viewMod.DecorationSet;
-      const stateMod = await import('@codemirror/state');
-      EditorState = stateMod.EditorState;
-      const langMod = await import('@codemirror/language');
-      syntaxHighlighting = langMod.syntaxHighlighting;
-      HighlightStyle = langMod.HighlightStyle;
-      syntaxTree = langMod.syntaxTree;
-      const jsMod = await import('@codemirror/lang-javascript');
-      javascript = jsMod.javascript;
-      const cmdMod = await import('@codemirror/commands');
-      indentSelection = cmdMod.indentSelection;
-      const acMod = await import('@codemirror/autocomplete');
-      autocompletion = acMod.autocompletion;
-      const hlMod = await import('@lezer/highlight');
-      tags = hlMod.tags;
-    }
+    const cm = await import('codemirror');
+    basicSetup = cm.basicSetup;
+    const viewMod = await import('@codemirror/view');
+    EditorView = viewMod.EditorView;
+    keymap = viewMod.keymap;
+    ViewPlugin = viewMod.ViewPlugin;
+    Decoration = viewMod.Decoration;
+    DecorationSet = viewMod.DecorationSet;
+    const stateMod = await import('@codemirror/state');
+    EditorState = stateMod.EditorState;
+    const langMod = await import('@codemirror/language');
+    syntaxHighlighting = langMod.syntaxHighlighting;
+    HighlightStyle = langMod.HighlightStyle;
+    syntaxTree = langMod.syntaxTree;
+    const jsMod = await import('@codemirror/lang-javascript');
+    javascript = jsMod.javascript;
+    const cmdMod = await import('@codemirror/commands');
+    indentSelection = cmdMod.indentSelection;
+    const acMod = await import('@codemirror/autocomplete');
+    autocompletion = acMod.autocompletion;
+    const hlMod = await import('@lezer/highlight');
+    tags = hlMod.tags;
     CM_READY = true;
   } catch(e) {
     console.error('CM load failed:', e);

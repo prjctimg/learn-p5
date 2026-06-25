@@ -88,10 +88,41 @@ export default function Exercise() {
   const [codeBackground, setCodeBackground] = useState<string | undefined>(undefined);
   const [codeFontSize, setCodeFontSize] = useState<number>(22);
   const [keyboardHeight, setKeyboardHeight] = useState<string>("medium");
+  const [toastKey, setToastKey] = useState(0);
   const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastActionLabel, setToastActionLabel] = useState<string | undefined>(undefined);
+  const toastActionRef = useRef<(() => void) | undefined>(undefined);
+  const [cachedSources, setCachedSources] = useState<Record<string, string> | null | undefined>(undefined);
+
+  useEffect(() => {
+    import("../../../utils/editor/cmCache").then((mod) =>
+      mod.getCachedSources().then((s) => {
+        if (s) {
+          setCachedSources(s);
+        } else {
+          setCachedSources(null);
+          showToast("Fetching extra resources…");
+          mod.fetchAndCacheSources().then((result) => {
+            setCachedSources(result);
+            setToastVisible(false);
+          });
+        }
+      })
+    );
+  }, []);
+
+  const showToast = useCallback((message: string, actionLabel?: string, onAction?: () => void) => {
+    setToastMessage(message);
+    setToastActionLabel(actionLabel);
+    toastActionRef.current = onAction;
+    setToastKey((k) => k + 1);
+    setToastVisible(true);
+  }, []);
 
   const exerciseHtml = useMemo(() => {
     if (!state.exercise) return null;
+    if (cachedSources === undefined) return null;
     return getExerciseHtml({
       title: state.exercise.title,
       moduleName: state.exercise.module,
@@ -102,8 +133,9 @@ export default function Exercise() {
       colorScheme: colorScheme === "dark" ? "dark" : "light",
       codeBackground,
       codeFontSize,
+      cachedSources,
     });
-  }, [state.exercise, colorScheme, id, codeBackground, codeFontSize]);
+  }, [state.exercise, colorScheme, id, codeBackground, codeFontSize, cachedSources]);
 
   const styles = useMemo(
     () =>
@@ -381,7 +413,7 @@ export default function Exercise() {
       }
     });
 
-    setToastVisible(true);
+    showToast("✓ Exercise completed!", "Next →", handleToastNext);
 
     loadCourse(course).then((courseData) => {
       if (!courseData) return;
@@ -504,10 +536,11 @@ export default function Exercise() {
       )}
 
       <Toast
+        key={toastKey}
         visible={toastVisible}
-        message="✓ Exercise completed!"
-        actionLabel="Next →"
-        onAction={handleToastNext}
+        message={toastMessage}
+        actionLabel={toastActionLabel}
+        onAction={toastActionRef.current}
         onDismiss={() => setToastVisible(false)}
       />
 
@@ -525,7 +558,7 @@ export default function Exercise() {
           isRunning={state.isRunning}
           keyboardVisible={keyboardVisible}
           usedFunctions={usedFunctions}
-          height={keyboardHeight === "small" ? 180 : keyboardHeight === "tall" ? 320 : 240}
+          height={keyboardHeight === "small" ? 230 : keyboardHeight === "tall" ? 360 : 280}
         />
       )}
 

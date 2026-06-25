@@ -66,24 +66,23 @@ interface ProgrammingKeyboardProps {
   height?: number;
 }
 
-export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], onToggleKeyboard, onRequestSystemKeyboard, onBackspace, onNewline, onFormat, onRun, isRunning, onCursorMove, keyboardVisible = true, usedFunctions = [], height = 240 }: ProgrammingKeyboardProps) {
+export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], onToggleKeyboard, onRequestSystemKeyboard, onBackspace, onNewline, onFormat, onRun, isRunning, onCursorMove, keyboardVisible = true, usedFunctions = [], height = 280 }: ProgrammingKeyboardProps) {
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
   const [hintType, setHintType] = useState<"string" | "array" | null>(null);
   const [popupSymbol, setPopupSymbol] = useState<string | null>(null);
-  const popupScale = useRef(new Animated.Value(0)).current;
+  const popupAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (popupSymbol) {
-      popupScale.setValue(0);
-      Animated.spring(popupScale, {
+      popupAnim.setValue(0);
+      Animated.timing(popupAnim, {
         toValue: 1,
-        damping: 8,
-        stiffness: 200,
+        duration: 120,
         useNativeDriver: true,
       }).start();
     }
-  }, [popupSymbol, popupScale]);
+  }, [popupSymbol, popupAnim]);
 
   const handleFunctionPress = useCallback((fn: P5FunctionDef) => {
     const parenIndex = fn.insert.indexOf("()");
@@ -259,31 +258,32 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
         })}
       </View>
 
+      <View style={styles.actionRow}>
+        <Pressable
+          onPress={onBackspace}
+          style={({ pressed }) => [
+            styles.actionBtn,
+            { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
+          ]}
+          accessibilityRole="button"
+          accessibilityLabel="Backspace"
+        >
+          <MaterialCommunityIcons name="backspace" size={22} color={colors.onSurfaceVariant} />
+        </Pressable>
+        <Pressable
+          onPress={onNewline}
+          style={({ pressed }) => [
+            styles.actionBtn,
+            { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
+          ]}
+          accessibilityRole="button"
+          accessibilityLabel="New line"
+        >
+          <MaterialCommunityIcons name="keyboard-return" size={22} color={colors.onSurfaceVariant} />
+        </Pressable>
+      </View>
+
       <View style={styles.bottomCluster}>
-        <View style={styles.bottomLeft}>
-          <Pressable
-            onPress={onBackspace}
-            style={({ pressed }) => [
-              styles.actionBtn,
-              { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel="Backspace"
-          >
-            <MaterialCommunityIcons name="backspace" size={22} color={colors.onSurfaceVariant} />
-          </Pressable>
-          <Pressable
-            onPress={onNewline}
-            style={({ pressed }) => [
-              styles.actionBtn,
-              { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel="New line"
-          >
-            <MaterialCommunityIcons name="keyboard-return" size={22} color={colors.onSurfaceVariant} />
-          </Pressable>
-        </View>
         <View style={styles.dpad}>
           <View style={styles.dpadRow}>
             <Pressable
@@ -341,7 +341,7 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
 
       <Modal transparent visible={popupSymbol !== null} onRequestClose={() => setPopupSymbol(null)}>
         <Pressable style={styles.popupOverlay} onPress={() => setPopupSymbol(null)}>
-          <Animated.View style={[styles.popupCard, { backgroundColor: colors.surfaceContainerHigh, transform: [{ scale: popupScale }] }]}>
+          <Animated.View style={[styles.popupCard, { backgroundColor: colors.surfaceContainerHigh, opacity: popupAnim, transform: [{ scale: popupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) }] }]}>
             {popupSymbol && (() => {
               const ref = P5_SYMBOLS.find(s => s.name === popupSymbol);
               return ref ? (
@@ -424,18 +424,20 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: Spacing.xs,
   },
+  actionRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: Spacing.xs,
+  },
   bottomCluster: {
     position: "absolute",
     left: 12,
     right: 12,
-    bottom: 12,
+    bottom: 24,
     flexDirection: "row",
     alignItems: "flex-end",
-    justifyContent: "space-between",
-  },
-  bottomLeft: {
-    flexDirection: "row",
-    gap: 8,
+    justifyContent: "flex-end",
   },
   dpad: {
     gap: 3,
