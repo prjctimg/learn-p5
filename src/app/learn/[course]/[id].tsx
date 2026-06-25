@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useReducer, useMemo, useCallback } from "react";
 import { View, Text, Pressable, StyleSheet, Keyboard } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -354,17 +354,19 @@ export default function Exercise() {
     };
   }, []);
 
-  useEffect(() => {
-    AsyncStorage.getItem("setting_codeBackground").then((val) => {
-      if (val) setCodeBackground(val);
-    });
-    AsyncStorage.getItem("setting_codeFontSize").then((val) => {
-      if (val) setCodeFontSize(parseInt(val, 10));
-    });
-    AsyncStorage.getItem("setting_keyboardHeight").then((val) => {
-      if (val) setKeyboardHeight(val);
-    });
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      AsyncStorage.getItem("setting_codeBackground").then((val) => {
+        setCodeBackground(val || undefined);
+      });
+      AsyncStorage.getItem("setting_codeFontSize").then((val) => {
+        setCodeFontSize(val ? parseInt(val, 10) : 22);
+      });
+      AsyncStorage.getItem("setting_keyboardHeight").then((val) => {
+        setKeyboardHeight(val || "medium");
+      });
+    }, [])
+  );
 
   useEffect(() => {
     if (!state.completed || !state.exercise) return;

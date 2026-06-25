@@ -4,22 +4,34 @@ let view;
 (async function() {
   let basicSetup, EditorView, EditorState, keymap, javascript, syntaxHighlighting, HighlightStyle, tags, indentSelection;
   try {
-    const cm = await import('codemirror');
-    basicSetup = cm.basicSetup;
-    const viewMod = await import('@codemirror/view');
-    EditorView = viewMod.EditorView;
-    keymap = viewMod.keymap;
-    const stateMod = await import('@codemirror/state');
-    EditorState = stateMod.EditorState;
-    const langMod = await import('@codemirror/language');
-    syntaxHighlighting = langMod.syntaxHighlighting;
-    HighlightStyle = langMod.HighlightStyle;
-    const jsMod = await import('@codemirror/lang-javascript');
-    javascript = jsMod.javascript;
-    const cmdMod = await import('@codemirror/commands');
-    indentSelection = cmdMod.indentSelection;
-    const hlMod = await import('@lezer/highlight');
-    tags = hlMod.tags;
+    if (typeof CM !== 'undefined') {
+      basicSetup = CM.basicSetup;
+      EditorView = CM.EditorView;
+      EditorState = CM.EditorState;
+      keymap = CM.keymap;
+      javascript = CM.javascript;
+      syntaxHighlighting = CM.syntaxHighlighting;
+      HighlightStyle = CM.HighlightStyle;
+      tags = CM.tags;
+      indentSelection = CM.indentSelection;
+    } else {
+      const cm = await import('codemirror');
+      basicSetup = cm.basicSetup;
+      const viewMod = await import('@codemirror/view');
+      EditorView = viewMod.EditorView;
+      keymap = viewMod.keymap;
+      const stateMod = await import('@codemirror/state');
+      EditorState = stateMod.EditorState;
+      const langMod = await import('@codemirror/language');
+      syntaxHighlighting = langMod.syntaxHighlighting;
+      HighlightStyle = langMod.HighlightStyle;
+      const jsMod = await import('@codemirror/lang-javascript');
+      javascript = jsMod.javascript;
+      const cmdMod = await import('@codemirror/commands');
+      indentSelection = cmdMod.indentSelection;
+      const hlMod = await import('@lezer/highlight');
+      tags = hlMod.tags;
+    }
   } catch(e) {
     console.error('CM load failed:', e);
     var editorEl = document.getElementById('editor');

@@ -1,6 +1,7 @@
 import { importMap } from "./importmap";
 import { styles } from "./styles";
 import { bridgeScript } from "./bridge";
+import { CODEMIRROR_BUNDLE } from "./codemirror-bundle.generated";
 
 export function getEditorHtml(): string {
   return `<!DOCTYPE html>
@@ -19,6 +20,7 @@ export function getEditorHtml(): string {
   <div id="editor"></div>
 </div>
 
+<script>${CODEMIRROR_BUNDLE}<\/script>
 <script type="importmap">
 ${JSON.stringify({ imports: importMap }, null, 2)}
 <\/script>

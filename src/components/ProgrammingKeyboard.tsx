@@ -14,6 +14,8 @@ interface P5FunctionDef {
   disabled?: boolean;
 }
 
+const p5FunctionLabels = new Set(["setup", "draw", "createCanvas", "background", "fill", "circle", "stroke", "strokeWeight", "line", "rect", "ellipse", "noStroke"]);
+
 const p5Functions: P5FunctionDef[] = [
   { label: "setup", insert: "function setup() {\n  \n}", paramTypes: [] },
   { label: "draw", insert: "function draw() {\n  \n}", paramTypes: [] },
@@ -113,6 +115,10 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
     onInsert(sym + "()", 1);
   }, [onInsert]);
 
+  const handleExerciseLongPress = useCallback((sym: string) => {
+    setPopupSymbol(sym);
+  }, []);
+
   return (
     <View style={[styles.container, { backgroundColor: colors.surfaceContainerLow, height }]}>
       <View style={styles.toolbarRow}>
@@ -202,10 +208,11 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
 
       {exerciseSymbols.length > 0 && (
         <View style={styles.exerciseRow}>
-          {exerciseSymbols.map((sym) => (
+          {exerciseSymbols.filter(sym => !p5FunctionLabels.has(sym)).map((sym) => (
             <Pressable
               key={sym}
               onPress={() => handleExercisePress(sym)}
+              onLongPress={() => handleExerciseLongPress(sym)}
               style={({ pressed }) => [
                 styles.exerciseKey,
                 { backgroundColor: pressed ? colors.primaryContainer : colors.surfaceContainer },
@@ -253,6 +260,30 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
       </View>
 
       <View style={styles.bottomCluster}>
+        <View style={styles.bottomLeft}>
+          <Pressable
+            onPress={onBackspace}
+            style={({ pressed }) => [
+              styles.actionBtn,
+              { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Backspace"
+          >
+            <MaterialCommunityIcons name="backspace" size={22} color={colors.onSurfaceVariant} />
+          </Pressable>
+          <Pressable
+            onPress={onNewline}
+            style={({ pressed }) => [
+              styles.actionBtn,
+              { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="New line"
+          >
+            <MaterialCommunityIcons name="keyboard-return" size={22} color={colors.onSurfaceVariant} />
+          </Pressable>
+        </View>
         <View style={styles.dpad}>
           <View style={styles.dpadRow}>
             <Pressable
@@ -306,28 +337,6 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
             </Pressable>
           </View>
         </View>
-        <Pressable
-          onPress={onBackspace}
-          style={({ pressed }) => [
-            styles.actionBtn,
-            { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
-          ]}
-          accessibilityRole="button"
-          accessibilityLabel="Backspace"
-        >
-          <MaterialCommunityIcons name="backspace" size={22} color={colors.onSurfaceVariant} />
-        </Pressable>
-        <Pressable
-          onPress={onNewline}
-          style={({ pressed }) => [
-            styles.actionBtn,
-            { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
-          ]}
-          accessibilityRole="button"
-          accessibilityLabel="New line"
-        >
-          <MaterialCommunityIcons name="keyboard-return" size={22} color={colors.onSurfaceVariant} />
-        </Pressable>
       </View>
 
       <Modal transparent visible={popupSymbol !== null} onRequestClose={() => setPopupSymbol(null)}>
@@ -403,7 +412,7 @@ const styles = StyleSheet.create({
     top: 6,
     bottom: 6,
     width: 40,
-    borderRadius: 8,
+    borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -417,11 +426,16 @@ const styles = StyleSheet.create({
   },
   bottomCluster: {
     position: "absolute",
+    left: 12,
     right: 12,
     bottom: 12,
     flexDirection: "row",
     alignItems: "flex-end",
-    gap: 12,
+    justifyContent: "space-between",
+  },
+  bottomLeft: {
+    flexDirection: "row",
+    gap: 8,
   },
   dpad: {
     gap: 3,
