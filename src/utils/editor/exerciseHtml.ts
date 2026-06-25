@@ -1,7 +1,8 @@
 import { p5Source } from "../p5Source";
 import { P5_FUNCTION_NAMES, P5_SYMBOLS } from "../../data/p5Symbols";
 import { Colors } from "../../constants/Colors";
-import { buildImportMap } from "./cmCache";
+import { buildImportMapJson, buildCachedSetup } from "./cmCache";
+import { CODEMIRROR_BUNDLE } from "./codemirror-bundle.generated";
 
 const SYMBOL_PATTERN = new RegExp(
   `\\b(${P5_FUNCTION_NAMES.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b(?=\\()`,
@@ -349,9 +350,10 @@ ${
 <div class="scroll-whitespace"></div>
 
 <script>${p5Source}</script>
-<script type="importmap">
-${buildImportMap(params.cachedSources ?? null)}
-</script>
+<script>${CODEMIRROR_BUNDLE}</script>
+${params.cachedSources
+  ? buildCachedSetup(params.cachedSources)
+  : `<script type="importmap">${buildImportMapJson()}</script>`}
 <script type="module">
 ${getBridgeScript(params.startingCode, params.solution, editorBg, params.colorScheme, params.exerciseNumber, fontSize)}
 </script>
@@ -400,32 +402,51 @@ let CM_READY = false;
 
 (async function() {
   let basicSetup, EditorView, EditorState, keymap, syntaxHighlighting, HighlightStyle, javascript, tags, indentSelection, syntaxTree, ViewPlugin, Decoration, DecorationSet, autocompletion;
-  try {
-    const cm = await import('codemirror');
-    basicSetup = cm.basicSetup;
-    const viewMod = await import('@codemirror/view');
-    EditorView = viewMod.EditorView;
-    keymap = viewMod.keymap;
-    ViewPlugin = viewMod.ViewPlugin;
-    Decoration = viewMod.Decoration;
-    DecorationSet = viewMod.DecorationSet;
-    const stateMod = await import('@codemirror/state');
-    EditorState = stateMod.EditorState;
-    const langMod = await import('@codemirror/language');
-    syntaxHighlighting = langMod.syntaxHighlighting;
-    HighlightStyle = langMod.HighlightStyle;
-    syntaxTree = langMod.syntaxTree;
-    const jsMod = await import('@codemirror/lang-javascript');
-    javascript = jsMod.javascript;
-    const cmdMod = await import('@codemirror/commands');
-    indentSelection = cmdMod.indentSelection;
-    const acMod = await import('@codemirror/autocomplete');
-    autocompletion = acMod.autocompletion;
-    const hlMod = await import('@lezer/highlight');
-    tags = hlMod.tags;
+  var _CM = typeof CM !== 'undefined' ? CM : null;
+  if (_CM) {
+    basicSetup = _CM.basicSetup;
+    EditorView = _CM.EditorView;
+    keymap = _CM.keymap;
+    ViewPlugin = _CM.ViewPlugin;
+    Decoration = _CM.Decoration;
+    DecorationSet = _CM.DecorationSet;
+    EditorState = _CM.EditorState;
+    syntaxHighlighting = _CM.syntaxHighlighting;
+    HighlightStyle = _CM.HighlightStyle;
+    syntaxTree = _CM.syntaxTree;
+    javascript = _CM.javascript;
+    indentSelection = _CM.indentSelection;
+    autocompletion = _CM.autocompletion;
+    tags = _CM.tags;
     CM_READY = true;
-  } catch(e) {
-    console.error('CM load failed:', e);
+  } else {
+    try {
+      const cm = await import('codemirror');
+      basicSetup = cm.basicSetup;
+      const viewMod = await import('@codemirror/view');
+      EditorView = viewMod.EditorView;
+      keymap = viewMod.keymap;
+      ViewPlugin = viewMod.ViewPlugin;
+      Decoration = viewMod.Decoration;
+      DecorationSet = viewMod.DecorationSet;
+      const stateMod = await import('@codemirror/state');
+      EditorState = stateMod.EditorState;
+      const langMod = await import('@codemirror/language');
+      syntaxHighlighting = langMod.syntaxHighlighting;
+      HighlightStyle = langMod.HighlightStyle;
+      syntaxTree = langMod.syntaxTree;
+      const jsMod = await import('@codemirror/lang-javascript');
+      javascript = jsMod.javascript;
+      const cmdMod = await import('@codemirror/commands');
+      indentSelection = cmdMod.indentSelection;
+      const acMod = await import('@codemirror/autocomplete');
+      autocompletion = acMod.autocompletion;
+      const hlMod = await import('@lezer/highlight');
+      tags = hlMod.tags;
+      CM_READY = true;
+    } catch(e) {
+      console.error('CM load failed:', e);
+    }
   }
 
   if (!CM_READY) {

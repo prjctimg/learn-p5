@@ -45,18 +45,28 @@ export async function fetchAndCacheSources(
   }
 }
 
-export function buildImportMap(sources: Record<string, string> | null): string {
-  if (!sources) {
-    return JSON.stringify({ imports: importMap }, null, 2);
-  }
-  const dataImports: Record<string, string> = {};
-  for (const [name, url] of Object.entries(importMap)) {
-    const src = sources[name];
-    if (src) {
-      dataImports[name] = "data:text/javascript;base64," + btoa(unescape(encodeURIComponent(src)));
+export function buildImportMapJson(): string {
+  return JSON.stringify({ imports: importMap }, null, 2);
+}
+
+export function buildCachedSetup(sources: Record<string, string>): string {
+  const filtered: Record<string, string> = {};
+  for (const name of Object.keys(importMap)) {
+    if (sources[name]) {
+      filtered[name] = sources[name];
     } else {
-      dataImports[name] = url;
+      filtered[name] = importMap[name];
     }
   }
-  return JSON.stringify({ imports: dataImports }, null, 2);
+  const dataJson = JSON.stringify(filtered).replace(/<\/script>/gi, "<\\/script>");
+  return `<script>window.__cmSources=${dataJson}<\/script>
+<script>
+(function(){
+var s=window.__cmSources,m={},e=document.createElement("script");
+e.type="importmap";
+for(var n in s)m[n]=URL.createObjectURL(new Blob([s[n]],{type:"text/javascript"}));
+e.textContent=JSON.stringify({imports:m});
+document.head.appendChild(e);
+})();
+<\/script>`;
 }

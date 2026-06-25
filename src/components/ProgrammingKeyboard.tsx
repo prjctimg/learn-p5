@@ -107,6 +107,28 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
           >
             <MaterialCommunityIcons name="code-tags" size={18} color={colors.onSurfaceVariant} />
           </Pressable>
+          <Pressable
+            onPress={onBackspace}
+            style={({ pressed }) => [
+              styles.keyboardIcon,
+              { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Backspace"
+          >
+            <MaterialCommunityIcons name="backspace" size={18} color={colors.onSurfaceVariant} />
+          </Pressable>
+          <Pressable
+            onPress={onNewline}
+            style={({ pressed }) => [
+              styles.keyboardIcon,
+              { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="New line"
+          >
+            <MaterialCommunityIcons name="keyboard-return" size={18} color={colors.onSurfaceVariant} />
+          </Pressable>
           {pairedSymbols.map((pair) => {
             const hinted = pair.hintTrigger && pair.hintTrigger === hintType;
             return (
@@ -214,31 +236,6 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
             </Pressable>
           );
         })}
-      </View>
-
-      <View style={styles.actionRow}>
-        <Pressable
-          onPress={onBackspace}
-          style={({ pressed }) => [
-            styles.actionBtn,
-            { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
-          ]}
-          accessibilityRole="button"
-          accessibilityLabel="Backspace"
-        >
-          <MaterialCommunityIcons name="backspace" size={22} color={colors.onSurfaceVariant} />
-        </Pressable>
-        <Pressable
-          onPress={onNewline}
-          style={({ pressed }) => [
-            styles.actionBtn,
-            { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
-          ]}
-          accessibilityRole="button"
-          accessibilityLabel="New line"
-        >
-          <MaterialCommunityIcons name="keyboard-return" size={22} color={colors.onSurfaceVariant} />
-        </Pressable>
       </View>
 
       <View style={styles.bottomCluster}>
@@ -382,12 +379,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: Spacing.xs,
   },
-  actionRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 8,
-    paddingVertical: Spacing.xs,
-  },
   bottomCluster: {
     position: "absolute",
     left: 12,
@@ -415,13 +406,6 @@ const styles = StyleSheet.create({
   dpadCenter: {
     width: 44,
     height: 44,
-  },
-  actionBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
   },
   symbolButton: {
     flexShrink: 0,

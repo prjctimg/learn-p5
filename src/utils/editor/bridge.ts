@@ -3,32 +3,45 @@ let view;
 
 (async function() {
   let basicSetup, EditorView, EditorState, keymap, javascript, syntaxHighlighting, HighlightStyle, tags, indentSelection;
-  try {
-    const cm = await import('codemirror');
-    basicSetup = cm.basicSetup;
-    const viewMod = await import('@codemirror/view');
-    EditorView = viewMod.EditorView;
-    keymap = viewMod.keymap;
-    const stateMod = await import('@codemirror/state');
-    EditorState = stateMod.EditorState;
-    const langMod = await import('@codemirror/language');
-    syntaxHighlighting = langMod.syntaxHighlighting;
-    HighlightStyle = langMod.HighlightStyle;
-    const jsMod = await import('@codemirror/lang-javascript');
-    javascript = jsMod.javascript;
-    const cmdMod = await import('@codemirror/commands');
-    indentSelection = cmdMod.indentSelection;
-    const hlMod = await import('@lezer/highlight');
-    tags = hlMod.tags;
-  } catch(e) {
-    console.error('CM load failed:', e);
-    var editorEl = document.getElementById('editor');
-    if (editorEl) {
-      editorEl.innerHTML = '<div style="color:#ED225D;padding:20px;font-family:sans-serif;text-align:center">CodeMirror unavailable. Please check your connection.</div>';
+  var _CM = typeof CM !== 'undefined' ? CM : null;
+  if (_CM) {
+    basicSetup = _CM.basicSetup;
+    EditorView = _CM.EditorView;
+    keymap = _CM.keymap;
+    EditorState = _CM.EditorState;
+    syntaxHighlighting = _CM.syntaxHighlighting;
+    HighlightStyle = _CM.HighlightStyle;
+    javascript = _CM.javascript;
+    indentSelection = _CM.indentSelection;
+    tags = _CM.tags;
+  } else {
+    try {
+      const cm = await import('codemirror');
+      basicSetup = cm.basicSetup;
+      const viewMod = await import('@codemirror/view');
+      EditorView = viewMod.EditorView;
+      keymap = viewMod.keymap;
+      const stateMod = await import('@codemirror/state');
+      EditorState = stateMod.EditorState;
+      const langMod = await import('@codemirror/language');
+      syntaxHighlighting = langMod.syntaxHighlighting;
+      HighlightStyle = langMod.HighlightStyle;
+      const jsMod = await import('@codemirror/lang-javascript');
+      javascript = jsMod.javascript;
+      const cmdMod = await import('@codemirror/commands');
+      indentSelection = cmdMod.indentSelection;
+      const hlMod = await import('@lezer/highlight');
+      tags = hlMod.tags;
+    } catch(e) {
+      console.error('CM load failed:', e);
+      var editorEl = document.getElementById('editor');
+      if (editorEl) {
+        editorEl.innerHTML = '<div style="color:#ED225D;padding:20px;font-family:sans-serif;text-align:center">CodeMirror unavailable. Please check your connection.</div>';
+      }
+      postReady();
+      postEditorReady();
+      return;
     }
-    postReady();
-    postEditorReady();
-    return;
   }
 
   const p5Theme = EditorView.theme({

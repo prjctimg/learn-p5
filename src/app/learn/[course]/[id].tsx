@@ -94,7 +94,7 @@ export default function Exercise() {
   const [toastMessage, setToastMessage] = useState("");
   const [toastActionLabel, setToastActionLabel] = useState<string | undefined>(undefined);
   const toastActionRef = useRef<(() => void) | undefined>(undefined);
-  const [cachedSources, setCachedSources] = useState<Record<string, string> | null | undefined>(undefined);
+  const [cachedSources, setCachedSources] = useState<Record<string, string> | null>(null);
 
   useEffect(() => {
     import("../../../utils/editor/cmCache").then((mod) =>
@@ -102,7 +102,6 @@ export default function Exercise() {
         if (s) {
           setCachedSources(s);
         } else {
-          setCachedSources(null);
           showToast("Fetching extra resources…");
           mod.fetchAndCacheSources().then((result) => {
             setCachedSources(result);
@@ -123,7 +122,6 @@ export default function Exercise() {
 
   const exerciseHtml = useMemo(() => {
     if (!state.exercise) return null;
-    if (cachedSources === undefined) return null;
     return getExerciseHtml({
       title: state.exercise.title,
       moduleName: state.exercise.module,
