@@ -664,9 +664,11 @@ function handleMessage(data) {
         if (view) {
           window.__systemKeyboardEnabled = true;
           var cmContent = view.dom.querySelector('.cm-content');
-          if (cmContent) cmContent.setAttribute('inputmode', 'text');
+          if (cmContent) {
+            cmContent.setAttribute('inputmode', 'text');
+            cmContent.focus();
+          }
           view.dom.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          setTimeout(function() { view.focus(); }, 200);
         }
         break;
       case 'useCustomKeyboard':

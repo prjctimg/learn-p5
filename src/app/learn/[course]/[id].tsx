@@ -87,6 +87,9 @@ export default function Exercise() {
   const [keyboardVisible, setKeyboardVisible] = useState(true);
   const [systemKeyboardVisible, setSystemKeyboardVisible] = useState(false);
   const [systemKeyboardHeight, setSystemKeyboardHeight] = useState(0);
+  const [codeSyncKey, setCodeSyncKey] = useState(0);
+  const codeRef = useRef(state.code);
+  codeRef.current = state.code;
   const [codeBackground, setCodeBackground] = useState<string | undefined>(undefined);
   const [codeFontSize, setCodeFontSize] = useState<number>(DEFAULTS.codeFontSize);
   const [keyboardHeight, setKeyboardHeight] = useState<string>(DEFAULTS.keyboardHeight);
@@ -301,10 +304,10 @@ export default function Exercise() {
   useEffect(() => {
     if (editorViewReady && webViewRef.current) {
       webViewRef.current.postMessage(
-        JSON.stringify({ type: "setCode", code: state.code })
+        JSON.stringify({ type: "setCode", code: codeRef.current })
       );
     }
-  }, [state.code, editorViewReady]);
+  }, [editorViewReady, codeSyncKey]);
 
   const handleMessage = useCallback(
     (event: { nativeEvent: { data: string } }) => {
@@ -316,6 +319,7 @@ export default function Exercise() {
             break;
           case "ready":
             setWebViewReady(true);
+            setCodeSyncKey((k) => k + 1);
             break;
           case "editorReady":
             setEditorViewReady(msg.ready);
@@ -634,6 +638,7 @@ export default function Exercise() {
           originWhitelist={["*"]}
           scrollEnabled={true}
           bounces={false}
+          {...({ keyboardDisplayRequiresUserAction: false } as Record<string, boolean>)}
         />
       )}
 
