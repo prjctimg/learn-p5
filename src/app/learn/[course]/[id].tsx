@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useReducer, useMemo, useCallback } from "react";
-import { View, Text, Pressable, StyleSheet, Keyboard } from "react-native";
+import { View, Text, Pressable, StyleSheet, Keyboard, Modal, Switch } from "react-native";
 import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -79,7 +79,7 @@ export default function Exercise() {
     isRunning: false,
     completed: false,
   });
-  const { colorScheme } = useThemeContext();
+  const { colorScheme, toggleTheme } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
   const webViewRef = useRef<WebView>(null);
   const [webViewReady, setWebViewReady] = useState(false);
@@ -90,6 +90,7 @@ export default function Exercise() {
   const [codeBackground, setCodeBackground] = useState<string | undefined>(undefined);
   const [codeFontSize, setCodeFontSize] = useState<number>(DEFAULTS.codeFontSize);
   const [keyboardHeight, setKeyboardHeight] = useState<string>(DEFAULTS.keyboardHeight);
+  const [settingsMenuVisible, setSettingsMenuVisible] = useState(false);
   const [toastKey, setToastKey] = useState(0);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
@@ -229,8 +230,8 @@ export default function Exercise() {
           justifyContent: "center",
         },
         runButton: {
-          width: 68,
-          height: 68,
+          width: 52,
+          height: 52,
           borderRadius: 9999,
           alignItems: "center",
           justifyContent: "center",
@@ -242,6 +243,46 @@ export default function Exercise() {
         },
         runButtonPressed: {
           transform: [{ scale: 0.9 }],
+        },
+        modalOverlay: {
+          flex: 1,
+          backgroundColor: "rgba(0,0,0,0.5)",
+          justifyContent: "center",
+          alignItems: "center",
+          padding: 24,
+        },
+        modalCard: {
+          width: "100%",
+          maxWidth: 360,
+          borderRadius: 16,
+          padding: 24,
+        },
+        modalHeader: {
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 20,
+        },
+        modalTitle: {
+          fontFamily: "JetBrainsMono",
+          fontSize: 18,
+          fontWeight: "700",
+        },
+        modalSection: {
+          marginBottom: 16,
+        },
+        modalSectionTitle: {
+          fontFamily: "JetBrainsMono",
+          fontSize: 11,
+          textTransform: "uppercase",
+          letterSpacing: 1,
+          marginBottom: 8,
+        },
+        modalRow: {
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 8,
         },
       }),
     [colorScheme]
@@ -345,13 +386,11 @@ export default function Exercise() {
 
   const handleRequestSystemKeyboard = useCallback(() => {
     if (systemKeyboardVisible) {
-      setKeyboardVisible(true);
       setSystemKeyboardVisible(false);
       if (webViewRef.current && editorViewReady) {
         webViewRef.current.postMessage(JSON.stringify({ type: "useCustomKeyboard" }));
       }
     } else {
-      setKeyboardVisible(false);
       if (webViewRef.current) {
         webViewRef.current.postMessage(JSON.stringify({ type: "focus" }));
       }
@@ -419,6 +458,30 @@ export default function Exercise() {
       });
     }, [])
   );
+
+  const changeCodeFontSize = useCallback((delta: number) => {
+    setCodeFontSize((prev) => {
+      const newSize = Math.min(DEFAULTS.codeFontSizeMax, Math.max(DEFAULTS.codeFontSizeMin, prev + delta));
+      AsyncStorage.setItem("setting_codeFontSize", newSize.toString());
+      if (webViewRef.current && editorViewReady) {
+        webViewRef.current.postMessage(JSON.stringify({ type: "setFontSize", fontSize: newSize }));
+      }
+      return newSize;
+    });
+  }, [editorViewReady]);
+
+  const changeCodeBackground = useCallback((value: string) => {
+    setCodeBackground(value === "auto" ? undefined : value);
+    AsyncStorage.setItem("setting_codeBackground", value);
+    setToastKey((k) => k + 1);
+    setToastMessage("Code background updated");
+    setToastVisible(true);
+  }, []);
+
+  const changeKeyboardHeight = useCallback((value: string) => {
+    setKeyboardHeight(value);
+    AsyncStorage.setItem("setting_keyboardHeight", value);
+  }, []);
 
   useEffect(() => {
     if (!state.completed || !state.exercise) return;
@@ -549,6 +612,14 @@ export default function Exercise() {
           P5.LEARN
         </Text>
         <View style={styles.spacer} />
+          <Pressable
+            onPress={() => setSettingsMenuVisible(true)}
+            style={styles.menuButton}
+            accessibilityRole="button"
+            accessibilityLabel="Editor settings"
+          >
+            <MaterialCommunityIcons name="dots-vertical" size={24} color={colors.onSurfaceVariant} />
+          </Pressable>
       </View>
 
       {exerciseHtml && (
@@ -586,7 +657,7 @@ export default function Exercise() {
         >
           <MaterialCommunityIcons
             name={state.isRunning ? "reload" : "play"}
-            size={36}
+            size={28}
             color="#FFFFFF"
           />
         </Pressable>
@@ -630,6 +701,154 @@ export default function Exercise() {
           <MaterialCommunityIcons name="keyboard-variant" size={24} color={colors.onSurface} />
         </Pressable>
       )}
+
+      <Modal
+        visible={settingsMenuVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSettingsMenuVisible(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setSettingsMenuVisible(false)}
+        >
+          <Pressable
+            style={[styles.modalCard, { backgroundColor: colors.surfaceContainerHigh }]}
+            onPress={() => {}}
+          >
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, { color: colors.onSurface }]}>Editor Settings</Text>
+              <Pressable
+                onPress={() => setSettingsMenuVisible(false)}
+                accessibilityRole="button"
+                accessibilityLabel="Close settings"
+              >
+                <MaterialCommunityIcons name="close" size={24} color={colors.onSurfaceVariant} />
+              </Pressable>
+            </View>
+
+            <View style={styles.modalSection}>
+              <Text style={[styles.modalSectionTitle, { color: colors.textSecondary }]}>Font Size</Text>
+              <View style={styles.modalRow}>
+                <Pressable
+                  onPress={() => changeCodeFontSize(-2)}
+                  style={({ pressed }) => ({
+                    width: 36,
+                    height: 36,
+                    borderRadius: 8,
+                    backgroundColor: pressed ? colors.primaryContainer : colors.surfaceContainer,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  })}
+                >
+                  <Text style={{ fontSize: 18, fontWeight: "700", color: colors.onSurface }}>−</Text>
+                </Pressable>
+                <Text style={{ fontFamily: "JetBrainsMono", fontSize: 16, fontWeight: "700", color: colors.onSurface, minWidth: 32, textAlign: "center" }}>
+                  {codeFontSize}
+                </Text>
+                <Pressable
+                  onPress={() => changeCodeFontSize(2)}
+                  style={({ pressed }) => ({
+                    width: 36,
+                    height: 36,
+                    borderRadius: 8,
+                    backgroundColor: pressed ? colors.primaryContainer : colors.surfaceContainer,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  })}
+                >
+                  <Text style={{ fontSize: 18, fontWeight: "700", color: colors.onSurface }}>+</Text>
+                </Pressable>
+              </View>
+            </View>
+
+            <View style={styles.modalSection}>
+              <Text style={[styles.modalSectionTitle, { color: colors.textSecondary }]}>Theme</Text>
+              <View style={styles.modalRow}>
+                <Text style={{ fontFamily: "Inter", fontSize: 14, color: colors.onSurface }}>
+                  {colorScheme === "dark" ? "Dark Mode" : "Light Mode"}
+                </Text>
+                <Switch
+                  value={colorScheme === "dark"}
+                  onValueChange={toggleTheme}
+                  trackColor={{ false: "#767577", true: "#ED225D" }}
+                  thumbColor="#ffffff"
+                />
+              </View>
+            </View>
+
+            <View style={styles.modalSection}>
+              <Text style={[styles.modalSectionTitle, { color: colors.textSecondary }]}>Code Background</Text>
+              <View style={styles.modalRow}>
+                {["auto", "#FFFFFF", "#0D0E12"].map((opt) => (
+                  <Pressable
+                    key={opt}
+                    onPress={() => changeCodeBackground(opt)}
+                    style={({ pressed }) => ({
+                      paddingHorizontal: 12,
+                      paddingVertical: 6,
+                      borderRadius: 6,
+                      backgroundColor:
+                        codeBackground === opt
+                          ? colors.primary
+                          : pressed
+                            ? colors.primaryContainer + "33"
+                            : colors.surfaceContainer,
+                    })}
+                  >
+                    <Text style={{
+                      fontFamily: "JetBrainsMono",
+                      fontSize: 11,
+                      fontWeight: "700",
+                      textTransform: "uppercase",
+                      letterSpacing: 0.5,
+                      color: codeBackground === opt ? colors.onPrimary : colors.onSurfaceVariant,
+                    }}>
+                      {opt === "auto" ? "Auto" : opt === "#FFFFFF" ? "Light" : "Dark"}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.modalSection}>
+              <Text style={[styles.modalSectionTitle, { color: colors.textSecondary }]}>Keyboard Height</Text>
+              <View style={styles.modalRow}>
+                {["small", "medium", "tall"].map((opt) => (
+                  <Pressable
+                    key={opt}
+                    onPress={() => changeKeyboardHeight(opt)}
+                    style={({ pressed }) => ({
+                      paddingHorizontal: 12,
+                      paddingVertical: 6,
+                      borderRadius: 6,
+                      minWidth: 56,
+                      alignItems: "center",
+                      backgroundColor:
+                        keyboardHeight === opt
+                          ? colors.primary
+                          : pressed
+                            ? colors.primaryContainer + "33"
+                            : colors.surfaceContainer,
+                    })}
+                  >
+                    <Text style={{
+                      fontFamily: "JetBrainsMono",
+                      fontSize: 11,
+                      fontWeight: "700",
+                      textTransform: "uppercase",
+                      letterSpacing: 0.5,
+                      color: keyboardHeight === opt ? colors.onPrimary : colors.onSurfaceVariant,
+                    }}>
+                      {opt === "small" ? "S" : opt === "medium" ? "M" : "T"}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }

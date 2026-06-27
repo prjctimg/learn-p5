@@ -27,16 +27,18 @@ function highlightSyntax(code: string): { text: string; color: string }[] {
   const KEYWORD_RE = /\b(function|if|else|for|while|return|let|const|var|new|this|class)\b/g;
   const P5_RE = new RegExp(`\\b(${P5_FUNCTION_NAMES.join("|")})\\b(?=\\()`, "g");
   const NUMBER_RE = /\b\d+(\.\d+)?\b/g;
-  const STRING_RE = /("[^"]*"|'[^']*'|`[^']*`)/g;
+  const STRING_RE = /("[^"]*"|'[^']*'|`[^`]*`)/g;
   const COMMENT_RE = /(\/\/.*)/g;
+  const OP_RE = /([{}[\]();,.]|=>|[-+*/%&|^!<>=]=?)/g;
 
   const allMatches: { index: number; text: string; colorKey: string }[] = [];
   const patterns: [RegExp, string][] = [
     [COMMENT_RE, "#6B7280"],
-    [KEYWORD_RE, "#ED225D"],
-    [P5_RE, "#FFB2BB"],
-    [NUMBER_RE, "#FF4F75"],
     [STRING_RE, "#22C55E"],
+    [KEYWORD_RE, "#ED225D"],
+    [NUMBER_RE, "#FF4F75"],
+    [P5_RE, "#FFB2BB"],
+    [OP_RE, "#9CA3AF"],
   ];
   for (const [re, colorKey] of patterns) {
     re.lastIndex = 0;
@@ -169,7 +171,7 @@ function SymbolDetail({ symbol }: { symbol: string }) {
     );
   }
 
-  const syntaxTokens = highlightSyntax(sym.syntax);
+  const syntaxTokens = highlightSyntax(sym.syntax.replace(/\n/g, " "));
 
   return (
     <View style={[styles.flex1, { backgroundColor: colors.surface }]}>
@@ -182,9 +184,11 @@ function SymbolDetail({ symbol }: { symbol: string }) {
         ListHeaderComponent={
           <>
             <View style={[styles.flexRow, { alignItems: "center", gap: 8, marginBottom: 8 }]}>
-              <Text style={[styles.symbolNameText, { color: colors.onSurface }]}>
-                {sym.name}()
-              </Text>
+              <View style={[styles.symbolNameCode, { backgroundColor: colors.surfaceDim }]}>
+                <Text style={[styles.symbolNameText, { color: colors.primary }]}>
+                  {sym.name}()
+                </Text>
+              </View>
               <View style={[styles.moduleBadge, { backgroundColor: colors.primary + "33" }]}>
                 <Text style={[styles.moduleBadgeText, { color: colors.primary }]}>
                   {sym.module}
@@ -340,6 +344,11 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
+  symbolNameCode: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
   symbolNameText: {
     fontFamily: "JetBrainsMono",
     fontSize: 30,
@@ -364,6 +373,8 @@ const styles = StyleSheet.create({
   syntaxBox: {
     paddingHorizontal: 16,
     paddingVertical: 12,
+    borderLeftWidth: 3,
+    borderLeftColor: "#ED225D",
   },
   syntaxText: {
     fontFamily: "JetBrainsMono",

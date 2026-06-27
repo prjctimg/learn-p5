@@ -438,7 +438,7 @@ function initEditor() {
   try {
     const p5Theme = EditorView.theme({
       '&': { backgroundColor: '${editorBg}', color: '${fg}' },
-      '.cm-content': { caretColor: '#ED225D', fontFamily: "'JetBrains Mono', monospace" },
+      '.cm-content': { caretColor: '#ED225D', fontFamily: "'JetBrains Mono', monospace", inputMode: 'none', WebkitUserModify: 'read-write-plaintext-only' },
       '.cm-gutters': { backgroundColor: '${editorBg}', color: '${gutterFg}', borderRight: '1px solid ${gutterBorder}' },
       '.cm-activeLineGutter': { backgroundColor: '${activeBg}' },
       '.cm-activeLine': { backgroundColor: '${activeBg}' },
@@ -507,12 +507,34 @@ function initEditor() {
     view.dom.addEventListener('mousedown', function(e) {
       if (!window.__systemKeyboardEnabled) {
         e.preventDefault();
+        e.stopPropagation();
+        var coords = { x: e.clientX, y: e.clientY };
+        var pos = view.posAtCoords(coords);
+        if (pos !== null) {
+          view.dispatch({ selection: { anchor: pos, head: pos } });
+        }
         view.focus();
         if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
           window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'editorTapped' }));
         }
       }
     });
+    view.dom.addEventListener('touchstart', function(e) {
+      if (!window.__systemKeyboardEnabled) {
+        e.preventDefault();
+        e.stopPropagation();
+        var touch = e.touches[0];
+        var coords = { x: touch.clientX, y: touch.clientY };
+        var pos = view.posAtCoords(coords);
+        if (pos !== null) {
+          view.dispatch({ selection: { anchor: pos, head: pos } });
+        }
+        view.focus();
+        if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+          window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'editorTapped' }));
+        }
+      }
+    }, { passive: false });
     postReady();
     postEditorReady();
     setTimeout(function() {
