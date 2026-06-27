@@ -22,6 +22,14 @@ The app is currently available on Android only and ChromeOS if you are on the `d
 
 You can [grab the releases here](https://github.com/skchr/learn-p5/releases)
 
+## Where can I give feedback and share suggestions
+
+There's a few GitHub Discussions that are open to suggestions and where we post feature previews (screenshots and the like).
+
+More threads will be created as the project progresses:
+
+- [Accessibility](https://github.com/skchr/learn-p5/discussions/1)
+
 ### Roadmap
 
 This is an almost exhaustive list of the things we wish to complete during the program (they are not listed in any order of priority)
