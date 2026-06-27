@@ -17,17 +17,32 @@ interface ProgrammingKeyboardProps {
   onNewline?: () => void;
   onFormat?: () => void;
   onCursorMove?: (direction: 'left' | 'right' | 'up' | 'down') => void;
+  onOpenReference?: (symbol: string) => void;
   keyboardVisible?: boolean;
   usedFunctions?: string[];
   height?: number;
 }
 
-export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], onToggleKeyboard, onRequestSystemKeyboard, onBackspace, onNewline, onFormat, onCursorMove, keyboardVisible = true, usedFunctions = [], height = 280 }: ProgrammingKeyboardProps) {
+const BACKSPACE_DELAY = 300;
+const BACKSPACE_INTERVAL = 60;
+
+export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], onToggleKeyboard, onRequestSystemKeyboard, onBackspace, onNewline, onFormat, onCursorMove, onOpenReference, keyboardVisible = true, usedFunctions = [], height = 280 }: ProgrammingKeyboardProps) {
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
   const [hintType, setHintType] = useState<"string" | "array" | null>(null);
   const [popupSymbol, setPopupSymbol] = useState<string | null>(null);
   const popupAnim = useRef(new Animated.Value(0)).current;
+  const backspaceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const backspaceInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+  const onBackspaceRef = useRef(onBackspace);
+  onBackspaceRef.current = onBackspace;
+
+  useEffect(() => {
+    return () => {
+      if (backspaceTimer.current) clearTimeout(backspaceTimer.current);
+      if (backspaceInterval.current) clearInterval(backspaceInterval.current);
+    };
+  }, []);
 
   useEffect(() => {
     if (popupSymbol) {
@@ -39,6 +54,27 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
       }).start();
     }
   }, [popupSymbol, popupAnim]);
+
+  const clearBackspaceRepeat = useCallback(() => {
+    if (backspaceTimer.current) {
+      clearTimeout(backspaceTimer.current);
+      backspaceTimer.current = null;
+    }
+    if (backspaceInterval.current) {
+      clearInterval(backspaceInterval.current);
+      backspaceInterval.current = null;
+    }
+  }, []);
+
+  const startBackspaceRepeat = useCallback(() => {
+    if (!onBackspaceRef.current) return;
+    onBackspaceRef.current();
+    backspaceTimer.current = setTimeout(() => {
+      backspaceInterval.current = setInterval(() => {
+        onBackspaceRef.current?.();
+      }, BACKSPACE_INTERVAL);
+    }, BACKSPACE_DELAY);
+  }, []);
 
   const handleFunctionPress = useCallback((fn: P5FunctionDef) => {
     const parenIndex = fn.insert.indexOf("()");
@@ -77,12 +113,7 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
   return (
     <View style={[styles.container, { backgroundColor: colors.surfaceContainerLow, height }]}>
       <View style={styles.toolbarRow}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.symbolsRow}
-          contentContainerStyle={styles.symbolsContent}
-        >
+        <View style={styles.toolbarFixed}>
           <Pressable
             onPress={onToggleKeyboard}
             style={({ pressed }) => [
@@ -117,7 +148,8 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
             <MaterialCommunityIcons name="code-tags" size={18} color={colors.onSurfaceVariant} />
           </Pressable>
           <Pressable
-            onPress={onBackspace}
+            onPressIn={startBackspaceRepeat}
+            onPressOut={clearBackspaceRepeat}
             style={({ pressed }) => [
               styles.keyboardIcon,
               { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
@@ -138,6 +170,13 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
           >
             <MaterialCommunityIcons name="keyboard-return" size={18} color={colors.onSurfaceVariant} />
           </Pressable>
+        </View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.symbolsScroll}
+          contentContainerStyle={styles.symbolsContent}
+        >
           {pairedSymbols.map((pair) => {
             const hinted = pair.hintTrigger && pair.hintTrigger === hintType;
             return (
@@ -225,7 +264,7 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
               accessibilityRole="button"
               accessibilityLabel={fn.label}
             >
-              <Text style={[styles.functionKeyText, { color: isDisabled ? colors.onSurfaceVariant : colors.primaryFixedDim }]}>
+              <Text style={[styles.functionKeyText, { color: isDisabled ? colors.onSurfaceVariant : colors.primary }]}>
                 {fn.label}
               </Text>
             </Pressable>
@@ -296,7 +335,7 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
               const ref = P5_SYMBOLS.find(s => s.name === popupSymbol);
               return ref ? (
                 <>
-                  <Text style={[popupTextStyles.popupTitle, { color: colors.onSurface }]}>{ref.syntax}</Text>
+                  <Text style={[popupTextStyles.popupTitle, { color: colors.onSurface, backgroundColor: colors.surfaceContainer, borderColor: colors.outlineVariant }]}>{ref.syntax}</Text>
                   <Text style={[popupTextStyles.popupDesc, { color: colors.onSurfaceVariant }]}>{ref.description}</Text>
                   {ref.parameters.map(p => (
                     <Text key={p.name} style={[popupTextStyles.popupParam, { color: colors.onSurfaceVariant }]}>
@@ -304,6 +343,12 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
                       {' '}({p.type}): {p.description}
                     </Text>
                   ))}
+                  <Pressable
+                    onPress={() => { setPopupSymbol(null); onOpenReference?.(popupSymbol); }}
+                    style={({ pressed }) => [popupTextStyles.refButton, { backgroundColor: pressed ? colors.primaryContainer : colors.primary }]}
+                  >
+                    <Text style={popupTextStyles.refButtonText}>View in Reference</Text>
+                  </Pressable>
                 </>
               ) : (
                 <Text style={[popupTextStyles.popupTitle, { color: colors.onSurface }]}>{popupSymbol}</Text>
@@ -322,6 +367,10 @@ const popupTextStyles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     marginBottom: 8,
+    padding: 8,
+    borderRadius: 6,
+    borderWidth: 1,
+    overflow: "hidden",
   },
   popupDesc: {
     fontFamily: "Inter",
@@ -336,6 +385,21 @@ const popupTextStyles = StyleSheet.create({
     marginBottom: 4,
     paddingLeft: 8,
   },
+  refButton: {
+    marginTop: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  refButtonText: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 12,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    color: "#FFFFFF",
+  },
 });
 
 const styles = StyleSheet.create({
@@ -344,15 +408,23 @@ const styles = StyleSheet.create({
   toolbarRow: {
     flexDirection: "row",
     position: "relative",
+    alignItems: "stretch",
   },
-  symbolsRow: {
+  toolbarFixed: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingLeft: Spacing.sm,
+    gap: Spacing.xs,
+    zIndex: 10,
+  },
+  symbolsScroll: {
     maxHeight: 44,
     flex: 1,
   },
   symbolsContent: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: Spacing.sm,
+    paddingHorizontal: Spacing.xs,
     gap: Spacing.xs,
   },
   keyboardIcon: {

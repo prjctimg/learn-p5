@@ -27,6 +27,24 @@ var syntaxHighlighting = _CM.syntaxHighlighting;
 var HighlightStyle = _CM.HighlightStyle;
 var tags = _CM.tags;
 var indentSelection = _CM.indentSelection;
+var autocompletion = _CM.autocompletion;
+var CompletionContext = _CM.CompletionContext;
+
+var P5_COMPLETIONS = ["setup","draw","createCanvas","background","fill","circle","stroke","strokeWeight","line","rect","ellipse","noStroke","noFill","noLoop","arc","point","quad","square","triangle","ellipseMode","rectMode"];
+
+function p5CompletionSource(context) {
+  var word = context.matchBefore(/\\w*/);
+  if (!word || (word.from === word.to && !context.explicit)) return null;
+  var options = [];
+  var prefix = word.text.toLowerCase();
+  for (var i = 0; i < P5_COMPLETIONS.length; i++) {
+    var name = P5_COMPLETIONS[i];
+    if (name.toLowerCase().startsWith(prefix)) {
+      options.push({ label: name + '()', type: 'function', detail: 'p5.js' });
+    }
+  }
+  return { from: word.from, options: options };
+}
 
 const p5Theme = EditorView.theme({
   '&': { backgroundColor: '${bg}', color: '${fg}' },
@@ -34,7 +52,7 @@ const p5Theme = EditorView.theme({
   '.cm-gutters': { backgroundColor: '${bg}', color: '${gutterFg}', borderRight: '1px solid ${gutterBorder}' },
   '.cm-activeLineGutter': { backgroundColor: '${activeBg}' },
   '.cm-activeLine': { backgroundColor: '${activeBg}' },
-  '.cm-cursor': { borderLeftColor: '#ED225D', borderLeftWidth: '2px' },
+  '.cm-cursor': { borderLeft: '2px solid #ED225D' },
   '.cm-selectionBackground': { backgroundColor: '${selBg}' },
   '.cm-matchingBracket': { backgroundColor: 'rgba(237, 34, 93, 0.3)', outline: '1px solid #ED225D' },
   '.cm-foldPlaceholder': { backgroundColor: 'transparent', color: '${gutterFg}', border: '1px solid ${gutterFg}' },
@@ -89,6 +107,7 @@ function createEditor(initialCode) {
       javascript(),
       p5Theme,
       syntaxHighlighting(p5Highlight),
+      autocompletion({ override: [p5CompletionSource] }),
       keymap.of([{
         key: 'Ctrl-s',
         run: () => true,
@@ -155,7 +174,16 @@ function handleMessage(data) {
       }
     } else if (msg.type === 'focus') {
       if (view) {
+        window.__systemKeyboardEnabled = true;
+        var cmContent = view.dom.querySelector('.cm-content');
+        if (cmContent) cmContent.setAttribute('inputmode', 'text');
         view.focus();
+      }
+    } else if (msg.type === 'useCustomKeyboard') {
+      window.__systemKeyboardEnabled = false;
+      if (view) {
+        var cmContent = view.dom.querySelector('.cm-content');
+        if (cmContent) cmContent.setAttribute('inputmode', 'none');
       }
     } else if (msg.type === 'setFontSize') {
       var scroller = view?.dom.querySelector('.cm-scroller');
@@ -173,14 +201,45 @@ function handleMessage(data) {
       }
     } else if (msg.type === 'backspace') {
       if (view) {
-        var cursor = view.state.selection.main.head;
-        if (cursor > 0) {
+        var sel = view.state.selection.main;
+        if (sel.from !== sel.to) {
           view.dispatch({
-            changes: { from: cursor - 1, to: cursor },
-            selection: { anchor: cursor - 1 },
+            changes: { from: sel.from, to: sel.to },
+            selection: { anchor: sel.from },
           });
-          view.focus();
+        } else if (sel.head > 0) {
+          view.dispatch({
+            changes: { from: sel.head - 1, to: sel.head },
+            selection: { anchor: sel.head - 1 },
+          });
         }
+        view.focus();
+      }
+    } else if (msg.type === 'cursorMove') {
+      if (view) {
+        var dir = msg.direction;
+        var sel = view.state.selection.main;
+        var pos = sel.head;
+        var doc = view.state.doc;
+        if (dir === 'left' && pos > 0) {
+          pos = pos - 1;
+        } else if (dir === 'right' && pos < doc.length) {
+          pos = pos + 1;
+        } else if (dir === 'up' || dir === 'down') {
+          var line = doc.lineAt(pos);
+          var lineNum = line.number;
+          var col = pos - line.from;
+          var targetLineNum = dir === 'up' ? lineNum - 1 : lineNum + 1;
+          if (targetLineNum >= 1 && targetLineNum <= doc.lines) {
+            var targetLine = doc.line(targetLineNum);
+            pos = Math.min(targetLine.from + col, targetLine.to);
+          }
+        }
+        view.dispatch({
+          selection: { anchor: pos, head: pos },
+          scrollIntoView: true,
+        });
+        view.focus();
       }
     } else if (msg.type === 'format') {
       if (view) {

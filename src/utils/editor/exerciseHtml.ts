@@ -399,10 +399,27 @@ var syntaxTree = _CM.syntaxTree;
 var ViewPlugin = _CM.ViewPlugin;
 var Decoration = _CM.Decoration;
 var DecorationSet = _CM.DecorationSet;
+var autocompletion = _CM.autocompletion;
+var CompletionContext = _CM.CompletionContext;
 
 let view;
 const INITIAL_CODE = ${codeArg};
 const SOLUTION_CODE = ${solutionArg};
+var P5_COMPLETIONS = ${JSON.stringify(P5_FUNCTION_NAMES)};
+
+function p5CompletionSource(context) {
+  var word = context.matchBefore(/\\w*/);
+  if (!word || (word.from === word.to && !context.explicit)) return null;
+  var options = [];
+  var prefix = word.text.toLowerCase();
+  for (var i = 0; i < P5_COMPLETIONS.length; i++) {
+    var name = P5_COMPLETIONS[i];
+    if (name.toLowerCase().startsWith(prefix)) {
+      options.push({ label: name + '()', type: 'function', detail: 'p5.js' });
+    }
+  }
+  return { from: word.from, options: options };
+}
 
 const p5FnMark = Decoration.mark({ class: 'cm-p5-fn' });
 
@@ -438,11 +455,11 @@ function initEditor() {
   try {
     const p5Theme = EditorView.theme({
       '&': { backgroundColor: '${editorBg}', color: '${fg}' },
-      '.cm-content': { caretColor: '#ED225D', fontFamily: "'JetBrains Mono', monospace", inputMode: 'none', WebkitUserModify: 'read-write-plaintext-only' },
+      '.cm-content': { caretColor: '#ED225D', fontFamily: "'JetBrains Mono', monospace" },
       '.cm-gutters': { backgroundColor: '${editorBg}', color: '${gutterFg}', borderRight: '1px solid ${gutterBorder}' },
       '.cm-activeLineGutter': { backgroundColor: '${activeBg}' },
       '.cm-activeLine': { backgroundColor: '${activeBg}' },
-      '.cm-cursor': { borderLeftColor: '#ED225D', borderLeftWidth: '2px' },
+      '.cm-cursor': { borderLeft: '2px solid #ED225D' },
       '.cm-selectionBackground': { backgroundColor: '${selBg}' },
       '.cm-matchingBracket': { backgroundColor: 'rgba(237, 34, 93, 0.3)', outline: '1px solid #ED225D' },
       '.cm-p5-fn': { fontWeight: '600' },
@@ -493,6 +510,7 @@ function initEditor() {
         p5Theme,
         syntaxHighlighting(p5Highlight),
         p5FnPlugin,
+        autocompletion({ override: [p5CompletionSource] }),
         keymap.of([{ key: 'Ctrl-s', run: function() { return true; } }, { key: 'Cmd-s', run: function() { return true; } }]),
         EditorView.updateListener.of(function(update) {
           if (update.docChanged) {
@@ -645,12 +663,18 @@ function handleMessage(data) {
       case 'focus':
         if (view) {
           window.__systemKeyboardEnabled = true;
+          var cmContent = view.dom.querySelector('.cm-content');
+          if (cmContent) cmContent.setAttribute('inputmode', 'text');
           view.dom.scrollIntoView({ behavior: 'smooth', block: 'center' });
           setTimeout(function() { view.focus(); }, 200);
         }
         break;
       case 'useCustomKeyboard':
         window.__systemKeyboardEnabled = false;
+        if (view) {
+          var cmContent = view.dom.querySelector('.cm-content');
+          if (cmContent) cmContent.setAttribute('inputmode', 'none');
+        }
         break;
       case 'setFontSize':
         var scroller = view && view.dom && view.dom.querySelector('.cm-scroller');
@@ -659,13 +683,46 @@ function handleMessage(data) {
       case 'backspace':
         if (view) {
           var cur = view.state.selection.main.head;
-          if (cur > 0) {
+          var sel = view.state.selection.main;
+          if (sel.from !== sel.to) {
+            view.dispatch({
+              changes: { from: sel.from, to: sel.to },
+              selection: { anchor: sel.from },
+            });
+          } else if (cur > 0) {
             view.dispatch({
               changes: { from: cur - 1, to: cur },
               selection: { anchor: cur - 1 },
             });
-            view.focus();
           }
+          view.focus();
+        }
+        break;
+      case 'cursorMove':
+        if (view) {
+          var dir = msg.direction;
+          var sel = view.state.selection.main;
+          var pos = sel.head;
+          var doc = view.state.doc;
+          if (dir === 'left' && pos > 0) {
+            pos = pos - 1;
+          } else if (dir === 'right' && pos < doc.length) {
+            pos = pos + 1;
+          } else if (dir === 'up' || dir === 'down') {
+            var line = doc.lineAt(pos);
+            var lineNum = line.number;
+            var col = pos - line.from;
+            var targetLineNum = dir === 'up' ? lineNum - 1 : lineNum + 1;
+            if (targetLineNum >= 1 && targetLineNum <= doc.lines) {
+              var targetLine = doc.line(targetLineNum);
+              pos = Math.min(targetLine.from + col, targetLine.to);
+            }
+          }
+          view.dispatch({
+            selection: { anchor: pos, head: pos },
+            scrollIntoView: true,
+          });
+          view.focus();
         }
         break;
       case 'format':

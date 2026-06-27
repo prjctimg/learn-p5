@@ -17,7 +17,7 @@ export const P5_SYMBOLS: P5Symbol[] = [
       { name: "mode", type: "Constant", description: "either CHORD, PIE, or OPEN." },
       { name: "detail", type: "Integer", description: "number of vertices for WebGL mode." },
     ],
-    url: "https://p5js.org/reference/p5/arc/",
+    url: "/ref?symbol=arc",
   },
   {
     name: "circle",
@@ -30,7 +30,7 @@ export const P5_SYMBOLS: P5Symbol[] = [
       { name: "y", type: "Number", description: "y-coordinate of the center of the circle." },
       { name: "d", type: "Number", description: "diameter of the circle." },
     ],
-    url: "https://p5js.org/reference/p5/circle/",
+    url: "/ref?symbol=circle",
   },
   {
     name: "ellipse",
@@ -44,7 +44,7 @@ export const P5_SYMBOLS: P5Symbol[] = [
       { name: "w", type: "Number", description: "width of the ellipse." },
       { name: "h", type: "Number", description: "height of the ellipse." },
     ],
-    url: "https://p5js.org/reference/p5/ellipse/",
+    url: "/ref?symbol=ellipse",
   },
   {
     name: "line",
@@ -58,7 +58,7 @@ export const P5_SYMBOLS: P5Symbol[] = [
       { name: "x2", type: "Number", description: "the x-coordinate of the second point." },
       { name: "y2", type: "Number", description: "the y-coordinate of the second point." },
     ],
-    url: "https://p5js.org/reference/p5/line/",
+    url: "/ref?symbol=line",
   },
   {
     name: "point",
@@ -71,7 +71,7 @@ export const P5_SYMBOLS: P5Symbol[] = [
       { name: "y", type: "Number", description: "the y-coordinate." },
       { name: "z", type: "Number", description: "the z-coordinate (for WebGL mode)." },
     ],
-    url: "https://p5js.org/reference/p5/point/",
+    url: "/ref?symbol=point",
   },
   {
     name: "quad",
@@ -89,7 +89,7 @@ export const P5_SYMBOLS: P5Symbol[] = [
       { name: "x4", type: "Number", description: "the x-coordinate of the fourth point." },
       { name: "y4", type: "Number", description: "the y-coordinate of the fourth point." },
     ],
-    url: "https://p5js.org/reference/p5/quad/",
+    url: "/ref?symbol=quad",
   },
   {
     name: "rect",
@@ -103,7 +103,7 @@ export const P5_SYMBOLS: P5Symbol[] = [
       { name: "w", type: "Number", description: "width of the rectangle." },
       { name: "h", type: "Number", description: "height of the rectangle." },
     ],
-    url: "https://p5js.org/reference/p5/rect/",
+    url: "/ref?symbol=rect",
   },
   {
     name: "square",
@@ -120,7 +120,7 @@ export const P5_SYMBOLS: P5Symbol[] = [
       { name: "br", type: "Number", description: "optional radius of bottom-right corner." },
       { name: "bl", type: "Number", description: "optional radius of bottom-left corner." },
     ],
-    url: "https://p5js.org/reference/p5/square/",
+    url: "/ref?symbol=square",
   },
   {
     name: "triangle",
@@ -136,7 +136,7 @@ export const P5_SYMBOLS: P5Symbol[] = [
       { name: "x3", type: "Number", description: "x-coordinate of the third point." },
       { name: "y3", type: "Number", description: "y-coordinate of the third point." },
     ],
-    url: "https://p5js.org/reference/p5/triangle/",
+    url: "/ref?symbol=triangle",
   },
   {
     name: "ellipseMode",
@@ -147,7 +147,7 @@ export const P5_SYMBOLS: P5Symbol[] = [
     parameters: [
       { name: "mode", type: "Constant", description: "either CENTER, RADIUS, CORNER, or CORNERS." },
     ],
-    url: "https://p5js.org/reference/p5/ellipseMode/",
+    url: "/ref?symbol=ellipseMode",
   },
   {
     name: "rectMode",
@@ -158,7 +158,7 @@ export const P5_SYMBOLS: P5Symbol[] = [
     parameters: [
       { name: "mode", type: "Constant", description: "either CORNER, CORNERS, CENTER, or RADIUS." },
     ],
-    url: "https://p5js.org/reference/p5/rectMode/",
+    url: "/ref?symbol=rectMode",
   },
   {
     name: "strokeWeight",
@@ -169,7 +169,7 @@ export const P5_SYMBOLS: P5Symbol[] = [
     parameters: [
       { name: "weight", type: "Number", description: "the weight of the stroke (in pixels)." },
     ],
-    url: "https://p5js.org/reference/p5/strokeWeight/",
+    url: "/ref?symbol=strokeWeight",
   },
   {
     name: "stroke",
@@ -183,7 +183,7 @@ export const P5_SYMBOLS: P5Symbol[] = [
       { name: "v3", type: "Number", description: "blue or brightness value." },
       { name: "alpha", type: "Number", description: "alpha value (0-255)." },
     ],
-    url: "https://p5js.org/reference/p5/stroke/",
+    url: "/ref?symbol=stroke",
   },
   {
     name: "fill",
@@ -197,7 +197,7 @@ export const P5_SYMBOLS: P5Symbol[] = [
       { name: "v3", type: "Number", description: "blue or brightness value." },
       { name: "alpha", type: "Number", description: "alpha value (0-255)." },
     ],
-    url: "https://p5js.org/reference/p5/fill/",
+    url: "/ref?symbol=fill",
   },
   {
     name: "background",
@@ -209,7 +209,7 @@ export const P5_SYMBOLS: P5Symbol[] = [
       { name: "v2", type: "Number", description: "green or saturation value." },
       { name: "v3", type: "Number", description: "blue or brightness value." },
     ],
-    url: "https://p5js.org/reference/p5/background/",
+    url: "/ref?symbol=background",
   },
   {
     name: "createCanvas",
@@ -220,7 +220,52 @@ export const P5_SYMBOLS: P5Symbol[] = [
       { name: "w", type: "Number", description: "width of the canvas." },
       { name: "h", type: "Number", description: "height of the canvas." },
     ],
-    url: "https://p5js.org/reference/p5/createCanvas/",
+    url: "/ref?symbol=createCanvas",
+  },
+  {
+    name: "setup",
+    module: "core",
+    description:
+      "The setup() function is called once when the program starts. It's used to define initial environment properties such as screen size and to load media such as images and fonts as the program starts.",
+    syntax: "function setup() {\n  \n}",
+    parameters: [],
+    url: "/ref?symbol=setup",
+  },
+  {
+    name: "draw",
+    module: "core",
+    description:
+      "The draw() function continuously executes the lines of code contained inside its block until the program is stopped or noLoop() is called. draw() is called automatically after setup() and should not be called explicitly.",
+    syntax: "function draw() {\n  \n}",
+    parameters: [],
+    url: "/ref?symbol=draw",
+  },
+  {
+    name: "noStroke",
+    module: "color",
+    description:
+      "Disables drawing the stroke (outline). If you want to draw shapes with no outline, call noStroke(). If both noStroke() and noFill() are called, nothing will be drawn.",
+    syntax: "noStroke()",
+    parameters: [],
+    url: "/ref?symbol=noStroke",
+  },
+  {
+    name: "noFill",
+    module: "color",
+    description:
+      "Disables filling geometry. If both noStroke() and noFill() are called, nothing will be drawn.",
+    syntax: "noFill()",
+    parameters: [],
+    url: "/ref?symbol=noFill",
+  },
+  {
+    name: "noLoop",
+    module: "core",
+    description:
+      "Stops the draw() function from repeatedly executing. If loop() is called, the program resumes running.",
+    syntax: "noLoop()",
+    parameters: [],
+    url: "/ref?symbol=noLoop",
   },
 ];
 

@@ -391,6 +391,7 @@ export default function Exercise() {
         webViewRef.current.postMessage(JSON.stringify({ type: "useCustomKeyboard" }));
       }
     } else {
+      setSystemKeyboardVisible(true);
       if (webViewRef.current) {
         webViewRef.current.postMessage(JSON.stringify({ type: "focus" }));
       }
@@ -682,6 +683,7 @@ export default function Exercise() {
           onNewline={handleNewline}
           onFormat={handleFormat}
           onCursorMove={handleCursorMove}
+          onOpenReference={(symbol) => router.push(`/ref?symbol=${symbol}`)}
           keyboardVisible={keyboardVisible}
           usedFunctions={usedFunctions}
           height={DEFAULTS.keyboardHeightPixels[keyboardHeight] ?? DEFAULTS.keyboardHeightPixels.medium}
