@@ -1,4 +1,12 @@
 > # Learn P5
+
+- [What is this ?](#what-is-this)
+- [Who is this for ?](#who-is-this-for)
+- [How can I try it out ?](#how-can-i-try-it-out)
+- [Where can I see and share suggestions ?](#where-can-i-see-and-share-suggestions)
+  - [Roadmap](#roadmap)
+  - [License](#license)
+
 >
 > An offline first mobile app to learn p5.js through small (bite sized 🍣) exercises.
 ---
@@ -22,7 +30,7 @@ The app is currently available on Android only and ChromeOS if you are on the `d
 
 You can [grab the releases here](https://github.com/skchr/learn-p5/releases)
 
-## Where can I give feedback and share suggestions
+## Where can I see and share suggestions ?
 
 There's a few GitHub Discussions that are open to suggestions and where we post feature previews (screenshots and the like).
 
