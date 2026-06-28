@@ -225,7 +225,8 @@ export function getExerciseHtml(params: {
   .cm-editor .cm-gutters { background: ${editorBg}; border-right: 1px solid ${params.colorScheme === 'dark' ? '#292A2E' : '#E5E7EB'}; color: ${params.colorScheme === 'dark' ? '#6B7280' : '#9CA3AF'}; }
   .cm-editor .cm-activeLineGutter { background: ${params.colorScheme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}; }
   .cm-editor .cm-activeLine { background: ${params.colorScheme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}; }
-  .cm-editor .cm-cursor { border-left-color: #ED225D; }
+  .cm-editor .cm-cursor { border-left-color: #ED225D; animation: cm-blink 1s step-end infinite; }
+  @keyframes cm-blink { 50% { border-left-color: transparent; } }
   .cm-editor .cm-selectionBackground,
   .cm-editor.cm-focused .cm-selectionBackground { background: ${params.colorScheme === 'dark' ? 'rgba(237, 34, 93, 0.2)' : 'rgba(237, 34, 93, 0.15)'} !important; }
   .cm-editor .cm-matchingBracket {
@@ -785,10 +786,13 @@ if (copyBtn) {
     if (view) {
       var code = view.state.doc.toString();
       navigator.clipboard.writeText(code).then(function() {
-        copyBtn.textContent = 'Copied!';
+        copyBtn.innerHTML = '&#10003; Copied';
         copyBtn.classList.add('copied');
+        if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+          window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'codeCopied' }));
+        }
         setTimeout(function() {
-          copyBtn.textContent = 'Copy';
+          copyBtn.innerHTML = 'Copy';
           copyBtn.classList.remove('copied');
         }, 2000);
       });

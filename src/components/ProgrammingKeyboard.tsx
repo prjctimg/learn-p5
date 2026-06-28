@@ -29,6 +29,7 @@ const BACKSPACE_INTERVAL = 60;
 export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], onToggleKeyboard, onRequestSystemKeyboard, onBackspace, onNewline, onFormat, onCursorMove, onOpenReference, keyboardVisible = true, usedFunctions = [], height = 280 }: ProgrammingKeyboardProps) {
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const isMediumKeyboard = height === 280;
   const [hintType, setHintType] = useState<"string" | "array" | null>(null);
   const [popupSymbol, setPopupSymbol] = useState<string | null>(null);
   const popupAnim = useRef(new Animated.Value(0)).current;
@@ -272,6 +273,7 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
         })}
       </View>
 
+      {!isMediumKeyboard && (
       <View style={styles.bottomCluster}>
         <View style={styles.dpad}>
           <View style={styles.dpadRow}>
@@ -327,6 +329,7 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
           </View>
         </View>
       </View>
+      )}
 
       <Modal transparent visible={popupSymbol !== null} onRequestClose={() => setPopupSymbol(null)}>
         <Pressable style={styles.popupOverlay} onPress={() => setPopupSymbol(null)}>

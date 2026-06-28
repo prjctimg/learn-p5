@@ -10,7 +10,7 @@ import { useThemeContext } from "../components/ThemeProvider";
 import { APP_VERSION } from "../constants/Version";
 import { p5Source } from "../utils/p5Source";
 
-const logoPaths = [
+const p5LogoPaths = [
   "M16.254,27.631v7.998h0.359c0.715-1.113,1.65-2.248,2.805-3.402c1.153-1.154,2.567-2.188,4.239-3.105c1.671-0.912,3.561-1.67,5.671-2.268c2.107-0.596,4.477-0.896,7.103-0.896c4.06,0,7.8,0.777,11.223,2.328c3.422,1.555,6.368,3.684,8.836,6.389c2.466,2.707,4.376,5.891,5.73,9.551c1.353,3.662,2.03,7.602,2.03,11.82s-0.657,8.178-1.971,11.879c-1.312,3.701-3.185,6.924-5.611,9.67c-2.429,2.746-5.372,4.938-8.835,6.566c-3.463,1.631-7.384,2.447-11.76,2.447c-4.06,0-7.781-0.836-11.163-2.506c-3.385-1.672-5.99-3.939-7.82-6.807h-0.238v36.295H2.525V27.631H16.254z M49.684,56.045c0-2.229-0.339-4.438-1.015-6.627c-0.678-2.188-1.692-4.158-3.045-5.91c-1.354-1.748-3.064-3.162-5.134-4.238c-2.07-1.074-4.497-1.611-7.282-1.611c-2.627,0-4.976,0.557-7.044,1.672c-2.07,1.115-3.842,2.549-5.313,4.297c-1.474,1.752-2.587,3.742-3.343,5.971c-0.758,2.229-1.134,4.459-1.134,6.686c0,2.229,0.376,4.438,1.134,6.625c0.756,2.191,1.869,4.16,3.343,5.912c1.472,1.75,3.243,3.164,5.313,4.236c2.068,1.076,4.417,1.611,7.044,1.611c2.785,0,5.212-0.555,7.282-1.67c2.069-1.115,3.78-2.547,5.134-4.299c1.353-1.75,2.367-3.74,3.045-5.969C49.345,60.502,49.684,58.273,49.684,56.045z",
   "M189.333,24.893v63.506c0,3.422-0.279,6.666-0.836,9.73c-0.559,3.064-1.611,5.73-3.164,8c-1.551,2.27-3.662,4.078-6.328,5.432c-2.668,1.354-6.148,2.029-10.447,2.029c-1.193,0-2.387-0.08-3.582-0.238c-1.193-0.16-2.148-0.32-2.865-0.479l1.195-12.178c0.637,0.16,1.312,0.279,2.029,0.359c0.717,0.078,1.352,0.119,1.91,0.119c1.67,0,3.023-0.318,4.059-0.955c1.033-0.639,1.83-1.514,2.389-2.627c0.555-1.115,0.914-2.408,1.074-3.881c0.158-1.473,0.238-3.043,0.238-4.715V24.893H189.333z",
   "M238.163,42.912c-1.275-1.672-3.025-3.123-5.254-4.357s-4.656-1.852-7.283-1.852c-2.309,0-4.416,0.479-6.326,1.434c-1.912,0.953-2.865,2.547-2.865,4.775s1.053,3.803,3.162,4.715c2.109,0.916,5.195,1.852,9.254,2.807c2.148,0.479,4.316,1.115,6.506,1.91s4.18,1.85,5.971,3.164c1.789,1.312,3.242,2.945,4.357,4.895c1.113,1.951,1.672,4.318,1.672,7.104c0,3.504-0.658,6.469-1.971,8.895c-1.312,2.428-3.064,4.398-5.254,5.91s-4.736,2.607-7.641,3.283c-2.906,0.676-5.908,1.014-9.014,1.014c-4.459,0-8.795-0.816-13.014-2.447c-4.219-1.629-7.721-3.959-10.506-6.982l9.432-8.836c1.592,2.07,3.66,3.781,6.209,5.133c2.547,1.354,5.371,2.029,8.477,2.029c1.033,0,2.088-0.117,3.164-0.357c1.074-0.238,2.068-0.615,2.984-1.133c0.914-0.518,1.65-1.213,2.209-2.09c0.555-0.877,0.834-1.949,0.834-3.225c0-2.389-1.094-4.098-3.281-5.133c-2.191-1.035-5.475-2.07-9.85-3.104c-2.15-0.479-4.24-1.094-6.27-1.852c-2.029-0.756-3.84-1.75-5.432-2.984c-1.594-1.234-2.865-2.764-3.82-4.598c-0.955-1.83-1.434-4.098-1.434-6.805c0-3.184,0.656-5.928,1.971-8.236c1.312-2.311,3.045-4.197,5.193-5.674c2.148-1.471,4.576-2.566,7.283-3.281c2.705-0.717,5.492-1.076,8.357-1.076c4.137,0,8.178,0.717,12.117,2.148c3.939,1.434,7.062,3.625,9.373,6.568L238.163,42.912z",
@@ -19,16 +19,16 @@ const logoPaths = [
 ];
 
 const PROCESSING_COLORS = [
-  [237, 34, 93],   // p5.js pink #ED225D
-  [156, 39, 176],  // purple
-  [33, 150, 243],  // blue
-  [0, 150, 136],   // teal
-  [255, 152, 0],   // orange
-  [63, 81, 181],   // indigo
-  [0, 188, 212],   // cyan
-  [255, 87, 34],   // deep orange
-  [76, 175, 80],   // green
-  [233, 30, 99],   // pink accent
+  [237, 34, 93],
+  [156, 39, 176],
+  [33, 150, 243],
+  [0, 150, 136],
+  [255, 152, 0],
+  [63, 81, 181],
+  [0, 188, 212],
+  [255, 87, 34],
+  [76, 175, 80],
+  [233, 30, 99],
 ];
 
 let _randomColor: number[] | null = null;
@@ -61,14 +61,82 @@ export default function About() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <Svg width={120} height={55} viewBox="0 0 250 114">
-          {logoPaths.map((d, i) => (
-            <Path key={`about-path-${i}`} d={d} fill={colors.primary} />
-          ))}
-        </Svg>
+        <View style={[styles.sectionCard, { backgroundColor: colors.surfaceDim }]}>
+          <Text style={[styles.sectionHeading, { color: colors.onSurface }]}>
+            What is p5.js ?
+          </Text>
+          <Svg width={100} height={46} viewBox="0 0 250 114" style={styles.logo}>
+            {p5LogoPaths.map((d, i) => (
+              <Path key={`about-p5-path-${i}`} d={d} fill={colors.primary} />
+            ))}
+          </Svg>
+          <Text style={[styles.definitionText, { color: colors.textSecondary }]}>
+            p5.js is a JavaScript library for creative coding, with a focus on making coding
+            accessible and inclusive for artists, designers, educators, beginners, and anyone else!
+            p5.js is free and open-source because we believe software, and the tools to learn it,
+            should be accessible to everyone.
+          </Text>
+          <Pressable
+            onPress={() => Linking.openURL("https://p5js.org")}
+            style={({ pressed }) => [
+              styles.linkButton,
+              { backgroundColor: pressed ? colors.primaryContainer : colors.primary },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Visit p5js.org"
+          >
+            <Text style={[styles.linkButtonText, { color: colors.onPrimary }]}>
+              Visit p5js.org
+            </Text>
+          </Pressable>
+        </View>
 
-        <Text style={[styles.description, { color: colors.textSecondary }]}>
-          Learn P5 is a GSoC 2026 project that aims to provide an offline first, ELI5 learning experience with the hope to improve the quality of learning for users who may not have unlimited bandwidth or reliable internet. Based on the existing community knowledge, this app focuses more on making learning creative programming with Processing tools an interactive and hopefully immersive experience.
+        <View style={[styles.sectionCard, { backgroundColor: colors.surfaceDim }]}>
+          <Text style={[styles.sectionHeading, { color: colors.onSurface }]}>
+            What is Processing?
+          </Text>
+          <Svg width={100} height={100} viewBox="0 0 100 100" style={styles.logo}>
+            <Path
+              d="M50 5 C25.1 5 5 25.1 5 50 s20.1 45 45 45 s45-20.1 45-45 S74.9 5 50 5z M50 85 C30.7 85 15 69.3 15 50 S30.7 15 50 15 s35 15.7 35 35 S69.3 85 50 85z"
+              fill={colors.primary}
+            />
+            <Path
+              d="M42 30 L42 70 L58 70 C66.8 70 74 62.8 74 54 C74 45.2 66.8 38 58 38 L50 38 L50 30 Z"
+              fill={colors.primary}
+            />
+            <Path
+              d="M50 46 L58 46 C62.4 46 66 49.6 66 54 C66 58.4 62.4 62 58 62 L50 62 Z"
+              fill={colors.surface}
+            />
+          </Svg>
+          <Text style={[styles.definitionText, { color: colors.textSecondary }]}>
+            Processing is a flexible software sketchbook and a language for learning how to code
+            within the context of the visual arts. Since 2001, Processing has promoted software
+            literacy within the visual arts and visual literacy within technology. There are tens
+            of thousands of students, artists, designers, researchers, and hobbyists who use
+            Processing for learning and prototyping.
+          </Text>
+          <Pressable
+            onPress={() => Linking.openURL("https://processing.org")}
+            style={({ pressed }) => [
+              styles.linkButton,
+              { backgroundColor: pressed ? colors.primaryContainer : colors.primary },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Visit processing.org"
+          >
+            <Text style={[styles.linkButtonText, { color: colors.onPrimary }]}>
+              Visit processing.org
+            </Text>
+          </Pressable>
+        </View>
+
+        <Text style={[styles.projectDescription, { color: colors.textSecondary }]}>
+          Learn P5 is a GSoC 2026 project that aims to provide an offline first, ELI5 learning
+          experience with the hope to improve the quality of learning for users who may not have
+          unlimited bandwidth or reliable internet. Based on the existing community knowledge, this
+          app focuses more on making learning creative programming with Processing tools an
+          interactive and hopefully immersive experience.
         </Text>
 
         <View style={[styles.versionBadge, { backgroundColor: colors.surfaceDim }]}>
@@ -85,14 +153,6 @@ export default function About() {
           bounces={false}
           pointerEvents="none"
         />
-
-        <View style={styles.footer}>
-          <Pressable onPress={() => Linking.openURL("https://processing.org")}>
-            <Text style={[styles.footerMono, { color: colors.primary }]}>
-              {"  "}What&apos;s Processing ?
-            </Text>
-          </Pressable>
-        </View>
       </ScrollView>
     </View>
   );
@@ -111,6 +171,50 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.xl,
     paddingBottom: 48,
   },
+  sectionCard: {
+    width: "100%",
+    borderRadius: 12,
+    padding: Spacing.lg,
+    alignItems: "center",
+    marginBottom: Spacing.lg,
+  },
+  sectionHeading: {
+    fontFamily: "SpaceGrotesk",
+    fontSize: 20,
+    fontWeight: "700",
+    marginBottom: Spacing.md,
+    textAlign: "center",
+  },
+  logo: {
+    marginBottom: Spacing.md,
+  },
+  definitionText: {
+    ...Typography.body,
+    fontFamily: "JetBrainsMono",
+    textAlign: "center",
+    lineHeight: 22,
+  },
+  linkButton: {
+    marginTop: Spacing.md,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  linkButtonText: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 11,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  projectDescription: {
+    ...Typography.body,
+    fontFamily: "JetBrainsMono",
+    textAlign: "center",
+    marginTop: Spacing.md,
+    maxWidth: 300,
+    lineHeight: 22,
+  },
   sketchBox: {
     width: 200,
     height: 200,
@@ -121,24 +225,9 @@ const styles = StyleSheet.create({
     borderRadius: 9999,
     paddingHorizontal: Spacing.sm + 4,
     paddingVertical: Spacing.xs,
-    marginTop: Spacing.md,
+    marginTop: Spacing.lg,
   },
   versionText: {
-    ...Typography.monoLabel,
-  },
-  description: {
-    ...Typography.body,
-    fontFamily: "JetBrainsMono",
-    textAlign: "center",
-    marginTop: Spacing.lg,
-    maxWidth: 300,
-  },
-  footer: {
-    marginTop: Spacing.xl + 8,
-    alignItems: "center",
-    gap: Spacing.sm,
-  },
-  footerMono: {
     ...Typography.monoLabel,
   },
 });

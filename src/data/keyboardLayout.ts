@@ -16,7 +16,6 @@ export const pairedSymbols: PairedSymbol[] = [
   { open: "(", close: ")", display: "( )", hintTrigger: null },
   { open: "{", close: "}", display: "{ }", hintTrigger: null },
   { open: "[", close: "]", display: "[ ]", hintTrigger: "array" },
-  { open: "<", close: ">", display: "< >", hintTrigger: null },
   { open: '"', close: '"', display: '" "', hintTrigger: "string" },
 ];
 

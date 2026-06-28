@@ -318,15 +318,13 @@ export default function Settings() {
             <View style={styles.flexChild}>
               <Text style={styles.settingTitle}>Keyboard Height</Text>
               <Text style={styles.settingDescription}>
-                {keyboardHeight === "small"
-                  ? "180px — compact"
-                  : keyboardHeight === "medium"
-                    ? "240px — default"
-                    : "320px — tall"}
+                {keyboardHeight === "medium"
+                  ? "280px — default"
+                  : "360px — tall"}
               </Text>
             </View>
             <View style={{ flexDirection: "row", gap: 6 }}>
-              {["small", "medium", "tall"].map((opt) => (
+              {["medium", "tall"].map((opt) => (
                 <Pressable
                   key={opt}
                   onPress={() => changeKeyboardHeight(opt)}
@@ -356,7 +354,7 @@ export default function Settings() {
                       color: keyboardHeight === opt ? colors.onPrimary : colors.onSurfaceVariant,
                     }}
                   >
-                    {opt === "small" ? "S" : opt === "medium" ? "M" : "T"}
+                    {opt === "medium" ? "M" : "T"}
                   </Text>
                 </Pressable>
               ))}

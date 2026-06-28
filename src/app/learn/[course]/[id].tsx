@@ -391,11 +391,13 @@ export default function Exercise() {
   const handleRequestSystemKeyboard = useCallback(() => {
     if (systemKeyboardVisible) {
       setSystemKeyboardVisible(false);
+      setKeyboardVisible(true);
       if (webViewRef.current && editorViewReady) {
         webViewRef.current.postMessage(JSON.stringify({ type: "useCustomKeyboard" }));
       }
     } else {
       setSystemKeyboardVisible(true);
+      setKeyboardVisible(false);
       if (webViewRef.current) {
         webViewRef.current.postMessage(JSON.stringify({ type: "focus" }));
       }
@@ -821,7 +823,7 @@ export default function Exercise() {
             <View style={styles.modalSection}>
               <Text style={[styles.modalSectionTitle, { color: colors.textSecondary }]}>Keyboard Height</Text>
               <View style={styles.modalRow}>
-                {["small", "medium", "tall"].map((opt) => (
+                {["medium", "tall"].map((opt) => (
                   <Pressable
                     key={opt}
                     onPress={() => changeKeyboardHeight(opt)}
@@ -847,7 +849,7 @@ export default function Exercise() {
                       letterSpacing: 0.5,
                       color: keyboardHeight === opt ? colors.onPrimary : colors.onSurfaceVariant,
                     }}>
-                      {opt === "small" ? "S" : opt === "medium" ? "M" : "T"}
+                      {opt === "medium" ? "M" : "T"}
                     </Text>
                   </Pressable>
                 ))}
