@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { View, Text, Switch, Pressable, ScrollView, StyleSheet } from "react-native";
+import { View, Text, TextInput, Switch, Pressable, ScrollView, StyleSheet } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
 import Header from "../../components/Header";
@@ -42,6 +42,13 @@ const createStyles = (colors: Record<string, string>) =>
     flexChild: { flex: 1 },
     settingTitle: { fontFamily: "JetBrainsMono", fontSize: 16, fontWeight: "700", color: colors.onSurface },
     settingDescription: { fontFamily: "JetBrainsMono", fontSize: 11, marginTop: 2, color: colors.textSecondary },
+    nameInput: {
+      fontFamily: "JetBrainsMono",
+      fontSize: 16,
+      borderBottomWidth: 1,
+      paddingVertical: 8,
+      flex: 1,
+    },
     sectionMargin: { marginTop: 32 },
   });
 
@@ -57,6 +64,7 @@ export default function Settings() {
   const [codeFontSize, setCodeFontSize] = useState(DEFAULTS.codeFontSize);
   const [codeBackground, setCodeBackgroundState] = useState<string>(DEFAULTS.codeBackground);
   const [keyboardHeight, setKeyboardHeightState] = useState<string>(DEFAULTS.keyboardHeight);
+  const [displayName, setDisplayName] = useState("");
 
   useEffect(() => {
     AsyncStorage.multiGet([
@@ -77,6 +85,14 @@ export default function Settings() {
       if (fontSize[1]) setCodeFontSize(parseInt(fontSize[1], 10));
       if (bg[1]) setCodeBackgroundState(bg[1]);
       if (kb[1]) setKeyboardHeightState(kb[1]);
+    });
+    AsyncStorage.getItem("onboardingData").then((val) => {
+      if (val) {
+        try {
+          const data = JSON.parse(val);
+          setDisplayName(data.displayName || "");
+        } catch {}
+      }
     });
   }, []);
 
@@ -144,6 +160,15 @@ export default function Settings() {
     await AsyncStorage.setItem(SETTINGS_KEYS.keyboardHeight, value);
   };
 
+  const handleDisplayNameChange = useCallback(async (text: string) => {
+    setDisplayName(text);
+    AsyncStorage.getItem("onboardingData").then((val) => {
+      const data = val ? JSON.parse(val) : {};
+      data.displayName = text;
+      AsyncStorage.setItem("onboardingData", JSON.stringify(data));
+    });
+  }, []);
+
   const keyboardHeightPixels = DEFAULTS.keyboardHeightPixels;
 
   return (
@@ -153,6 +178,29 @@ export default function Settings() {
         style={styles.scrollContent}
         contentContainerStyle={{ paddingBottom: 32 }}
       >
+        {/* Profile */}
+        <Text style={styles.sectionTitle}>Profile</Text>
+        <View style={styles.card}>
+          <View style={styles.cardRow}>
+            <View style={styles.flexChild}>
+              <Text style={styles.settingTitle}>Display Name</Text>
+              <Text style={styles.settingDescription}>
+                Used in greetings and notifications
+              </Text>
+            </View>
+          </View>
+          <View style={[styles.cardRow, { borderTopWidth: 1, borderTopColor: colors.surfaceContainerHighest }]}>
+            <TextInput
+              style={[styles.nameInput, { color: colors.primary, borderColor: colors.outlineVariant }]}
+              placeholder="Enter your name"
+              placeholderTextColor={colors.textSecondary}
+              value={displayName}
+              onChangeText={handleDisplayNameChange}
+              maxLength={30}
+            />
+          </View>
+        </View>
+
         {/* Appearance */}
         <Text style={styles.sectionTitle}>Appearance</Text>
         <View style={styles.card}>

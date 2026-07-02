@@ -193,15 +193,15 @@ function generateStub() {
     ]},
     { name: "circle", module: "Shape", cls: "p5", params: [
       { name: "x", type: "Number" }, { name: "y", type: "Number" }, { name: "d", type: "Number" },
-    ]},
+    ], examples: ["circle(200, 200, 100);"] },
     { name: "ellipse", module: "Shape", cls: "p5", params: [
       { name: "x", type: "Number" }, { name: "y", type: "Number" },
       { name: "w", type: "Number" }, { name: "h", type: "Number", optional: true },
-    ]},
+    ], examples: ["ellipse(200, 200, 150, 100);"] },
     { name: "line", module: "Shape", cls: "p5", params: [
       { name: "x1", type: "Number" }, { name: "y1", type: "Number" },
       { name: "x2", type: "Number" }, { name: "y2", type: "Number" },
-    ]},
+    ], examples: ["line(100, 100, 300, 300);"] },
     { name: "point", module: "Shape", cls: "p5", params: [
       { name: "x", type: "Number" }, { name: "y", type: "Number" }, { name: "z", type: "Number", optional: true },
     ]},
@@ -214,7 +214,7 @@ function generateStub() {
     { name: "rect", module: "Shape", cls: "p5", params: [
       { name: "x", type: "Number" }, { name: "y", type: "Number" },
       { name: "w", type: "Number" }, { name: "h", type: "Number", optional: true },
-    ]},
+    ], examples: ["rect(150, 150, 200, 100);"] },
     { name: "square", module: "Shape", cls: "p5", params: [
       { name: "x", type: "Number" }, { name: "y", type: "Number" }, { name: "s", type: "Number" },
       { name: "tl", type: "Number", optional: true }, { name: "tr", type: "Number", optional: true },
@@ -241,11 +241,11 @@ function generateStub() {
     { name: "fill", module: "Color", cls: "p5", params: [
       { name: "v1", type: "Number" }, { name: "v2", type: "Number", optional: true },
       { name: "v3", type: "Number", optional: true }, { name: "alpha", type: "Number", optional: true },
-    ]},
+    ], examples: ["fill(255, 0, 0);\ncircle(200, 200, 100);"] },
     { name: "background", module: "Color", cls: "p5", params: [
       { name: "v1", type: "Number" }, { name: "v2", type: "Number", optional: true },
       { name: "v3", type: "Number", optional: true }, { name: "alpha", type: "Number", optional: true },
-    ]},
+    ], examples: ["background(220);"] },
     { name: "noStroke", module: "Color", cls: "p5", params: [] },
     { name: "noFill", module: "Color", cls: "p5", params: [] },
     { name: "color", module: "Color", cls: "p5", params: [
@@ -400,18 +400,25 @@ function generateStub() {
       description: "",
     }));
 
-    byName[name] = {
+    const entry = {
       name,
       module: mod,
       submodule: null,
       class: cls,
       itemtype,
-      description: "",
+      description: sym.description || "",
       syntax: buildSyntax(name, params),
       params,
+      overloads: sym.overloads || undefined,
       chainable: false,
       isConstructor: false,
     };
+
+    if (sym.examples) {
+      entry.examples = sym.examples;
+    }
+
+    byName[name] = entry;
 
     if (!byModule[mod]) byModule[mod] = [];
     byModule[mod].push(name);

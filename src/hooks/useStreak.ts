@@ -5,6 +5,7 @@ const STREAK_COUNT_KEY = "streak_count";
 const LAST_VISIT_KEY = "streak_last_visit";
 const LONGEST_STREAK_KEY = "streak_longest";
 const LAST_TIER_KEY = "streak_last_tier";
+const STREAK_TOAST_PENDING_KEY = "streak_toast_pending";
 
 export const STREAK_TIERS = [3, 7, 14, 30, 100, 365];
 
@@ -28,7 +29,10 @@ function getCurrentTierIndex(days: number): number {
   return -1;
 }
 
-export function useStreak(): StreakData & { checkStreak: () => Promise<boolean> } {
+export function useStreak(): StreakData & {
+  checkStreak: () => Promise<boolean>;
+  consumePendingToast: () => Promise<StreakData | null>;
+} {
   const [streakData, setStreakData] = useState<StreakData>({
     count: 0,
     longest: 0,
@@ -79,6 +83,7 @@ export function useStreak(): StreakData & { checkStreak: () => Promise<boolean> 
       [STREAK_COUNT_KEY, newCount.toString()],
       [LAST_VISIT_KEY, today],
       [LONGEST_STREAK_KEY, newLongest.toString()],
+      [STREAK_TOAST_PENDING_KEY, "true"],
     ]);
 
     setStreakData({
@@ -93,11 +98,18 @@ export function useStreak(): StreakData & { checkStreak: () => Promise<boolean> 
     return true;
   }, []);
 
+  const consumePendingToast = useCallback(async (): Promise<StreakData | null> => {
+    const pending = await AsyncStorage.getItem(STREAK_TOAST_PENDING_KEY);
+    if (pending !== "true") return null;
+    await AsyncStorage.removeItem(STREAK_TOAST_PENDING_KEY);
+    return streakData;
+  }, [streakData]);
+
   useEffect(() => {
     checkStreak();
   }, [checkStreak]);
 
-  return { ...streakData, checkStreak };
+  return { ...streakData, checkStreak, consumePendingToast };
 }
 
 export async function getStreakFromStorage(): Promise<{ count: number; longest: number }> {

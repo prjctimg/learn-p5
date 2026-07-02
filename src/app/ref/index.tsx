@@ -1,5 +1,7 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useRef } from "react";
 import { View, Text, FlatList, Pressable, Alert, StyleSheet, Linking } from "react-native";
+import { WebView } from "react-native-webview";
 import Header from "../../components/Header";
 import { P5_SYMBOLS_BY_NAME, P5_SYMBOLS, P5_FUNCTION_NAMES, P5SymbolView as P5Symbol } from "../../data/reference";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -7,6 +9,7 @@ import { useThemeContext } from "../../components/ThemeProvider";
 import { Colors } from "../../constants/Colors";
 import { useModuleProgress } from "../../hooks/useModuleProgress";
 import { getEditorTheme } from "../../utils/editor/themes";
+import { getExampleHtml } from "../../utils/editor/exampleHtml";
 
 const MODULE_GROUPS = P5_SYMBOLS.reduce<{ module: string; symbols: P5Symbol[] }[]>((acc, sym) => {
   const existing = acc.find((g) => g.module === sym.module);
@@ -217,6 +220,34 @@ function SymbolDetail({ symbol }: { symbol: string }) {
                 ))}
               </Text>
             </View>
+
+            {sym.examples && sym.examples.length > 0 && (
+              <>
+                <Text style={[styles.sectionTitle, { color: colors.onSurface, marginBottom: 12 }]}>
+                  Examples
+                </Text>
+                {sym.examples.map((ex, i) => (
+                  <View key={i} style={{ marginBottom: 16 }}>
+                    {sym.norender ? (
+                      <View style={[styles.codeBlock, { backgroundColor: colors.surfaceDim }]}>
+                        <Text style={{ fontFamily: "JetBrainsMono", fontSize: 13, lineHeight: 20, color: colors.onSurface }}>
+                          {ex}
+                        </Text>
+                      </View>
+                    ) : (
+                      <WebView
+                        source={{ html: getExampleHtml(ex) }}
+                        style={[styles.exampleWebView, { backgroundColor: colors.surface }]}
+                        scrollEnabled={false}
+                        javaScriptEnabled
+                        domStorageEnabled
+                        bounces={false}
+                      />
+                    )}
+                  </View>
+                ))}
+              </>
+            )}
 
             {sym.parameters.length > 0 && (
               <>
@@ -444,6 +475,16 @@ const styles = StyleSheet.create({
   syntaxText: {
     fontFamily: "JetBrainsMono",
     fontSize: 16,
+  },
+  codeBlock: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  exampleWebView: {
+    height: 200,
+    borderRadius: 8,
+    overflow: "hidden",
   },
   paramRow: {
     paddingVertical: 12,

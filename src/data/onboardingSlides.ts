@@ -12,19 +12,21 @@ export interface PathOption {
 
 export interface OnboardingSlide {
   id: string;
-  type: "welcome" | "experience" | "path" | "ready";
+  type: "welcome" | "experience" | "path" | "name" | "ready";
 }
 
 export interface OnboardingData {
   experience: string | null;
   path: string | null;
+  displayName: string;
 }
 
 const slides: OnboardingSlide[] = [
   { id: "1", type: "welcome" },
   { id: "2", type: "experience" },
   { id: "3", type: "path" },
-  { id: "4", type: "ready" },
+  { id: "4", type: "name" },
+  { id: "5", type: "ready" },
 ];
 
 export const experienceOptions: ExperienceOption[] = [

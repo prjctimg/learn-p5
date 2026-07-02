@@ -34,6 +34,8 @@ export type P5SymbolView = {
   description: string;
   syntax: string;
   parameters: { name: string; type: string; description: string }[];
+  examples?: string[];
+  norender?: boolean;
 };
 
 function toP5SymbolView(sym: GeneratedSymbol): P5SymbolView {
@@ -47,6 +49,8 @@ function toP5SymbolView(sym: GeneratedSymbol): P5SymbolView {
       type: p.type,
       description: p.description,
     })),
+    examples: sym.examples,
+    norender: sym.itemtype === "property",
   };
 }
 

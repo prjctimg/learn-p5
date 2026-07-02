@@ -104,7 +104,7 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
 
   const handleExercisePress = useCallback((sym: string) => {
     setHintType(null);
-    onInsert(sym + "()", 1);
+    onInsert(sym + "()", sym.length + 1);
   }, [onInsert]);
 
   const handleExerciseLongPress = useCallback((sym: string) => {

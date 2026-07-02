@@ -1,4 +1,5 @@
-import { View, Text, Pressable, ScrollView, StyleSheet } from "react-native";
+import { useState } from "react";
+import { View, Text, TextInput, Pressable, ScrollView, StyleSheet } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -43,6 +44,11 @@ const slideContent: Record<string, SlideData> = {
     title: "Why do you want\nto learn p5.js?",
   },
   "4": {
+    title: "What should we\ncall you?",
+    subtitle:
+      "This will be used in greetings and notifications — local only, never shared.",
+  },
+  "5": {
     title: "Your Path",
     subtitle:
       "Based on your goals, we've optimized a path for creative expression and logic.",
@@ -110,8 +116,8 @@ export default function OnboardingSlide() {
   const isLast = isLastSlide(slide);
   const isFirst = isFirstSlide(slide);
 
-  const needsSelection = slide === "2" || slide === "3";
-  const hasSelection = slide === "2" ? !!data.experience : slide === "3" ? !!data.path : true;
+  const needsSelection = slide === "2" || slide === "3" || slide === "4";
+  const hasSelection = slide === "2" ? !!data.experience : slide === "3" ? !!data.path : slide === "4" ? !!data.displayName : true;
   const canProceed = !needsSelection || hasSelection;
 
   return (
@@ -252,6 +258,26 @@ export default function OnboardingSlide() {
 
           {slide === "4" && (
             <View style={[styles.flex1, { paddingTop: 32 }]}>
+              <Text style={styles.slideTitle}>
+                {content.title}
+              </Text>
+              <Text style={styles.slideSubtitle}>
+                {content.subtitle}
+              </Text>
+              <TextInput
+                style={[styles.nameInput, { color: "#ffd9e4", borderColor: "#ff4f75", backgroundColor: "#340d1f" }]}
+                placeholder="Enter your name"
+                placeholderTextColor="#e4bdc0"
+                value={data.displayName}
+                onChangeText={(text) => updateData({ displayName: text })}
+                autoFocus
+                maxLength={30}
+              />
+            </View>
+          )}
+
+          {slide === "5" && (
+            <View style={[styles.flex1, { paddingTop: 32 }]}>
               <Text style={styles.readyTitle}>
                 {content.title}
               </Text>
@@ -292,7 +318,7 @@ export default function OnboardingSlide() {
 
       <View style={[{ paddingBottom: insets.bottom + 16 }, styles.bottomBar]}>
         <View style={[styles.flexRow, { justifyContent: "center", gap: 8, marginBottom: 16 }]}>
-          {["1", "2", "3", "4"].map((dot) => (
+          {["1", "2", "3", "4", "5"].map((dot) => (
             <View
               key={dot}
               style={[styles.dot, { backgroundColor: dot === slide ? "#ED225D" : "rgba(255,255,255,0.3)" }]}
@@ -340,6 +366,14 @@ const styles = StyleSheet.create({
   flexWrap: { flexWrap: "wrap" },
   justifyCenter: { justifyContent: "center" },
   contentPadding: { paddingHorizontal: 24 },
+  nameInput: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 24,
+    fontWeight: "700",
+    borderBottomWidth: 2,
+    paddingVertical: 12,
+    marginTop: 32,
+  },
   headerRow: {
     flexDirection: "row",
     alignItems: "center",

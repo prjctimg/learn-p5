@@ -466,10 +466,12 @@ export default function Exercise() {
   }, []);
 
   useEffect(() => {
-    if (streak.isNewDay) {
-      setStreakToastVisible(true);
-    }
-  }, [streak.isNewDay]);
+    streak.consumePendingToast().then((data) => {
+      if (data) {
+        setStreakToastVisible(true);
+      }
+    });
+  }, []);
 
   useFocusEffect(
     useCallback(() => {

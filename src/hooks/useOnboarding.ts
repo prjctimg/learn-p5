@@ -7,6 +7,7 @@ const ONBOARDING_DATA_KEY = "onboardingData";
 interface OnboardingData {
   experience: string | null;
   path: string | null;
+  displayName: string;
 }
 
 export function useOnboarding() {
@@ -15,6 +16,7 @@ export function useOnboarding() {
   const [data, setData] = useState<OnboardingData>({
     experience: null,
     path: null,
+    displayName: "",
   });
 
   useEffect(() => {
@@ -54,10 +56,10 @@ export function useOnboarding() {
   const resetOnboarding = async () => {
     await AsyncStorage.multiSet([
       [ONBOARDING_KEY, "false"],
-      [ONBOARDING_DATA_KEY, JSON.stringify({ experience: null, path: null })],
+      [ONBOARDING_DATA_KEY, JSON.stringify({ experience: null, path: null, displayName: "" })],
     ]);
     setIsOnboardingComplete(false);
-    setData({ experience: null, path: null });
+    setData({ experience: null, path: null, displayName: "" });
   };
 
   return {
