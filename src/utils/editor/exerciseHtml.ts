@@ -1039,8 +1039,10 @@ function handleMessage(data) {
               for (var pi = 0; pi < pixelRules.length; pi++) {
                 var pr = pixelRules[pi];
                 var tol = pr.tolerance !== undefined ? pr.tolerance : 30;
-                var px = Math.min(Math.max(0, Math.floor(pr.x)), cnv.width - 1);
-                var py = Math.min(Math.max(0, Math.floor(pr.y)), cnv.height - 1);
+                var d = p5Instance.pixelDensity ? p5Instance.pixelDensity() : 1;
+                var px = Math.min(Math.max(0, Math.floor(pr.x * d)), cnv.width - 1);
+                var py = Math.min(Math.max(0, Math.floor(pr.y * d)), cnv.height - 1);
+
                 var imageData = ctx.getImageData(px, py, 1, 1).data;
                 var rDiff = Math.abs(imageData[0] - pr.expected[0]);
                 var gDiff = Math.abs(imageData[1] - pr.expected[1]);
