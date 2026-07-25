@@ -374,7 +374,7 @@ export default function QwertyKeyboard({
 
         <View style={[styles.bottomRow, { gap: KEY_GAP }]}>
           <Pressable
-            onPress={() => onHideKeyboard?.()}
+            onPress={onToggleProgramming}
             style={({ pressed }) => [
               {
                 width: dims.keySize + 8,
@@ -384,15 +384,15 @@ export default function QwertyKeyboard({
                 justifyContent: "center",
                 backgroundColor: pressed
                   ? derivedColors.primaryContainer
-                  : colors.surfaceContainerHigh,
+                  : derivedColors.primaryContainer + "33",
               },
             ]}
             accessibilityRole="button"
-            accessibilityLabel="Hide keyboard"
+            accessibilityLabel="Switch to programming keyboard"
           >
             <MaterialCommunityIcons
-              name="chevron-down"
-              size={22}
+              name="code-tags"
+              size={20}
               color={derivedColors.primary}
             />
           </Pressable>
@@ -417,7 +417,7 @@ export default function QwertyKeyboard({
           </Pressable>
 
           <Pressable
-            onPress={onToggleProgramming}
+            onPress={() => onHideKeyboard?.()}
             style={({ pressed }) => [
               {
                 width: dims.keySize + 8,
@@ -427,15 +427,15 @@ export default function QwertyKeyboard({
                 justifyContent: "center",
                 backgroundColor: pressed
                   ? derivedColors.primaryContainer
-                  : derivedColors.primaryContainer + "33",
+                  : colors.surfaceContainerHigh,
               },
             ]}
             accessibilityRole="button"
-            accessibilityLabel="Switch to programming keyboard"
+            accessibilityLabel="Hide keyboard"
           >
             <MaterialCommunityIcons
-              name="code-tags"
-              size={20}
+              name="chevron-down"
+              size={22}
               color={derivedColors.primary}
             />
           </Pressable>
