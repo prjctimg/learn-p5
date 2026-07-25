@@ -83,7 +83,9 @@ const createStyles = (colors: Record<string, string>) =>
       fontSize: 14,
       borderBottomWidth: 1,
       paddingVertical: 6,
-      flex: 1,
+      minWidth: 140,
+      marginLeft: 12,
+      textAlign: "right",
     },
   });
 
@@ -305,9 +307,6 @@ export default function Settings() {
               <Text style={styles.settingTitle}>Display Name</Text>
               <Text style={styles.settingDescription}>Used in greetings and notifications</Text>
             </View>
-          </View>
-          <View style={styles.cardDivider} />
-          <View style={styles.cardRow}>
             <TextInput
               style={[styles.nameInput, { color: derivedColors.primary, borderColor: colors.outlineVariant }]}
               placeholder="Enter your name"
