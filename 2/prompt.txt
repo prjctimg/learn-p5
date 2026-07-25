@@ -1,0 +1,15 @@
+Explore the learn-p5 codebase (working dir /workspaces/learn-p5) and report back, thoroughly:
+
+1. The dashboard / home screen: find the route (likely `src/app/index.tsx` or `src/app/(tabs)/index.tsx` or `src/app/dashboard/`). Read it fully. Report its structure, what cards/sections it shows, what data it pulls from AsyncStorage, and where a heatmap would naturally fit.
+
+2. Activity data: grep for `AsyncStorage.setItem` and `AsyncStorage.getItem` across src/. Report every key used (e.g. `exerciseCode_*`, `streak`, `error_log`, `setting_*`, completion data). Specifically — is there any per-day or per-exercise completion log? What well-known keys exist?
+
+3. Course progress: find how course/exercise completion is persisted and read. Look in `src/data/courses/`, `src/utils/courseLoader.ts`, the dashboard, and `src/app/learn/[course]/[id].tsx` for the completion record shape. Quote the exact AsyncStorage keys and values written when a task/exercise completes (search for `exerciseCode_`, `completed`, `progress`).
+
+4. Existing charting/calendar libraries in `package.json` (any `react-native-calendars`, `victory-native`, `react-native-gifted-charts`, `d3`, etc.?). List all relevant deps.
+
+5. Theming tokens available for the heatmap: read `src/constants/Colors.ts` and report the surface/container/outline/cta token names for both light and dark. We'll need ~5 intensity steps derived from the accent color.
+
+6. `useStreak` (`src/hooks/useStreak.ts`): does it record per-day activity? What is its AsyncStorage shape?
+
+Return: file paths with line numbers, exact snippets for AsyncStorage writes/reads related to completion, and a concise summary. Do NOT edit anything — read only.
