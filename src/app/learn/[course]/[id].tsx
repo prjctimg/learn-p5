@@ -23,6 +23,7 @@ import { getExerciseHtml } from "../../../utils/editor/exerciseHtml";
 import { EDITOR_THEMES, getThemeSwatches } from "../../../utils/editor/themes";
 import { useStreak } from "../../../hooks/useStreak";
 import { recordCompletion, ACHIEVEMENTS } from "../../../hooks/useAchievements";
+import { recordActivity } from "../../../hooks/useActivityLog";
 import { useShakeDetection } from "../../../hooks/useShakeDetection";
 
 const EXERCISE_CODE_PREFIX = "exerciseCode_";
@@ -699,6 +700,7 @@ export default function Exercise() {
   (async () => {
   const durationMs = runStartTimeRef.current ? Date.now() - runStartTimeRef.current : undefined;
   const newlyUnlocked = await recordCompletion(`${course}/${ex.id}`, durationMs);
+  await recordActivity();
   if (newlyUnlocked.length > 0) {
     const first = ACHIEVEMENTS.find((a) => a.id === newlyUnlocked[0]);
     if (first) {

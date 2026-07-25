@@ -13,6 +13,8 @@ import { Exercise, Course } from "../data/types";
 import { isExerciseLocked as checkExerciseLocked } from "../utils/isExerciseLocked";
 import { getStreakFromStorage, useStreak } from "../hooks/useStreak";
 import { useAchievements, ACHIEVEMENTS } from "../hooks/useAchievements";
+import { useActivityLog } from "../hooks/useActivityLog";
+import ActivityHeatmap from "../components/ActivityHeatmap";
 
 const LAST_GREETING_KEY = "last_greeting_period";
 
@@ -41,6 +43,7 @@ export default function Dashboard() {
  const streak = useStreak();
  const [streakToastVisible, setStreakToastVisible] = useState(false);
 const { unlocked: unlockedAchievements, refresh: refreshAchievements } = useAchievements();
+const { activity, refresh: refreshActivity } = useActivityLog();
  const [greetingToastVisible, setGreetingToastVisible] = useState(false);
  const [greetingMessage, setGreetingMessage] = useState("");
  const levelAnim = useRef(new Animated.Value(0)).current;
@@ -66,7 +69,8 @@ const { unlocked: unlockedAchievements, refresh: refreshAchievements } = useAchi
  setStreakCount(count);
  setStreakLongest(longest);
  });
- refreshAchievements();
+refreshAchievements();
+ refreshActivity();
  }, [])
 );
 
@@ -77,6 +81,7 @@ const { unlocked: unlockedAchievements, refresh: refreshAchievements } = useAchi
  }
  });
  refreshAchievements();
+ refreshActivity();
  }, []);
 
  useEffect(() => {
@@ -455,6 +460,8 @@ const { unlocked: unlockedAchievements, refresh: refreshAchievements } = useAchi
  );
  })}
  </View>
+
+ <ActivityHeatmap activity={activity} />
 
  <View style={styles.continueSection}>
  <Text style={styles.sectionTitle}>
