@@ -1,0 +1,26 @@
+{
+  "cli_version": "0.8.42",
+  "checkpoint_id": "01KYCMQEK46MR6W9N3NWTAABHG",
+  "session_id": "ses_066dec4bffferBAjplAkBUgFVb",
+  "strategy": "manual-commit",
+  "created_at": "2026-07-25T12:41:56.372641624Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [],
+  "agent": "OpenCode",
+  "model": "glm-5.2",
+  "turn_id": "ca4dbe1c8904",
+  "checkpoint_transcript_start": 20,
+  "transcript_lines_at_start": 20,
+  "compact_transcript_start": 20,
+  "token_usage": {
+    "input_tokens": 0,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 0,
+    "output_tokens": 0,
+    "api_call_count": 0
+  },
+  "session_metrics": {
+    "turn_count": 1
+  }
+}
