@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# Pre-push git hook (see AGENTS.md "Release cadence").
+# Refuses a push to main unless the pushed commit range includes a version bump
+# in package.json AND a matching vX.Y.Z tag exists locally.
+#
+# Reads stdin: <local ref> <local sha> <remote ref> <remote sha> per line.
+
+set -e
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  # Only enforce on the main branch.
+  if [[ "$local_ref" != "refs/heads/main" ]]; then
+    continue
+  fi
+
+  # Resolve the range of commits being pushed.
+  if [[ -z "$remote_sha" || "$remote_sha" == "0000000000000000000000000000000000000000" ]]; then
+    range="$local_sha"
+  else
+    range="$remote_sha..$local_sha"
+  fi
+
+  repo_dir="$(git rev-parse --show-toplevel)"
+
+  # Detect a version bump in package.json within the pushed range.
+  bumped_version=""
+  if git diff --name-only "$range" -- "$repo_dir/package.json" 2>/dev/null | grep -q package.json; then
+    bumped_version=$(git show "$local_sha:package.json" 2>/dev/null | node -e "
+      let data='';
+      process.stdin.on('data',c=>data+=c);
+      process.stdin.on('end',()=>{
+        try { process.stdout.write(JSON.parse(data).version || ''); }
+        catch(e) { process.stdout.write(''); }
+      });
+    ")
+  fi
+
+  if [[ -z "$bumped_version" ]]; then
+    echo "[pre-push] ERROR: push to main must include a version bump in package.json." >&2
+    echo "           Run: sh scripts/bump-version.sh <X.Y.Z>  then commit, then:" >&2
+    echo "           git tag vX.Y.Z  before pushing." >&2
+    exit 1
+  fi
+
+  # Confirm the matching tag exists locally.
+  if ! git rev-parse -q --verify "refs/tags/v$bumped_version" >/dev/null 2>&1; then
+    echo "[pre-push] ERROR: package.json is at $bumped_version but tag v$bumped_version does not exist locally." >&2
+    echo "           Run: git tag v$bumped_version  before pushing." >&2
+    exit 1
+  fi
+done
+
+exit 0

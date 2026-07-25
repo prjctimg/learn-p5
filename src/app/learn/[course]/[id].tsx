@@ -148,17 +148,20 @@ export default function Exercise() {
   const [searchVisible, setSearchVisible] = useState(false);
 
   const [toastIcon, setToastIcon] = useState<string>("check-circle");
-  const [toastIconColor, setToastIconColor] = useState<string>("#22C55E");
+  const [toastIconColor, setToastIconColor] = useState<string | undefined>(undefined);
 
   const showToast = useCallback((message: string, actionLabel?: string, onAction?: () => void, type?: "success" | "failure") => {
     setToastMessage(message);
     setToastActionLabel(actionLabel);
     toastActionRef.current = onAction;
     setToastIcon(type === "failure" ? "alert-circle" : "check-circle");
-    setToastIconColor(type === "failure" ? colors.error : "#22C55E");
+    setToastIconColor(undefined);
+    setToastTone(type);
     setToastKey((k) => k + 1);
     setToastVisible(true);
-  }, [colors.error]);
+  }, []);
+
+  const [toastTone, setToastTone] = useState<"success" | "failure" | undefined>(undefined);
 
  const exerciseHtml = useMemo(() => {
  if (!state.exercise) return null;
@@ -960,6 +963,7 @@ return (
     onDismiss={() => setToastVisible(false)}
     icon={toastIcon}
     iconColor={toastIconColor}
+    tone={toastTone}
   />
 
  {keyboardVisible && keyboardMode === "programming" && (

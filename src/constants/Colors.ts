@@ -35,6 +35,10 @@ export const Colors = {
     errorContainer: "#FFDAD6",
     onError: "#FFFFFF",
     onErrorContainer: "#410002",
+    success: "#2E7D32",
+    onSuccess: "#FFFFFF",
+    successContainer: "#C8E6C9",
+    onSuccessContainer: "#0A3D0E",
   },
   dark: {
     primary: "#ED225D",
@@ -72,6 +76,10 @@ export const Colors = {
     errorContainer: "#93000A",
     onError: "#690005",
     onErrorContainer: "#FFDAD6",
+    success: "#7CD97C",
+    onSuccess: "#082E0A",
+    successContainer: "#1E4A1F",
+    onSuccessContainer: "#B8F2B6",
   },
 } as const;
 
