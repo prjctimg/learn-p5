@@ -3,7 +3,7 @@
   "checkpoint_id": "01KYCMBG6RWQSGVA9K1R25YE7N",
   "strategy": "manual-commit",
   "branch": "main",
-  "checkpoints_count": 9,
+  "checkpoints_count": 10,
   "files_touched": [
     "app.json",
     "package.json",
@@ -71,6 +71,13 @@
       "transcript": "/8/full.jsonl",
       "compact_transcript": "/8/transcript.jsonl",
       "content_hash": "/8/content_hash.txt",
+      "prompt": ""
+    },
+    {
+      "metadata": "/9/metadata.json",
+      "transcript": "/9/full.jsonl",
+      "compact_transcript": "/9/transcript.jsonl",
+      "content_hash": "/9/content_hash.txt",
       "prompt": ""
     }
   ],
