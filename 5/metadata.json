@@ -1,0 +1,53 @@
+{
+  "cli_version": "0.8.42",
+  "checkpoint_id": "01KYCKFE1MHMWTM101MDG36TBD",
+  "session_id": "ses_066e053f5ffeYBMEAT8PeclH5C",
+  "strategy": "manual-commit",
+  "created_at": "2026-07-25T12:20:12.641348104Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "save_step_count": 1,
+  "files_touched": [],
+  "agent": "OpenCode",
+  "model": "glm-5.2",
+  "turn_id": "b646b362a24d",
+  "compact_transcript_start": 0,
+  "token_usage": {
+    "input_tokens": 33084,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 152512,
+    "output_tokens": 4384,
+    "api_call_count": 14
+  },
+  "session_metrics": {
+    "turn_count": 1
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 345,
+      "user_lines_removed": 53,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0,
+      "user_added_per_file": {
+        ".opencode/plugins/entire.ts": 267,
+        "scripts/hooks/commit-msg": 4,
+        "scripts/hooks/post-commit": 4,
+        "scripts/hooks/post-rewrite": 4,
+        "scripts/hooks/pre-push": 10,
+        "scripts/hooks/pre-push.pre-entire": 53,
+        "scripts/hooks/prepare-commit-msg": 3
+      },
+      "user_removed_per_file": {
+        "scripts/hooks/pre-push": 53
+      }
+    },
+    {
+      "checkpoint_number": 2,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 345,
+      "agent_lines_removed": 53
+    }
+  ]
+}
