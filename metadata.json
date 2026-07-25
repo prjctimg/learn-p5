@@ -3,7 +3,7 @@
   "checkpoint_id": "01KYCKFE1MHMWTM101MDG36TBD",
   "strategy": "manual-commit",
   "branch": "main",
-  "checkpoints_count": 12,
+  "checkpoints_count": 16,
   "files_touched": [
     "app.json",
     "package.json",
@@ -93,13 +93,20 @@
       "compact_transcript": "/11/transcript.jsonl",
       "content_hash": "/11/content_hash.txt",
       "prompt": ""
+    },
+    {
+      "metadata": "/12/metadata.json",
+      "transcript": "/12/full.jsonl",
+      "compact_transcript": "/12/transcript.jsonl",
+      "content_hash": "/12/content_hash.txt",
+      "prompt": "/12/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 261932,
+    "input_tokens": 533972,
     "cache_creation_tokens": 0,
-    "cache_read_tokens": 725504,
-    "output_tokens": 30918,
-    "api_call_count": 59
+    "cache_read_tokens": 1458816,
+    "output_tokens": 43241,
+    "api_call_count": 84
   }
 }
