@@ -479,7 +479,6 @@ var indentSelection = _CM.indentSelection;
 var syntaxTree = _CM.syntaxTree;
 var ViewPlugin = _CM.ViewPlugin;
 var Decoration = _CM.Decoration;
-var DecorationSet = _CM.DecorationSet;
 var autocompletion = _CM.autocompletion;
 var CompletionContext = _CM.CompletionContext;
 var lineWrapping = _CM.EditorView.lineWrapping;
@@ -542,7 +541,7 @@ function computeP5Decos(v) {
       }
     }
   });
-  return DecorationSet.create(v.state, decos);
+  return Decoration.set(decos, true);
 }
 
 function P5FnPlugin(view) { this.decorations = computeP5Decos(view); }
@@ -891,16 +890,32 @@ function handleMessage(data) {
           WORD_WRAP = msg.wordWrap;
           var savedDoc = view.state.doc.toString();
           var savedSel = view.state.selection.main.head;
-          view.destroy();
-          view = new EditorView({
-            state: EditorState.create({
-              doc: savedDoc,
-              extensions: getExtensions(),
-            }),
-            parent: document.getElementById('editor'),
-          });
-          view.dispatch({ selection: { anchor: savedSel, head: savedSel } });
-          view.focus();
+          try {
+            view.destroy();
+            view = new EditorView({
+              state: EditorState.create({
+                doc: savedDoc,
+                extensions: getExtensions(),
+              }),
+              parent: document.getElementById('editor'),
+            });
+            view.dispatch({ selection: { anchor: savedSel, head: savedSel } });
+            view.focus();
+          } catch (err) {
+            // A plugin failure during reconstruction must not wedge the
+            // WebView permanently. Roll back the flag and attempt a bare
+            // recovery so the user can keep editing.
+            console.warn('setWordWrap rebuild failed:', err);
+            WORD_WRAP = !msg.wordWrap;
+            if (!view) {
+              try {
+                view = new EditorView({
+                  state: EditorState.create({ doc: savedDoc, extensions: getExtensions() }),
+                  parent: document.getElementById('editor'),
+                });
+              } catch (e2) { console.warn('setWordWrap recovery failed:', e2); }
+            }
+          }
           if (${disableSystemKeyboard ? 'true' : 'false'}) {
             var cmContent2 = document.querySelector('.cm-content');
             if (cmContent2) cmContent2.setAttribute('inputmode', 'none');
