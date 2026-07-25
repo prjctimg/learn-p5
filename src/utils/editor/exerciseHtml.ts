@@ -462,7 +462,7 @@ var Decoration = _CM.Decoration;
 var DecorationSet = _CM.DecorationSet;
 var autocompletion = _CM.autocompletion;
 var CompletionContext = _CM.CompletionContext;
-var lineWrapping = _CM.lineWrapping;
+var lineWrapping = _CM.EditorView.lineWrapping;
 var prettierLib = _CM.prettier;
 var prettierEstree = _CM.prettierPluginEstree;
 var prettierAcorn = _CM.prettierPluginAcorn;
@@ -601,7 +601,7 @@ function getExtensions() {
       }
     }),
   ];
-  if (WORD_WRAP) { exts.push(lineWrapping); }
+  if (WORD_WRAP && lineWrapping) { exts.push(lineWrapping); }
   return exts;
 }
 
