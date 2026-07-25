@@ -22,6 +22,7 @@ import { P5_FUNCTION_NAMES, ONCE_ONLY_P5_FUNCTIONS } from "../../../data/referen
 import { getExerciseHtml } from "../../../utils/editor/exerciseHtml";
 import { EDITOR_THEMES, getThemeSwatches } from "../../../utils/editor/themes";
 import { useStreak } from "../../../hooks/useStreak";
+import { recordCompletion, ACHIEVEMENTS } from "../../../hooks/useAchievements";
 import { useShakeDetection } from "../../../hooks/useShakeDetection";
 
 const EXERCISE_CODE_PREFIX = "exerciseCode_";
@@ -442,10 +443,20 @@ export default function Exercise() {
       dispatch({ type: "RUN_DONE" });
       dispatch({ type: "EXERCISE_COMPLETE" });
       break;
-    case "taskComplete":
+    case "taskComplete": {
       dispatch({ type: "RUN_DONE" });
+      const totalTasks = state.exercise?.tasks?.length ?? 0;
+      const hasMore = state.exercise?.tasks && msg.taskIndex < totalTasks - 1;
+      if (hasMore && totalTasks > 1) {
+        // Per M3 cadence: let the in-WebView fade-through (~450ms) settle
+        // before bringing the confirmation toast in (~480ms).
+        setTimeout(() => {
+          showToast(`Task ${msg.taskIndex + 1}/${totalTasks} complete`, undefined, undefined, "success");
+        }, 480);
+      }
       dispatch({ type: "TASK_COMPLETE", taskIndex: msg.taskIndex });
       break;
+    }
     case "validationFailed":
       dispatch({ type: "RUN_DONE" });
       showToast(msg.reason || "Not quite right — check the instructions", undefined, undefined, "failure");
@@ -680,12 +691,22 @@ export default function Exercise() {
 
  useEffect(() => {
   if (!state.completed || !state.exercise) return;
-
-  const key = `${course}/${state.exercise.id}`;
+  const ex = state.exercise;
+  const key = `${course}/${ex.id}`;
 
   showToast("✓ Exercise completed!", "Next →", handleToastNext, "success");
 
   (async () => {
+  const durationMs = runStartTimeRef.current ? Date.now() - runStartTimeRef.current : undefined;
+  const newlyUnlocked = await recordCompletion(`${course}/${ex.id}`, durationMs);
+  if (newlyUnlocked.length > 0) {
+    const first = ACHIEVEMENTS.find((a) => a.id === newlyUnlocked[0]);
+    if (first) {
+      // Defer slightly so the exercise-completion toast doesn't overlap.
+      setTimeout(() => showToast(`🏆 ${first.title} unlocked`, undefined, undefined, "success"), 2200);
+    }
+  }
+
   const val = await AsyncStorage.getItem("completedLessons");
   const arr: string[] = val ? JSON.parse(val) : [];
   if (!arr.includes(key)) {
@@ -708,7 +729,7 @@ export default function Exercise() {
   }
   }
   })();
-  }, [state.completed, state.exercise, course, webViewReady, handleToastNext]);
+  }, [state.completed, state.exercise, course, webViewReady, handleToastNext, showToast]);
 
  const exerciseSymbols = useMemo(() => {
  if (!state.exercise) return [];
