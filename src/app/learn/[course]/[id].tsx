@@ -615,11 +615,21 @@ export default function Exercise() {
           .replace(/&/g, "&amp;")
           .replace(/</g, "&lt;")
           .replace(/>/g, "&gt;");
+        // Always reset the codeblock with the next task's starter code instead
+        // of persisting the previous task's editor contents across the
+        // transition. Per-task starter wins if defined; otherwise fall back to
+        // the exercise-level startingCode. Dispatch SET_CODE so React's state
+        // mirrors the editor and the draft-save effect persists the new starter.
+        const nextCode = task.startingCode ?? state.startingCode;
+        if (nextCode != null && nextCode !== state.code) {
+          dispatch({ type: "SET_CODE", code: nextCode });
+        }
         webViewRef.current.postMessage(
           JSON.stringify({
             type: "setActiveTask",
             taskIndex: state.currentTaskIndex,
             instructionHtml,
+            code: nextCode,
           })
         );
       }

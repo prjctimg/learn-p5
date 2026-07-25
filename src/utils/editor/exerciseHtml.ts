@@ -806,6 +806,15 @@ function handleMessage(data) {
         break;
       case 'setActiveTask':
         ACTIVE_TASK_INDEX = typeof msg.taskIndex === 'number' ? msg.taskIndex : 0;
+        // Replace the editor document with the next task's starter code so the
+        // codeblock resets across task transitions (rather than persisting the
+        // previous task's editor contents). Done inside the fade-out handler
+        // so the swap lands during the opacity dip (no visible flash).
+        var applyTaskCode = function() {
+          if (msg.code != null && view && msg.code !== view.state.doc.toString()) {
+            view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: msg.code } });
+          }
+        };
         if (msg.instructionHtml || msg.instruction) {
           var descEl = document.querySelector('.description-text');
           if (descEl) {
@@ -815,6 +824,7 @@ function handleMessage(data) {
             // cancel and restart cleanly.
             if (descEl.classList.contains('task-fading-out') || descEl.classList.contains('task-fading-in')) {
               descEl.classList.remove('task-fading-out', 'task-fading-in');
+              applyTaskCode();
               descEl.innerHTML = msg.instructionHtml || msg.instruction;
               descEl.classList.add('task-fading-in');
               return;
@@ -824,6 +834,7 @@ function handleMessage(data) {
               if (e.animationName !== 'task-fade-through-out') return;
               descEl.removeEventListener('animationend', fadeOutHandler);
               descEl.classList.remove('task-fading-out');
+              applyTaskCode();
               descEl.innerHTML = msg.instructionHtml || msg.instruction;
               // Re-bind symbol taps for the freshly-swapped instruction.
               descEl.querySelectorAll('.symbol').forEach(function(sym) {
@@ -839,6 +850,9 @@ function handleMessage(data) {
               });
             });
           }
+        } else {
+          // No instruction update; still apply the code reset.
+          applyTaskCode();
         }
         break;
       case 'insert':
