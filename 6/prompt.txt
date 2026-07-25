@@ -1,0 +1,12 @@
+I'm researching a p5 learning app (React Native + Expo, with a CodeMirror-based code editor running inside a WebView). I need to understand what happens when a task completes and the next task is loaded, specifically regarding the code editor contents.
+
+Key question: when a user completes a task and moves to the next task, does the editor persist the previous task's code, or does it reset to the next task's starter code? The user wants it to ALWAYS reset to the next task's starter code.
+
+Please find and report:
+1. The handler / function that advances to the next task (likely in src/app/learn/[course]/[id].tsx). Search for terms like "nextTask", "setActiveTask", "taskComplete", "advanceTask", "activeTask", "NEXT_TASK", "loadTask". Report the file path and line numbers.
+2. How the editor content (CodeMirror) is set when switching tasks — look for the postMessage that sends code to the WebView (search for "setActiveTask", "setCode", "setValue", "starterCode", "initialCode", postMessage with code). 
+3. Where the starter code for each task comes from (the course data structure — look in src/data/types.ts and a sample course file in src/data/courses/). Report the field name (e.g. `starterCode`, `initial`, `startingCode`).
+4. Whether there's any logic that preserves current editor contents across task changes (e.g. caching by task id, a "draft" system, or just not sending new code). 
+5. The bridge between the React side and the WebView — is there a useWebViewMessage hook or a ref-based postMessage? Show the function that sends messages like { type: 'setActiveTask', code: ... } to the editor.
+
+Report file paths + line numbers + relevant code excerpts (~10-20 line windows). Read only, no edits.
