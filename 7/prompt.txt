@@ -1,0 +1,12 @@
+I need to find and understand the "Display Name" UI in the Settings screen of this React Native (Expo) app. 
+
+Search for settings screen files (likely under src/app/ somewhere, maybe settings.tsx or profile.tsx), and any component that renders a "Display Name" editor (div/box/card holding the user's display name with an edit affordance). 
+
+Report back:
+1. The exact file path(s) and line numbers of the Display Name div/container and its surrounding settings screen layout.
+2. The JSX/static styles defining its size — height, padding, margins, font sizes, any View styling that makes it "too big".
+3. How the display name is stored/updated (AsyncStorage? context? setState?) and the onChange/submit handler.
+4. Any related styling constants or theme tokens used.
+5. The full surrounding JSX context (a ~40 line window) so I can see how it fits in the settings layout.
+
+Do NOT make any edits. Read only. This is research for a plan to make the Display Name block more ergonomic/compact.
