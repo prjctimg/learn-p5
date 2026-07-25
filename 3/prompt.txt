@@ -1,0 +1,15 @@
+Explore the learn-p5 codebase (working dir /workspaces/learn-p5) and report back, thoroughly:
+
+1. The Toast component: read `src/components/Toast.tsx` fully. Report its props, color source (does it use Colors.light/dark tokens or hardcoded hex?), how `showToast` is invoked from `src/app/learn/[course]/[id].tsx`, and the current visual treatment (icon, color, animation).
+
+2. The task completion flow in `src/app/learn/[course]/[id].tsx`: find the `TASK_COMPLETE` and `EXERCISE_COMPLETE` handlers (~line 442-448), the `handleRun` function, and any toast shown on completion. Quote the exact code blocks. Is any toast shown today on a single task completion? On exercise completion? What does the StreakToast do (read `src/components/StreakToast.tsx`)?
+
+3. The `useStreak` hook (`src/hooks/useStreak.ts`): report its API, what it persists to AsyncStorage, what "streak" means here (consecutive days? consecutive tasks?). Quote the key functions.
+
+4. The exercise state shape (ExerciseState, ExerciseAction) and how `completedTasks` / `currentTaskIndex` flow.
+
+5. Existing badges/achievements: search for "badge", "achievement", "streak", "milestone" across src/. Report any existing system.
+
+6. Material Design motion: is `react-native-reanimated` already used? Where (grep for `reanimated`, `useSharedValue`, `withTiming`, `AnimatedFadingTransition`)? Is there a theme context with motion tokens (durations, easings)? Read `src/components/ThemeProvider.tsx` and `src/constants/Colors.ts` briefly to understand the theming system.
+
+Return: file paths with line numbers, exact code snippets for the critical blocks, and a concise summary. Do NOT edit anything — read only.
