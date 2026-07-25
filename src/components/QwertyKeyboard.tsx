@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useMemo } from "react";
-import { View, Text, Pressable, ScrollView, StyleSheet, useWindowDimensions, LayoutChangeEvent } from "react-native";
+import { View, Text, Pressable, ScrollView, StyleSheet, useWindowDimensions, LayoutChangeEvent, GestureResponderEvent } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { useThemeContext } from "./ThemeProvider";
 import { Colors } from "../constants/Colors";
 import { Typography } from "../constants/Typography";
@@ -19,7 +20,15 @@ interface QwertyKeyboardProps {
 interface QwertyLetterKey {
   type: "letter";
   primary: string;
-  secondary?: string;
+  secondary?: string | string[];
+}
+
+// Normalize a key's alternates into an array. A scalar secondary (e.g. "1"
+// on the 'q' key) is treated as a single alternate; an array lets a single
+// key expose several long-press glyphs (iOS-keyboard style).
+function getAlternates(key: QwertyLetterKey): string[] {
+  if (!key.secondary) return [];
+  return Array.isArray(key.secondary) ? key.secondary : [key.secondary];
 }
 
 interface QwertyActionKey {
@@ -44,15 +53,15 @@ const ROW1: QwertyKey[] = [
 ];
 
 const ROW2: QwertyKey[] = [
-  { type: "letter", primary: "a", secondary: "@" },
-  { type: "letter", primary: "s", secondary: "$" },
+  { type: "letter", primary: "a", secondary: ["@", "&", "1"] },
+  { type: "letter", primary: "s", secondary: ["$", "%", "2"] },
   { type: "letter", primary: "d" },
   { type: "letter", primary: "f" },
   { type: "letter", primary: "g" },
-  { type: "letter", primary: "h", secondary: "#" },
+  { type: "letter", primary: "h", secondary: ["#", "~", "3"] },
   { type: "letter", primary: "j" },
   { type: "letter", primary: "k" },
-  { type: "letter", primary: "l", secondary: ";" },
+  { type: "letter", primary: "l", secondary: [";", ":", "4"] },
   { type: "action", action: "enter" },
 ];
 
@@ -69,8 +78,11 @@ const ROW3: QwertyKey[] = [
   { type: "letter", primary: "/", secondary: "?" },
 ];
 
-const LONG_PRESS_DELAY = 200;
-const POPUP_DISMISS_DELAY = 800;
+const LONG_PRESS_DELAY = 280;
+const POPUP_DISMISS_DELAY = 1200;
+const ALT_CELL_WIDTH = 38;
+const ALT_CELL_HEIGHT = 58;
+const POPUP_TOP_OFFSET = 6;
 const CONTAINER_PADDING = 4;
 const KEY_GAP = 3;
 const ACTION_KEY_RATIO = 1.5;
@@ -97,7 +109,13 @@ export default function QwertyKeyboard({
   const [longPressActive, setLongPressActive] = useState(false);
   const [popupKey, setPopupKey] = useState<string | null>(null);
   const [popupLayout, setPopupLayout] = useState<{ x: number; y: number } | null>(null);
+  const [popupAlternates, setPopupAlternates] = useState<string[]>([]);
+  const [popupRowLeft, setPopupRowLeft] = useState(0);
+  const [popupWidth, setPopupWidth] = useState(ALT_CELL_WIDTH);
+  const [popupSelected, setPopupSelected] = useState(0);
   const keyLayouts = useRef<Record<string, { x: number; y: number; w: number; h: number }>>({});
+  const containerRef = useRef<View>(null);
+  const containerScreenXRef = useRef(0);
 
   const dims = useMemo(() => {
     const availWidth = screenWidth - CONTAINER_PADDING * 2;
@@ -118,26 +136,64 @@ export default function QwertyKeyboard({
 
   const showPopup = useCallback((key: string) => {
     const layout = keyLayouts.current[key];
-    if (layout) {
-      setPopupKey(key);
-      setPopupLayout({ x: layout.x + layout.w / 2, y: layout.y });
-    }
+    const row1Key = ROW1.find((k) => k.type === "letter" && k.primary === key);
+    const row2Key = ROW2.find((k) => k.type === "letter" && k.primary === key);
+    const row3Key = ROW3.find((k) => k.type === "letter" && k.primary === key);
+    const found = (row1Key ?? row2Key ?? row3Key) as QwertyLetterKey | undefined;
+    const alts = found ? getAlternates(found) : [];
+    if (!found || !layout || alts.length === 0) return;
+    // Measure the keyboard container's screen-absolute x so finger pageX can
+    // be mapped onto the popup row regardless of how the keyboard is inset.
+    containerRef.current?.measure((_fx, _fy, _w, _h, px) => {
+      containerScreenXRef.current = px;
+    });
+    const w = Math.min(screenWidth - 8, Math.max(ALT_CELL_WIDTH, alts.length * ALT_CELL_WIDTH));
+    const centerX = layout.x + layout.w / 2;
+    let left = centerX - w / 2;
+    if (left < 4) left = 4;
+    if (left + w > screenWidth - 4) left = screenWidth - w - 4;
+    setPopupKey(key);
+    setPopupLayout({ x: centerX, y: layout.y });
+    setPopupAlternates(alts);
+    setPopupRowLeft(left);
+    setPopupWidth(w);
+    setPopupSelected(0);
     if (popupDismissTimer.current) clearTimeout(popupDismissTimer.current);
     popupDismissTimer.current = setTimeout(() => {
       setPopupKey(null);
       setPopupLayout(null);
+      setPopupAlternates([]);
     }, POPUP_DISMISS_DELAY);
-  }, []);
+  }, [screenWidth]);
 
   const handlePressIn = useCallback((key: QwertyLetterKey) => {
     longPressKey.current = key.primary;
     longPressTimer.current = setTimeout(() => {
       if (longPressKey.current === key.primary) {
-        setLongPressActive(true);
-        if (key.secondary) showPopup(key.primary);
+        const alts = getAlternates(key);
+        if (alts.length > 0) {
+          setLongPressActive(true);
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+          showPopup(key.primary);
+        }
       }
     }, LONG_PRESS_DELAY);
   }, [showPopup]);
+
+  // While the popup is open and the finger is still down on the original
+  // key, Pressable keeps the touch responder (the gesture belongs to the
+  // view that received touchstart). Map pageX → alternate index so the user
+  // can slide their finger to pick a long-press glyph, iOS-style.
+  const handleTouchMove = useCallback((e: GestureResponderEvent) => {
+    if (!popupKey || popupAlternates.length <= 1) return;
+    const globalLeft = containerScreenXRef.current + popupRowLeft;
+    const idx = Math.floor((e.nativeEvent.pageX - globalLeft) / ALT_CELL_WIDTH);
+    const clamped = Math.max(0, Math.min(popupAlternates.length - 1, idx));
+    if (clamped !== popupSelected) {
+      Haptics.selectionAsync().catch(() => {});
+      setPopupSelected(clamped);
+    }
+  }, [popupKey, popupAlternates, popupRowLeft, popupSelected]);
 
   const handlePressOut = useCallback(
     (key: QwertyLetterKey) => {
@@ -146,71 +202,91 @@ export default function QwertyKeyboard({
         longPressTimer.current = null;
       }
       const isLong = longPressActive && longPressKey.current === key.primary;
+      const alts = getAlternates(key);
+      const selectedIdx = popupSelected;
       setLongPressActive(false);
       longPressKey.current = null;
       setPopupKey(null);
       setPopupLayout(null);
+      setPopupAlternates([]);
       if (popupDismissTimer.current) {
         clearTimeout(popupDismissTimer.current);
         popupDismissTimer.current = null;
       }
-      if (isLong && key.secondary) {
-        onInsert(key.secondary);
+      if (isLong && alts.length > 0) {
+        onInsert(alts[Math.min(selectedIdx, alts.length - 1)] ?? key.primary);
       } else {
         onInsert(key.primary);
       }
     },
-    [longPressActive, onInsert]
+    [longPressActive, onInsert, popupSelected]
   );
 
   const renderPopup = useCallback(() => {
-    if (!popupKey || !popupLayout) return null;
-    const row1Key = ROW1.find((k) => k.type === "letter" && k.primary === popupKey);
-    const row2Key = ROW2.find((k) => k.type === "letter" && k.primary === popupKey);
-    const row3Key = ROW3.find((k) => k.type === "letter" && k.primary === popupKey);
-    const found = (row1Key ?? row2Key ?? row3Key) as QwertyLetterKey | undefined;
-    if (!found?.secondary) return null;
-
-    const popupWidth = 44;
-    const popupHeight = 56;
-    const halfW = popupWidth / 2;
-    let left = popupLayout.x - halfW;
-    if (left < 4) left = 4;
-    if (left + popupWidth > screenWidth - 4) left = screenWidth - popupWidth - 4;
-    const top = popupLayout.y - popupHeight - 4;
+    if (!popupKey || !popupLayout || popupAlternates.length === 0) return null;
+    const top = popupLayout.y - ALT_CELL_HEIGHT - POPUP_TOP_OFFSET;
 
     return (
       <View
         style={[
           styles.popup,
           {
-            left,
-            top: top > 0 ? top : popupLayout.y + dims.keyHeight + 4,
+            left: popupRowLeft,
+            top: top > 0 ? top : popupLayout.y + dims.keyHeight + POPUP_TOP_OFFSET,
             width: popupWidth,
-            height: popupHeight,
+            height: ALT_CELL_HEIGHT,
             backgroundColor: colors.surfaceContainerHighest,
             borderColor: colors.outlineVariant,
+            padding: 0,
           },
         ]}
         pointerEvents="none"
       >
-        <Text style={[styles.popupText, { color: colors.onSurface }]}>
-          {found.secondary}
-        </Text>
+        <View style={{ flexDirection: "row", width: popupWidth, height: ALT_CELL_HEIGHT }}>
+          {popupAlternates.map((alt, i) => {
+            const isSelected = i === popupSelected;
+            return (
+              <View
+                key={`${alt}-${i}`}
+                style={{
+                  width: ALT_CELL_WIDTH,
+                  height: ALT_CELL_HEIGHT,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: isSelected ? derivedColors.primary : "transparent",
+                }}
+              >
+                <Text
+                  style={{
+                    fontFamily: "JetBrainsMono",
+                    fontSize: isSelected ? 26 : 22,
+                    fontWeight: "700",
+                    color: isSelected ? colors.onPrimary : colors.onSurface,
+                  }}
+                >
+                  {alt}
+                </Text>
+              </View>
+            );
+          })}
+        </View>
       </View>
     );
-  }, [popupKey, popupLayout, screenWidth, dims.keyHeight, colors]);
+  }, [popupKey, popupLayout, popupAlternates, popupRowLeft, popupWidth, popupSelected,
+      dims.keyHeight, colors, derivedColors]);
 
   const renderLetterKey = useCallback(
     (key: QwertyLetterKey) => {
       const isActive = longPressActive && longPressKey.current === key.primary;
       const isPopup = popupKey === key.primary;
+      const primaryAlt = getAlternates(key)[0];
       return (
         <View key={key.primary}>
           <Pressable
             onLayout={(e) => handleKeyLayout(key.primary, e)}
             onPressIn={() => handlePressIn(key)}
             onPressOut={() => handlePressOut(key)}
+            onTouchMove={handleTouchMove}
             style={({ pressed }) => [
               {
                 width: dims.keySize,
@@ -228,10 +304,10 @@ export default function QwertyKeyboard({
             accessibilityRole="button"
             accessibilityLabel={key.primary}
           >
-            {key.secondary ? (
+            {primaryAlt ? (
               <View style={styles.keyContent}>
                 <Text style={[styles.keySuperscript, { color: colors.textSecondary }]}>
-                  {key.secondary}
+                  {primaryAlt}
                 </Text>
                 <Text
                   style={[
@@ -256,7 +332,7 @@ export default function QwertyKeyboard({
         </View>
       );
     },
-    [longPressActive, popupKey, colors, derivedColors, handlePressIn, handlePressOut, dims, handleKeyLayout]
+    [longPressActive, popupKey, colors, derivedColors, handlePressIn, handlePressOut, handleTouchMove, dims, handleKeyLayout]
   );
 
   const renderActionKey = useCallback(
@@ -313,6 +389,7 @@ export default function QwertyKeyboard({
 
   return (
     <View
+      ref={containerRef}
       style={[
         styles.container,
         { backgroundColor: colors.surfaceContainerLow, height },
