@@ -1,1 +1,1 @@
-Currently, the solution validation logic fails even if you complete the exercise as expected and add the required function calls and the solution is similar pixel for pixel. Analyze the logic gaps and suggest a robust fix
+Proceed

@@ -18,19 +18,19 @@
       "deletions": 0,
       "files": 0
     },
-    "cost": 4.10707612,
+    "cost": 4.33741108,
     "tokens": {
-      "input": 1204151,
-      "output": 47767,
+      "input": 1319031,
+      "output": 48780,
       "reasoning": 0,
       "cache": {
-        "read": 8504192,
+        "read": 8754368,
         "write": 0
       }
     },
     "time": {
       "created": 1784960282181,
-      "updated": 1784961872573
+      "updated": 1784961902134
     }
   },
   "messages": [
@@ -12518,21 +12518,24 @@
           "cwd": "/workspaces/learn-p5",
           "root": "/workspaces/learn-p5"
         },
-        "cost": 0,
+        "cost": 0.03375068,
         "tokens": {
-          "input": 0,
-          "output": 0,
+          "total": 121750,
+          "input": 215,
+          "output": 447,
           "reasoning": 0,
           "cache": {
-            "read": 0,
-            "write": 0
+            "write": 0,
+            "read": 121088
           }
         },
         "modelID": "glm-5.2",
         "providerID": "opencode-go",
         "time": {
-          "created": 1784961872565
+          "created": 1784961872565,
+          "completed": 1784961885191
         },
+        "finish": "tool-calls",
         "id": "msg_f9804b2b5002YcfA5LkgNVezkI",
         "sessionID": "ses_0681391bbffeFXC1q2dOl1xprk"
       },
@@ -12549,20 +12552,200 @@
           "tool": "bash",
           "callID": "call_423f",
           "state": {
-            "metadata": {
-              "output": ""
-            },
-            "status": "running",
+            "status": "completed",
             "input": {
               "command": "cd /workspaces/learn-p5 && git commit -m \"v0.6.101: robust exercise validation engine\n\nFixes false-failures where a correctly-completed exercise with the required\nfunction calls and pixel-matching output still failed validation.\n\nRoot causes addressed:\n- Pixel sampling used a fixed 300ms timer after renderSketch resolved, but\n  renderSketch resolves before the first draw() frame. Replace with a\n  frameCount-based gate (polls requestAnimationFrame, 2s timeout) so pixels\n  are only sampled after a real frame has rendered.\n- Density factor derived from pixelDensity() getter; on fractional-DPI\n  Android devices this can disagree with the actual backing store. Derive\n  density directly from cnv.width / p5Instance.width instead.\n- functionCall parser used /\\bname\\s*\\(([^)]*)\\)/g, which truncates args\n  at the first ')' (nested calls like fill(color(...))) and matches inside\n  comments/strings. Replaced with a depth-balanced scanner over a\n  comment/string-stripped buffer.\n- No-rules fallback demanded byte-identical code (userCode.trim() ===\n  solution.trim()); any formatting/comment difference failed. Replaced with\n  a comment-stripped, whitespace-collapsed comparison.\n- New expectedPixels rule type: multi-point sampling that passes when the\n  fraction of matching points >= minPassFraction (default 0.9), so one\n  anti-aliased edge pixel no longer sinks an otherwise correct sketch.\n\nOther:\n- Add state.currentTaskIndex to exerciseHtml useMemo deps so the baked-in\n  ACTIVE_TASK_INDEX cannot drift from the RN side on WebView reload.\n- Add scripts/check-exercises.mjs dev invariant: asserts each task's\n  validation rules are well-formed and consistent with the exercise's final\n  solution state. Wired into package.json as npm run check-exercises.\n- Document the validation rule model in AGENTS.md and shapes.ts.\n- Add expectedPixels rules to exercise-1 tasks for multi-point robustness.\" -q && git log --oneline -3"
             },
+            "output": "5260440 v0.6.101: robust exercise validation engine\n62ad305 v0.6.100: fix pixel validation reading wrong pixel on HiDPI devices\n27ac397 v0.6.99: fix keyboard input not reaching editor on Android\n",
+            "metadata": {
+              "output": "5260440 v0.6.101: robust exercise validation engine\n62ad305 v0.6.100: fix pixel validation reading wrong pixel on HiDPI devices\n27ac397 v0.6.99: fix keyboard input not reaching editor on Android\n",
+              "exit": 0,
+              "truncated": false
+            },
+            "title": "cd /workspaces/learn-p5 && git commit -m \"v0.6.101: robust exercise validation engine\n\nFixes false-failures where a correctly-completed exercise with the required\nfunction calls and pixel-matching output still failed validation.\n\nRoot causes addressed:\n- Pixel sampling used a fixed 300ms timer after renderSketch resolved, but\n  renderSketch resolves before the first draw() frame. Replace with a\n  frameCount-based gate (polls requestAnimationFrame, 2s timeout) so pixels\n  are only sampled after a real frame has rendered.\n- Density factor derived from pixelDensity() getter; on fractional-DPI\n  Android devices this can disagree with the actual backing store. Derive\n  density directly from cnv.width / p5Instance.width instead.\n- functionCall parser used /\\bname\\s*\\(([^)]*)\\)/g, which truncates args\n  at the first ')' (nested calls like fill(color(...))) and matches inside\n  comments/strings. Replaced with a depth-balanced scanner over a\n  comment/string-stripped buffer.\n- No-rules fallback demanded byte-identical code (userCode.trim() ===\n  solution.trim()); any formatting/comment difference failed. Replaced with\n  a comment-stripped, whitespace-collapsed comparison.\n- New expectedPixels rule type: multi-point sampling that passes when the\n  fraction of matching points >= minPassFraction (default 0.9), so one\n  anti-aliased edge pixel no longer sinks an otherwise correct sketch.\n\nOther:\n- Add state.currentTaskIndex to exerciseHtml useMemo deps so the baked-in\n  ACTIVE_TASK_INDEX cannot drift from the RN side on WebView reload.\n- Add scripts/check-exercises.mjs dev invariant: asserts each task's\n  validation rules are well-formed and consistent with the exercise's final\n  solution state. Wired into package.json as npm run check-exercises.\n- Document the validation rule model in AGENTS.md and shapes.ts.\n- Add expectedPixels rules to exercise-1 tasks for multi-point robustness.\" -q && git log --oneline -3",
             "time": {
-              "start": 1784961879539
+              "start": 1784961884988,
+              "end": 1784961885007
             }
           },
           "id": "prt_f9804cde7001sJnOMaq13Sc717",
           "sessionID": "ses_0681391bbffeFXC1q2dOl1xprk",
           "messageID": "msg_f9804b2b5002YcfA5LkgNVezkI"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "2508bc846653a01a7b7aa9d5372938309da209d1",
+          "type": "step-finish",
+          "tokens": {
+            "total": 121750,
+            "input": 215,
+            "output": 447,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 121088
+            }
+          },
+          "cost": 0.03375068,
+          "id": "prt_f9804e3b2001oPtTdCW4rwmnAW",
+          "sessionID": "ses_0681391bbffeFXC1q2dOl1xprk",
+          "messageID": "msg_f9804b2b5002YcfA5LkgNVezkI"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_f97fd51e8001UCfFxsDjLzKjsp",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/workspaces/learn-p5",
+          "root": "/workspaces/learn-p5"
+        },
+        "cost": 0.1623326,
+        "tokens": {
+          "total": 121855,
+          "input": 114453,
+          "output": 42,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 7360
+          }
+        },
+        "modelID": "glm-5.2",
+        "providerID": "opencode-go",
+        "time": {
+          "created": 1784961885217,
+          "completed": 1784961902115
+        },
+        "finish": "tool-calls",
+        "id": "msg_f9804e421002d1vMzkbN9TrYAs",
+        "sessionID": "ses_0681391bbffeFXC1q2dOl1xprk"
+      },
+      "parts": [
+        {
+          "snapshot": "2508bc846653a01a7b7aa9d5372938309da209d1",
+          "type": "step-start",
+          "id": "prt_f98050185001cMQKJEWooOCC54",
+          "sessionID": "ses_0681391bbffeFXC1q2dOl1xprk",
+          "messageID": "msg_f9804e421002d1vMzkbN9TrYAs"
+        },
+        {
+          "type": "tool",
+          "tool": "bash",
+          "callID": "call_4461",
+          "state": {
+            "status": "completed",
+            "input": {
+              "command": "cd /workspaces/learn-p5 && git tag v0.6.101 && git push origin main && git push origin v0.6.101"
+            },
+            "output": "[entire] Pushing 1 checkpoint ref(s) to origin..... done\nTo https://github.com/prjctimg/learn-p5\n   62ad305..5260440  main -> main\nTo https://github.com/prjctimg/learn-p5\n * [new tag]         v0.6.101 -> v0.6.101\n",
+            "metadata": {
+              "output": "[entire] Pushing 1 checkpoint ref(s) to origin..... done\nTo https://github.com/prjctimg/learn-p5\n   62ad305..5260440  main -> main\nTo https://github.com/prjctimg/learn-p5\n * [new tag]         v0.6.101 -> v0.6.101\n",
+              "exit": 0,
+              "truncated": false
+            },
+            "title": "cd /workspaces/learn-p5 && git tag v0.6.101 && git push origin main && git push origin v0.6.101",
+            "time": {
+              "start": 1784961901985,
+              "end": 1784961901999
+            }
+          },
+          "id": "prt_f9805026b0013jwgHJRU9d689X",
+          "sessionID": "ses_0681391bbffeFXC1q2dOl1xprk",
+          "messageID": "msg_f9804e421002d1vMzkbN9TrYAs"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "2508bc846653a01a7b7aa9d5372938309da209d1",
+          "type": "step-finish",
+          "tokens": {
+            "total": 121855,
+            "input": 114453,
+            "output": 42,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 7360
+            }
+          },
+          "cost": 0.1623326,
+          "id": "prt_f980525f1001uaA1ps0BxW54jh",
+          "sessionID": "ses_0681391bbffeFXC1q2dOl1xprk",
+          "messageID": "msg_f9804e421002d1vMzkbN9TrYAs"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_f97fd51e8001UCfFxsDjLzKjsp",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/workspaces/learn-p5",
+          "root": "/workspaces/learn-p5"
+        },
+        "cost": 0.03425168,
+        "tokens": {
+          "total": 122464,
+          "input": 212,
+          "output": 524,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 121728
+          }
+        },
+        "modelID": "glm-5.2",
+        "providerID": "opencode-go",
+        "time": {
+          "created": 1784961902132,
+          "completed": 1784961909199
+        },
+        "finish": "stop",
+        "id": "msg_f98052634002NnybRcOgL6K7hx",
+        "sessionID": "ses_0681391bbffeFXC1q2dOl1xprk"
+      },
+      "parts": [
+        {
+          "snapshot": "2508bc846653a01a7b7aa9d5372938309da209d1",
+          "type": "step-start",
+          "id": "prt_f98052d8c001EIR8vLJJYPITET",
+          "sessionID": "ses_0681391bbffeFXC1q2dOl1xprk",
+          "messageID": "msg_f98052634002NnybRcOgL6K7hx"
+        },
+        {
+          "type": "text",
+          "text": "Done. Pushed `v0.6.101` (commit `5260440`) to `main` and tagged `v0.6.101`.\n\n## Summary of what landed\n\n**Engine fixes (`src/utils/editor/exerciseHtml.ts`)**\n- **Frame-ready gate**: replaced the hardcoded `setTimeout(300)` with `waitForFrame()` that polls `p5Instance.frameCount > 0` via `requestAnimationFrame` (2 s timeout). Pixels are now sampled only after a real draw frame renders — fixes cold-WebView / slow-GPU false-failures.\n- **Density from canvas**: `d = cnv.width / p5Instance.width` instead of `pixelDensity()`, correct on fractional-DPI Android where the getter can disagree with the backing store.\n- **Depth-balanced `functionCall` parser**: `stripIgnoredRegions()` (strips `//`, `/* */`, string/template literals) + `findCallArgsList()` (paren-depth walker). Now `fill(color(255,0,0))` counts as 1 arg and calls inside comments/strings are ignored.\n- **`expectedPixels` rule** (multi-point, `minPassFraction` default 0.9) so one anti-aliased edge pixel can't sink a correct sketch.\n- **Fallback fix**: no-rules path replaced `code.trim() === solution.trim()` with `stripIgnoredRegions + collapse-whitespace` comparison.\n\n**Data + types**\n- `src/data/types.ts`: added `ExpectedPixel` interface + `expectedPixels` rule variant.\n- `src/data/courses/shapes.ts`: documented rule model; added `expectedPixels` rules to exercise‑1 (4–5 interior sample points).\n\n**Invariant + tooling**\n- `scripts/check-exercises.mjs`: asserts each task's rules are well-formed and consistent with the final `solution`. `npm run check-exercises` passes.\n- `package.json`: `check-exercises` script; version `0.6.101`.\n- `AGENTS.md`: rule model + `check-exercises` instruction.\n\n**Verification**: `npx tsc --noEmit` (3 pre-existing errors unchanged, 0 new), `npm run lint` (18 pre-existing warnings, 0 errors from changed files), `npm run check-exercises` passes.\n\nOpen follow-up worth doing later but out of scope: per-task `solution` fields so the displayed \"solution\" preview can reflect the *current* task rather than only the final task.",
+          "time": {
+            "start": 1784961904035,
+            "end": 1784961909094
+          },
+          "id": "prt_f98052da30015Ygfjcl1z7AcPz",
+          "sessionID": "ses_0681391bbffeFXC1q2dOl1xprk",
+          "messageID": "msg_f98052634002NnybRcOgL6K7hx"
+        },
+        {
+          "reason": "stop",
+          "snapshot": "2508bc846653a01a7b7aa9d5372938309da209d1",
+          "type": "step-finish",
+          "tokens": {
+            "total": 122464,
+            "input": 212,
+            "output": 524,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 121728
+            }
+          },
+          "cost": 0.03425168,
+          "id": "prt_f98054197001cammL3Sou6F8RD",
+          "sessionID": "ses_0681391bbffeFXC1q2dOl1xprk",
+          "messageID": "msg_f98052634002NnybRcOgL6K7hx"
         }
       ]
     }
