@@ -1,0 +1,12 @@
+Fetch the latest Material Design 3 motion guidelines and report back the canonical durations and easing curves for:
+
+1. Container transform / shared element transitions
+2. Fade through (switching siblings — this is the relevant pattern for task-to-task transitions where the instruction card and preview swap)
+3. Fade
+4. Scale
+
+For each, report the exact duration (in ms) and easing cubic-bezier values for each of the four severity tiers (small/medium/large, incoming/outgoing). Specifically I need the recommended duration + easing for a "fade through" transition that swaps a content panel (the task instruction + sketch preview area) — this is what Material calls "Fade through".
+
+Also report the guidance on when to use Fade through vs. Shared axis vs. Container transform, and any guidance on combining motion with a toast/snackbar appearing immediately after.
+
+Source: https://m3.material.io/styles/motion/easing-and-applying-motion and https://m3.material.io/styles/motion/overview. Fetch both. If those URLs fail, try the older m2 tabular spec. Return the actual numbers, not just prose.
