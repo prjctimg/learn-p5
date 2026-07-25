@@ -1,0 +1,9 @@
+In this React Native + Expo p5 learning app, there's a "reference" screen/modal with a search icon. The user wants the search icon to act as an input — i.e., tapping it should focus/activate a text input so the system keyboard appears immediately and the user can start typing.
+
+Please search for:
+1. The reference screen/modal. Search for files and components with "reference", "ref", "search" in the name under src/app and src/components. Likely something like "reference.tsx", "ReferenceScreen", "ReferenceModal", "ReferenceSearch".
+2. The search UI — is there a magnifying-glass icon that toggles a search input? A search bar that's initially hidden? Report the exact file + line numbers of the search icon button and the text input it reveals.
+3. How the icon and input are wired — useState for visibility? A TextInput ref with focus()? Show the relevant JSX and handlers.
+4. The current behavior when the search icon is tapped (does it just setShowSearch(true)? Does it auto-focus the input?).
+
+Report file paths + line numbers + code excerpts. Read only, no edits.
