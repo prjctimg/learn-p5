@@ -1,0 +1,13 @@
+Explore the learn-p5 codebase (working dir /workspaces/learn-p5) and report back, thoroughly:
+
+1. The word-wrap crash: in `src/utils/editor/exerciseHtml.ts`, find the `setWordWrap` message handler (around line ~825) and the `getExtensions()` function that pushes `lineWrapping`. Quote the exact code. Note that `bundleEntry.ts` has a known TS error: `Module '"@codemirror/view"' has no exported member 'lineWrapping'` — read `src/utils/editor/bundleEntry.ts` and the generated bundle to see how `lineWrapping` is exposed. Is the runtime reference `WORD_WRAP ? lineWrapping : undefined` or similar? Is `lineWrapping` actually exported from `@codemirror/view` 6.36.5 (check `node_modules/@codemirror/view/dist/index.d.ts` via grep)? Report the exact import line in bundleEntry.ts and the exact usage in exerciseHtml.ts.
+
+2. Quote the WORD_WRAP toggle JSX in `src/app/learn/[course]/[id].tsx` (the settings menu) — find the Switch and the `setWordWrap` state.
+
+3. Quote the `setWordWrap` case in `handleMessage` (exerciseHtml.ts) — the block that destroys and recreates the EditorView. Look for any reference to `view.destroy()`, `EditorView.lineWrapping`, `CM.lineWrapping`, and report the exact identifier used.
+
+4. Check `node_modules/@codemirror/view/dist/index.d.ts` (or .d.ts) for an export named `lineWrapping`. Use `grep -n "lineWrapping" node_modules/@codemirror/view/dist/index.d.ts`. Report whether it exists. If not, check for `EditorView.lineWrapping` as a static property.
+
+5. Quote the `getExtensions` function in exerciseHtml.ts fully (the array of extensions and the `if (WORD_WRAP) exts.push(lineWrapping)` line).
+
+Return: exact file paths + line numbers, exact code snippets, and a clear statement of the most likely crash cause (undefined import vs. wrong reference). Do NOT edit anything — read only.
