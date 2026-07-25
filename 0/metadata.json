@@ -1,0 +1,59 @@
+{
+  "cli_version": "0.8.42",
+  "checkpoint_id": "01KYC09KMZKYWPMH7NDJ3CNY43",
+  "session_id": "ses_0681391bbffeFXC1q2dOl1xprk",
+  "strategy": "manual-commit",
+  "created_at": "2026-07-25T06:44:44.7733377Z",
+  "branch": "main",
+  "checkpoints_count": 2,
+  "save_step_count": 1,
+  "files_touched": [
+    "src/data/types.ts",
+    "src/utils/editor/exerciseHtml.ts"
+  ],
+  "agent": "OpenCode",
+  "model": "glm-5.2",
+  "turn_id": "4b5bf1c9a90b",
+  "compact_transcript_start": 0,
+  "token_usage": {
+    "input_tokens": 1204151,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 8504192,
+    "output_tokens": 47767,
+    "api_call_count": 128
+  },
+  "session_metrics": {
+    "turn_count": 2
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-07-25T06:44:44.651404493Z",
+    "agent_lines": 24,
+    "agent_removed": 8,
+    "human_added": 211,
+    "human_modified": 57,
+    "human_removed": 0,
+    "total_committed": 292,
+    "total_lines_changed": 303,
+    "agent_percentage": 10.561056105610561,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 267,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0,
+      "user_added_per_file": {
+        ".opencode/plugins/entire.ts": 267
+      }
+    },
+    {
+      "checkpoint_number": 2,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 348,
+      "agent_lines_removed": 8
+    }
+  ]
+}
