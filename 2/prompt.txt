@@ -1,0 +1,9 @@
+In this React Native + Expo p5 learning app, there's an in-app "qwerty keyboard" component (a custom on-screen keyboard for inserting p5 symbols/snippets into the code editor). The user wants the "symbol keyboard toggle" put back at the LEFTMOST part of the toolbar (it was apparently moved or is currently elsewhere).
+
+Please find:
+1. The qwerty keyboard component. Search for files with names like "keyboard", "qwerty", "Qwerty", "SymbolKeyboard", "InputKeyboard", "Toolbar" under src/components and src/app. 
+2. The toolbar row that contains keys + a symbol-keyboard toggle button. Report the exact file + line numbers of the toolbar JSX and the toggle button's current position.
+3. How the toggle button is styled/positioned (flex order, style array, marginLeft/marginRight, etc.) and what icon/label it uses.
+4. The state that switches between qwerty and symbol layouts (useState like `keyboardMode`, `showSymbols`, `layout`).
+
+Report file paths + line numbers + the relevant toolbar JSX (10-30 line window). Read only, no edits.
