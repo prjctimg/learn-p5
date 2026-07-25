@@ -1,0 +1,9 @@
+In this React Native + Expo p5 learning app, there's a "symbol popup" that shows reference info when a user taps a symbol (like a p5 function name) in the code editor or instruction. The popup is not scrollable when content is long. I need to find this popup component.
+
+Please search for:
+1. A modal/popup that shows symbol/p5 API reference info. Search for terms like "symbol", "openRef", "ReferenceModal", "SymbolPopup", "RefPopup", "reference", "popup", "modal" in src/components and src/app.
+2. The exact file + line numbers where the popup's content container is defined, and its style — likely a <View> or <Modal> or <ScrollView> with fixed maxHeight that fails to scroll. Report whether it's wrapped in a ScrollView or not.
+3. How the content is loaded (HTML string? markdown? raw text?) and roughly how long it can get.
+4. The trigger: there's a postMessage { type: 'openRef', symbol: ... } sent from the WebView (in src/utils/editor/exerciseHtml.ts around line 708-710) — find the handler on the React side that receives this and opens the popup.
+
+Report file paths + line numbers + relevant JSX/style excerpts. Read only, no edits.
