@@ -1,0 +1,9 @@
+Read `/workspaces/learn-p5/src/components/QwertyKeyboard.tsx` in full and report:
+
+1. The toolbar row JSX (the row of buttons above/below the letter keys that contains the "programming/symbol keyboard" toggle button, backspace, newline, etc.). Show the exact line numbers and the full JSX of that toolbar row (~30 line window).
+2. The current ORDER of buttons in the toolbar row — list them in source order. Identify where the symbol-keyboard toggle button (the one calling `onToggleProgramming` or similar, usually with a "keyboard" or "code" icon) sits.
+3. The styling on the toolbar row container and the toggle button (style names + definitions).
+4. Any "key popup" / preview bubble that appears above a key when tapped — search for "popup", "preview", "pop", "bubble", "tooltip", "Modal", "absolute". Show the JSX + style if it exists. Report whether it currently handles long-press at all.
+5. Any long-press handling on keys (search `onLongPress`, `delayLongPress`, `Pressable`). Show how keys are rendered (the Pressable component used per key).
+
+Report file paths + line numbers + exact code excerpts. Read only, no edits.
