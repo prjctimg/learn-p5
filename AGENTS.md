@@ -1,3 +1,5 @@
 - Read exact versioned docs at <https://docs.expo.dev/versions/v55.0.0/> before writing any code.
 - **Never run `npm install` on the dev machine.** Only edit `package.json` to add/change dependencies. The user handles installation separately.
 - After editing `package.json`, update `AGENTS.md` if the change introduces new conventions or build steps.
+- Run `npm run check-exercises` after editing `src/data/courses/*.ts`. It asserts each task's validation rules are consistent with the exercise's `solution` (final task state) and that `expectedPixels`/`pixelMatch` rules are well-formed.
+- Validation rule model (see `src/data/types.ts`): `functionCall`, `functionExists`, `canvasSize`, `pixelMatch` (single strict point), `expectedPixels` (multi-point, passes if matching fraction >= `minPassFraction`, default 0.9). The exercise-level `solution` represents the FINAL task's target state.

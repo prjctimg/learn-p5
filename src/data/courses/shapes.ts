@@ -1,3 +1,13 @@
+// Validation rule model (see src/data/types.ts):
+//   - functionCall: { type, name, exactArgs?, minArgs? } — regex/balanced parser
+//   - functionExists: { type, name }
+//   - canvasSize: { type, width, height }
+//   - pixelMatch: { type, x, y, expected:[r,g,b], tolerance? } — single strict point
+//   - expectedPixels: { type, points:[{x,y,expected,tolerance?}], minPassFraction? }
+//                        multi-point; passes if fraction of matching points >= minPassFraction
+//                        (default 0.9). Use for anti-aliased / multi-region checks.
+// The exercise-level `solution` field represents the FINAL task's target state and
+// drives the displayed solution preview; per-task `validation` rules gate progression.
 export const shapesCourse = {
   "slug": "shapes",
   "title": "Shapes",
@@ -33,6 +43,17 @@ export const shapesCourse = {
                 180
               ],
               "tolerance": 120
+            },
+            {
+              "type": "expectedPixels",
+              "minPassFraction": 0.9,
+              "points": [
+                { "x": 200, "y": 200, "expected": [255, 105, 180], "tolerance": 120 },
+                { "x": 180, "y": 200, "expected": [255, 105, 180], "tolerance": 120 },
+                { "x": 220, "y": 200, "expected": [255, 105, 180], "tolerance": 120 },
+                { "x": 200, "y": 180, "expected": [255, 105, 180], "tolerance": 120 },
+                { "x": 200, "y": 220, "expected": [255, 105, 180], "tolerance": 120 }
+              ]
             }
           ]
         },
@@ -56,6 +77,17 @@ export const shapesCourse = {
                 0
               ],
               "tolerance": 120
+            },
+            {
+              "type": "expectedPixels",
+              "minPassFraction": 0.9,
+              "points": [
+                { "x": 200, "y": 200, "expected": [255, 165, 0], "tolerance": 120 },
+                { "x": 185, "y": 200, "expected": [255, 165, 0], "tolerance": 120 },
+                { "x": 215, "y": 200, "expected": [255, 165, 0], "tolerance": 120 },
+                { "x": 200, "y": 185, "expected": [255, 165, 0], "tolerance": 120 },
+                { "x": 200, "y": 215, "expected": [255, 165, 0], "tolerance": 120 }
+              ]
             }
           ]
         }

@@ -178,7 +178,7 @@ export default function Exercise() {
       activeTaskIndex: state.currentTaskIndex,
       disableSystemKeyboard,
     });
-  }, [state.exercise, colorScheme, id, editorTheme, codeFontSize, ctaColor]);
+  }, [state.exercise, state.currentTaskIndex, colorScheme, id, editorTheme, codeFontSize, ctaColor]);
 
  const styles = useMemo(
  () =>
