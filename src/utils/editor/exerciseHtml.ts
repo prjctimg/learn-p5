@@ -108,6 +108,26 @@ export function getExerciseHtml(params: {
     line-height: 22px;
     color: ${colors.onSurfaceVariant};
     white-space: pre-line;
+    /* Material 3 Fade-through: 450ms envelope, Emphasized path (path easing
+       cannot be expressed as a single cubic-bezier, so we use the M3 Standard
+       cubic-bezier(0.2,0,0,1) as the accepted single-curve approximation).
+       Outgoing fades in the first 35% (~158ms), incoming fades + scales
+       0.92→1 in the last 65% (~293ms). */
+    animation-fill-mode: both;
+  }
+  @keyframes task-fade-through-out {
+    0%   { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1); }
+  }
+  @keyframes task-fade-through-in {
+    0%   { opacity: 0; transform: scale(0.92); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  .task-fading-out {
+    animation: task-fade-through-out 158ms cubic-bezier(0.3, 0, 0.8, 0.2) both;
+  }
+  .task-fading-in {
+    animation: task-fade-through-in 292ms cubic-bezier(0.2, 0, 0, 1) both;
   }
   .symbol {
     font-weight: 700;
@@ -788,7 +808,37 @@ function handleMessage(data) {
         ACTIVE_TASK_INDEX = typeof msg.taskIndex === 'number' ? msg.taskIndex : 0;
         if (msg.instructionHtml || msg.instruction) {
           var descEl = document.querySelector('.description-text');
-          if (descEl) descEl.innerHTML = msg.instructionHtml || msg.instruction;
+          if (descEl) {
+            // Material 3 Fade through: outgoing fades out (~158ms), then the
+            // content swaps and the incoming panel fades + scales up. If
+            // the element is mid-transition (re-entrant setActiveTask) we
+            // cancel and restart cleanly.
+            if (descEl.classList.contains('task-fading-out') || descEl.classList.contains('task-fading-in')) {
+              descEl.classList.remove('task-fading-out', 'task-fading-in');
+              descEl.innerHTML = msg.instructionHtml || msg.instruction;
+              descEl.classList.add('task-fading-in');
+              return;
+            }
+            descEl.classList.add('task-fading-out');
+            descEl.addEventListener('animationend', function fadeOutHandler(e) {
+              if (e.animationName !== 'task-fade-through-out') return;
+              descEl.removeEventListener('animationend', fadeOutHandler);
+              descEl.classList.remove('task-fading-out');
+              descEl.innerHTML = msg.instructionHtml || msg.instruction;
+              // Re-bind symbol taps for the freshly-swapped instruction.
+              descEl.querySelectorAll('.symbol').forEach(function(sym) {
+                sym.addEventListener('click', function() {
+                  postOpenRef(sym.getAttribute('data-symbol'));
+                });
+              });
+              descEl.classList.add('task-fading-in');
+              descEl.addEventListener('animationend', function fadeInHandler(e2) {
+                if (e2.animationName !== 'task-fade-through-in') return;
+                descEl.removeEventListener('animationend', fadeInHandler);
+                descEl.classList.remove('task-fading-in');
+              });
+            });
+          }
         }
         break;
       case 'insert':
