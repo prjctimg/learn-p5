@@ -18,19 +18,19 @@
       "deletions": 0,
       "files": 0
     },
-    "cost": 2.2371694399999997,
+    "cost": 2.4100035600000003,
     "tokens": {
-      "input": 955528,
-      "output": 19746,
+      "input": 1031987,
+      "output": 20392,
       "reasoning": 0,
       "cache": {
-        "read": 3125184,
+        "read": 3367296,
         "write": 0
       }
     },
     "time": {
       "created": 1785161692410,
-      "updated": 1785165304534
+      "updated": 1785165354827
     }
   },
   "messages": [
@@ -7665,21 +7665,24 @@
           "cwd": "/workspaces/learn-p5",
           "root": "/workspaces/learn-p5"
         },
-        "cost": 0,
+        "cost": 0.0212348,
         "tokens": {
-          "input": 0,
-          "output": 0,
+          "total": 79381,
+          "input": 272,
+          "output": 69,
           "reasoning": 0,
           "cache": {
-            "read": 0,
-            "write": 0
+            "write": 0,
+            "read": 79040
           }
         },
         "modelID": "glm-5.2",
         "providerID": "opencode-go",
         "time": {
-          "created": 1785165304527
+          "created": 1785165304527,
+          "completed": 1785165324380
         },
+        "finish": "tool-calls",
         "id": "msg_fa424d2cf0023k80Dprf7iKxwH",
         "sessionID": "ses_05c124b05ffexe198kAl9VVoyz"
       },
@@ -7696,21 +7699,348 @@
           "tool": "bash",
           "callID": "call_3a0e",
           "state": {
-            "metadata": {
-              "output": ""
-            },
-            "status": "running",
+            "status": "completed",
             "input": {
               "command": "git commit -m \"v0.6.117: dashboard circles, activity reorder, codeblock cap + QWERTY toolbar toggle\n\" && git tag v0.6.117 && git log --oneline -3",
               "workdir": "/workspaces/learn-p5"
             },
+            "output": "[main 4c7dd67] v0.6.117: dashboard circles, activity reorder, codeblock cap + QWERTY toolbar toggle\n Author: Dean Tarisai <prjctimg@outlook.com>\n 6 files changed, 122 insertions(+), 120 deletions(-)\n4c7dd67 v0.6.117: dashboard circles, activity reorder, codeblock cap + QWERTY toolbar toggle\n3533d29 feat: add loop engineering patterns (L1 triage + L2 verifier)\n149f186 v0.6.114: responsive Run long-press → reference search + haptic\n",
+            "metadata": {
+              "output": "[main 4c7dd67] v0.6.117: dashboard circles, activity reorder, codeblock cap + QWERTY toolbar toggle\n Author: Dean Tarisai <prjctimg@outlook.com>\n 6 files changed, 122 insertions(+), 120 deletions(-)\n4c7dd67 v0.6.117: dashboard circles, activity reorder, codeblock cap + QWERTY toolbar toggle\n3533d29 feat: add loop engineering patterns (L1 triage + L2 verifier)\n149f186 v0.6.114: responsive Run long-press → reference search + haptic\n",
+              "exit": 0,
+              "truncated": false
+            },
+            "title": "git commit -m \"v0.6.117: dashboard circles, activity reorder, codeblock cap + QWERTY toolbar toggle\n\" && git tag v0.6.117 && git log --oneline -3",
             "time": {
-              "start": 1785165306933
+              "start": 1785165324188,
+              "end": 1785165324197
             }
           },
           "id": "prt_fa424dc2c001qGVPT1J3Z2jqzI",
           "sessionID": "ses_05c124b05ffexe198kAl9VVoyz",
           "messageID": "msg_fa424d2cf0023k80Dprf7iKxwH"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "cc25d4d69c22743c2bfd57c6f79fa22dc5f78b7c",
+          "type": "step-finish",
+          "tokens": {
+            "total": 79381,
+            "input": 272,
+            "output": 69,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 79040
+            }
+          },
+          "cost": 0.0212348,
+          "id": "prt_fa42520060013WfSB0GeqmUqWp",
+          "sessionID": "ses_05c124b05ffexe198kAl9VVoyz",
+          "messageID": "msg_fa424d2cf0023k80Dprf7iKxwH"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_fa40df8c4001Pn07ojBYNl6Ghw",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/workspaces/learn-p5",
+          "root": "/workspaces/learn-p5"
+        },
+        "cost": 0.10704004,
+        "tokens": {
+          "total": 79559,
+          "input": 75619,
+          "output": 36,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 3904
+          }
+        },
+        "modelID": "glm-5.2",
+        "providerID": "opencode-go",
+        "time": {
+          "created": 1785165324400,
+          "completed": 1785165343292
+        },
+        "finish": "tool-calls",
+        "id": "msg_fa4252070002FARmSorYViW56b",
+        "sessionID": "ses_05c124b05ffexe198kAl9VVoyz"
+      },
+      "parts": [
+        {
+          "snapshot": "cc25d4d69c22743c2bfd57c6f79fa22dc5f78b7c",
+          "type": "step-start",
+          "id": "prt_fa42536a2001T3YPRSkDGSitbd",
+          "sessionID": "ses_05c124b05ffexe198kAl9VVoyz",
+          "messageID": "msg_fa4252070002FARmSorYViW56b"
+        },
+        {
+          "type": "tool",
+          "tool": "bash",
+          "callID": "call_9643",
+          "state": {
+            "status": "completed",
+            "input": {
+              "command": "git push origin main && git push origin v0.6.117",
+              "workdir": "/workspaces/learn-p5"
+            },
+            "output": "[entire] Pushing 9 checkpoint ref(s) to origin....... done\nTo https://github.com/prjctimg/learn-p5\n   3533d29..4c7dd67  main -> main\nTo https://github.com/prjctimg/learn-p5\n * [new tag]         v0.6.117 -> v0.6.117\n",
+            "metadata": {
+              "output": "[entire] Pushing 9 checkpoint ref(s) to origin....... done\nTo https://github.com/prjctimg/learn-p5\n   3533d29..4c7dd67  main -> main\nTo https://github.com/prjctimg/learn-p5\n * [new tag]         v0.6.117 -> v0.6.117\n",
+              "exit": 0,
+              "truncated": false
+            },
+            "title": "git push origin main && git push origin v0.6.117",
+            "time": {
+              "start": 1785165343067,
+              "end": 1785165343081
+            }
+          },
+          "id": "prt_fa425446b0012612yIMM5VdNU0",
+          "sessionID": "ses_05c124b05ffexe198kAl9VVoyz",
+          "messageID": "msg_fa4252070002FARmSorYViW56b"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "cc25d4d69c22743c2bfd57c6f79fa22dc5f78b7c",
+          "type": "step-finish",
+          "tokens": {
+            "total": 79559,
+            "input": 75619,
+            "output": 36,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 3904
+            }
+          },
+          "cost": 0.10704004,
+          "id": "prt_fa42569ba001eYJA5XC9rQEL4r",
+          "sessionID": "ses_05c124b05ffexe198kAl9VVoyz",
+          "messageID": "msg_fa4252070002FARmSorYViW56b"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_fa40df8c4001Pn07ojBYNl6Ghw",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/workspaces/learn-p5",
+          "root": "/workspaces/learn-p5"
+        },
+        "cost": 0.021936,
+        "tokens": {
+          "total": 79851,
+          "input": 286,
+          "output": 205,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 79360
+          }
+        },
+        "modelID": "glm-5.2",
+        "providerID": "opencode-go",
+        "time": {
+          "created": 1785165343303,
+          "completed": 1785165354808
+        },
+        "finish": "tool-calls",
+        "id": "msg_fa4256a47002CtnGkPgA6yvS3F",
+        "sessionID": "ses_05c124b05ffexe198kAl9VVoyz"
+      },
+      "parts": [
+        {
+          "snapshot": "cc25d4d69c22743c2bfd57c6f79fa22dc5f78b7c",
+          "type": "step-start",
+          "id": "prt_fa4258f2f001L5NsSV2g8j0X58",
+          "sessionID": "ses_05c124b05ffexe198kAl9VVoyz",
+          "messageID": "msg_fa4256a47002CtnGkPgA6yvS3F"
+        },
+        {
+          "type": "tool",
+          "tool": "todowrite",
+          "callID": "call_592e",
+          "state": {
+            "status": "completed",
+            "input": {
+              "todos": [
+                {
+                  "content": "Fix ProgrammingKeyboard reference popup to scroll internally when content overflows",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Cap codeblock to 20 LOC max + internal scroll (exerciseHtml.ts)",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Move symbol-keyboard toggle into QWERTY toolbar; symbols scroll beside it; remove toggle from bottomRow",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Dashboard: replace Achievements section with overlapping circles below progress bar",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Dashboard: move ActivityHeatmap to be the last item (after Up Next)",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Typecheck/lint, bump version, commit, tag, push",
+                  "status": "completed",
+                  "priority": "medium"
+                }
+              ]
+            },
+            "output": "[\n  {\n    \"content\": \"Fix ProgrammingKeyboard reference popup to scroll internally when content overflows\",\n    \"status\": \"completed\",\n    \"priority\": \"high\"\n  },\n  {\n    \"content\": \"Cap codeblock to 20 LOC max + internal scroll (exerciseHtml.ts)\",\n    \"status\": \"completed\",\n    \"priority\": \"high\"\n  },\n  {\n    \"content\": \"Move symbol-keyboard toggle into QWERTY toolbar; symbols scroll beside it; remove toggle from bottomRow\",\n    \"status\": \"completed\",\n    \"priority\": \"high\"\n  },\n  {\n    \"content\": \"Dashboard: replace Achievements section with overlapping circles below progress bar\",\n    \"status\": \"completed\",\n    \"priority\": \"high\"\n  },\n  {\n    \"content\": \"Dashboard: move ActivityHeatmap to be the last item (after Up Next)\",\n    \"status\": \"completed\",\n    \"priority\": \"high\"\n  },\n  {\n    \"content\": \"Typecheck/lint, bump version, commit, tag, push\",\n    \"status\": \"completed\",\n    \"priority\": \"medium\"\n  }\n]",
+            "metadata": {
+              "todos": [
+                {
+                  "content": "Fix ProgrammingKeyboard reference popup to scroll internally when content overflows",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Cap codeblock to 20 LOC max + internal scroll (exerciseHtml.ts)",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Move symbol-keyboard toggle into QWERTY toolbar; symbols scroll beside it; remove toggle from bottomRow",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Dashboard: replace Achievements section with overlapping circles below progress bar",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Dashboard: move ActivityHeatmap to be the last item (after Up Next)",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Typecheck/lint, bump version, commit, tag, push",
+                  "status": "completed",
+                  "priority": "medium"
+                }
+              ],
+              "truncated": false
+            },
+            "title": "0 todos",
+            "time": {
+              "start": 1785165354568,
+              "end": 1785165354577
+            }
+          },
+          "id": "prt_fa425962a0010hWf2W6jg12xOi",
+          "sessionID": "ses_05c124b05ffexe198kAl9VVoyz",
+          "messageID": "msg_fa4256a47002CtnGkPgA6yvS3F"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "cc25d4d69c22743c2bfd57c6f79fa22dc5f78b7c",
+          "type": "step-finish",
+          "tokens": {
+            "total": 79851,
+            "input": 286,
+            "output": 205,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 79360
+            }
+          },
+          "cost": 0.021936,
+          "id": "prt_fa42596d4001HdsEA3gDPme8eP",
+          "sessionID": "ses_05c124b05ffexe198kAl9VVoyz",
+          "messageID": "msg_fa4256a47002CtnGkPgA6yvS3F"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_fa40df8c4001Pn07ojBYNl6Ghw",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/workspaces/learn-p5",
+          "root": "/workspaces/learn-p5"
+        },
+        "cost": 0.02262328,
+        "tokens": {
+          "total": 80426,
+          "input": 282,
+          "output": 336,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 79808
+          }
+        },
+        "modelID": "glm-5.2",
+        "providerID": "opencode-go",
+        "time": {
+          "created": 1785165354823,
+          "completed": 1785165361832
+        },
+        "finish": "stop",
+        "id": "msg_fa4259747001VnSY1z06nMopD9",
+        "sessionID": "ses_05c124b05ffexe198kAl9VVoyz"
+      },
+      "parts": [
+        {
+          "snapshot": "cc25d4d69c22743c2bfd57c6f79fa22dc5f78b7c",
+          "type": "step-start",
+          "id": "prt_fa425a012001Fdd2GmZpBHT3VL",
+          "sessionID": "ses_05c124b05ffexe198kAl9VVoyz",
+          "messageID": "msg_fa4259747001VnSY1z06nMopD9"
+        },
+        {
+          "type": "text",
+          "text": "Done. Pushed `v0.6.117` to `main` with tag `v0.6.117`.\n\n**Summary of changes:**\n1. **Reference popup scroll** (`ProgrammingKeyboard.tsx`): ScrollView gets `flexShrink:1` + `contentContainerStyle={{ flexGrow: 0 }}` so it scrolls within the 70% maxHeight card instead of overflowing.\n2. **Codeblock cap** (`exerciseHtml.ts`): `.editor-section` and `#editor` no longer force `min-height:400px`; max-height is set to `view.defaultLineHeight * 20` in JS after init (`applyEditorMaxHeight`, re-applied on font-size and word-wrap changes). Internal `cm-scroller` overflow shows ≤20 LOC and avoids covered code; `body` padding-bottom trimmed to 16px.\n3. **QWERTY toolbar toggle** (`QwertyKeyboard.tsx`): `code-tags` toggle moved into the toolbar fixed cluster; symbolsScroll keeps scrolling beside it; bottomRow replaced with a spacer + space + hide.\n4. **Dashboard circles** (`dashboard.tsx`): \"Achievements\" heading + grid removed; rendered unlocked achievements as overlapping 28px circles right below the progress bar (empty-state hint when none).\n5. **Activity last** (`dashboard.tsx`): `ActivityHeatmap` moved to after the \"Up Next\" list, as the final scrollable item.\n\nPre-existing TS errors (in `[id].tsx` WebView `onLoadStart` and `StatusBarAccent`) are unchanged on `main` and not from my edits.",
+          "time": {
+            "start": 1785165357131,
+            "end": 1785165361610
+          },
+          "id": "prt_fa425a04b001qxOE1YPTWV4ILc",
+          "sessionID": "ses_05c124b05ffexe198kAl9VVoyz",
+          "messageID": "msg_fa4259747001VnSY1z06nMopD9"
+        },
+        {
+          "reason": "stop",
+          "snapshot": "cc25d4d69c22743c2bfd57c6f79fa22dc5f78b7c",
+          "type": "step-finish",
+          "tokens": {
+            "total": 80426,
+            "input": 282,
+            "output": 336,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 79808
+            }
+          },
+          "cost": 0.02262328,
+          "id": "prt_fa425b212001B7IdmWHFwDVqyz",
+          "sessionID": "ses_05c124b05ffexe198kAl9VVoyz",
+          "messageID": "msg_fa4259747001VnSY1z06nMopD9"
         }
       ]
     }
