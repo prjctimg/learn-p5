@@ -3,84 +3,60 @@
   "checkpoint_id": "01KYMEKC37ZYEBW65773874XFH",
   "session_id": "ses_05732e76fffeCUVrpapJfzf9rq",
   "strategy": "manual-commit",
-  "created_at": "2026-07-28T13:28:38.452836167Z",
+  "created_at": "2026-07-28T14:01:40.833021854Z",
   "branch": "main",
-  "checkpoints_count": 2,
+  "checkpoints_count": 1,
   "save_step_count": 2,
   "files_touched": [
-    ".github/workflows/release.yaml",
-    ".gitignore",
-    "AGENTS.md",
-    "app.json",
-    "package.json",
-    "src/data/courses/io.yaml",
-    "src/data/courses/shapes.ts",
-    "src/data/courses/vectors.yaml"
+    "src/data/courses/shapes.ts"
   ],
   "agent": "OpenCode",
   "model": "glm-5.2",
-  "turn_id": "11409cf9a20e",
+  "turn_id": "7c591d59ec8c",
   "compact_transcript_start": 0,
   "token_usage": {
-    "input_tokens": 212165,
+    "input_tokens": 391904,
     "cache_creation_tokens": 0,
-    "cache_read_tokens": 898688,
-    "output_tokens": 14157,
-    "api_call_count": 45
+    "cache_read_tokens": 1473472,
+    "output_tokens": 18292,
+    "api_call_count": 63
   },
   "session_metrics": {
-    "turn_count": 2
+    "turn_count": 3
   },
   "initial_attribution": {
-    "calculated_at": "2026-07-28T13:28:38.408172601Z",
+    "calculated_at": "2026-07-28T14:01:40.786541303Z",
     "agent_lines": 0,
     "agent_removed": 0,
-    "human_added": 0,
-    "human_modified": 33,
-    "human_removed": 319,
-    "total_committed": 0,
-    "total_lines_changed": 352,
+    "human_added": 32,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 32,
+    "total_lines_changed": 42,
     "agent_percentage": 0,
     "metric_version": 2
   },
   "prompt_attributions": [
     {
-      "checkpoint_number": 1,
-      "user_lines_added": 345,
-      "user_lines_removed": 53,
+      "checkpoint_number": 2,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
       "agent_lines_added": 0,
-      "agent_lines_removed": 0,
+      "agent_lines_removed": 0
+    },
+    {
+      "checkpoint_number": 3,
+      "user_lines_added": 335,
+      "user_lines_removed": 0,
+      "agent_lines_added": 10,
+      "agent_lines_removed": 53,
       "user_added_per_file": {
         ".opencode/plugins/entire.ts": 267,
         "scripts/hooks/commit-msg": 4,
         "scripts/hooks/post-commit": 4,
         "scripts/hooks/post-rewrite": 4,
-        "scripts/hooks/pre-push": 10,
         "scripts/hooks/pre-push.pre-entire": 53,
         "scripts/hooks/prepare-commit-msg": 3
-      },
-      "user_removed_per_file": {
-        "scripts/hooks/pre-push": 53
-      }
-    },
-    {
-      "checkpoint_number": 2,
-      "user_lines_added": 0,
-      "user_lines_removed": 0,
-      "agent_lines_added": 345,
-      "agent_lines_removed": 53
-    },
-    {
-      "checkpoint_number": 3,
-      "user_lines_added": 33,
-      "user_lines_removed": 33,
-      "agent_lines_added": 376,
-      "agent_lines_removed": 62,
-      "user_added_per_file": {
-        "src/data/courses/shapes.ts": 33
-      },
-      "user_removed_per_file": {
-        "src/data/courses/shapes.ts": 33
       }
     }
   ]

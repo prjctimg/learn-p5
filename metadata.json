@@ -3,16 +3,9 @@
   "checkpoint_id": "01KYMEKC37ZYEBW65773874XFH",
   "strategy": "manual-commit",
   "branch": "main",
-  "checkpoints_count": 3,
+  "checkpoints_count": 2,
   "files_touched": [
-    ".github/workflows/release.yaml",
-    ".gitignore",
-    "AGENTS.md",
-    "app.json",
-    "package.json",
-    "src/data/courses/io.yaml",
-    "src/data/courses/shapes.ts",
-    "src/data/courses/vectors.yaml"
+    "src/data/courses/shapes.ts"
   ],
   "sessions": [
     {
@@ -31,11 +24,11 @@
     }
   ],
   "token_usage": {
-    "input_tokens": 300203,
+    "input_tokens": 479942,
     "cache_creation_tokens": 0,
-    "cache_read_tokens": 1103168,
-    "output_tokens": 20993,
-    "api_call_count": 53
+    "cache_read_tokens": 1677952,
+    "output_tokens": 25128,
+    "api_call_count": 71
   },
   "combined_attribution": {
     "calculated_at": "2026-07-28T13:28:49.835222298Z",
