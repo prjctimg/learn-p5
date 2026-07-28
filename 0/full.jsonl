@@ -18,19 +18,19 @@
       "deletions": 0,
       "files": 0
     },
-    "cost": 0.5929806799999999,
+    "cost": 0.7240035599999999,
     "tokens": {
-      "input": 212165,
-      "output": 14157,
+      "input": 272597,
+      "output": 15131,
       "reasoning": 0,
       "cache": {
-        "read": 898688,
+        "read": 1060736,
         "write": 0
       }
     },
     "time": {
       "created": 1785243441296,
-      "updated": 1785245310263
+      "updated": 1785245380134
     }
   },
   "messages": [
@@ -5340,21 +5340,24 @@
           "cwd": "/workspaces/learn-p5",
           "root": "/workspaces/learn-p5"
         },
-        "cost": 0,
+        "cost": 0.04354428,
         "tokens": {
-          "input": 0,
-          "output": 0,
+          "total": 36762,
+          "input": 29511,
+          "output": 83,
           "reasoning": 0,
           "cache": {
-            "read": 0,
-            "write": 0
+            "write": 0,
+            "read": 7168
           }
         },
         "modelID": "glm-5.2",
         "providerID": "opencode-go",
         "time": {
-          "created": 1785245310256
+          "created": 1785245310256,
+          "completed": 1785245330000
         },
+        "finish": "tool-calls",
         "id": "msg_fa8e99d30002BRy4ONdbduQYBG",
         "sessionID": "ses_05732e76fffeCUVrpapJfzf9rq"
       },
@@ -5382,21 +5385,552 @@
           "tool": "bash",
           "callID": "call_8a7d",
           "state": {
-            "metadata": {
-              "output": ""
-            },
-            "status": "running",
+            "status": "completed",
             "input": {
               "command": "git commit -m \"v0.7.2: build courses from YAML, gitignore generated .ts\" 2>&1 | tail -20",
               "workdir": "/workspaces/learn-p5"
             },
+            "output": "[main aa9159c] v0.7.2: build courses from YAML, gitignore generated .ts\n Author: Dean Tarisai <prjctimg@outlook.com>\n 8 files changed, 31 insertions(+), 328 deletions(-)\n delete mode 100644 src/data/courses/shapes.ts\n",
+            "metadata": {
+              "output": "[main aa9159c] v0.7.2: build courses from YAML, gitignore generated .ts\n Author: Dean Tarisai <prjctimg@outlook.com>\n 8 files changed, 31 insertions(+), 328 deletions(-)\n delete mode 100644 src/data/courses/shapes.ts\n",
+              "exit": 0,
+              "truncated": false
+            },
+            "title": "git commit -m \"v0.7.2: build courses from YAML, gitignore generated .ts\" 2>&1 | tail -20",
             "time": {
-              "start": 1785245315033
+              "start": 1785245329866,
+              "end": 1785245329873
             }
           },
           "id": "prt_fa8e9afd1001qw3zI5I5TtaYDo",
           "sessionID": "ses_05732e76fffeCUVrpapJfzf9rq",
           "messageID": "msg_fa8e99d30002BRy4ONdbduQYBG"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "65644d3cade36a84d5a1e59789d4cf4ef17fcbd0",
+          "type": "step-finish",
+          "tokens": {
+            "total": 36762,
+            "input": 29511,
+            "output": 83,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 7168
+            }
+          },
+          "cost": 0.04354428,
+          "id": "prt_fa8e9ea150019wETTvV3DjxBmQ",
+          "sessionID": "ses_05732e76fffeCUVrpapJfzf9rq",
+          "messageID": "msg_fa8e99d30002BRy4ONdbduQYBG"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_fa8e96aac001AMhEVbKLvythen",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/workspaces/learn-p5",
+          "root": "/workspaces/learn-p5"
+        },
+        "cost": 0.04374768,
+        "tokens": {
+          "total": 36918,
+          "input": 29672,
+          "output": 78,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 7168
+          }
+        },
+        "modelID": "glm-5.2",
+        "providerID": "opencode-go",
+        "time": {
+          "created": 1785245330006,
+          "completed": 1785245338656
+        },
+        "finish": "tool-calls",
+        "id": "msg_fa8e9ea56002i6e4hC3Y10IpzS",
+        "sessionID": "ses_05732e76fffeCUVrpapJfzf9rq"
+      },
+      "parts": [
+        {
+          "snapshot": "65644d3cade36a84d5a1e59789d4cf4ef17fcbd0",
+          "type": "step-start",
+          "id": "prt_fa8e9f7f7001SzzHfFE2k17mk6",
+          "sessionID": "ses_05732e76fffeCUVrpapJfzf9rq",
+          "messageID": "msg_fa8e9ea56002i6e4hC3Y10IpzS"
+        },
+        {
+          "type": "text",
+          "text": "Committed. Now tag and verify the pre-push hook won't trip.",
+          "time": {
+            "start": 1785245337651,
+            "end": 1785245338483
+          },
+          "id": "prt_fa8ea0833001ruw45dr3XxSVOG",
+          "sessionID": "ses_05732e76fffeCUVrpapJfzf9rq",
+          "messageID": "msg_fa8e9ea56002i6e4hC3Y10IpzS"
+        },
+        {
+          "type": "tool",
+          "tool": "bash",
+          "callID": "call_fea9",
+          "state": {
+            "status": "completed",
+            "input": {
+              "command": "git tag v0.7.2 2>&1; echo \"--- log ---\"; git log --oneline -3; echo \"--- tags ---\"; git tag --list 'v0.7*'",
+              "workdir": "/workspaces/learn-p5"
+            },
+            "output": "--- log ---\naa9159c v0.7.2: build courses from YAML, gitignore generated .ts\nbfac087 v0.7.1: Add exercises for all p5.js v2 modules\nec78598 Add 15 course YAML files covering all p5.js v2 modules\n--- tags ---\nv0.7.0\nv0.7.1\nv0.7.2\n",
+            "metadata": {
+              "output": "--- log ---\naa9159c v0.7.2: build courses from YAML, gitignore generated .ts\nbfac087 v0.7.1: Add exercises for all p5.js v2 modules\nec78598 Add 15 course YAML files covering all p5.js v2 modules\n--- tags ---\nv0.7.0\nv0.7.1\nv0.7.2\n",
+              "exit": 0,
+              "truncated": false
+            },
+            "title": "git tag v0.7.2 2>&1; echo \"--- log ---\"; git log --oneline -3; echo \"--- tags ---\"; git tag --list 'v0.7*'",
+            "time": {
+              "start": 1785245338529,
+              "end": 1785245338537
+            }
+          },
+          "id": "prt_fa8ea0b1d001JmGMwU3Baj47Ih",
+          "sessionID": "ses_05732e76fffeCUVrpapJfzf9rq",
+          "messageID": "msg_fa8e9ea56002i6e4hC3Y10IpzS"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "65644d3cade36a84d5a1e59789d4cf4ef17fcbd0",
+          "type": "step-finish",
+          "tokens": {
+            "total": 36918,
+            "input": 29672,
+            "output": 78,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 7168
+            }
+          },
+          "cost": 0.04374768,
+          "id": "prt_fa8ea0bd9001AkT5TkeRMRo176",
+          "sessionID": "ses_05732e76fffeCUVrpapJfzf9rq",
+          "messageID": "msg_fa8e9ea56002i6e4hC3Y10IpzS"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_fa8e96aac001AMhEVbKLvythen",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/workspaces/learn-p5",
+          "root": "/workspaces/learn-p5"
+        },
+        "cost": 0.00998244,
+        "tokens": {
+          "total": 37056,
+          "input": 149,
+          "output": 43,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 36864
+          }
+        },
+        "modelID": "glm-5.2",
+        "providerID": "opencode-go",
+        "time": {
+          "created": 1785245338666,
+          "completed": 1785245357350
+        },
+        "finish": "tool-calls",
+        "id": "msg_fa8ea0c2a002WABpMwypWl7pc2",
+        "sessionID": "ses_05732e76fffeCUVrpapJfzf9rq"
+      },
+      "parts": [
+        {
+          "snapshot": "65644d3cade36a84d5a1e59789d4cf4ef17fcbd0",
+          "type": "step-start",
+          "id": "prt_fa8ea24350012i5GmtgquzWRaf",
+          "sessionID": "ses_05732e76fffeCUVrpapJfzf9rq",
+          "messageID": "msg_fa8ea0c2a002WABpMwypWl7pc2"
+        },
+        {
+          "type": "text",
+          "text": "Tag created. Now push main +tag.",
+          "time": {
+            "start": 1785245351684,
+            "end": 1785245352408
+          },
+          "id": "prt_fa8ea3f04001m0LknSIsq5Hers",
+          "sessionID": "ses_05732e76fffeCUVrpapJfzf9rq",
+          "messageID": "msg_fa8ea0c2a002WABpMwypWl7pc2"
+        },
+        {
+          "type": "tool",
+          "tool": "bash",
+          "callID": "call_79d3",
+          "state": {
+            "status": "completed",
+            "input": {
+              "command": "git push origin main 2>&1 | tail -15",
+              "workdir": "/workspaces/learn-p5"
+            },
+            "output": "[entire] Pushing 2 checkpoint ref(s) to origin..... done\nTo https://github.com/prjctimg/learn-p5\n   bfac087..aa9159c  main -> main\n",
+            "metadata": {
+              "output": "[entire] Pushing 2 checkpoint ref(s) to origin..... done\nTo https://github.com/prjctimg/learn-p5\n   bfac087..aa9159c  main -> main\n",
+              "exit": 0,
+              "truncated": false
+            },
+            "title": "git push origin main 2>&1 | tail -15",
+            "time": {
+              "start": 1785245357105,
+              "end": 1785245357140
+            }
+          },
+          "id": "prt_fa8ea4196001hl44b8wouYaBNm",
+          "sessionID": "ses_05732e76fffeCUVrpapJfzf9rq",
+          "messageID": "msg_fa8ea0c2a002WABpMwypWl7pc2"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "65644d3cade36a84d5a1e59789d4cf4ef17fcbd0",
+          "type": "step-finish",
+          "tokens": {
+            "total": 37056,
+            "input": 149,
+            "output": 43,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 36864
+            }
+          },
+          "cost": 0.00998244,
+          "id": "prt_fa8ea54c0001oN9hBwdcmDM434",
+          "sessionID": "ses_05732e76fffeCUVrpapJfzf9rq",
+          "messageID": "msg_fa8ea0c2a002WABpMwypWl7pc2"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_fa8e96aac001AMhEVbKLvythen",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/workspaces/learn-p5",
+          "root": "/workspaces/learn-p5"
+        },
+        "cost": 0.00995052,
+        "tokens": {
+          "total": 37146,
+          "input": 115,
+          "output": 39,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 36992
+          }
+        },
+        "modelID": "glm-5.2",
+        "providerID": "opencode-go",
+        "time": {
+          "created": 1785245357361,
+          "completed": 1785245366535
+        },
+        "finish": "tool-calls",
+        "id": "msg_fa8ea5531002Oz0MyP84yTjyYK",
+        "sessionID": "ses_05732e76fffeCUVrpapJfzf9rq"
+      },
+      "parts": [
+        {
+          "snapshot": "65644d3cade36a84d5a1e59789d4cf4ef17fcbd0",
+          "type": "step-start",
+          "id": "prt_fa8ea6e41001wSJjf1edy1zrFO",
+          "sessionID": "ses_05732e76fffeCUVrpapJfzf9rq",
+          "messageID": "msg_fa8ea5531002Oz0MyP84yTjyYK"
+        },
+        {
+          "type": "tool",
+          "tool": "bash",
+          "callID": "call_9038",
+          "state": {
+            "status": "completed",
+            "input": {
+              "command": "git push origin v0.7.2 2>&1 | tail -10",
+              "workdir": "/workspaces/learn-p5"
+            },
+            "output": "To https://github.com/prjctimg/learn-p5\n * [new tag]         v0.7.2 -> v0.7.2\n",
+            "metadata": {
+              "output": "To https://github.com/prjctimg/learn-p5\n * [new tag]         v0.7.2 -> v0.7.2\n",
+              "exit": 0,
+              "truncated": false
+            },
+            "title": "git push origin v0.7.2 2>&1 | tail -10",
+            "time": {
+              "start": 1785245366412,
+              "end": 1785245366420
+            }
+          },
+          "id": "prt_fa8ea6fc40015dC35UDu2xAWkt",
+          "sessionID": "ses_05732e76fffeCUVrpapJfzf9rq",
+          "messageID": "msg_fa8ea5531002Oz0MyP84yTjyYK"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "65644d3cade36a84d5a1e59789d4cf4ef17fcbd0",
+          "type": "step-finish",
+          "tokens": {
+            "total": 37146,
+            "input": 115,
+            "output": 39,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 36992
+            }
+          },
+          "cost": 0.00995052,
+          "id": "prt_fa8ea78c6001wA0c3xy1gfArL1",
+          "sessionID": "ses_05732e76fffeCUVrpapJfzf9rq",
+          "messageID": "msg_fa8ea5531002Oz0MyP84yTjyYK"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_fa8e96aac001AMhEVbKLvythen",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/workspaces/learn-p5",
+          "root": "/workspaces/learn-p5"
+        },
+        "cost": 0.01112896,
+        "tokens": {
+          "total": 37400,
+          "input": 448,
+          "output": 216,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 36736
+          }
+        },
+        "modelID": "glm-5.2",
+        "providerID": "opencode-go",
+        "time": {
+          "created": 1785245366549,
+          "completed": 1785245380123
+        },
+        "finish": "tool-calls",
+        "id": "msg_fa8ea7915002YaZovoJSRsXz5i",
+        "sessionID": "ses_05732e76fffeCUVrpapJfzf9rq"
+      },
+      "parts": [
+        {
+          "snapshot": "65644d3cade36a84d5a1e59789d4cf4ef17fcbd0",
+          "type": "step-start",
+          "id": "prt_fa8ea80f20013nBnRb1oY7Ad7Y",
+          "sessionID": "ses_05732e76fffeCUVrpapJfzf9rq",
+          "messageID": "msg_fa8ea7915002YaZovoJSRsXz5i"
+        },
+        {
+          "type": "tool",
+          "tool": "todowrite",
+          "callID": "call_c2e9",
+          "state": {
+            "status": "completed",
+            "input": {
+              "todos": [
+                {
+                  "content": "Add src/data/courses/*.ts to .gitignore",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "git rm --cached the committed shapes.ts",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Wire build-courses into package.json postinstall + start",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Add explicit 'Generate course modules' step to release.yaml",
+                  "status": "completed",
+                  "priority": "medium"
+                },
+                {
+                  "content": "Update AGENTS.md with build-artifact convention",
+                  "status": "completed",
+                  "priority": "low"
+                },
+                {
+                  "content": "Run build-courses + check-exercises + tsc to verify",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Patch bump 0.7.2, commit, tag v0.7.2, push",
+                  "status": "completed",
+                  "priority": "high"
+                }
+              ]
+            },
+            "output": "[\n  {\n    \"content\": \"Add src/data/courses/*.ts to .gitignore\",\n    \"status\": \"completed\",\n    \"priority\": \"high\"\n  },\n  {\n    \"content\": \"git rm --cached the committed shapes.ts\",\n    \"status\": \"completed\",\n    \"priority\": \"high\"\n  },\n  {\n    \"content\": \"Wire build-courses into package.json postinstall + start\",\n    \"status\": \"completed\",\n    \"priority\": \"high\"\n  },\n  {\n    \"content\": \"Add explicit 'Generate course modules' step to release.yaml\",\n    \"status\": \"completed\",\n    \"priority\": \"medium\"\n  },\n  {\n    \"content\": \"Update AGENTS.md with build-artifact convention\",\n    \"status\": \"completed\",\n    \"priority\": \"low\"\n  },\n  {\n    \"content\": \"Run build-courses + check-exercises + tsc to verify\",\n    \"status\": \"completed\",\n    \"priority\": \"high\"\n  },\n  {\n    \"content\": \"Patch bump 0.7.2, commit, tag v0.7.2, push\",\n    \"status\": \"completed\",\n    \"priority\": \"high\"\n  }\n]",
+            "metadata": {
+              "todos": [
+                {
+                  "content": "Add src/data/courses/*.ts to .gitignore",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "git rm --cached the committed shapes.ts",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Wire build-courses into package.json postinstall + start",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Add explicit 'Generate course modules' step to release.yaml",
+                  "status": "completed",
+                  "priority": "medium"
+                },
+                {
+                  "content": "Update AGENTS.md with build-artifact convention",
+                  "status": "completed",
+                  "priority": "low"
+                },
+                {
+                  "content": "Run build-courses + check-exercises + tsc to verify",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Patch bump 0.7.2, commit, tag v0.7.2, push",
+                  "status": "completed",
+                  "priority": "high"
+                }
+              ],
+              "truncated": false
+            },
+            "title": "0 todos",
+            "time": {
+              "start": 1785245379890,
+              "end": 1785245379894
+            }
+          },
+          "id": "prt_fa8eaad29001XqI44SabNhLYiC",
+          "sessionID": "ses_05732e76fffeCUVrpapJfzf9rq",
+          "messageID": "msg_fa8ea7915002YaZovoJSRsXz5i"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "65644d3cade36a84d5a1e59789d4cf4ef17fcbd0",
+          "type": "step-finish",
+          "tokens": {
+            "total": 37400,
+            "input": 448,
+            "output": 216,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 36736
+            }
+          },
+          "cost": 0.01112896,
+          "id": "prt_fa8eaadd50013O4Vz3YVknyBs0",
+          "sessionID": "ses_05732e76fffeCUVrpapJfzf9rq",
+          "messageID": "msg_fa8ea7915002YaZovoJSRsXz5i"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_fa8e96aac001AMhEVbKLvythen",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/workspaces/learn-p5",
+          "root": "/workspaces/learn-p5"
+        },
+        "cost": 0.012669,
+        "tokens": {
+          "total": 38172,
+          "input": 537,
+          "output": 515,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 37120
+          }
+        },
+        "modelID": "glm-5.2",
+        "providerID": "opencode-go",
+        "time": {
+          "created": 1785245380131,
+          "completed": 1785245410775
+        },
+        "finish": "stop",
+        "id": "msg_fa8eaae23002ukrX1CJlB0ag8t",
+        "sessionID": "ses_05732e76fffeCUVrpapJfzf9rq"
+      },
+      "parts": [
+        {
+          "snapshot": "65644d3cade36a84d5a1e59789d4cf4ef17fcbd0",
+          "type": "step-start",
+          "id": "prt_fa8eab53b001jOSe2G4a55cb00",
+          "sessionID": "ses_05732e76fffeCUVrpapJfzf9rq",
+          "messageID": "msg_fa8eaae23002ukrX1CJlB0ag8t"
+        },
+        {
+          "type": "text",
+          "text": "Done. Pushed `v0.7.2` (commit `aa9159c`) to `main` and tag `v0.7.2` to origin.\n\n### Summary of the fix\n\n**Root cause:** `ec78598` added 15 new `.yaml` course files but never generated or committed the matching `.ts` files that `courseLoader.ts` imports — so the build broke with \"Cannot find module\" errors for every course except `shapes`.\n\n**Resolution (codegen, generated `.ts` gitignored — your choice):**\n1. `.gitignore`: added `src/data/courses/*.ts` (same convention as `reference.generated.json`).\n2. `git rm --cached src/data/courses/shapes.ts` to untrack the one previously-committed derivative.\n3. `package.json`: wired `build-courses` into `postinstall` (so a fresh clone builds) and `start` (so local YAML edits propagate).\n4. `release.yaml`: added explicit \"Generate course modules\" + \"Verify course modules\" CI steps after Install, mirroring the existing CodeMirror-bundle verify.\n5. `AGENTS.md`: documented the YAML-as-source / `.ts`-as-build-artifact convention.\n6. Fixed two pre-existing YAML content bugs flagged by `npm run check-exercises`:\n   - `io.yaml` ex-3 task-1: `loadStrings` `exactArgs: 1` → `2` (matches actual 2-arg call).\n   - `vectors.yaml` ex-3 task-2: removed stray `mag()` rule (no matching solution/instruction).\n7. Patch-bumped `0.7.1` → `0.7.2` (per your instruction — no minor bump), committed, tagged, pushed.\n\n### Verification\n- `npm run build-courses` → 16/16 `.ts` files generated.\n- `npm run check-exercises` → `All exercise validation invariants OK.`\n\n### Out of scope (left alone)\n- 2 tsc errors (`onLoadStart` on WebView, `\"hidden\"` StatusBarStyle) — confirmed pre-existing on `main` (introduced by the TS v7 upgrade in `d22ba16`), unrelated to YAML course loading.\n- Working-tree `scripts/hooks/pre-push` modification + untracked hook files (`commit-msg`, `post-commit`, etc.) — not part of this fix; left unstaged/untracked.",
+          "time": {
+            "start": 1785245381951,
+            "end": 1785245410688
+          },
+          "id": "prt_fa8eab53f001CZY4maD6hQcnH9",
+          "sessionID": "ses_05732e76fffeCUVrpapJfzf9rq",
+          "messageID": "msg_fa8eaae23002ukrX1CJlB0ag8t"
+        },
+        {
+          "reason": "stop",
+          "snapshot": "65644d3cade36a84d5a1e59789d4cf4ef17fcbd0",
+          "type": "step-finish",
+          "tokens": {
+            "total": 38172,
+            "input": 537,
+            "output": 515,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 37120
+            }
+          },
+          "cost": 0.012669,
+          "id": "prt_fa8eb25ae001bsd4G6zMHMI2Y6",
+          "sessionID": "ses_05732e76fffeCUVrpapJfzf9rq",
+          "messageID": "msg_fa8eaae23002ukrX1CJlB0ag8t"
         }
       ]
     }
