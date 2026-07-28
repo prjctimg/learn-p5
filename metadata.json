@@ -1,0 +1,33 @@
+{
+  "cli_version": "0.8.42",
+  "checkpoint_id": "01KYMEKC37ZYEBW65773874XFH",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 2,
+  "files_touched": [
+    ".github/workflows/release.yaml",
+    ".gitignore",
+    "AGENTS.md",
+    "app.json",
+    "package.json",
+    "src/data/courses/io.yaml",
+    "src/data/courses/shapes.ts",
+    "src/data/courses/vectors.yaml"
+  ],
+  "sessions": [
+    {
+      "metadata": "/0/metadata.json",
+      "transcript": "/0/full.jsonl",
+      "compact_transcript": "/0/transcript.jsonl",
+      "content_hash": "/0/content_hash.txt",
+      "prompt": "/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 212165,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 898688,
+    "output_tokens": 14157,
+    "api_call_count": 45
+  }
+}
