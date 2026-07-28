@@ -7,6 +7,7 @@
     "start": "npm run gen-reference && npm run bundle-editor && expo start",
     "gen-reference": "node scripts/generate-reference.mjs",
     "bundle-editor": "node scripts/bundle-editor.mjs",
+    "build-courses": "node scripts/build-courses.mjs",
     "check-exercises": "node scripts/check-exercises.mjs",
     "version": "sh scripts/bump-version.sh",
     "android": "expo start --android",
@@ -55,7 +56,8 @@
     "esbuild": "^0.25.3",
     "eslint": "^9.0.0",
     "eslint-config-expo": "~55.0.1",
-    "typescript": "~5.9.2"
+    "js-yaml": "^4.1.0",
+    "typescript": "~7.0.2"
   },
   "private": true
 }
