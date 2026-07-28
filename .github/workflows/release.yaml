@@ -49,6 +49,19 @@ jobs:
           fi
           echo "CodeMirror bundle OK ($SIZE bytes)"
 
+      - name: Generate course modules
+        run: npm run build-courses
+
+      - name: Verify course modules
+        run: |
+          COUNT=$(find src/data/courses -name "*.ts" 2>/dev/null | wc -l)
+          if [ "$COUNT" -lt 16 ]; then
+            echo "ERROR: only $COUNT course .ts files generated (expected >= 16)"
+            echo "Regenerate with: npm run build-courses"
+            exit 1
+          fi
+          echo "Course modules OK ($COUNT files)"
+
       - name: Setup JDK
         uses: actions/setup-java@v4
         with:

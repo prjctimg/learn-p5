@@ -156,3 +156,7 @@ expo-env.d.ts
 
 # Auto-generated reference data (CI-generated, never committed)
 src/data/reference.generated.json
+
+# Auto-generated course modules (built from .yaml by scripts/build-courses.mjs)
+# Source of truth is the .yaml files; .ts are local/CI build artifacts.
+src/data/courses/*.ts

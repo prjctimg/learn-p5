@@ -184,9 +184,6 @@ exercises:
           - type: functionCall
             name: circle
             exactArgs: 3
-          - type: functionCall
-            name: mag
-            minArgs: 0
 
   - id: exercise-4
     title: "Heading Home"

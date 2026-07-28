@@ -169,7 +169,7 @@ exercises:
         validation:
           - type: functionCall
             name: loadStrings
-            exactArgs: 1
+            exactArgs: 2
           - type: functionCall
             name: text
             minArgs: 3
