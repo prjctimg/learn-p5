@@ -1,0 +1,260 @@
+slug: image
+title: Image
+moduleName: Visual Media
+description: "Create, display, and manipulate images on the canvas."
+
+exercises:
+  - id: exercise-1
+    title: "Pixel Canvas"
+    module: Image
+    description: "Create an image from scratch by setting individual pixels."
+    instruction: |
+      Create a 100x100 image and fill the top half with red.
+      Use createImage(w, h) to make the image,
+      set(x, y, color) to set a red pixel, then updatePixels().
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        let img = createImage(100, 100);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        let img = createImage(100, 100);
+        img.loadPixels();
+        for (let x = 0; x < 100; x++) {
+          for (let y = 0; y < 50; y++) {
+            img.set(x, y, color(255, 0, 0));
+          }
+        }
+        img.updatePixels();
+        image(img, 150, 150);
+      }
+    tasks:
+      - id: task-1
+        title: "Create an Image"
+        instruction: |
+          Create a 100x100 image using createImage(100, 100).
+        validation:
+          - type: functionCall
+            name: createImage
+            exactArgs: 2
+      - id: task-2
+        title: "Set Pixels"
+        instruction: |
+          Call loadPixels() on the image, then use a loop to set pixels in the top half (y < 50) to red using set(x, y, color(255, 0, 0)).
+          Finish with updatePixels().
+        validation:
+          - type: functionCall
+            name: createImage
+            exactArgs: 2
+          - type: functionCall
+            name: loadPixels
+            exactArgs: 0
+          - type: functionCall
+            name: set
+            minArgs: 3
+          - type: functionCall
+            name: updatePixels
+            exactArgs: 0
+          - type: functionCall
+            name: image
+            exactArgs: 3
+
+  - id: exercise-2
+    title: "Image Tint"
+    module: Image
+    description: "Display an image with a color tint."
+    instruction: |
+      Create a colored image and display it with a tint.
+      Use createImage(w, h), fill it with a color, then use
+      tint(r, g, b) before image(img, x, y).
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        let img = createImage(100, 100);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        let img = createImage(100, 100);
+        img.loadPixels();
+        for (let i = 0; i < img.width * img.height; i++) {
+          img.pixels[i * 4] = 255;
+          img.pixels[i * 4 + 1] = 255;
+          img.pixels[i * 4 + 2] = 255;
+          img.pixels[i * 4 + 3] = 255;
+        }
+        img.updatePixels();
+        tint(255, 200, 0);
+        image(img, 150, 150);
+      }
+    tasks:
+      - id: task-1
+        title: "Display Image"
+        instruction: |
+          Create a 100x100 image, fill all pixels white (255, 255, 255), and display it with image(img, 150, 150).
+        validation:
+          - type: functionCall
+            name: createImage
+            exactArgs: 2
+          - type: functionCall
+            name: image
+            exactArgs: 3
+      - id: task-2
+        title: "Apply Tint"
+        instruction: |
+          Use tint(255, 200, 0) before the image() call to tint the image yellow.
+        validation:
+          - type: functionCall
+            name: createImage
+            exactArgs: 2
+          - type: functionCall
+            name: tint
+            exactArgs: 3
+          - type: functionCall
+            name: image
+            exactArgs: 3
+          - type: pixelMatch
+            x: 200
+            y: 200
+            expected: [255, 200, 0]
+            tolerance: 120
+
+  - id: exercise-3
+    title: "Filter Fun"
+    module: Image
+    description: "Apply built-in filters to the canvas."
+    instruction: |
+      Draw a shape and apply a filter to the entire canvas.
+      Use filter(GRAY) after drawing to turn the canvas grayscale.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        fill(255, 0, 0);
+        noStroke();
+        circle(200, 200, 200);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        fill(255, 0, 0);
+        noStroke();
+        circle(200, 200, 200);
+        filter(GRAY);
+      }
+    tasks:
+      - id: task-1
+        title: "Apply Gray Filter"
+        instruction: |
+          After drawing the red circle, add filter(GRAY) to convert the canvas to grayscale.
+        validation:
+          - type: functionCall
+            name: filter
+            exactArgs: 1
+          - type: pixelMatch
+            x: 200
+            y: 200
+            expected: [126, 126, 126]
+            tolerance: 40
+      - id: task-2
+        title: "Try Invert"
+        instruction: |
+          Change filter(GRAY) to filter(INVERT) to invert the canvas colors.
+        validation:
+          - type: functionCall
+            name: filter
+            exactArgs: 1
+          - type: pixelMatch
+            x: 200
+            y: 200
+            expected: [0, 255, 255]
+            tolerance: 40
+
+  - id: exercise-4
+    title: "Pixel Peek"
+    module: Image
+    description: "Read pixel colors from the canvas."
+    instruction: |
+      Draw a shape and use get(x, y) to read a pixel color.
+      get(x, y) returns a p5.Color object at the given coordinates.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        fill(0, 120, 255);
+        noStroke();
+        circle(200, 200, 200);
+        let c = get(200, 200);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        fill(0, 120, 255);
+        noStroke();
+        circle(200, 200, 200);
+        let c = get(200, 200);
+        fill(c);
+        noStroke();
+        rect(300, 300, 50, 50);
+      }
+    tasks:
+      - id: task-1
+        title: "Get a Pixel"
+        instruction: |
+          Use get(200, 200) to read the center pixel color into a variable named c.
+        validation:
+          - type: functionCall
+            name: get
+            exactArgs: 2
+      - id: task-2
+        title: "Use the Pixel"
+        instruction: |
+          Use fill(c) to set the fill color to the sampled pixel,
+          then draw a 50x50 rectangle at (300, 300) to display the sampled color.
+        validation:
+          - type: functionCall
+            name: get
+            exactArgs: 2
+          - type: functionCall
+            name: fill
+            exactArgs: 1
+          - type: functionCall
+            name: rect
+            exactArgs: 4
+          - type: pixelMatch
+            x: 325
+            y: 325
+            expected: [0, 120, 255]
+            tolerance: 120

@@ -1,0 +1,280 @@
+slug: curves
+title: Curves
+moduleName: Drawing
+description: "Master Bézier and spline curves to create flowing, organic shapes."
+
+exercises:
+  - id: exercise-1
+    title: "Bezier Basics"
+    module: Drawing
+    description: "Draw a Bézier curve connecting two points with control points."
+    instruction: |
+      Draw a Bézier curve from (50, 350) to (350, 50).
+      Use bezier(x1, y1, x2, y2, x3, y3, x4, y4).
+      Control points: (150, 50) and (250, 350) for a nice S-curve.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(30);
+        stroke(255, 100, 200);
+        strokeWeight(3);
+        noFill();
+        // Draw your bezier curve here
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(30);
+        stroke(255, 100, 200);
+        strokeWeight(3);
+        noFill();
+        bezier(50, 350, 150, 50, 250, 350, 350, 50);
+      }
+    tasks:
+      - id: task-1
+        title: "Draw the Bezier"
+        instruction: |
+          Draw a Bézier curve with bezier(x1, y1, x2, y2, x3, y3, x4, y4).
+          Use (50, 350), (150, 50), (250, 350), (350, 50).
+        validation:
+          - type: functionCall
+            name: bezier
+            exactArgs: 8
+          - type: pixelMatch
+            x: 200
+            y: 200
+            expected: [255, 100, 200]
+            tolerance: 120
+
+  - id: exercise-2
+    title: "Spline Stroke"
+    module: Drawing
+    description: "Draw a spline curve through a series of points (p5.js v2)."
+    instruction: |
+      Draw a smooth spline curve passing through four points.
+      Use spline(x1, y1, x2, y2, x3, y3, x4, y4) — the v2 name for what was curve().
+      Points: (40, 300), (140, 80), (260, 320), (360, 100).
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(25);
+        stroke(100, 200, 255);
+        strokeWeight(3);
+        noFill();
+        // Draw your spline curve here
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(25);
+        stroke(100, 200, 255);
+        strokeWeight(3);
+        noFill();
+        spline(40, 300, 140, 80, 260, 320, 360, 100);
+      }
+    tasks:
+      - id: task-1
+        title: "Draw the Spline"
+        instruction: |
+          Draw a spline with spline(x1, y1, x2, y2, x3, y3, x4, y4).
+          Use (40, 300), (140, 80), (260, 320), (360, 100).
+          Note: spline() is the p5.js v2 name for the old curve() function.
+        validation:
+          - type: functionCall
+            name: spline
+            exactArgs: 8
+          - type: pixelMatch
+            x: 200
+            y: 180
+            expected: [100, 200, 255]
+            tolerance: 120
+
+  - id: exercise-3
+    title: "Curve Points"
+    module: Drawing
+    description: "Use bezierPoint() to calculate and plot individual points along a Bézier curve."
+    instruction: |
+      Plot 10 evenly-spaced dots along a Bézier curve.
+      Use bezierPoint(x1, x2, x3, x4, t) to get the x and y coordinates at parameter t (0 to 1).
+      Draw a small circle at each computed point.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(20);
+        fill(255, 200, 50);
+        noStroke();
+
+        let x1 = 50, y1 = 350;
+        let x2 = 150, y2 = 50;
+        let x3 = 250, y3 = 350;
+        let x4 = 350, y4 = 50;
+
+        for (let i = 0; i <= 10; i++) {
+          let t = i / 10;
+          // Compute x and y using bezierPoint()
+          // Draw a circle at each point
+        }
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(20);
+        fill(255, 200, 50);
+        noStroke();
+
+        let x1 = 50, y1 = 350;
+        let x2 = 150, y2 = 50;
+        let x3 = 250, y3 = 350;
+        let x4 = 350, y4 = 50;
+
+        for (let i = 0; i <= 10; i++) {
+          let t = i / 10;
+          let px = bezierPoint(x1, x2, x3, x4, t);
+          let py = bezierPoint(y1, y2, y3, y4, t);
+          circle(px, py, 12);
+        }
+      }
+    tasks:
+      - id: task-1
+        title: "Compute Points"
+        instruction: |
+          Inside the loop, use bezierPoint() to compute the x and y coordinates.
+          Let px = bezierPoint(x1, x2, x3, x4, t) and py = bezierPoint(y1, y2, y3, y4, t).
+        validation:
+          - type: functionCall
+            name: bezierPoint
+            exactArgs: 5
+          - type: functionCall
+            name: circle
+            exactArgs: 3
+      - id: task-2
+        title: "Draw the Dots"
+        instruction: |
+          Draw a circle at each computed point using circle(px, py, 12).
+          You should see 11 dots (including t=0 and t=1) tracing the Bézier curve.
+        validation:
+          - type: functionCall
+            name: bezierPoint
+            exactArgs: 5
+          - type: functionCall
+            name: circle
+            exactArgs: 3
+          - type: pixelMatch
+            x: 50
+            y: 350
+            expected: [255, 200, 50]
+            tolerance: 120
+
+  - id: exercise-4
+    title: "Tangent Lines"
+    module: Drawing
+    description: "Use bezierTangent() to draw tangent lines along a Bézier curve."
+    instruction: |
+      Draw a Bézier curve and add tangent lines at several points.
+      Use bezierTangent(x1, x2, x3, x4, t) to get the tangent direction.
+      Normalize the tangent and draw short lines extending from each point on the curve.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(20);
+        stroke(100, 255, 180);
+        strokeWeight(2);
+        noFill();
+
+        let x1 = 50, y1 = 300;
+        let x2 = 150, y2 = 50;
+        let x3 = 250, y3 = 350;
+        let x4 = 350, y4 = 100;
+
+        bezier(x1, y1, x2, y2, x3, y3, x4, y4);
+
+        stroke(255, 100, 100);
+        strokeWeight(1);
+        for (let i = 1; i < 10; i++) {
+          let t = i / 10;
+          let px = bezierPoint(x1, x2, x3, x4, t);
+          let py = bezierPoint(y1, y2, y3, y4, t);
+          // Compute tangent and draw a line
+        }
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(20);
+        stroke(100, 255, 180);
+        strokeWeight(2);
+        noFill();
+
+        let x1 = 50, y1 = 300;
+        let x2 = 150, y2 = 50;
+        let x3 = 250, y3 = 350;
+        let x4 = 350, y4 = 100;
+
+        bezier(x1, y1, x2, y2, x3, y3, x4, y4);
+
+        stroke(255, 100, 100);
+        strokeWeight(1);
+        for (let i = 1; i < 10; i++) {
+          let t = i / 10;
+          let px = bezierPoint(x1, x2, x3, x4, t);
+          let py = bezierPoint(y1, y2, y3, y4, t);
+          let tx = bezierTangent(x1, x2, x3, x4, t);
+          let ty = bezierTangent(y1, y2, y3, y4, t);
+          let len = 20;
+          line(px, py, px + tx * len, py + ty * len);
+        }
+      }
+    tasks:
+      - id: task-1
+        title: "Compute Tangents"
+        instruction: |
+          Use bezierTangent(x1, x2, x3, x4, t) to get the tangent x and y components.
+          Store them as tx and ty.
+        validation:
+          - type: functionCall
+            name: bezierTangent
+            exactArgs: 5
+          - type: functionCall
+            name: bezierPoint
+            exactArgs: 5
+      - id: task-2
+        title: "Draw Tangent Lines"
+        instruction: |
+          Draw a line from each point on the curve in the tangent direction.
+          Use line(px, py, px + tx * 20, py + ty * 20) to extend 20 pixels along the tangent.
+        validation:
+          - type: functionCall
+            name: bezierTangent
+            exactArgs: 5
+          - type: functionCall
+            name: line
+            exactArgs: 4
+          - type: pixelMatch
+            x: 50
+            y: 300
+            expected: [100, 255, 180]
+            tolerance: 120

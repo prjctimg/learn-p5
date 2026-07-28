@@ -1,0 +1,248 @@
+slug: dom
+title: DOM Elements
+moduleName: Interaction
+description: "Create interactive UI elements outside the canvas with sliders, buttons, checkboxes, and color pickers."
+
+exercises:
+  - id: exercise-1
+    title: "Slider Sense"
+    module: Interaction
+    description: "Use createSlider() to control the size of a circle in real time."
+    instruction: |
+      Create a slider that controls the diameter of a circle.
+      Use createSlider(min, max, value) with range 10 to 200, default 80.
+      Read its value with slider.value() in draw().
+    startingCode: |
+      let slider;
+
+      function setup() {
+        createCanvas(400, 400);
+        slider = createSlider(10, 200, 80);
+      }
+
+      function draw() {
+        background(30);
+        fill(100, 200, 255);
+        noStroke();
+      }
+    solution: |
+      let slider;
+
+      function setup() {
+        createCanvas(400, 400);
+        slider = createSlider(10, 200, 80);
+      }
+
+      function draw() {
+        background(30);
+        fill(100, 200, 255);
+        noStroke();
+        let d = slider.value();
+        circle(200, 200, d);
+      }
+    tasks:
+      - id: task-1
+        title: "Create a Slider"
+        instruction: |
+          Call createSlider(10, 200, 80) in setup() and store it in a variable.
+          This creates a slider with min=10, max=200, and default value=80.
+        validation:
+          - type: functionCall
+            name: createSlider
+            exactArgs: 3
+      - id: task-2
+        title: "Read Slider Value"
+        instruction: |
+          In draw(), call slider.value() to get the current slider position.
+          Use that value as the diameter in circle(200, 200, d).
+        validation:
+          - type: functionCall
+            name: createSlider
+            exactArgs: 3
+          - type: functionCall
+            name: circle
+            exactArgs: 3
+
+  - id: exercise-2
+    title: "Button Bonanza"
+    module: Interaction
+    description: "Use createButton() to make a clickable button that triggers an action."
+    instruction: |
+      Create a button that changes the canvas background when clicked.
+      Use createButton(label) and .mousePressed() to toggle a background color.
+    startingCode: |
+      let btn;
+      let bgColor = 30;
+
+      function setup() {
+        createCanvas(400, 400);
+        btn = createButton("Toggle");
+      }
+
+      function draw() {
+        background(bgColor);
+        fill(255, 180, 50);
+        noStroke();
+        circle(200, 200, 100);
+      }
+    solution: |
+      let btn;
+      let bgColor = 30;
+
+      function setup() {
+        createCanvas(400, 400);
+        btn = createButton("Toggle");
+        btn.mousePressed(toggleBg);
+      }
+
+      function toggleBg() {
+        bgColor = bgColor === 30 ? 220 : 30;
+      }
+
+      function draw() {
+        background(bgColor);
+        fill(255, 180, 50);
+        noStroke();
+        circle(200, 200, 100);
+      }
+    tasks:
+      - id: task-1
+        title: "Create a Button"
+        instruction: |
+          Call createButton("Toggle") in setup() and store it in a variable.
+        validation:
+          - type: functionCall
+            name: createButton
+            exactArgs: 1
+      - id: task-2
+        title: "Attach Event"
+        instruction: |
+          Call btn.mousePressed() with a callback function that toggles bgColor between 30 and 220.
+        validation:
+          - type: functionCall
+            name: createButton
+            exactArgs: 1
+          - type: functionCall
+            name: mousePressed
+            minArgs: 1
+
+  - id: exercise-3
+    title: "Checkbox Charm"
+    module: Interaction
+    description: "Use createCheckbox() to toggle the fill of a shape on and off."
+    instruction: |
+      Create a checkbox that toggles between a filled circle and an outlined circle.
+      Use createCheckbox(label) and .checked() to read its state.
+    startingCode: |
+      let cb;
+
+      function setup() {
+        createCanvas(400, 400);
+        cb = createCheckbox("Fill", true);
+      }
+
+      function draw() {
+        background(30);
+        stroke(255);
+        strokeWeight(3);
+      }
+    solution: |
+      let cb;
+
+      function setup() {
+        createCanvas(400, 400);
+        cb = createCheckbox("Fill", true);
+      }
+
+      function draw() {
+        background(30);
+        if (cb.checked()) {
+          fill(200, 100, 255);
+        } else {
+          noFill();
+        }
+        stroke(255);
+        strokeWeight(3);
+        circle(200, 200, 150);
+      }
+    tasks:
+      - id: task-1
+        title: "Create Checkbox"
+        instruction: |
+          Call createCheckbox("Fill", true) in setup() to create a checked checkbox.
+        validation:
+          - type: functionCall
+            name: createCheckbox
+            exactArgs: 2
+      - id: task-2
+        title: "Toggle Fill"
+        instruction: |
+          In draw(), use an if statement with cb.checked() to call fill() or noFill().
+          Then draw a circle at (200, 200) with diameter 150.
+        validation:
+          - type: functionCall
+            name: createCheckbox
+            exactArgs: 2
+          - type: functionCall
+            name: circle
+            exactArgs: 3
+          - type: functionCall
+            name: checked
+
+  - id: exercise-4
+    title: "Color Picker Party"
+    module: Interaction
+    description: "Use createColorPicker() to let the user choose a fill color interactively."
+    instruction: |
+      Create a color picker that controls the fill of a shape.
+      Use createColorPicker(defaultColor) and .color() to read the chosen color.
+    startingCode: |
+      let picker;
+
+      function setup() {
+        createCanvas(400, 400);
+        picker = createColorPicker("#ff64c8");
+      }
+
+      function draw() {
+        background(30);
+        noStroke();
+      }
+    solution: |
+      let picker;
+
+      function setup() {
+        createCanvas(400, 400);
+        picker = createColorPicker("#ff64c8");
+      }
+
+      function draw() {
+        background(30);
+        noStroke();
+        fill(picker.color());
+        rect(100, 100, 200, 200, 20);
+      }
+    tasks:
+      - id: task-1
+        title: "Create Color Picker"
+        instruction: |
+          Call createColorPicker("#ff64c8") in setup() and store it in a variable.
+          This creates a color picker with a pink default color.
+        validation:
+          - type: functionCall
+            name: createColorPicker
+            exactArgs: 1
+      - id: task-2
+        title: "Apply Picked Color"
+        instruction: |
+          In draw(), call fill(picker.color()) to use the picked color.
+          Draw a rounded rect(100, 100, 200, 200, 20) with that fill.
+        validation:
+          - type: functionCall
+            name: createColorPicker
+            exactArgs: 1
+          - type: functionCall
+            name: color
+          - type: functionCall
+            name: rect
+            minArgs: 4

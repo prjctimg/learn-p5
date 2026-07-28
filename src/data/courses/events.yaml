@@ -1,0 +1,172 @@
+slug: events
+title: Events
+moduleName: Interaction
+description: "Make your sketches respond to mouse clicks, key presses, and touch."
+exercises:
+  - id: exercise-1
+    title: "Click to Draw"
+    module: Events
+    description: "Draw a circle where the user clicks using mousePressed()."
+    instruction: |
+      Define a mousePressed() function that draws a circle at mouseX, mouseY.
+      Each time you tap the canvas, a new circle appears.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+      }
+
+      function mousePressed() {
+        fill(255, 100, 150);
+        noStroke();
+        circle(mouseX, mouseY, 40);
+      }
+    tasks:
+      - id: task-1
+        title: "Define mousePressed"
+        instruction: |
+          Create a mousePressed() function that draws a circle at mouseX, mouseY.
+          Use fill(255, 100, 150), noStroke(), circle(mouseX, mouseY, 40).
+        validation:
+          - type: functionExists
+            name: mousePressed
+  - id: exercise-2
+    title: "Key Mapper"
+    module: Events
+    description: "Change canvas color based on which key is pressed."
+    instruction: |
+      Define a keyPressed() function.
+      If key === "r", set background to red.
+      If key === "g", set background to green.
+      If key === "b", set background to blue.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+      }
+
+      function keyPressed() {
+        if (key === "r") {
+          background(255, 50, 50);
+        } else if (key === "g") {
+          background(50, 255, 50);
+        } else if (key === "b") {
+          background(50, 50, 255);
+        }
+      }
+    tasks:
+      - id: task-1
+        title: "Define keyPressed"
+        instruction: |
+          Create a keyPressed() function that changes background color based on the key variable.
+        validation:
+          - type: functionExists
+            name: keyPressed
+  - id: exercise-3
+    title: "Draggable Dot"
+    module: Events
+    description: "Draw a circle that follows the mouse when pressed."
+    instruction: |
+      In draw(), check if mouseIsPressed is true.
+      If so, draw a circle at mouseX, mouseY.
+      This creates a drawing-while-dragging effect.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        if (mouseIsPressed) {
+          fill(255, 50, 100);
+          noStroke();
+          circle(mouseX, mouseY, 30);
+        }
+      }
+    tasks:
+      - id: task-1
+        title: "Mouse Pressed Check"
+        instruction: |
+          In draw(), add: if (mouseIsPressed) { fill(255, 50, 100); noStroke(); circle(mouseX, mouseY, 30); }
+        validation:
+          - type: functionCall
+            name: circle
+            exactArgs: 3
+  - id: exercise-4
+    title: "Arrow Mover"
+    module: Events
+    description: "Move a shape with arrow keys using keyIsDown()."
+    instruction: |
+      Create a variable x = 200, y = 200.
+      In draw(), check keyIsDown(LEFT_ARROW), keyIsDown(RIGHT_ARROW), etc. to move x and y.
+      Draw a circle at x, y.
+    startingCode: |
+      let x = 200;
+      let y = 200;
+
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        fill(50, 180, 255);
+        circle(x, y, 40);
+      }
+    solution: |
+      let x = 200;
+      let y = 200;
+
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        if (keyIsDown(LEFT_ARROW)) x -= 3;
+        if (keyIsDown(RIGHT_ARROW)) x += 3;
+        if (keyIsDown(UP_ARROW)) y -= 3;
+        if (keyIsDown(DOWN_ARROW)) y += 3;
+        fill(50, 180, 255);
+        circle(x, y, 40);
+      }
+    tasks:
+      - id: task-1
+        title: "Arrow Key Movement"
+        instruction: |
+          In draw(), add keyIsDown checks for all four arrows to update x and y.
+          Use LEFT_ARROW, RIGHT_ARROW, UP_ARROW, DOWN_ARROW constants.
+        validation:
+          - type: functionCall
+            name: keyIsDown
+            minArgs: 1

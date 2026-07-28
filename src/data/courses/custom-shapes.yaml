@@ -1,0 +1,259 @@
+slug: custom-shapes
+title: Custom Shapes
+moduleName: Drawing
+description: "Build custom shapes with vertex-based drawing using beginShape() and endShape()."
+
+exercises:
+  - id: exercise-1
+    title: "Vertex Playground"
+    module: Drawing
+    description: "Use beginShape(), vertex(), and endShape() to draw a custom polygon."
+    instruction: |
+      Draw a triangle using vertex coordinates.
+      Use beginShape(), three vertex(x, y) calls, and endShape(CLOSE).
+      Vertices: (200, 60), (80, 340), (320, 340).
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(30);
+        fill(100, 200, 255);
+        stroke(255);
+        strokeWeight(2);
+        beginShape();
+        // Add your vertices here
+        endShape(CLOSE);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(30);
+        fill(100, 200, 255);
+        stroke(255);
+        strokeWeight(2);
+        beginShape();
+        vertex(200, 60);
+        vertex(80, 340);
+        vertex(320, 340);
+        endShape(CLOSE);
+      }
+    tasks:
+      - id: task-1
+        title: "Add Vertex Calls"
+        instruction: |
+          Add three vertex(x, y) calls between beginShape() and endShape(CLOSE).
+          Use (200, 60), (80, 340), and (320, 340).
+        validation:
+          - type: functionCall
+            name: beginShape
+            exactArgs: 0
+          - type: functionCall
+            name: vertex
+            exactArgs: 2
+          - type: functionCall
+            name: endShape
+            exactArgs: 1
+          - type: pixelMatch
+            x: 200
+            y: 250
+            expected: [100, 200, 255]
+            tolerance: 120
+
+  - id: exercise-2
+    title: "Polygon Party"
+    module: Drawing
+    description: "Draw a pentagon by placing five vertices around a center point."
+    instruction: |
+      Draw a regular pentagon centered at (200, 220) with a radius of about 140.
+      Use beginShape(), five vertex() calls, and endShape(CLOSE).
+      Vertices: (200, 80), (333, 171), (283, 336), (117, 336), (67, 171).
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(25);
+        fill(255, 130, 80);
+        stroke(255);
+        strokeWeight(2);
+        beginShape();
+        // Add 5 vertices for a pentagon
+        endShape(CLOSE);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(25);
+        fill(255, 130, 80);
+        stroke(255);
+        strokeWeight(2);
+        beginShape();
+        vertex(200, 80);
+        vertex(333, 171);
+        vertex(283, 336);
+        vertex(117, 336);
+        vertex(67, 171);
+        endShape(CLOSE);
+      }
+    tasks:
+      - id: task-1
+        title: "Draw the Pentagon"
+        instruction: |
+          Add five vertex(x, y) calls between beginShape() and endShape(CLOSE).
+          Use the coordinates: (200, 80), (333, 171), (283, 336), (117, 336), (67, 171).
+        validation:
+          - type: functionCall
+            name: beginShape
+            exactArgs: 0
+          - type: functionCall
+            name: vertex
+            exactArgs: 2
+          - type: functionCall
+            name: endShape
+            exactArgs: 1
+          - type: pixelMatch
+            x: 200
+            y: 220
+            expected: [255, 130, 80]
+            tolerance: 120
+
+  - id: exercise-3
+    title: "Bezier Blob"
+    module: Drawing
+    description: "Create curved shapes using bezierVertex() inside beginShape()."
+    instruction: |
+      Draw a curved blob using bezierVertex() for smooth sides.
+      Use beginShape(), then alternate vertex() and bezierVertex() calls.
+      Start at (100, 200), use bezierVertex() for the top and bottom curves, and close the shape.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(20);
+        fill(200, 100, 255);
+        stroke(255);
+        strokeWeight(2);
+        beginShape();
+        vertex(100, 200);
+        // Add bezierVertex() calls to create curves
+        endShape(CLOSE);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(20);
+        fill(200, 100, 255);
+        stroke(255);
+        strokeWeight(2);
+        beginShape();
+        vertex(100, 200);
+        bezierVertex(100, 50, 300, 50, 300, 200);
+        bezierVertex(300, 350, 100, 350, 100, 200);
+        endShape(CLOSE);
+      }
+    tasks:
+      - id: task-1
+        title: "First Bezier Curve"
+        instruction: |
+          Add a bezierVertex() call to create the top curve of the blob.
+          Use bezierVertex(100, 50, 300, 50, 300, 200) — it takes 6 args: three control points and an endpoint.
+        validation:
+          - type: functionCall
+            name: bezierVertex
+            exactArgs: 6
+          - type: functionCall
+            name: beginShape
+            exactArgs: 0
+      - id: task-2
+        title: "Complete the Blob"
+        instruction: |
+          Add a second bezierVertex() to create the bottom curve.
+          Use bezierVertex(300, 350, 100, 350, 100, 200) to loop back to the start.
+        validation:
+          - type: functionCall
+            name: bezierVertex
+            exactArgs: 6
+          - type: pixelMatch
+            x: 200
+            y: 200
+            expected: [200, 100, 255]
+            tolerance: 120
+
+  - id: exercise-4
+    title: "Spline Smoothie"
+    module: Drawing
+    description: "Use splineVertex() for automatically smooth curves through your points."
+    instruction: |
+      Draw a smooth wavy shape using splineVertex() (p5.js v2).
+      Use beginShape(), add at least 4 splineVertex() calls, and endShape(CLOSE).
+      splineVertex() creates smooth Catmull-Rom splines through your points.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(15);
+        fill(80, 220, 180);
+        stroke(255);
+        strokeWeight(2);
+        beginShape();
+        // Add at least 4 splineVertex() calls for a smooth shape
+        endShape(CLOSE);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(15);
+        fill(80, 220, 180);
+        stroke(255);
+        strokeWeight(2);
+        beginShape();
+        splineVertex(100, 100);
+        splineVertex(200, 60);
+        splineVertex(300, 100);
+        splineVertex(340, 200);
+        splineVertex(300, 300);
+        splineVertex(200, 340);
+        splineVertex(100, 300);
+        splineVertex(60, 200);
+        endShape(CLOSE);
+      }
+    tasks:
+      - id: task-1
+        title: "Add Spline Vertices"
+        instruction: |
+          Add at least 4 splineVertex(x, y) calls between beginShape() and endShape(CLOSE).
+          Try placing points around a circle-like path for a smooth blob.
+        validation:
+          - type: functionCall
+            name: beginShape
+            exactArgs: 0
+          - type: functionCall
+            name: splineVertex
+            exactArgs: 2
+          - type: functionCall
+            name: endShape
+            exactArgs: 1
+          - type: pixelMatch
+            x: 200
+            y: 200
+            expected: [80, 220, 180]
+            tolerance: 120

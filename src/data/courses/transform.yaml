@@ -1,0 +1,195 @@
+slug: transform
+title: Transform
+moduleName: Fundamentals
+description: "Move, rotate, and scale shapes using transformations."
+exercises:
+  - id: exercise-1
+    title: "Slide Into Place"
+    module: Transform
+    description: "Reposition shapes using translate() instead of hardcoded coordinates."
+    instruction: |
+      Use translate(150, 150) to move the origin, then draw a rectangle at (0, 0).
+      The rectangle will appear at (150, 150) on screen.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        fill(100, 200, 255);
+        rect(0, 0, 100, 100);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        fill(100, 200, 255);
+        translate(150, 150);
+        rect(0, 0, 100, 100);
+      }
+    tasks:
+      - id: task-1
+        title: "Translate and Draw"
+        instruction: |
+          Add translate(150, 150) before rect(0, 0, 100, 100).
+        validation:
+          - type: functionCall
+            name: translate
+            exactArgs: 2
+          - type: pixelMatch
+            x: 150
+            y: 150
+            expected: [100, 200, 255]
+            tolerance: 120
+  - id: exercise-2
+    title: "Spin Class"
+    module: Transform
+    description: "Rotate shapes around a point using rotate() with push/pop."
+    instruction: |
+      Use push() and pop() to isolate the rotation.
+      Inside, translate to center, rotate by PI/4 (45 degrees), then draw a rectangle.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        fill(255, 150, 50);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        fill(255, 150, 50);
+        push();
+        translate(200, 200);
+        rotate(PI / 4);
+        rectMode(CENTER);
+        rect(0, 0, 150, 80);
+        pop();
+      }
+    tasks:
+      - id: task-1
+        title: "Rotate a Rectangle"
+        instruction: |
+          Use push(), translate(200, 200), rotate(PI / 4), rectMode(CENTER), rect(0, 0, 150, 80), pop().
+        validation:
+          - type: functionCall
+            name: push
+            exactArgs: 0
+          - type: functionCall
+            name: rotate
+            exactArgs: 1
+          - type: functionCall
+            name: pop
+            exactArgs: 0
+  - id: exercise-3
+    title: "Scale Up"
+    module: Transform
+    description: "Make shapes bigger or smaller using scale()."
+    instruction: |
+      Use push/pop with translate to center, then scale(2) to double the size.
+      Draw a small 50x50 rectangle — it will appear as 100x100.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        fill(50, 220, 150);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        fill(50, 220, 150);
+        push();
+        translate(200, 200);
+        scale(2);
+        rectMode(CENTER);
+        rect(0, 0, 50, 50);
+        pop();
+      }
+    tasks:
+      - id: task-1
+        title: "Scale a Rectangle"
+        instruction: |
+          Use push(), translate(200, 200), scale(2), rectMode(CENTER), rect(0, 0, 50, 50), pop().
+        validation:
+          - type: functionCall
+            name: scale
+            minArgs: 1
+          - type: functionCall
+            name: push
+            exactArgs: 0
+          - type: functionCall
+            name: pop
+            exactArgs: 0
+  - id: exercise-4
+    title: "State Stack"
+    module: Transform
+    description: "Use push() and pop() to isolate transforms between multiple shapes."
+    instruction: |
+      Draw two rectangles with different transforms.
+      First: translate(100, 200) + rotate(PI/6), wrapped in push/pop.
+      Second: translate(300, 200) + scale(1.5), wrapped in push/pop.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        fill(255, 100, 100);
+        rectMode(CENTER);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        rectMode(CENTER);
+        push();
+        translate(100, 200);
+        rotate(PI / 6);
+        fill(255, 100, 100);
+        rect(0, 0, 80, 80);
+        pop();
+        push();
+        translate(300, 200);
+        scale(1.5);
+        fill(100, 100, 255);
+        rect(0, 0, 80, 80);
+        pop();
+      }
+    tasks:
+      - id: task-1
+        title: "Two Transformed Shapes"
+        instruction: |
+          Draw two rectangles with different transforms using push/pop to isolate them.
+          First: push, translate(100, 200), rotate(PI/6), fill(255, 100, 100), rect(0,0,80,80), pop.
+          Second: push, translate(300, 200), scale(1.5), fill(100, 100, 255), rect(0,0,80,80), pop.
+        validation:
+          - type: functionCall
+            name: push
+            exactArgs: 0
+          - type: functionCall
+            name: pop
+            exactArgs: 0
+          - type: functionCall
+            name: translate
+            exactArgs: 2
