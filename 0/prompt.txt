@@ -1,0 +1,10 @@
+Explore the learn-p5 Expo app codebase at /workspaces/learn-p5. I need to understand several features.
+
+Find and read:
+1. The fullscreen feature for the sketch/preview — search for "fullscreen", "Fullscreen", "FullScreen". Understand current implementation and why it doesn't cover the full viewport as expected.
+2. The exercise view's "reference popup" shown when long-pressing the Run button — search for "long press", "longPress", "Run", "reference popup", "referenceModal". Read the relevant files.
+3. The Reference route — search for "reference", "Reference", where example code is rendered as plain text. Find where example code is displayed (look for "example", "plain text", render of code).
+4. How p5.js is bundled during build — search for "p5.js", "p5", "bundleP5", build scripts in package.json or scripts/. Understand the build process and how the p5 version is determined.
+5. The "Debugging" settings option and associated code — search for "Debugging", "debug", "Debug". Find routes, components, and any logic.
+
+Return: file paths with line numbers, key code snippets, and clear summaries for each of the 5 areas. Be thorough — read full files where relevant.
