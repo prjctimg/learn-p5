@@ -185,6 +185,25 @@ export function getExerciseHtml(params: {
     border-radius: 0;
   }
    .sketch-box canvas { display: block; touch-action: pan-y !important; }
+  /* Fullscreen: cover the entire OS viewport when the sketch box is the
+     active fullscreen element (HTML Fullscreen API). */
+  .sketch-box:fullscreen {
+    width: 100vw;
+    height: 100vh;
+    background: #000000;
+    border-radius: 0;
+  }
+  .sketch-box:-webkit-full-screen {
+    width: 100vw;
+    height: 100vh;
+    background: #000000;
+    border-radius: 0;
+  }
+  .sketch-box:fullscreen canvas,
+  .sketch-box:-webkit-full-screen canvas {
+    max-width: 100%;
+    max-height: 100%;
+  }
   .run-btn {
     position: absolute;
     bottom: 8px;
@@ -1347,20 +1366,49 @@ if (solutionToggle) {
 }
 
 var maximizeBtn = document.getElementById('maximize-btn');
+function setMaximizeIcon(isExpanded) {
+  var icon = document.getElementById('maximize-icon');
+  if (icon) icon.innerHTML = isExpanded ? '&#x2715;' : '&#x26F6;';
+}
 if (maximizeBtn) {
   maximizeBtn.addEventListener('click', function() {
     var sketch = document.getElementById('user-sketch');
-    var icon = document.getElementById('maximize-icon');
-    if (sketch) {
-      var isExpanded = sketch.classList.contains('expanded');
-      sketch.classList.toggle('expanded');
-      if (icon) icon.innerHTML = isExpanded ? '&#x26F6;' : '&#x2715;';
-      if (!isExpanded) {
-        setTimeout(function() { smoothScrollTo(sketch, 300); }, 350);
+    var el = sketch;
+    var fsElement = document.fullscreenElement || document.webkitFullscreenElement || document.webkitCurrentFullScreenElement;
+    var isExpanded = !!fsElement || (sketch && sketch.classList.contains('expanded'));
+    if (isExpanded) {
+      if (document.exitFullscreen) { document.exitFullscreen().catch(function(){}); }
+      else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); }
+      if (sketch) sketch.classList.remove('expanded');
+      setMaximizeIcon(false);
+    } else if (el) {
+      var req = el.requestFullscreen || el.webkitRequestFullscreen || el.webkitRequestFullScreen;
+      if (req) {
+        var p = req.call(el);
+        if (p && p.catch) p.catch(function(){});
+        el.classList.add('expanded');
+      } else {
+        // Fullscreen API unavailable (older WebView) — fall back to the
+        // inline expanded box so the control still does something useful.
+        el.classList.add('expanded');
+        setTimeout(function() { smoothScrollTo(el, 300); }, 350);
       }
+      setMaximizeIcon(true);
     }
   });
 }
+// Keep the toggle icon in sync if the user exits fullscreen via Esc/back.
+function onFsChange() {
+  var fsElement = document.fullscreenElement || document.webkitFullscreenElement || document.webkitCurrentFullScreenElement;
+  var sketch = document.getElementById('user-sketch');
+  if (sketch) {
+    if (fsElement) { sketch.classList.add('expanded'); setMaximizeIcon(true); }
+    else { sketch.classList.remove('expanded'); setMaximizeIcon(false); }
+  }
+}
+document.addEventListener('fullscreenchange', onFsChange);
+document.addEventListener('webkitfullscreenchange', onFsChange);
+document.addEventListener('webkitcurrentfullscreenchange', onFsChange);
 
 function copyToClipboard(text) {
   if (navigator.clipboard && navigator.clipboard.writeText) {

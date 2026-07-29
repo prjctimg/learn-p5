@@ -13,8 +13,7 @@ import { Exercise, Course } from "../data/types";
 import { isExerciseLocked as checkExerciseLocked } from "../utils/isExerciseLocked";
 import { getStreakFromStorage, useStreak } from "../hooks/useStreak";
 import { useAchievements, ACHIEVEMENTS } from "../hooks/useAchievements";
-import { useActivityLog } from "../hooks/useActivityLog";
-import ActivityHeatmap from "../components/ActivityHeatmap";
+import AchievementBadgeModal from "../components/AchievementBadgeModal";
 
 const LAST_GREETING_KEY = "last_greeting_period";
 
@@ -42,8 +41,9 @@ export default function Dashboard() {
  const [streakLongest, setStreakLongest] = useState(0);
  const streak = useStreak();
  const [streakToastVisible, setStreakToastVisible] = useState(false);
-const { unlocked: unlockedAchievements, refresh: refreshAchievements } = useAchievements();
-const { activity, refresh: refreshActivity } = useActivityLog();
+const { unlocked: unlockedAchievements, unlockedAt, refresh: refreshAchievements } = useAchievements();
+ const [badgeModalVisible, setBadgeModalVisible] = useState(false);
+ const [badgeModalIndex, setBadgeModalIndex] = useState(0);
  const [greetingToastVisible, setGreetingToastVisible] = useState(false);
  const [greetingMessage, setGreetingMessage] = useState("");
  const levelAnim = useRef(new Animated.Value(0)).current;
@@ -70,7 +70,6 @@ const { activity, refresh: refreshActivity } = useActivityLog();
  setStreakLongest(longest);
  });
 refreshAchievements();
- refreshActivity();
  }, [])
 );
 
@@ -80,9 +79,8 @@ refreshAchievements();
  setStreakToastVisible(true);
  }
  });
- refreshAchievements();
- refreshActivity();
- }, []);
+refreshAchievements();
+  }, []);
 
  useEffect(() => {
  const timer = setTimeout(async () => {
@@ -396,9 +394,13 @@ progressBarOuter: {
  unlockedAchievements
  .map((id) => ACHIEVEMENTS.find((a) => a.id === id))
  .filter((a): a is typeof ACHIEVEMENTS[number] => Boolean(a))
- .map((a) => (
- <View
+ .map((a, index) => (
+ <Pressable
  key={a.id}
+ onPress={() => {
+ setBadgeModalIndex(index);
+ setBadgeModalVisible(true);
+ }}
  style={[
  styles.achievementCircle,
  {
@@ -406,15 +408,15 @@ progressBarOuter: {
  borderColor: colors.surface,
  },
  ]}
- accessibilityLabel={a.title}
- accessibilityRole="image"
+ accessibilityLabel={`${a.title} — tap for details`}
+ accessibilityRole="button"
  >
  <MaterialCommunityIcons
  name={a.icon as any}
  size={16}
  color={colors.onPrimary}
  />
- </View>
+ </Pressable>
  ))
  )}
  </View>
@@ -540,10 +542,8 @@ progressBarOuter: {
  })}
  </>
 )}
- </View>
-
- <ActivityHeatmap activity={activity} />
- </ScrollView>
+</View>
+  </ScrollView>
 
  <Toast
  visible={greetingToastVisible}
@@ -558,6 +558,13 @@ progressBarOuter: {
  tierProgress={streak.tierProgress}
  nextTier={streak.nextTier}
  onDismiss={() => setStreakToastVisible(false)}
+ />
+ <AchievementBadgeModal
+ visible={badgeModalVisible}
+ startIndex={badgeModalIndex}
+ unlocked={unlockedAchievements}
+ unlockedAt={unlockedAt}
+ onDismiss={() => setBadgeModalVisible(false)}
  />
  </View>
 );

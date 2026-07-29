@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Pressable } from "react-native";
 import { Svg, Path } from "react-native-svg";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useThemeContext } from "./ThemeProvider";
@@ -13,6 +13,8 @@ interface ExerciseCardProps {
  moduleName: string;
  description: string;
  locked?: boolean;
+ isCurrent?: boolean;
+ completed?: boolean;
  onContinue?: () => void;
 }
 
@@ -21,16 +23,29 @@ export default function ExerciseCard({
  moduleName,
  description,
  locked = false,
+ isCurrent = false,
+ completed = false,
  onContinue,
 }: ExerciseCardProps) {
   const { colorScheme, derivedColors } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
  return (
- <View style={[styles.card, { backgroundColor: colors.surfaceDim, opacity: locked ? 0.5 : 1 }]}>
+ <Pressable
+   disabled={locked}
+   onPress={onContinue}
+   style={({ pressed }) => [
+     styles.card,
+     { backgroundColor: colors.surfaceDim, opacity: locked ? 0.5 : pressed ? 0.85 : 1 },
+   ]}
+   accessibilityRole="button"
+   accessibilityLabel={locked ? `${title} (locked)` : title}
+ >
   <View style={[styles.iconContainer, { backgroundColor: derivedColors.primary + "1A" }]}>
   {locked ? (
   <MaterialCommunityIcons name="lock" size={28} color={colors.textSecondary} />
+  ) : completed ? (
+  <MaterialCommunityIcons name="check-circle" size={28} color={derivedColors.primary} />
   ) : (
   <Svg width={48} height={48} viewBox="0 0 28 28" fill="none">
   <Path d={asteriskPath} fill={derivedColors.primary} />
@@ -46,17 +61,17 @@ export default function ExerciseCard({
   {moduleName}
   </Text>
  <Text style={[styles.description, { color: colors.textSecondary }]}>
- {locked ? "Complete the previous exercise to unlock this one." : description}
+ {locked ? "Complete the current module to unlock this one." : description}
  </Text>
- </View>
+  </View>
 
- {!locked && onContinue && (
+ {!locked && isCurrent && onContinue && (
  <View style={styles.buttonContainer}>
  <Button title="Continue" onPress={onContinue} variant="primary" />
  </View>
-)}
- </View>
-);
+ )}
+ </Pressable>
+ );
 }
 
 const styles = StyleSheet.create({
@@ -84,12 +99,12 @@ const styles = StyleSheet.create({
     fontSize: 11,
  textTransform: "uppercase",
  letterSpacing: 0.5,
- },
+  },
   description: {
     fontFamily: "JetBrainsMono",
     fontSize: 16,
  lineHeight: 20,
- },
+  },
  buttonContainer: {
  paddingHorizontal: 16,
  paddingBottom: 16,

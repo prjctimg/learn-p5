@@ -6,23 +6,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
 import Header from "../../components/Header";
 import TimePicker from "../../components/TimePicker";
-import Toast from "../../components/Toast";
-import StreakToast from "../../components/StreakToast";
 import { useThemeContext } from "../../components/ThemeProvider";
 import { Colors } from "../../constants/Colors";
 import { DEFAULTS } from "../../constants/Defaults";
 
 import { EDITOR_THEMES, getThemeSwatches } from "../../utils/editor/themes";
-import { loadAllCourses } from "../../utils/courseLoader";
 import { PROCESSING_COLOR_HEX } from "../../constants/ProcessingColors";
-
-const STREAK_KEYS = {
-  count: "streak_count",
-  lastVisit: "streak_last_visit",
-  longest: "streak_longest",
-  lastTier: "streak_last_tier",
-  toastPending: "streak_toast_pending",
-};
 
 const SETTINGS_KEYS = {
   dailyReminder: "setting_dailyReminder",
@@ -34,7 +23,6 @@ const SETTINGS_KEYS = {
   keyboardHeight: "setting_keyboardHeight",
   editorTheme: "setting_editorTheme",
   wordWrap: "setting_wordWrap",
-  devMode: "setting_devMode",
   showDrawerFab: "setting_showDrawerFab",
   showStatusBar: "setting_showStatusBar",
   disableSystemKeyboard: "setting_disableSystemKeyboard",
@@ -104,14 +92,9 @@ export default function Settings() {
   const [editorTheme, setEditorTheme] = useState<string>("p5-learn");
   const [wordWrap, setWordWrap] = useState(false);
   const [displayName, setDisplayName] = useState("");
-  const [devMode, setDevMode] = useState(false);
   const [showDrawerFab, setShowDrawerFab] = useState(true);
   const [showStatusBar, setShowStatusBar] = useState(true);
   const [disableSystemKeyboard, setDisableSystemKeyboard] = useState(false);
-  const [debugToastVisible, setDebugToastVisible] = useState(false);
-  const [debugStreakToastVisible, setDebugStreakToastVisible] = useState(false);
-  const [debugStreakCount, setDebugStreakCount] = useState("7");
-  const [exercisesCompleteAllLabel, setExercisesCompleteAllLabel] = useState("Complete All Exercises");
 
   useEffect(() => {
     AsyncStorage.multiGet([
@@ -124,11 +107,10 @@ export default function Settings() {
       SETTINGS_KEYS.keyboardHeight,
       SETTINGS_KEYS.editorTheme,
       SETTINGS_KEYS.wordWrap,
-      SETTINGS_KEYS.devMode,
       SETTINGS_KEYS.showDrawerFab,
       SETTINGS_KEYS.showStatusBar,
       SETTINGS_KEYS.disableSystemKeyboard,
-    ]).then(([reminder, snippet, hour, minute, fontSize, bg, kb, theme, wrap, dev, drawerFab, statusBar, disableSysKb]) => {
+    ]).then(([reminder, snippet, hour, minute, fontSize, bg, kb, theme, wrap, drawerFab, statusBar, disableSysKb]) => {
       setDailyReminder(reminder[1] === "true");
       setSnippetAlternatives(snippet[1] === "true");
       if (hour[1]) setNotificationHour(parseInt(hour[1], 10));
@@ -138,7 +120,6 @@ export default function Settings() {
       if (kb[1]) setKeyboardHeightState(kb[1]);
       if (theme[1]) setEditorTheme(theme[1]);
       setWordWrap(wrap[1] === "true");
-      setDevMode(dev[1] === "true");
       if (drawerFab[1] !== null) setShowDrawerFab(drawerFab[1] !== "false");
       if (statusBar[1] !== null) setShowStatusBar(statusBar[1] !== "false");
       setDisableSystemKeyboard(disableSysKb[1] === "true");
@@ -231,11 +212,6 @@ export default function Settings() {
     });
   }, []);
 
-  const toggleDevMode = async (value: boolean) => {
-    setDevMode(value);
-    await AsyncStorage.setItem(SETTINGS_KEYS.devMode, value.toString());
-  };
-
   const toggleShowDrawerFab = async (value: boolean) => {
     setShowDrawerFab(value);
     await AsyncStorage.setItem(SETTINGS_KEYS.showDrawerFab, value.toString());
@@ -249,36 +225,6 @@ export default function Settings() {
   const toggleDisableSystemKeyboard = async (value: boolean) => {
     setDisableSystemKeyboard(value);
     await AsyncStorage.setItem(SETTINGS_KEYS.disableSystemKeyboard, value.toString());
-  };
-
-  const handleCompleteAllExercises = async () => {
-    const courses = await loadAllCourses();
-    const allLessonKeys: string[] = [];
-    for (const c of courses) {
-      for (const l of c.exercises) {
-        allLessonKeys.push(`${c.slug}/${l.id}`);
-      }
-    }
- await AsyncStorage.setItem("completedLessons", JSON.stringify(allLessonKeys));
- setExercisesCompleteAllLabel("Done! Reload to see");
- setTimeout(() => setExercisesCompleteAllLabel("Complete All Exercises"), 3000);
-  };
-
-  const handleResetAllProgress = async () => {
- await AsyncStorage.removeItem("completedLessons");
- await AsyncStorage.removeItem("completedCourses");
- setExercisesCompleteAllLabel("Reset! Reload to see");
- setTimeout(() => setExercisesCompleteAllLabel("Complete All Exercises"), 3000);
-  };
-
-  const handleSetStreak = async () => {
-    const count = parseInt(debugStreakCount, 10);
-    if (isNaN(count)) return;
-    const today = new Date().toISOString().split("T")[0];
-    await AsyncStorage.multiSet([
-      [STREAK_KEYS.count, count.toString()],
-      [STREAK_KEYS.lastVisit, today],
-    ]);
   };
 
   function SectionHeader({ icon, label, color }: { icon: string; label: string; color: string }) {
@@ -618,187 +564,7 @@ export default function Settings() {
             <MaterialCommunityIcons name="chevron-right" size={20} color={colors.textSecondary} />
           </Pressable>
         </View>
-
-        {/* Debugging */}
-        <SectionHeader icon="bug-outline" label="Debugging" color={derivedColors.primary} />
-        <View style={styles.card}>
-          <View style={styles.cardRow}>
-            <View style={styles.flexChild}>
-              <Text style={styles.settingTitle}>Dev Mode</Text>
-              <Text style={styles.settingDescription}>Enable debug controls for testing</Text>
-            </View>
-            <Switch
-              value={devMode}
-              onValueChange={toggleDevMode}
-              trackColor={{ false: "#767577", true: ctaColor }}
-              thumbColor="#ffffff"
-            />
-          </View>
-        </View>
-
-        {devMode && (
-          <>
-            <View style={[styles.card, { marginTop: 8 }]}>
-              <View style={styles.cardRow}>
-                <View style={styles.flexChild}>
-                  <Text style={styles.settingTitle}>View Error Logs</Text>
-                  <Text style={styles.settingDescription}>Open stored error logs for debugging</Text>
-                </View>
-                <Pressable
-                  onPress={() => router.push("/settings/error-logs")}
-                  style={({ pressed }) => ({
-                    paddingHorizontal: 12,
-                    paddingVertical: 6,
-                    borderRadius: 8,
-                    backgroundColor: pressed ? derivedColors.primaryContainer : derivedColors.primary,
-                  })}
-                >
-                  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 10, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
-                    Open
-                  </Text>
-                </Pressable>
-              </View>
-            </View>
-
-            <View style={[styles.card, { marginTop: 8 }]}>
-              <View style={styles.cardRow}>
-                <Text style={styles.settingTitle}>Show Toast</Text>
-                <Pressable
-                  onPress={() => setDebugToastVisible(true)}
-                  style={({ pressed }) => ({
-                    paddingHorizontal: 12,
-                    paddingVertical: 6,
-                    borderRadius: 8,
-                    backgroundColor: pressed ? derivedColors.primaryContainer : derivedColors.primary,
-                  })}
-                >
-                  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 10, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
-                    Trigger
-                  </Text>
-                </Pressable>
-              </View>
-              <View style={styles.cardDivider} />
-              <View style={styles.cardRow}>
-                <Text style={styles.settingTitle}>Show Streak Toast</Text>
-                <Pressable
-                  onPress={() => setDebugStreakToastVisible(true)}
-                  style={({ pressed }) => ({
-                    paddingHorizontal: 12,
-                    paddingVertical: 6,
-                    borderRadius: 8,
-                    backgroundColor: pressed ? derivedColors.primaryContainer : derivedColors.primary,
-                  })}
-                >
-                  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 10, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
-                    Trigger
-                  </Text>
-                </Pressable>
-              </View>
-            </View>
-
-            <View style={[styles.card, { marginTop: 8 }]}>
-              <View style={styles.cardRow}>
-                <View style={styles.flexChild}>
-                   <Text style={styles.settingTitle}>{exercisesCompleteAllLabel}</Text>
-                   <Text style={styles.settingDescription}>Mark every exercise as completed</Text>
-                </View>
-                <Pressable
-                  onPress={handleCompleteAllExercises}
-                  style={({ pressed }) => ({
-                    paddingHorizontal: 12,
-                    paddingVertical: 6,
-                    borderRadius: 8,
-                    backgroundColor: pressed ? derivedColors.primaryContainer : derivedColors.primary,
-                  })}
-                >
-                  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 10, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
-                    Run
-                  </Text>
-                </Pressable>
-              </View>
-              <View style={styles.cardDivider} />
-              <View style={styles.cardRow}>
-                <View style={styles.flexChild}>
-                  <Text style={styles.settingTitle}>Reset All Progress</Text>
-                   <Text style={styles.settingDescription}>Clear all completed exercises and courses</Text>
-                </View>
-                <Pressable
-                  onPress={handleResetAllProgress}
-                  style={({ pressed }) => ({
-                    paddingHorizontal: 12,
-                    paddingVertical: 6,
-                    borderRadius: 8,
-                    backgroundColor: pressed ? colors.errorContainer : colors.error,
-                  })}
-                >
-                  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 10, fontWeight: "700", color: colors.onError, textTransform: "uppercase" }}>
-                    Reset
-                  </Text>
-                </Pressable>
-              </View>
-              <View style={styles.cardDivider} />
-              <View style={[styles.cardRow, { flexWrap: "wrap", gap: 8 }]}>
-                <View style={{ width: "100%", marginBottom: 4 }}>
-                  <Text style={styles.settingTitle}>Set Streak Count</Text>
-                </View>
-                <TextInput
-                  style={[styles.nameInput, { color: derivedColors.primary, borderColor: colors.outlineVariant, flex: 0, minWidth: 72, maxWidth: 90 }]}
-                  value={debugStreakCount}
-                  onChangeText={setDebugStreakCount}
-                  keyboardType="number-pad"
-                  maxLength={4}
-                />
-                <Pressable
-                  onPress={handleSetStreak}
-                  style={({ pressed }) => ({
-                    paddingHorizontal: 12,
-                    paddingVertical: 6,
-                    borderRadius: 8,
-                    backgroundColor: pressed ? derivedColors.primaryContainer : derivedColors.primary,
-                  })}
-                >
-                  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 10, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
-                    Set
-                  </Text>
-                </Pressable>
-              </View>
-              <View style={styles.cardDivider} />
-              <View style={styles.cardRow}>
-                <View style={styles.flexChild}>
-                  <Text style={styles.settingTitle}>Error Logs</Text>
-                  <Text style={styles.settingDescription}>View recent error logs from the app</Text>
-                </View>
-                <Pressable
-                  onPress={() => router.push("/settings/error-logs")}
-                  style={({ pressed }) => ({
-                    paddingHorizontal: 12,
-                    paddingVertical: 6,
-                    borderRadius: 8,
-                    backgroundColor: pressed ? derivedColors.primaryContainer : derivedColors.primary,
-                  })}
-                >
-                  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 10, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
-                    View Logs
-                  </Text>
-                </Pressable>
-              </View>
-            </View>
-          </>
-        )}
       </ScrollView>
-
-      <Toast
-        visible={debugToastVisible}
-        message="Debug toast — component rendering works!"
-        onDismiss={() => setDebugToastVisible(false)}
-      />
-      <StreakToast
-        visible={debugStreakToastVisible}
-        streakCount={7}
-        tierProgress={0.5}
-        nextTier={14}
-        onDismiss={() => setDebugStreakToastVisible(false)}
-      />
     </View>
   );
 }

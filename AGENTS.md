@@ -12,6 +12,12 @@
 - **`src/data/courses/*.ts` are gitignored build artifacts** (see `.gitignore`, same convention as `src/data/reference.generated.json`). Never commit them.
 - After editing any `.yaml`, re-run `npm run build-courses` before type-checking or starting the app.
 
+## p5.js bundling (always latest)
+
+- `scripts/bundle-p5.mjs` queries the npm registry for the latest `p5` release, downloads `lib/p5.min.js`, and regenerates `src/utils/p5Source.ts` (the vendored minified source as `const _p = [...]; export const p5Source = _p.join("")`) plus `src/utils/p5Version.ts` (`export const p5Version = "X.Y.Z"`).
+- `bundle-p5` runs first in `postinstall` (before `gen-reference`) and first in `npm start`, so the app always bundles the newest p5.js. `scripts/generate-reference.mjs` reads the version stamp from `src/utils/p5Version.ts` instead of hardcoding it.
+- **`src/utils/p5Source.ts` and `src/utils/p5Version.ts` are gitignored build artifacts** — never commit them. A fresh clone regenerates them on `npm install`.
+
 ## Release cadence
 
 - **Every push to `main` must bump the app version and create a matching git tag.** This is enforced by a `pre-push` git hook (`scripts/hooks/pre-push`, repo tracks `core.hooksPath = scripts/hooks`).

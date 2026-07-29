@@ -160,3 +160,8 @@ src/data/reference.generated.json
 # Auto-generated course modules (built from .yaml by scripts/build-courses.mjs)
 # Source of truth is the .yaml files; .ts are local/CI build artifacts.
 src/data/courses/*.ts
+
+# Auto-generated vendored p5.js (fetched from npm by scripts/bundle-p5.mjs)
+# Regenerated on every install/start so the app bundles the latest p5.js.
+src/utils/p5Source.ts
+src/utils/p5Version.ts
