@@ -18,19 +18,19 @@
       "deletions": 0,
       "files": 0
     },
-    "cost": 5.080817440000001,
+    "cost": 5.5562334,
     "tokens": {
-      "input": 1286944,
-      "output": 46422,
+      "input": 1545223,
+      "output": 47789,
       "reasoning": 0,
       "cache": {
-        "read": 11826304,
+        "read": 12240960,
         "write": 0
       }
     },
     "time": {
       "created": 1785339170988,
-      "updated": 1785343109398
+      "updated": 1785343181142
     }
   },
   "messages": [
@@ -16669,21 +16669,24 @@
           "cwd": "/workspaces/learn-p5",
           "root": "/workspaces/learn-p5"
         },
-        "cost": 0,
+        "cost": 0.03804688,
         "tokens": {
-          "input": 0,
-          "output": 0,
+          "total": 134318,
+          "input": 1760,
+          "output": 270,
           "reasoning": 0,
           "cache": {
-            "read": 0,
-            "write": 0
+            "write": 0,
+            "read": 132288
           }
         },
         "modelID": "glm-5.2",
         "providerID": "opencode-go",
         "time": {
-          "created": 1785343109390
+          "created": 1785343109390,
+          "completed": 1785343134293
         },
+        "finish": "tool-calls",
         "id": "msg_faebde90e001ibWrePkHOuvhtn",
         "sessionID": "ses_0517e2f53ffeeHN6lfUZ3NF1TC"
       },
@@ -16711,21 +16714,464 @@
           "tool": "bash",
           "callID": "call_ebd3",
           "state": {
-            "metadata": {
-              "output": ""
-            },
-            "status": "running",
+            "status": "completed",
             "input": {
               "command": "git commit -m \"v0.8.0: dashboard/ref/settings rework + latest-p5 bundling\n\n- Remove ActivityHeatmap (GitHub-style activity grid) from dashboard\n- Learn index: lock + grey out upcoming modules; 'Continue' CTA only on the\n  current module; completed modules move to the bottom but stay tappable\n- Fullscreen preview now uses the HTML Fullscreen API to cover the viewport\n- Achievement badges on the dashboard open a swipeable detail popup showing\n  the earned date (with a backfill for pre-existing unlocks)\n- Remove the Debugging settings section, dev-mode toggle, error-logs route,\n  and the error_log AsyncStorage writers in the exercise view\n- bundle-p5.mjs fetches the latest p5.js from npm on every build and\n  regenerates the vendored p5Source.ts/p5Version.ts (now gitignored)\n- Run-button long-press reference popup now shows the selected symbol inline\n  instead of navigating away (SearchOverlay inline mode)\n- Syntax-highlight example code in the Reference route (theme-aware)\n\" 2>&1 | tail -8",
               "workdir": "/workspaces/learn-p5"
             },
+            "output": " 21 files changed, 986 insertions(+), 1098 deletions(-)\n create mode 100644 scripts/bundle-p5.mjs\n delete mode 100644 src/app/settings/error-logs.tsx\n create mode 100644 src/components/AchievementBadgeModal.tsx\n delete mode 100644 src/components/ActivityHeatmap.tsx\n delete mode 100644 src/hooks/useActivityLog.ts\n delete mode 100644 src/utils/p5Source.ts\n create mode 100644 src/utils/referenceRender.tsx\n",
+            "metadata": {
+              "output": " 21 files changed, 986 insertions(+), 1098 deletions(-)\n create mode 100644 scripts/bundle-p5.mjs\n delete mode 100644 src/app/settings/error-logs.tsx\n create mode 100644 src/components/AchievementBadgeModal.tsx\n delete mode 100644 src/components/ActivityHeatmap.tsx\n delete mode 100644 src/hooks/useActivityLog.ts\n delete mode 100644 src/utils/p5Source.ts\n create mode 100644 src/utils/referenceRender.tsx\n",
+              "exit": 0,
+              "truncated": false
+            },
+            "title": "git commit -m \"v0.8.0: dashboard/ref/settings rework + latest-p5 bundling\n\n- Remove ActivityHeatmap (GitHub-style activity grid) from dashboard\n- Learn index: lock + grey out upcoming modules; 'Continue' CTA only on the\n  current module; completed modules move to the bottom but stay tappable\n- Fullscreen preview now uses the HTML Fullscreen API to cover the viewport\n- Achievement badges on the dashboard open a swipeable detail popup showing\n  the earned date (with a backfill for pre-existing unlocks)\n- Remove the Debugging settings section, dev-mode toggle, error-logs route,\n  and the error_log AsyncStorage writers in the exercise view\n- bundle-p5.mjs fetches the latest p5.js from npm on every build and\n  regenerates the vendored p5Source.ts/p5Version.ts (now gitignored)\n- Run-button long-press reference popup now shows the selected symbol inline\n  instead of navigating away (SearchOverlay inline mode)\n- Syntax-highlight example code in the Reference route (theme-aware)\n\" 2>&1 | tail -8",
             "time": {
-              "start": 1785343113914
+              "start": 1785343134116,
+              "end": 1785343134133
             }
           },
           "id": "prt_faebdfab0001fLTUZyITXkLTG2",
           "sessionID": "ses_0517e2f53ffeeHN6lfUZ3NF1TC",
           "messageID": "msg_faebde90e001ibWrePkHOuvhtn"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "262083d3de810c4428fac5750827dc0da11267f4",
+          "type": "step-finish",
+          "tokens": {
+            "total": 134318,
+            "input": 1760,
+            "output": 270,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 132288
+            }
+          },
+          "cost": 0.03804688,
+          "id": "prt_faebe4a2b001IDP76zDpumtOnu",
+          "sessionID": "ses_0517e2f53ffeeHN6lfUZ3NF1TC",
+          "messageID": "msg_faebde90e001ibWrePkHOuvhtn"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_faea7d892001lM06ndn37pCTbE",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/workspaces/learn-p5",
+          "root": "/workspaces/learn-p5"
+        },
+        "cost": 0.03616408,
+        "tokens": {
+          "total": 134489,
+          "input": 872,
+          "output": 49,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 133568
+          }
+        },
+        "modelID": "glm-5.2",
+        "providerID": "opencode-go",
+        "time": {
+          "created": 1785343134324,
+          "completed": 1785343146402
+        },
+        "finish": "tool-calls",
+        "id": "msg_faebe4a74002vfXeH5Bpp3tF7U",
+        "sessionID": "ses_0517e2f53ffeeHN6lfUZ3NF1TC"
+      },
+      "parts": [
+        {
+          "snapshot": "262083d3de810c4428fac5750827dc0da11267f4",
+          "type": "step-start",
+          "id": "prt_faebe764a001u5ERouA49Lh207",
+          "sessionID": "ses_0517e2f53ffeeHN6lfUZ3NF1TC",
+          "messageID": "msg_faebe4a74002vfXeH5Bpp3tF7U"
+        },
+        {
+          "type": "tool",
+          "tool": "bash",
+          "callID": "call_f830",
+          "state": {
+            "status": "completed",
+            "input": {
+              "command": "git tag v0.8.0 && git log --oneline -1 && git tag | grep v0.8.0",
+              "workdir": "/workspaces/learn-p5"
+            },
+            "output": "348223b v0.8.0: dashboard/ref/settings rework + latest-p5 bundling\nv0.8.0\n",
+            "metadata": {
+              "output": "348223b v0.8.0: dashboard/ref/settings rework + latest-p5 bundling\nv0.8.0\n",
+              "exit": 0,
+              "truncated": false
+            },
+            "title": "git tag v0.8.0 && git log --oneline -1 && git tag | grep v0.8.0",
+            "time": {
+              "start": 1785343146203,
+              "end": 1785343146216
+            }
+          },
+          "id": "prt_faebe7823001hO6wD73VbC0O8p",
+          "sessionID": "ses_0517e2f53ffeeHN6lfUZ3NF1TC",
+          "messageID": "msg_faebe4a74002vfXeH5Bpp3tF7U"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "262083d3de810c4428fac5750827dc0da11267f4",
+          "type": "step-finish",
+          "tokens": {
+            "total": 134489,
+            "input": 872,
+            "output": 49,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 133568
+            }
+          },
+          "cost": 0.03616408,
+          "id": "prt_faebe793b001qYY4PcQ09l30ya",
+          "sessionID": "ses_0517e2f53ffeeHN6lfUZ3NF1TC",
+          "messageID": "msg_faebe4a74002vfXeH5Bpp3tF7U"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_faea7d892001lM06ndn37pCTbE",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/workspaces/learn-p5",
+          "root": "/workspaces/learn-p5"
+        },
+        "cost": 0.03523824,
+        "tokens": {
+          "total": 134568,
+          "input": 60,
+          "output": 44,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 134464
+          }
+        },
+        "modelID": "glm-5.2",
+        "providerID": "opencode-go",
+        "time": {
+          "created": 1785343146431,
+          "completed": 1785343171148
+        },
+        "finish": "tool-calls",
+        "id": "msg_faebe79bf002Ss6rhpfGi4sSj2",
+        "sessionID": "ses_0517e2f53ffeeHN6lfUZ3NF1TC"
+      },
+      "parts": [
+        {
+          "snapshot": "262083d3de810c4428fac5750827dc0da11267f4",
+          "type": "step-start",
+          "id": "prt_faebecacf001blyrA754Gc9fWA",
+          "sessionID": "ses_0517e2f53ffeeHN6lfUZ3NF1TC",
+          "messageID": "msg_faebe79bf002Ss6rhpfGi4sSj2"
+        },
+        {
+          "type": "tool",
+          "tool": "bash",
+          "callID": "call_0e0a",
+          "state": {
+            "status": "completed",
+            "input": {
+              "command": "git push origin main && git push origin v0.8.0 2>&1 | tail -15",
+              "workdir": "/workspaces/learn-p5"
+            },
+            "output": "To https://github.com/prjctimg/learn-p5\n   e32d387..348223b  main -> main\nTo https://github.com/prjctimg/learn-p5\n * [new tag]         v0.8.0 -> v0.8.0\n",
+            "metadata": {
+              "output": "To https://github.com/prjctimg/learn-p5\n   e32d387..348223b  main -> main\nTo https://github.com/prjctimg/learn-p5\n * [new tag]         v0.8.0 -> v0.8.0\n",
+              "exit": 0,
+              "truncated": false
+            },
+            "title": "git push origin main && git push origin v0.8.0 2>&1 | tail -15",
+            "time": {
+              "start": 1785343171012,
+              "end": 1785343171018
+            }
+          },
+          "id": "prt_faebecc2f001T2lrvi1L0gmm5Y",
+          "sessionID": "ses_0517e2f53ffeeHN6lfUZ3NF1TC",
+          "messageID": "msg_faebe79bf002Ss6rhpfGi4sSj2"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "262083d3de810c4428fac5750827dc0da11267f4",
+          "type": "step-finish",
+          "tokens": {
+            "total": 134568,
+            "input": 60,
+            "output": 44,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 134464
+            }
+          },
+          "cost": 0.03523824,
+          "id": "prt_faebed9fb001m0gSuMXHVdc7m4",
+          "sessionID": "ses_0517e2f53ffeeHN6lfUZ3NF1TC",
+          "messageID": "msg_faebe79bf002Ss6rhpfGi4sSj2"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_faea7d892001lM06ndn37pCTbE",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/workspaces/learn-p5",
+          "root": "/workspaces/learn-p5"
+        },
+        "cost": 0.18162708,
+        "tokens": {
+          "total": 134934,
+          "input": 127469,
+          "output": 297,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 7168
+          }
+        },
+        "modelID": "glm-5.2",
+        "providerID": "opencode-go",
+        "time": {
+          "created": 1785343171171,
+          "completed": 1785343181118
+        },
+        "finish": "tool-calls",
+        "id": "msg_faebeda63002lBE45f11d4lkDL",
+        "sessionID": "ses_0517e2f53ffeeHN6lfUZ3NF1TC"
+      },
+      "parts": [
+        {
+          "snapshot": "262083d3de810c4428fac5750827dc0da11267f4",
+          "type": "step-start",
+          "id": "prt_faebef726001Ndgcr0xuwrrmTN",
+          "sessionID": "ses_0517e2f53ffeeHN6lfUZ3NF1TC",
+          "messageID": "msg_faebeda63002lBE45f11d4lkDL"
+        },
+        {
+          "type": "tool",
+          "tool": "todowrite",
+          "callID": "call_12f3",
+          "state": {
+            "status": "completed",
+            "input": {
+              "todos": [
+                {
+                  "content": "Task 1: Remove ActivityHeatmap from dashboard + delete files",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Task 5: Remove Debugging settings section + error-logs route + error_log writers",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Task 2: Lock upcoming modules in Learn index; Continue only on current; completed to bottom",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Task 3: Real fullscreen via HTML Fullscreen API in WebView",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Task 8: Syntax-highlight example code in Reference route",
+                  "status": "completed",
+                  "priority": "medium"
+                },
+                {
+                  "content": "Task 7: Inline reference popup (SearchOverlay inline mode)",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Task 4: Achievement badge popup + swipe + date attained",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Task 6: bundle-p5.mjs to fetch latest p5 each build + gitignore p5Source.ts",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Bump version, commit, tag, push",
+                  "status": "completed",
+                  "priority": "high"
+                }
+              ]
+            },
+            "output": "[\n  {\n    \"content\": \"Task 1: Remove ActivityHeatmap from dashboard + delete files\",\n    \"status\": \"completed\",\n    \"priority\": \"high\"\n  },\n  {\n    \"content\": \"Task 5: Remove Debugging settings section + error-logs route + error_log writers\",\n    \"status\": \"completed\",\n    \"priority\": \"high\"\n  },\n  {\n    \"content\": \"Task 2: Lock upcoming modules in Learn index; Continue only on current; completed to bottom\",\n    \"status\": \"completed\",\n    \"priority\": \"high\"\n  },\n  {\n    \"content\": \"Task 3: Real fullscreen via HTML Fullscreen API in WebView\",\n    \"status\": \"completed\",\n    \"priority\": \"high\"\n  },\n  {\n    \"content\": \"Task 8: Syntax-highlight example code in Reference route\",\n    \"status\": \"completed\",\n    \"priority\": \"medium\"\n  },\n  {\n    \"content\": \"Task 7: Inline reference popup (SearchOverlay inline mode)\",\n    \"status\": \"completed\",\n    \"priority\": \"high\"\n  },\n  {\n    \"content\": \"Task 4: Achievement badge popup + swipe + date attained\",\n    \"status\": \"completed\",\n    \"priority\": \"high\"\n  },\n  {\n    \"content\": \"Task 6: bundle-p5.mjs to fetch latest p5 each build + gitignore p5Source.ts\",\n    \"status\": \"completed\",\n    \"priority\": \"high\"\n  },\n  {\n    \"content\": \"Bump version, commit, tag, push\",\n    \"status\": \"completed\",\n    \"priority\": \"high\"\n  }\n]",
+            "metadata": {
+              "todos": [
+                {
+                  "content": "Task 1: Remove ActivityHeatmap from dashboard + delete files",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Task 5: Remove Debugging settings section + error-logs route + error_log writers",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Task 2: Lock upcoming modules in Learn index; Continue only on current; completed to bottom",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Task 3: Real fullscreen via HTML Fullscreen API in WebView",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Task 8: Syntax-highlight example code in Reference route",
+                  "status": "completed",
+                  "priority": "medium"
+                },
+                {
+                  "content": "Task 7: Inline reference popup (SearchOverlay inline mode)",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Task 4: Achievement badge popup + swipe + date attained",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Task 6: bundle-p5.mjs to fetch latest p5 each build + gitignore p5Source.ts",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Bump version, commit, tag, push",
+                  "status": "completed",
+                  "priority": "high"
+                }
+              ],
+              "truncated": false
+            },
+            "title": "0 todos",
+            "time": {
+              "start": 1785343180929,
+              "end": 1785343180938
+            }
+          },
+          "id": "prt_faebf0070001n5jkK5MsIVnicF",
+          "sessionID": "ses_0517e2f53ffeeHN6lfUZ3NF1TC",
+          "messageID": "msg_faebeda63002lBE45f11d4lkDL"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "262083d3de810c4428fac5750827dc0da11267f4",
+          "type": "step-finish",
+          "tokens": {
+            "total": 134934,
+            "input": 127469,
+            "output": 297,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 7168
+            }
+          },
+          "cost": 0.18162708,
+          "id": "prt_faebf00f3001PisurupQPndawJ",
+          "sessionID": "ses_0517e2f53ffeeHN6lfUZ3NF1TC",
+          "messageID": "msg_faebeda63002lBE45f11d4lkDL"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_faea7d892001lM06ndn37pCTbE",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/workspaces/learn-p5",
+          "root": "/workspaces/learn-p5"
+        },
+        "cost": 0.18433968,
+        "tokens": {
+          "total": 135993,
+          "input": 128118,
+          "output": 707,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 7168
+          }
+        },
+        "modelID": "glm-5.2",
+        "providerID": "opencode-go",
+        "time": {
+          "created": 1785343181139,
+          "completed": 1785343195171
+        },
+        "finish": "stop",
+        "id": "msg_faebf0153002mD6Vpt3C1jwRad",
+        "sessionID": "ses_0517e2f53ffeeHN6lfUZ3NF1TC"
+      },
+      "parts": [
+        {
+          "snapshot": "262083d3de810c4428fac5750827dc0da11267f4",
+          "type": "step-start",
+          "id": "prt_faebf1ef00019fhqWfYX5UsIAP",
+          "sessionID": "ses_0517e2f53ffeeHN6lfUZ3NF1TC",
+          "messageID": "msg_faebf0153002mD6Vpt3C1jwRad"
+        },
+        {
+          "type": "text",
+          "text": "All 8 tasks shipped as **v0.8.0** and pushed to `main` + tag `v0.8.0`.\n\n## Summary of changes\n\n| # | Task | What changed |\n|---|------|-------------|\n| 1 | Remove GitHub-style activity from dashboard | Deleted `ActivityHeatmap.tsx` + `useActivityLog.ts`; stripped their usages from `dashboard.tsx` and the `recordActivity()` writer in `[id].tsx` |\n| 2 | Lock upcoming modules in Learn index | `learn/index.tsx` loads `completedLessons`/`completedCourses`, computes the current module, locks/greys non-current + non-completed cards, shows \"Continue\" only on the current module, and sinks completed modules to the bottom (still tappable) |\n| 3 | Real fullscreen preview | `exerciseHtml.ts` now calls the HTML Fullscreen API (`requestFullscreen`/`webkitRequestFullscreen`) on the sketch box with `:fullscreen` CSS to cover the viewport, plus a `fullscreenchange` listener to keep the icon in sync (with an inline-expansion fallback for older WebViews) |\n| 4 | Achievement badge popup + swipe + date | `useAchievements.ts` now records unlock timestamps (`achievements_unlocked_at`) with a same-day backfill for pre-existing unlocks; new `AchievementBadgeModal.tsx` (paging horizontal FlatList for ←/→ swipe); dashboard badges are tappable to open it |\n| 5 | Remove Debugging settings + all associated code | Stripped the Debugging section, dev-mode toggle, handlers, and debug toasts from `settings/index.tsx`; deleted `settings/error-logs.tsx`; removed both `error_log` AsyncStorage writers in `[id].tsx` |\n| 6 | Always bundle the latest p5.js on build | New `scripts/bundle-p5.mjs` (queries npm registry → fetches `lib/p5.min.js` → regenerates `p5Source.ts`/`p5Version.ts`, preserving the `_p` array shape); wired first in `postinstall` and `npm start`; `generate-reference.mjs` reads the version from `p5Version.ts`; both files gitignored; documented in `AGENTS.md`. Verified working (pulled v2.3.1) |\n| 7 | Inline reference popup (no navigation away) | `SearchOverlay.tsx` gains an `inline` mode showing the selected symbol's full reference (syntax-highlighted, live example WebView when renderable, parameters) within the modal; the exercise view passes `inline` and drops the `router.push` |\n| 8 | Syntax-highlight example code in Reference route | Extracted `highlightSyntax`/`parseDescription` into `src/utils/referenceRender.tsx`; Reference route examples now render theme-aware highlighted tokens instead of plain text |\n\nTypeScript check: all edited/new files compile cleanly. The only two `tsc` errors (`WebView.onLoadStart` in `[id].tsx` and `StatusBar style=\"hidden\"` in `StatusBarAccent.tsx`) are pre-existing in `HEAD` and unrelated to these changes — I left them untouched.\n\nNote: I restored `scripts/hooks/pre-push` which the environment tooling had overwritten, and did not commit the unrelated `.entire/`, `.opencode/plugins/`, or extra hook scripts that appeared in the worktree.",
+          "time": {
+            "start": 1785343188756,
+            "end": 1785343195015
+          },
+          "id": "prt_faebf1f14001KhjK8OzDGGfUIi",
+          "sessionID": "ses_0517e2f53ffeeHN6lfUZ3NF1TC",
+          "messageID": "msg_faebf0153002mD6Vpt3C1jwRad"
+        },
+        {
+          "reason": "stop",
+          "snapshot": "262083d3de810c4428fac5750827dc0da11267f4",
+          "type": "step-finish",
+          "tokens": {
+            "total": 135993,
+            "input": 128118,
+            "output": 707,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 7168
+            }
+          },
+          "cost": 0.18433968,
+          "id": "prt_faebf37d20019RvguROZIDTJfh",
+          "sessionID": "ses_0517e2f53ffeeHN6lfUZ3NF1TC",
+          "messageID": "msg_faebf0153002mD6Vpt3C1jwRad"
         }
       ]
     }
