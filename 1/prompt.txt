@@ -1,0 +1,8 @@
+- Remove the GitHub activity component from dashboard 
+ - Grey out and lock the next modules when the user has not finished the current one in the Learn index route where the modules are listed. Also the "Continue" CTA should only be shown on the current module. Completed modules should be moved to the bottom of the page, but not disabled
+- Improve the fullscreen feature to fully cover the viewport as expected. This is useful for interactive previews of the user's sketch. 
+- When you click on an achievement badge on the dashboard show a popup that shows the badge's full details including the date it was attained. Allow the user to swipe left/right to see the next/prev achievements whilst the popup is active
+- Remove the Debugging settings option and all associated code
+- During build, always bundle the latest p5.js version
+- In the exercise view's reference popup (the one showed when we long press the Run button), show the selected symbol's content in that popup instead of navigating away. This avoids disruption and keeps the user in the current exercise view as they would expect. 
+- Syntax highlight the example code in the Reference route instead of rendering it as plain text. Also ensure that it respects themeing
