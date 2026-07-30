@@ -1,0 +1,11 @@
+In the codebase at /workspaces/learn-p5, I need to understand the Learn page and how modules are displayed. 
+
+Search for:
+1. File(s) related to the Learn page/screen - look for "Learn" in screen names, component names
+2. How modules are listed and styled (padding, spacing between module items)
+3. Look for module list styles - padding, margin, gap between items
+
+Search patterns: "Learn", "ModuleList", "module", "learn" in filenames and content.
+Read the relevant screen file(s) and any module list component fully.
+
+Be thorough - find actual file contents, not just names.
