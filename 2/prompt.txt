@@ -1,0 +1,11 @@
+In the codebase at /workspaces/learn-p5, find the exercise view's reference popup - the one shown when long-pressing the Run button.
+
+Search for:
+1. "reference" in relation to exercises, "Run" button, long press
+2. Look for reference popup/modal implementation
+3. Search for "longPress", "RunButton", "reference" in filenames and content
+4. Find where symbol content is displayed or navigated to
+
+Search patterns: "longPress", "RunButton", "reference" in filenames and content
+
+Read all relevant files fully.
