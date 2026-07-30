@@ -278,9 +278,9 @@ const styles = StyleSheet.create({
   card: {
     width: "100%",
     maxWidth: 480,
-    maxHeight: "85%",
+    maxHeight: "92%",
     borderRadius: 16,
-    padding: 20,
+    padding: 16,
   },
   header: {
     flexDirection: "row",
@@ -343,7 +343,7 @@ const styles = StyleSheet.create({
   detailName: { fontFamily: "JetBrainsMono", fontSize: 18, fontWeight: "900" },
   moduleBadge: { borderRadius: 9999, paddingHorizontal: 8, paddingVertical: 2 },
   moduleBadgeText: { fontFamily: "JetBrainsMono", fontSize: 10, fontWeight: "700" },
-  detailScroll: { flex: 1 },
+  detailScroll: { flex: 1, flexGrow: 1 },
   detailDescription: { fontFamily: "JetBrainsMono", fontSize: 13, lineHeight: 20, marginBottom: 12 },
   detailSection: {
     fontFamily: "JetBrainsMono",
