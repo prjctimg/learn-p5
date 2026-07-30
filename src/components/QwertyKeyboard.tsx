@@ -33,7 +33,7 @@ function getAlternates(key: QwertyLetterKey): string[] {
 
 interface QwertyActionKey {
   type: "action";
-  action: "backspace" | "enter";
+  action: "backspace" | "enter" | "shift";
 }
 
 type QwertyKey = QwertyLetterKey | QwertyActionKey;
@@ -66,6 +66,7 @@ const ROW2: QwertyKey[] = [
 ];
 
 const ROW3: QwertyKey[] = [
+  { type: "action", action: "shift" },
   { type: "letter", primary: "z" },
   { type: "letter", primary: "x", secondary: "*" },
   { type: "letter", primary: "c", secondary: "(" },
@@ -112,6 +113,7 @@ export default function QwertyKeyboard({
   const [popupAlternates, setPopupAlternates] = useState<string[]>([]);
   const [popupRowLeft, setPopupRowLeft] = useState(0);
   const [popupWidth, setPopupWidth] = useState(ALT_CELL_WIDTH);
+  const [shifted, setShifted] = useState(false);
   const [popupSelected, setPopupSelected] = useState(0);
   const keyLayouts = useRef<Record<string, { x: number; y: number; w: number; h: number }>>({});
   const containerRef = useRef<View>(null);
@@ -216,10 +218,11 @@ export default function QwertyKeyboard({
       if (isLong && alts.length > 0) {
         onInsert(alts[Math.min(selectedIdx, alts.length - 1)] ?? key.primary);
       } else {
-        onInsert(key.primary);
+        onInsert(shifted ? key.primary.toUpperCase() : key.primary);
+        if (shifted) setShifted(false);
       }
     },
-    [longPressActive, onInsert, popupSelected]
+    [longPressActive, onInsert, popupSelected, shifted]
   );
 
   const renderPopup = useCallback(() => {
@@ -315,7 +318,7 @@ export default function QwertyKeyboard({
                     { color: isActive ? derivedColors.primary : colors.onSurface },
                   ]}
                 >
-                  {key.primary}
+                  {shifted ? key.primary.toUpperCase() : key.primary}
                 </Text>
               </View>
             ) : (
@@ -325,18 +328,51 @@ export default function QwertyKeyboard({
                   { color: isActive ? derivedColors.primary : colors.onSurface },
                 ]}
               >
-                {key.primary}
+                {shifted ? key.primary.toUpperCase() : key.primary}
               </Text>
             )}
           </Pressable>
         </View>
       );
     },
-    [longPressActive, popupKey, colors, derivedColors, handlePressIn, handlePressOut, handleTouchMove, dims, handleKeyLayout]
+    [longPressActive, popupKey, colors, derivedColors, handlePressIn, handlePressOut, handleTouchMove, dims, handleKeyLayout, shifted]
   );
+
+  const handleShiftPress = useCallback(() => {
+    setShifted((s) => !s);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+  }, []);
 
   const renderActionKey = useCallback(
     (key: QwertyActionKey) => {
+      if (key.action === "shift") {
+        return (
+          <Pressable
+            key="shift"
+            onPress={handleShiftPress}
+            style={({ pressed }) => [
+              {
+                width: dims.actionKeyWidth,
+                height: dims.keyHeight,
+                borderRadius: 8,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: pressed || shifted
+                  ? derivedColors.primary
+                  : colors.surfaceContainerHigh,
+              },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel={shifted ? "Shift (active)" : "Shift"}
+          >
+            <MaterialCommunityIcons
+              name="arrow-up-bold"
+              size={20}
+              color={shifted ? colors.onPrimary : colors.onSurfaceVariant}
+            />
+          </Pressable>
+        );
+      }
       const isBackspace = key.action === "backspace";
       const onPress = isBackspace ? onBackspace : onNewline;
       const iconName = isBackspace ? "backspace" : "keyboard-return";
@@ -368,7 +404,7 @@ export default function QwertyKeyboard({
         </Pressable>
       );
     },
-    [onBackspace, onNewline, colors, derivedColors, dims]
+    [onBackspace, onNewline, colors, derivedColors, dims, shifted, handleShiftPress]
   );
 
   const renderKey = useCallback(
@@ -462,7 +498,7 @@ export default function QwertyKeyboard({
         <View style={[styles.row, { gap: KEY_GAP }, { paddingLeft: dims.keySize * 0.5 + KEY_GAP }]}>
           {ROW2.map(renderKey)}
         </View>
-        <View style={[styles.row, { gap: KEY_GAP }, { paddingLeft: dims.keySize * 1.2 + KEY_GAP * 2 }]}>
+        <View style={[styles.row, { gap: KEY_GAP }, { paddingLeft: dims.keySize * 0.3 + KEY_GAP }]}>
           {ROW3.map(renderKey)}
         </View>
 
