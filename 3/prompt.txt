@@ -1,0 +1,13 @@
+In the codebase at /workspaces/learn-p5, find the achievement/badge feature implementation.
+
+Search for:
+1. "achievement" or "badge" in filenames and content
+2. Dashboard screen implementation
+3. Achievement badge popup/modal component
+4. How achievements are displayed in a list
+5. Look for "How to Earn" text in code
+6. Look for swipe-related functionality (Swiper, gesture handler, etc.)
+
+Search patterns: "Achievement", "badge", "How to Earn", "swipe", "Swiper"
+
+Read all relevant files fully - dashboard screen, achievement popup component, etc.
