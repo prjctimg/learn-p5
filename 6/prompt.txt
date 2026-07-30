@@ -1,0 +1,14 @@
+Explore the codebase structure at /workspaces/learn-p5. I need to understand:
+1. The overall project structure (React Native/Expo app?)
+2. How routing/navigation works (look for React Navigation setup)
+3. The component structure - find all screens and components
+
+Please provide:
+- Top-level directory listing
+- Contents of src/ directory recursively (just the structure, not full files)
+- List of all screen files
+- List of all component files
+- How navigation is organized (look for navigator files, stack/screen configs)
+- Look for any theme-related files
+
+Be very thorough - read the directory tree at each level.
