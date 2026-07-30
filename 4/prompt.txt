@@ -1,0 +1,13 @@
+In the codebase at /workspaces/learn-p5, find the fullscreen feature implementation. 
+
+Search for:
+1. "fullscreen" in filenames and content
+2. Look for ScreenOrientation or similar APIs
+3. Search for StatusBar, immersive, navigation bar hiding
+4. Look for how fullscreen is toggled in the app
+5. Find the relevant component/screen that has the fullscreen button
+6. Read the full implementation file(s)
+
+Search patterns: "fullscreen", "StatusBar", "ScreenOrientation", "immersive", "navigationBar"
+
+Read all relevant files fully.
