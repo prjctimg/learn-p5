@@ -1,0 +1,22 @@
+Explore the learn-p5 Expo app codebase at /workspaces/learn-p5. I need to understand the structure of these areas for an upcoming refactor:
+
+1. The popup modal component — find where it's defined, how it renders content, and whether it uses ScrollView/FlatList. Look for "popup" or "modal" related files.
+
+2. The dashboard / home screen — find all the components rendered on it. Specifically look for:
+   - GitHub activity component
+   - Achievements section (with a heading that says "Achievements" and a progress bar)
+   - The order in which components appear on the dashboard
+
+3. The code block component used in the editor — find where code is displayed (likely in an editor screen). Look for how it handles height and keyboard. Get the relevant file paths and line numbers.
+
+4. The keyboard component — find the QWERTY keyboard and symbol keyboard. Find the symbol keyboard toggle icon (currently at the bottom row of the QWERTY keyboard) and understand how symbol rows are rendered.
+
+Return:
+- Exact file paths for each area
+- Key line numbers and a short description of the relevant code
+- The order of components on the dashboard
+- How the popup modal currently lays out content
+- How the code block currently sizes itself
+- How the symbol toggle currently works and where the toolbar is
+
+Be thorough. Use Glob and Grep and Read.
