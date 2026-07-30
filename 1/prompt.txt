@@ -1,0 +1,14 @@
+In the codebase at /workspaces/learn-p5, find:
+
+1. The custom keyboard implementation - search for "Keyboard", "QWERTY", "qwerty", "keyboard" in filenames and content
+2. The shift key/arrow - search for "Shift", "shift" in keyboard components
+3. The symbol reference pages - search for "symbol" reference, "ReferenceScreen", "SymbolDetail", "ref" route
+4. Copy-to-clipboard functionality - search for "clipboard", "copy", "Copy"
+5. "describe()" function usage in reference/example code
+6. Reference page with accordions - search for "reference", "Accordion", "accordion" 
+7. Breadcrumbs on ref route - search for "breadcrumb", "Breadcrumb"
+8. How reference groups/categories are organized
+
+Search patterns: "qwerty", "Keyboard", "shift", "reference", "SymbolDetail", "ref/", "clipboard", "describe", "Accordion", "breadcrumb"
+
+Read all relevant files fully.
