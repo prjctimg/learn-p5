@@ -1,0 +1,66 @@
+{
+  "cli_version": "0.8.42",
+  "checkpoint_id": "01KYT9SC4E36ZGVT4DYHAGWRMD",
+  "session_id": "ses_04e43e3e2ffe3lkToWGyV4A1U8",
+  "strategy": "manual-commit",
+  "created_at": "2026-07-30T20:01:00.150801956Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "src/app/ref/index.tsx",
+    "package.json",
+    "src/components/SearchOverlay.tsx",
+    "src/components/AchievementBadgeModal.tsx",
+    "AGENTS.md",
+    "scripts/ensure-clipboard.mjs"
+  ],
+  "agent": "OpenCode",
+  "model": "big-pickle",
+  "turn_id": "f17bc47c9153",
+  "compact_transcript_start": 0,
+  "token_usage": {
+    "input_tokens": 617437,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 11041280,
+    "output_tokens": 33547,
+    "api_call_count": 131
+  },
+  "session_metrics": {
+    "turn_count": 1
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-07-30T20:00:59.933712408Z",
+    "agent_lines": 0,
+    "agent_removed": 1,
+    "human_added": 0,
+    "human_modified": 1,
+    "human_removed": 14,
+    "total_committed": 1,
+    "total_lines_changed": 17,
+    "agent_percentage": 5.88235294117647,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 39,
+      "user_lines_removed": 15,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0,
+      "user_added_per_file": {
+        "AGENTS.md": 1,
+        "package.json": 2,
+        "scripts/ensure-clipboard.mjs": 13,
+        "src/app/ref/index.tsx": 7,
+        "src/components/AchievementBadgeModal.tsx": 8,
+        "src/components/SearchOverlay.tsx": 8
+      },
+      "user_removed_per_file": {
+        "package.json": 2,
+        "src/app/ref/index.tsx": 4,
+        "src/components/AchievementBadgeModal.tsx": 5,
+        "src/components/SearchOverlay.tsx": 4
+      }
+    }
+  ]
+}
