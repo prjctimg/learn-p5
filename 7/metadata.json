@@ -1,0 +1,40 @@
+{
+  "cli_version": "0.8.42",
+  "checkpoint_id": "01KYRWK0HMVY1Z68WTH7963EXK",
+  "session_id": "ses_04e43e3e2ffe3lkToWGyV4A1U8",
+  "strategy": "manual-commit",
+  "created_at": "2026-07-30T06:50:55.627955428Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "src/components/QwertyKeyboard.tsx"
+  ],
+  "agent": "OpenCode",
+  "model": "big-pickle",
+  "turn_id": "87fdfe7b5417",
+  "checkpoint_transcript_start": 21,
+  "transcript_lines_at_start": 21,
+  "compact_transcript_start": 21,
+  "token_usage": {
+    "input_tokens": 7566,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 815360,
+    "output_tokens": 2837,
+    "api_call_count": 10
+  },
+  "session_metrics": {
+    "turn_count": 1
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-07-30T06:50:55.541093286Z",
+    "agent_lines": 44,
+    "agent_removed": 8,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 44,
+    "total_lines_changed": 52,
+    "agent_percentage": 100,
+    "metric_version": 2
+  }
+}
