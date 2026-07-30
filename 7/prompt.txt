@@ -1,0 +1,9 @@
+- On the Learn page, fix the padding between the module list so that they don't look crowded
+- Improve the fullscreen feature to fully cover the viewport as expected. This is useful for interactive previews of the user's sketch. The current implementation is not working as expected
+- When you click on an achievement badge on the dashboard show a popup that shows the badge's full details including the date it was attained. Allow the user to swipe left/right to see the next/prev (and show dots instead of "Swipe next/prev" help text) achievements whilst the popup is active. Current implement has improper layout and the swipe is not working. Also remove the "How to Earn" section from it
+- In the exercise view's reference popup (the one showed when we long press the Run button), show the selected symbol's content in that popup instead of navigating away. Currently, the contents of the symbol are not being shown as expected
+- Add the shift arrow in the qwerty keyboard to allow users to input uppercase letters
+- On the symbol reference pages, add a copy-to-clipboard button. Also, extract the describe() function from the example code and use that as the preview caption,it must not be shown in the example code at all
+- On the reference page, group the symbols into accordions so that the user can expand the group they want to see rather than scrolling down a long list at once like the current implementation. Also add breadcrumbs to the 'ref' route too. 
+- On the dashboard,  don't allow the user to play the next exercise (the first one in the Up Next section) until the current one was completed. 
+- Rename the P5 Learn theme to 'Default'
