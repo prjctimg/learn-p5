@@ -1,0 +1,12 @@
+In the codebase at /workspaces/learn-p5, find:
+
+1. The Dashboard screen - read it fully
+2. The "Up Next" section on the dashboard - how next exercises are listed and tapped
+3. Any logic that prevents playing the next exercise
+4. Theme-related files - search for "P5 Learn", "theme", "P5Learn", "Default" in filenames and content
+5. The theme configuration - look for where themes are defined, named, and used
+6. Look at ColorScheme, ThemeContext, or similar patterns
+
+Search patterns: "Dashboard", "Up Next", "P5 Learn", "Default", "theme", "ThemeContext", "colorScheme" in filenames and content
+
+Read all relevant files fully.
