@@ -3,6 +3,7 @@ import { useRef, useMemo, useState, useCallback } from "react";
 import { View, Text, FlatList, ScrollView, Pressable, Alert, StyleSheet, Linking } from "react-native";
 import { WebView } from "react-native-webview";
 import Header from "../../components/Header";
+import Breadcrumbs from "../../components/Breadcrumbs";
 import { P5_SYMBOLS_BY_NAME, P5_SYMBOLS, P5SymbolView as P5Symbol } from "../../data/reference";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useThemeContext } from "../../components/ThemeProvider";
@@ -80,9 +81,15 @@ function SymbolDetail({ symbol, onOpenSearch }: { symbol: string; onOpenSearch: 
  const syntaxTokens = highlightSyntax(sym.syntax.replace(/\n/g, " "), colorScheme);
  const refUrl = `https://p5js.org/reference/p5/${sym.name.toLowerCase()}/`;
 
-  return (
-  <View style={[styles.flex1, { backgroundColor: colors.surface }]}>
-  <Header title={sym.name} onBack={() => router.push("/ref")} />
+   return (
+   <View style={[styles.flex1, { backgroundColor: colors.surface }]}>
+   <Header title={sym.name} onBack={() => router.push("/ref")} />
+   <Breadcrumbs
+     segments={[
+       { label: "Reference", href: "/ref" },
+       { label: sym.name },
+     ]}
+   />
 <ScrollView
   style={[styles.flex1, { paddingHorizontal: 16, paddingTop: 24 }]}
   contentContainerStyle={{ paddingBottom: 48 }}
@@ -252,104 +259,127 @@ function SymbolDetail({ symbol, onOpenSearch }: { symbol: string; onOpenSearch: 
 }
 
 export default function Reference() {
- const { symbol } = useLocalSearchParams<{ symbol?: string }>();
- const router = useRouter();
- const { colorScheme, derivedColors } = useThemeContext();
- const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
-  const [searchVisible, setSearchVisible] = useState(false);
-  const [shakeModalVisible, setShakeModalVisible] = useState(false);
+  const { symbol } = useLocalSearchParams<{ symbol?: string }>();
+  const router = useRouter();
+  const { colorScheme, derivedColors } = useThemeContext();
+  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+   const [searchVisible, setSearchVisible] = useState(false);
+   const [shakeModalVisible, setShakeModalVisible] = useState(false);
+   const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>({});
 
-  useShakeDetection(
-    useCallback(() => setShakeModalVisible(true), []),
-    { enabled: true, haptic: true }
-  );
+   const toggleModule = useCallback((module: string) => {
+     setExpandedModules((prev) => ({ ...prev, [module]: !prev[module] }));
+   }, []);
 
- const handleSelectSymbol = useCallback((name: string) => {
-   router.push(`/ref?symbol=${name}`);
- }, [router]);
+   useShakeDetection(
+     useCallback(() => setShakeModalVisible(true), []),
+     { enabled: true, haptic: true }
+   );
 
-  if (symbol) {
-    return (
-      <>
-        <SymbolDetail symbol={symbol} onOpenSearch={() => setSearchVisible(true)} />
-        <SearchOverlay
-          visible={searchVisible}
-          onClose={() => setSearchVisible(false)}
-          onSelectSymbol={handleSelectSymbol}
-        />
-        <ShakeModal
-          visible={shakeModalVisible}
-          onDismiss={() => setShakeModalVisible(false)}
-          title="Reference"
-          subtitle="What would you like to do?"
-          actions={[
-            {
-              icon: "magnify",
-              label: "Search Symbols",
-              variant: "primary",
-              onPress: () => {
-                setShakeModalVisible(false);
-                setSearchVisible(true);
-              },
-            },
-            {
-              icon: "book-open-variant",
-              label: "Browse All",
-              variant: "secondary",
-              onPress: () => {
-                setShakeModalVisible(false);
-                router.push("/ref");
-              },
-            },
-            {
-              icon: "close",
-              label: "Dismiss",
-              variant: "ghost",
-              onPress: () => setShakeModalVisible(false),
-            },
-          ]}
-        />
-      </>
-    );
-  }
+  const handleSelectSymbol = useCallback((name: string) => {
+    router.push(`/ref?symbol=${name}`);
+  }, [router]);
 
-  return (
-  <View style={[styles.flex1, { backgroundColor: colors.surface }]}>
-  <Header title="Reference" showBack={false} />
-  <FlatList
-  style={[styles.flex1, { paddingHorizontal: 16 }]}
-  contentContainerStyle={{ paddingTop: 12, paddingBottom: 80 }}
-    ListHeaderComponent={
-      <View style={{ marginBottom: 12 }} />
-    }
-  data={MODULE_GROUPS}
-  keyExtractor={(item) => item.module}
-  renderItem={({ item: group }) => (
-  <View style={{ marginBottom: 24 }}>
-  <Text style={[styles.moduleGroupTitle, { color: colors.onSurface, marginBottom: 12 }]}>
-  {group.module}
-  </Text>
-  {group.symbols.map((sym) => (
-  <Pressable
-  key={sym.name}
-  onPress={() => router.push(`/ref?symbol=${sym.name}`)}
-  style={({ pressed }) => [
-  styles.flexRow,
-  styles.symbolRow,
-  pressed && { opacity: 0.6 },
-  ]}
-  accessibilityRole="button"
-  accessibilityLabel={`View reference for ${sym.name}`}
+   if (symbol) {
+     return (
+       <>
+         <SymbolDetail symbol={symbol} onOpenSearch={() => setSearchVisible(true)} />
+         <SearchOverlay
+           visible={searchVisible}
+           onClose={() => setSearchVisible(false)}
+           onSelectSymbol={handleSelectSymbol}
+         />
+         <ShakeModal
+           visible={shakeModalVisible}
+           onDismiss={() => setShakeModalVisible(false)}
+           title="Reference"
+           subtitle="What would you like to do?"
+           actions={[
+             {
+               icon: "magnify",
+               label: "Search Symbols",
+               variant: "primary",
+               onPress: () => {
+                 setShakeModalVisible(false);
+                 setSearchVisible(true);
+               },
+             },
+             {
+               icon: "book-open-variant",
+               label: "Browse All",
+               variant: "secondary",
+               onPress: () => {
+                 setShakeModalVisible(false);
+                 router.push("/ref");
+               },
+             },
+             {
+               icon: "close",
+               label: "Dismiss",
+               variant: "ghost",
+               onPress: () => setShakeModalVisible(false),
+             },
+           ]}
+         />
+       </>
+     );
+   }
+
+   return (
+   <View style={[styles.flex1, { backgroundColor: colors.surface }]}>
+   <Header title="Reference" showBack={false} />
+   <Breadcrumbs segments={[{ label: "Reference" }]} />
+   <FlatList
+   style={[styles.flex1, { paddingHorizontal: 16 }]}
+   contentContainerStyle={{ paddingTop: 12, paddingBottom: 80 }}
+     ListHeaderComponent={
+       <View style={{ marginBottom: 12 }} />
+     }
+   data={MODULE_GROUPS}
+   keyExtractor={(item) => item.module}
+   renderItem={({ item: group }) => {
+   const isExpanded = expandedModules[group.module] ?? false;
+   return (
+   <View style={{ marginBottom: 16 }}>
+   <Pressable
+     onPress={() => toggleModule(group.module)}
+     style={({ pressed }) => [
+       styles.flexRow,
+       { alignItems: "center", paddingVertical: 10, opacity: pressed ? 0.6 : 1 },
+     ]}
+     accessibilityRole="button"
+     accessibilityLabel={isExpanded ? `Collapse ${group.module}` : `Expand ${group.module}`}
    >
-    <Text style={[styles.monoSm, { color: derivedColors.primary, flex: 1 }]}>
-    {sym.name}()
-    </Text>
-    </Pressable>
+     <MaterialCommunityIcons
+       name={isExpanded ? "chevron-down" : "chevron-right"}
+       size={18}
+       color={colors.onSurface}
+       style={{ marginRight: 6 }}
+     />
+     <Text style={[styles.moduleGroupTitle, { color: colors.onSurface }]}>
+       {group.module}
+     </Text>
+   </Pressable>
+   {isExpanded && group.symbols.map((sym) => (
+   <Pressable
+   key={sym.name}
+   onPress={() => router.push(`/ref?symbol=${sym.name}`)}
+   style={({ pressed }) => [
+   styles.flexRow,
+   styles.symbolRow,
+   pressed && { opacity: 0.6 },
+   ]}
+   accessibilityRole="button"
+   accessibilityLabel={`View reference for ${sym.name}`}
+    >
+     <Text style={[styles.monoSm, { color: derivedColors.primary, flex: 1 }]}>
+     {sym.name}()
+     </Text>
+     </Pressable>
 ))}
-    </View>
-  )
-  }
-  />
+     </View>
+   );}}
+   />
   <Pressable
     onPress={() => setSearchVisible(true)}
     style={[styles.searchFab, { backgroundColor: derivedColors.primary }]}
