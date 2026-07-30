@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useRef, useMemo, useState, useCallback } from "react";
 import { View, Text, FlatList, ScrollView, Pressable, Alert, StyleSheet, Linking } from "react-native";
+import * as Clipboard from "expo-clipboard";
 import { WebView } from "react-native-webview";
 import Header from "../../components/Header";
 import Breadcrumbs from "../../components/Breadcrumbs";
@@ -15,6 +16,18 @@ import SearchOverlay from "../../components/SearchOverlay";
 import { getExampleHtml } from "../../utils/editor/exampleHtml";
 import { highlightSyntax, parseDescription } from "../../utils/referenceRender";
 
+const DESCRIBE_RE = /describe\s*\(\s*(["'])((?:(?!\1).)*)\1\s*\)\s*;?\s*/g;
+
+function extractDescribeCaption(code: string): string | null {
+  DESCRIBE_RE.lastIndex = 0;
+  const match = DESCRIBE_RE.exec(code);
+  return match ? match[2] : null;
+}
+
+function stripDescribe(code: string): string {
+  return code.replace(DESCRIBE_RE, "").trim();
+}
+
 const MODULE_GROUPS = P5_SYMBOLS.reduce<{ module: string; symbols: P5Symbol[] }[]>((acc, sym) => {
   const existing = acc.find((g) => g.module === sym.module);
   if (existing) {
@@ -25,15 +38,22 @@ const MODULE_GROUPS = P5_SYMBOLS.reduce<{ module: string; symbols: P5Symbol[] }[
   return acc;
 }, []);
 
-function SymbolDetail({ symbol, onOpenSearch }: { symbol: string; onOpenSearch: () => void }) {
- const router = useRouter();
- const sym = P5_SYMBOLS_BY_NAME[symbol];
- const { colorScheme, derivedColors } = useThemeContext();
- const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
- const { getLockedCourseName } = useModuleProgress();
- const currentIndex = sym ? P5_SYMBOLS.indexOf(sym) : -1;
- const prevSym = currentIndex > 0 ? P5_SYMBOLS[currentIndex - 1] : null;
- const nextSym = currentIndex >= 0 && currentIndex < P5_SYMBOLS.length - 1 ? P5_SYMBOLS[currentIndex + 1] : null;
+ function SymbolDetail({ symbol, onOpenSearch }: { symbol: string; onOpenSearch: () => void }) {
+  const router = useRouter();
+  const sym = P5_SYMBOLS_BY_NAME[symbol];
+  const { colorScheme, derivedColors } = useThemeContext();
+  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const { getLockedCourseName } = useModuleProgress();
+  const currentIndex = sym ? P5_SYMBOLS.indexOf(sym) : -1;
+  const prevSym = currentIndex > 0 ? P5_SYMBOLS[currentIndex - 1] : null;
+  const nextSym = currentIndex >= 0 && currentIndex < P5_SYMBOLS.length - 1 ? P5_SYMBOLS[currentIndex + 1] : null;
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = useCallback(async (text: string) => {
+    await Clipboard.setStringAsync(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  }, []);
 
  const handleSymbolPress = (name: string) => {
  const lockedCourse = getLockedCourseName(P5_SYMBOLS_BY_NAME[name]?.module ?? "");
@@ -112,57 +132,90 @@ function SymbolDetail({ symbol, onOpenSearch }: { symbol: string; onOpenSearch: 
   {parseDescription(sym.description, handleSymbolPress, colors, derivedColors.primary)}
  </Text>
 
- <Text style={[styles.sectionTitle, { color: colors.onSurface, marginBottom: 12 }]}>
- Usage
- </Text>
-  <View style={[styles.syntaxBox, { backgroundColor: colors.surfaceDim, marginBottom: 24, borderLeftColor: derivedColors.primary }]}>
- <Text style={{ fontFamily: "JetBrainsMono", fontSize: 16, lineHeight: 24 }}>
- {syntaxTokens.map((t, i) => (
- <Text key={i} style={{ color: t.color, fontFamily: "JetBrainsMono", fontSize: 16 }}>
- {t.text}
- </Text>
-))}
- </Text>
- </View>
+  <View style={[styles.flexRow, { alignItems: "center", justifyContent: "space-between", marginBottom: 12 }]}>
+  <Text style={[styles.sectionTitle, { color: colors.onSurface }]}>
+  Usage
+  </Text>
+  <Pressable
+    onPress={() => handleCopy(sym.syntax)}
+    style={({ pressed }) => ({
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 6,
+      backgroundColor: pressed ? derivedColors.primaryContainer : "transparent",
+    })}
+    accessibilityRole="button"
+    accessibilityLabel="Copy syntax"
+  >
+    <MaterialCommunityIcons
+      name={copied ? "check" : "content-copy"}
+      size={14}
+      color={copied ? "#22C55E" : derivedColors.primary}
+    />
+    <Text style={{ fontFamily: "JetBrainsMono", fontSize: 10, fontWeight: "700", color: copied ? "#22C55E" : derivedColors.primary }}>
+      {copied ? "Copied" : "Copy"}
+    </Text>
+  </Pressable>
+  </View>
+   <View style={[styles.syntaxBox, { backgroundColor: colors.surfaceDim, marginBottom: 24, borderLeftColor: derivedColors.primary }]}>
+  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 16, lineHeight: 24 }}>
+  {syntaxTokens.map((t, i) => (
+  <Text key={i} style={{ color: t.color, fontFamily: "JetBrainsMono", fontSize: 16 }}>
+  {t.text}
+  </Text>
+ ))}
+  </Text>
+  </View>
 
- {sym.examples && sym.examples.length > 0 && (
- <>
- <Text style={[styles.sectionTitle, { color: colors.onSurface, marginBottom: 12 }]}>
- Examples
- </Text>
- {sym.examples.map((ex, i) => (
- <View key={i} style={{ marginBottom: 16 }}>
- {sym.norender ? (
- <View style={[styles.codeBlock, { backgroundColor: colors.surfaceDim }]}>
- <Text style={{ fontFamily: "JetBrainsMono", fontSize: 13, lineHeight: 20 }}>
- {highlightSyntax(ex, colorScheme).map((t, i) => (
- <Text key={i} style={{ color: t.color }}>{t.text}</Text>
- ))}
- </Text>
- </View>
+  {sym.examples && sym.examples.length > 0 && (
+  <>
+  <Text style={[styles.sectionTitle, { color: colors.onSurface, marginBottom: 12 }]}>
+  Examples
+  </Text>
+  {sym.examples.map((ex, i) => {
+    const caption = extractDescribeCaption(ex);
+    const code = stripDescribe(ex);
+    return (
+  <View key={i} style={{ marginBottom: 16 }}>
+  {caption && (
+    <Text style={[styles.exampleCaption, { color: colors.textSecondary, marginBottom: 6 }]}>
+      {caption}
+    </Text>
+  )}
+  {sym.norender ? (
+  <View style={[styles.codeBlock, { backgroundColor: colors.surfaceDim }]}>
+  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 13, lineHeight: 20 }}>
+  {highlightSyntax(code, colorScheme).map((t, i) => (
+  <Text key={i} style={{ color: t.color }}>{t.text}</Text>
+  ))}
+  </Text>
+  </View>
 ) : (
- <>
- <WebView
- source={{ html: getExampleHtml(ex) }}
- style={[styles.exampleWebView, { backgroundColor: colors.surface }]}
- scrollEnabled={false}
- pointerEvents="none"
- javaScriptEnabled
- domStorageEnabled
- bounces={false}
- />
- <View style={[styles.codeBlock, { backgroundColor: colors.surfaceDim, marginTop: 8 }]}>
- <Text style={{ fontFamily: "JetBrainsMono", fontSize: 13, lineHeight: 20 }}>
- {highlightSyntax(ex, colorScheme).map((t, i) => (
- <Text key={i} style={{ color: t.color }}>{t.text}</Text>
- ))}
- </Text>
- </View>
- </>
+  <>
+  <WebView
+  source={{ html: getExampleHtml(ex) }}
+  style={[styles.exampleWebView, { backgroundColor: colors.surface }]}
+  scrollEnabled={false}
+  pointerEvents="none"
+  javaScriptEnabled
+  domStorageEnabled
+  bounces={false}
+  />
+  <View style={[styles.codeBlock, { backgroundColor: colors.surfaceDim, marginTop: 8 }]}>
+  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 13, lineHeight: 20 }}>
+  {highlightSyntax(code, colorScheme).map((t, i) => (
+  <Text key={i} style={{ color: t.color }}>{t.text}</Text>
+  ))}
+  </Text>
+  </View>
+  </>
 )}
- </View>
-))}
- </>
+  </View>
+  );})}
+  </>
 )}
 
  {sym.parameters.length > 0 && (
@@ -523,11 +576,17 @@ const styles = StyleSheet.create({
  paddingVertical: 12,
  borderRadius: 8,
  },
- exampleWebView: {
- height: 260,
- borderRadius: 8,
- overflow: "hidden",
- },
+  exampleWebView: {
+  height: 260,
+  borderRadius: 8,
+  overflow: "hidden",
+  },
+  exampleCaption: {
+  fontFamily: "JetBrainsMono",
+  fontSize: 12,
+  lineHeight: 18,
+  fontStyle: "italic",
+  },
  paramRow: {
  paddingVertical: 12,
  },

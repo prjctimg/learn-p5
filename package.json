@@ -29,6 +29,7 @@
     "codemirror": "6.0.1",
     "expo": "~55.0.26",
     "expo-build-properties": "~55.0.14",
+    "expo-clipboard": "~7.0.0",
     "expo-constants": "~55.0.16",
     "expo-font": "~55.0.8",
     "expo-haptics": "~55.0.9",
