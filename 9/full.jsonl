@@ -1,0 +1,1211 @@
+{
+  "info": {
+    "id": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+    "slug": "kind-falcon",
+    "projectID": "753652bce8787d650703e2b7d1c0d29c71587ed9",
+    "directory": "/workspaces/learn-p5",
+    "path": "",
+    "parentID": "ses_0517e2f53ffeeHN6lfUZ3NF1TC",
+    "title": "Explore dashboard & GitHub activity (@explore subagent)",
+    "agent": "explore",
+    "model": {
+      "id": "glm-5.2",
+      "providerID": "opencode-go",
+      "variant": "default"
+    },
+    "version": "1.18.8",
+    "summary": {
+      "additions": 0,
+      "deletions": 0,
+      "files": 0
+    },
+    "cost": 0.10784208,
+    "tokens": {
+      "input": 62386,
+      "output": 681,
+      "reasoning": 0,
+      "cache": {
+        "read": 67328,
+        "write": 0
+      }
+    },
+    "permission": [
+      {
+        "permission": "todowrite",
+        "pattern": "*",
+        "action": "deny"
+      },
+      {
+        "permission": "task",
+        "pattern": "*",
+        "action": "deny"
+      }
+    ],
+    "time": {
+      "created": 1785339179949,
+      "updated": 1785339223429
+    }
+  },
+  "messages": [
+    {
+      "info": {
+        "role": "user",
+        "time": {
+          "created": 1785339179988
+        },
+        "agent": "explore",
+        "model": {
+          "providerID": "opencode-go",
+          "modelID": "glm-5.2"
+        },
+        "summary": {
+          "diffs": []
+        },
+        "id": "msg_fae81f3d0001virBrhLoh2YWPk",
+        "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p"
+      },
+      "parts": [
+        {
+          "type": "text",
+          "text": "Explore the learn-p5 Expo app codebase at /workspaces/learn-p5. I need to understand the dashboard route and any \"GitHub activity\" component on it.\n\nFind:\n1. The dashboard route file (likely under src/ or app/ routing). Read the whole file.\n2. Any component that renders GitHub activity (search for \"GitHubActivity\", \"github\", \"activity\", \"commits\", etc.). Read it.\n3. The achievement badge rendering on the dashboard — where badges are displayed. Read relevant files.\n4. How modules list / \"Continue\" CTA appears on the Learn index route (search for \"Continue\", module list rendering).\n\nReturn: file paths with line numbers, key code snippets, and a clear summary of how dashboard is structured, where the GitHub activity component lives, and how achievement badges are rendered. Be thorough.",
+          "id": "prt_fae81f3e2001AZr9QwX9UyCpOH",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae81f3d0001virBrhLoh2YWPk"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_fae81f3d0001virBrhLoh2YWPk",
+        "role": "assistant",
+        "mode": "explore",
+        "agent": "explore",
+        "path": {
+          "cwd": "/workspaces/learn-p5",
+          "root": "/workspaces/learn-p5"
+        },
+        "cost": 0.00311684,
+        "tokens": {
+          "total": 3991,
+          "input": 1635,
+          "output": 52,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 2304
+          }
+        },
+        "modelID": "glm-5.2",
+        "providerID": "opencode-go",
+        "time": {
+          "created": 1785339180256,
+          "completed": 1785339183774
+        },
+        "finish": "tool-calls",
+        "id": "msg_fae81f4e0001EKWvS9HHDmUsGS",
+        "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p"
+      },
+      "parts": [
+        {
+          "snapshot": "37ad4d2c80a96b4065d95d975f1c52058ed5ff7a",
+          "type": "step-start",
+          "id": "prt_fae81fa5e00184nSm8s15StwAT",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae81f4e0001EKWvS9HHDmUsGS"
+        },
+        {
+          "type": "reasoning",
+          "text": "Let me explore the codebase structurefirst.",
+          "time": {
+            "start": 1785339181668,
+            "end": 1785339183110
+          },
+          "id": "prt_fae81fa63001nLvVvA0KMH0Hyk",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae81f4e0001EKWvS9HHDmUsGS"
+        },
+        {
+          "type": "tool",
+          "tool": "read",
+          "callID": "call_ebb6",
+          "state": {
+            "status": "completed",
+            "input": {
+              "filePath": "/workspaces/learn-p5"
+            },
+            "output": "<path>/workspaces/learn-p5</path>\n<type>directory</type>\n<entries>\n.entire/\n.expo/\n.git/\n.github/\n.gitignore\n.opencode/\nAGENTS.md\napp.json\nassets/\nbabel.config.js\nBUILD.md\nchanges.md\neslint.config.js\nexpo-env.d.ts\nLICENSE\nmetro.config.js\nnode_modules/\npackage-lock.json\npackage.json\nREADME.md\nROADMAP.md\nscripts/\nsrc/\ntsconfig.json\n\n(24 entries)\n</entries>",
+            "metadata": {
+              "preview": ".entire/\n.expo/\n.git/\n.github/\n.gitignore\n.opencode/\nAGENTS.md\napp.json\nassets/\nbabel.config.js\nBUILD.md\nchanges.md\neslint.config.js\nexpo-env.d.ts\nLICENSE\nmetro.config.js\nnode_modules/\npackage-lock.json\npackage.json\nREADME.md",
+              "truncated": false,
+              "loaded": [],
+              "display": {
+                "type": "directory",
+                "path": "/workspaces/learn-p5",
+                "entries": [
+                  ".entire/",
+                  ".expo/",
+                  ".git/",
+                  ".github/",
+                  ".gitignore",
+                  ".opencode/",
+                  "AGENTS.md",
+                  "app.json",
+                  "assets/",
+                  "babel.config.js",
+                  "BUILD.md",
+                  "changes.md",
+                  "eslint.config.js",
+                  "expo-env.d.ts",
+                  "LICENSE",
+                  "metro.config.js",
+                  "node_modules/",
+                  "package-lock.json",
+                  "package.json",
+                  "README.md",
+                  "ROADMAP.md",
+                  "scripts/",
+                  "src/",
+                  "tsconfig.json"
+                ],
+                "offset": 1,
+                "totalEntries": 24,
+                "truncated": false
+              }
+            },
+            "title": "",
+            "time": {
+              "start": 1785339183125,
+              "end": 1785339183154
+            }
+          },
+          "id": "prt_fae82000a00107a0eJNvhvvAdq",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae81f4e0001EKWvS9HHDmUsGS"
+        },
+        {
+          "type": "tool",
+          "tool": "glob",
+          "callID": "call_1d76",
+          "state": {
+            "status": "completed",
+            "input": {
+              "pattern": "app/**/*.tsx"
+            },
+            "output": "No files found",
+            "metadata": {
+              "count": 0,
+              "truncated": false
+            },
+            "title": "",
+            "time": {
+              "start": 1785339183141,
+              "end": 1785339183582
+            }
+          },
+          "id": "prt_fae82001a001P6H8hnfF274OMT",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae81f4e0001EKWvS9HHDmUsGS"
+        },
+        {
+          "type": "tool",
+          "tool": "glob",
+          "callID": "call_1eb6",
+          "state": {
+            "status": "completed",
+            "input": {
+              "pattern": "src/**/*.{tsx,ts}"
+            },
+            "output": "/workspaces/learn-p5/src/components/SideDrawer.tsx\n/workspaces/learn-p5/src/components/StreakToast.tsx\n/workspaces/learn-p5/src/components/DrawerFab.tsx\n/workspaces/learn-p5/src/components/DrawerContent.tsx\n/workspaces/learn-p5/src/components/ProgrammingKeyboard.tsx\n/workspaces/learn-p5/src/components/SearchOverlay.tsx\n/workspaces/learn-p5/src/components/Toast.tsx\n/workspaces/learn-p5/src/components/SplashScreen.tsx\n/workspaces/learn-p5/src/components/ShakeModal.tsx\n/workspaces/learn-p5/src/components/TimePicker.tsx\n/workspaces/learn-p5/src/components/Button.tsx\n/workspaces/learn-p5/src/components/QwertyKeyboard.tsx\n/workspaces/learn-p5/src/components/ExerciseCard.tsx\n/workspaces/learn-p5/src/components/StatusBarAccent.tsx\n/workspaces/learn-p5/src/components/ActivityHeatmap.tsx\n/workspaces/learn-p5/src/components/Header.tsx\n/workspaces/learn-p5/src/components/Breadcrumbs.tsx\n/workspaces/learn-p5/src/components/ThemeProvider.tsx\n/workspaces/learn-p5/src/components/CodeEditor.tsx\n/workspaces/learn-p5/src/app/_layout.tsx\n/workspaces/learn-p5/src/app/index.tsx\n/workspaces/learn-p5/src/constants/Spacing.ts\n/workspaces/learn-p5/src/constants/Version.ts\n/workspaces/learn-p5/src/constants/fontBase64.generated.ts\n/workspaces/learn-p5/src/constants/Fonts.ts\n/workspaces/learn-p5/src/constants/Defaults.ts\n/workspaces/learn-p5/src/constants/Typography.ts\n/workspaces/learn-p5/src/constants/Colors.ts\n/workspaces/learn-p5/src/constants/ProcessingColors.ts\n/workspaces/learn-p5/src/app/tips/index.tsx\n/workspaces/learn-p5/src/hooks/useModuleProgress.ts\n/workspaces/learn-p5/src/hooks/useStreak.ts\n/workspaces/learn-p5/src/hooks/useAchievements.ts\n/workspaces/learn-p5/src/hooks/useOnboarding.ts\n/workspaces/learn-p5/src/hooks/useActivityLog.ts\n/workspaces/learn-p5/src/hooks/useShakeDetection.ts\n/workspaces/learn-p5/src/app/onboarding/_layout.tsx\n/workspaces/learn-p5/src/app/onboarding/[slide].tsx\n/workspaces/learn-p5/src/app/learn/_layout.tsx\n/workspaces/learn-p5/src/app/learn/index.tsx\n/workspaces/learn-p5/src/app/learn/[course]/_layout.tsx\n/workspaces/learn-p5/src/app/learn/[course]/index.tsx\n/workspaces/learn-p5/src/app/learn/[course]/[id].tsx\n/workspaces/learn-p5/src/app/ref/index.tsx\n/workspaces/learn-p5/src/app/dashboard.tsx\n/workspaces/learn-p5/src/app/settings/index.tsx\n/workspaces/learn-p5/src/app/settings/about.tsx\n/workspaces/learn-p5/src/app/settings/error-logs.tsx\n/workspaces/learn-p5/src/utils/dynamicIcon.ts\n/workspaces/learn-p5/src/utils/p5Source.ts\n/workspaces/learn-p5/src/utils/isExerciseLocked.ts\n/workspaces/learn-p5/src/utils/courseLoader.ts\n/workspaces/learn-p5/src/utils/colorUtils.ts\n/workspaces/learn-p5/src/utils/editor/styles.ts\n/workspaces/learn-p5/src/utils/editor/codemirror-bundle.generated.ts\n/workspaces/learn-p5/src/utils/editor/colors.ts\n/workspaces/learn-p5/src/utils/editor/bridge.ts\n/workspaces/learn-p5/src/utils/editor/exampleHtml.ts\n/workspaces/learn-p5/src/utils/editor/bundleEntry.ts\n/workspaces/learn-p5/src/utils/editor/editor.ts\n/workspaces/learn-p5/src/utils/editor/exerciseHtml.ts\n/workspaces/learn-p5/src/utils/editor/themes.ts\n/workspaces/learn-p5/src/contexts/DrawerContext.tsx\n/workspaces/learn-p5/src/data/courses/webgl.ts\n/workspaces/learn-p5/src/data/courses/typography.ts\n/workspaces/learn-p5/src/data/courses/dom.ts\n/workspaces/learn-p5/src/data/courses/custom-shapes.ts\n/workspaces/learn-p5/src/data/courses/shapes.ts\n/workspaces/learn-p5/src/data/courses/time.ts\n/workspaces/learn-p5/src/data/courses/vectors.ts\n/workspaces/learn-p5/src/data/courses/random-noise.ts\n/workspaces/learn-p5/src/data/courses/color.ts\n/workspaces/learn-p5/src/data/courses/io.ts\n/workspaces/learn-p5/src/data/courses/math.ts\n/workspaces/learn-p5/src/data/courses/events.ts\n/workspaces/learn-p5/src/data/courses/image.ts\n/workspaces/learn-p5/src/data/courses/data.ts\n/workspaces/learn-p5/src/data/courses/curves.ts\n/workspaces/learn-p5/src/data/courses/transform.ts\n/workspaces/learn-p5/src/data/types.ts\n/workspaces/learn-p5/src/data/reference.ts\n/workspaces/learn-p5/src/data/keyboardLayout.ts\n/workspaces/learn-p5/src/data/onboardingSlides.ts\n/workspaces/learn-p5/src/types/react-native-webview.d.ts",
+            "metadata": {
+              "count": 84,
+              "truncated": false
+            },
+            "title": "",
+            "time": {
+              "start": 1785339183418,
+              "end": 1785339183599
+            }
+          },
+          "id": "prt_fae820090001iNRtgE4QJG0XrD",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae81f4e0001EKWvS9HHDmUsGS"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "37ad4d2c80a96b4065d95d975f1c52058ed5ff7a",
+          "type": "step-finish",
+          "tokens": {
+            "total": 3991,
+            "input": 1635,
+            "output": 52,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 2304
+            }
+          },
+          "cost": 0.00311684,
+          "id": "prt_fae820250001YSlJqOnX3vft25",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae81f4e0001EKWvS9HHDmUsGS"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_fae81f3d0001virBrhLoh2YWPk",
+        "role": "assistant",
+        "mode": "explore",
+        "agent": "explore",
+        "path": {
+          "cwd": "/workspaces/learn-p5",
+          "root": "/workspaces/learn-p5"
+        },
+        "cost": 0.0046,
+        "tokens": {
+          "total": 5363,
+          "input": 2358,
+          "output": 125,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 2880
+          }
+        },
+        "modelID": "glm-5.2",
+        "providerID": "opencode-go",
+        "time": {
+          "created": 1785339183779,
+          "completed": 1785339185980
+        },
+        "finish": "tool-calls",
+        "id": "msg_fae8202a3001Jr8GPud5v6R365",
+        "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p"
+      },
+      "parts": [
+        {
+          "snapshot": "37ad4d2c80a96b4065d95d975f1c52058ed5ff7a",
+          "type": "step-start",
+          "id": "prt_fae82075c001oDlpTUlpb2yqJv",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae8202a3001Jr8GPud5v6R365"
+        },
+        {
+          "type": "reasoning",
+          "text": "Found it. The dashboard route is at `/workspaces/learn-p5/src/app/dashboard.tsx`. Let me read that, the ActivityHeatmap component, the achievements hook, and the learn index.",
+          "time": {
+            "start": 1785339185000,
+            "end": 1785339185391
+          },
+          "id": "prt_fae8207680017NocJyB7qBQnP7",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae8202a3001Jr8GPud5v6R365"
+        },
+        {
+          "type": "tool",
+          "tool": "read",
+          "callID": "call_ca63",
+          "state": {
+            "status": "completed",
+            "input": {
+              "filePath": "/workspaces/learn-p5/src/app/dashboard.tsx"
+            },
+            "output": "<path>/workspaces/learn-p5/src/app/dashboard.tsx</path>\n<type>file</type>\n<content>\n1: import { useMemo, useState, useCallback, useRef, useEffect } from \"react\";\n2: import { View, Text, Pressable, ScrollView, StyleSheet, Animated } from \"react-native\";\n3: import { useRouter, useFocusEffect } from \"expo-router\";\n4: import { MaterialCommunityIcons } from \"@expo/vector-icons\";\n5: import AsyncStorage from \"@react-native-async-storage/async-storage\";\n6: import { useThemeContext } from \"../components/ThemeProvider\";\n7: import { Colors } from \"../constants/Colors\";\n8: import Header from \"../components/Header\";\n9: import Toast from \"../components/Toast\";\n10: import StreakToast from \"../components/StreakToast\";\n11: import { loadAllCourses } from \"../utils/courseLoader\";\n12: import { Exercise, Course } from \"../data/types\";\n13: import { isExerciseLocked as checkExerciseLocked } from \"../utils/isExerciseLocked\";\n14: import { getStreakFromStorage, useStreak } from \"../hooks/useStreak\";\n15: import { useAchievements, ACHIEVEMENTS } from \"../hooks/useAchievements\";\n16: import { useActivityLog } from \"../hooks/useActivityLog\";\n17: import ActivityHeatmap from \"../components/ActivityHeatmap\";\n18: \n19: const LAST_GREETING_KEY = \"last_greeting_period\";\n20: \n21: function getPeriodKey(): string {\n22:  const hour = new Date().getHours();\n23:  if (hour < 12) return \"morning\";\n24:  if (hour < 18) return \"afternoon\";\n25:  return \"evening\";\n26: }\n27: \n28: function getGreeting(): string {\n29:  const hour = new Date().getHours();\n30:  if (hour < 12) return \"Good morning\";\n31:  if (hour < 18) return \"Good afternoon\";\n32:  return \"Good evening\";\n33: }\n34: \n35: export default function Dashboard() {\n36:  const router = useRouter();\n37:  const { colorScheme, ctaColor, derivedColors } = useThemeContext();\n38:  const colors = Colors[colorScheme === \"dark\" ? \"dark\" : \"light\"];\n39:  const [completedLessons, setCompletedLessons] = useState<string[]>([]);\n40:  const [courses, setCourses] = useState<Course[]>([]);\n41:  const [streakCount, setStreakCount] = useState(0);\n42:  const [streakLongest, setStreakLongest] = useState(0);\n43:  const streak = useStreak();\n44:  const [streakToastVisible, setStreakToastVisible] = useState(false);\n45: const { unlocked: unlockedAchievements, refresh: refreshAchievements } = useAchievements();\n46: const { activity, refresh: refreshActivity } = useActivityLog();\n47:  const [greetingToastVisible, setGreetingToastVisible] = useState(false);\n48:  const [greetingMessage, setGreetingMessage] = useState(\"\");\n49:  const levelAnim = useRef(new Animated.Value(0)).current;\n50:  const completedAnim = useRef(new Animated.Value(0)).current;\n51:  const streakAnim = useRef(new Animated.Value(0)).current;\n52:  const [animatedLevel, setAnimatedLevel] = useState(1);\n53:  const [animatedCompleted, setAnimatedCompleted] = useState(0);\n54:  const [animatedStreak, setAnimatedStreak] = useState(0);\n55: \n56:  useFocusEffect(\n57:  useCallback(() => {\n58:  AsyncStorage.getItem(\"completedLessons\").then((val) => {\n59:  if (val) {\n60:  try {\n61:  setCompletedLessons(JSON.parse(val));\n62:  } catch {\n63:  setCompletedLessons([]);\n64:  }\n65:  }\n66:  });\n67:  loadAllCourses().then(setCourses);\n68:  getStreakFromStorage().then(({ count, longest }) => {\n69:  setStreakCount(count);\n70:  setStreakLongest(longest);\n71:  });\n72: refreshAchievements();\n73:  refreshActivity();\n74:  }, [])\n75: );\n76: \n77:  useEffect(() => {\n78:  streak.consumePendingToast().then((data) => {\n79:  if (data) {\n80:  setStreakToastVisible(true);\n81:  }\n82:  });\n83:  refreshAchievements();\n84:  refreshActivity();\n85:  }, []);\n86: \n87:  useEffect(() => {\n88:  const timer = setTimeout(async () => {\n89:  const period = getPeriodKey();\n90:  const lastPeriod = await AsyncStorage.getItem(LAST_GREETING_KEY);\n91:  if (lastPeriod === period) return;\n92:  const onboardingRaw = await AsyncStorage.getItem(\"onboardingData\");\n93:  let name = \"\";\n94:  if (onboardingRaw) {\n95:  try {\n96:  const data = JSON.parse(onboardingRaw);\n97:  name = data.displayName || \"\";\n98:  } catch {}\n99:  }\n100:  setGreetingMessage(`${getGreeting()}${name ? `, ${name}` : \"!\"}`);\n101:  setGreetingToastVisible(true);\n102:  await AsyncStorage.setItem(LAST_GREETING_KEY, period);\n103:  }, 1000);\n104:  return () => clearTimeout(timer);\n105:  }, []);\n106: \n107:  const nextExercise: (Exercise & { courseSlug: string; courseTitle: string }) | null = useMemo(() => {\n108:  if (courses.length === 0) return null;\n109:  const flat = courses.flatMap((c) =>\n110:  c.exercises.map((l) => ({ ...l, courseSlug: c.slug, courseTitle: c.title }))\n111:  );\n112:  return flat.find((l) => !completedLessons.includes(`${l.courseSlug}/${l.id}`)) ?? null;\n113:  }, [courses, completedLessons]);\n114: \n115:  const upcomingExercises = useMemo(() => {\n116:  if (courses.length === 0 || !nextExercise) return [];\n117:  const flat = courses.flatMap((c) =>\n118:  c.exercises.map((l) => ({ ...l, courseSlug: c.slug, courseTitle: c.title }))\n119:  );\n120:  const startIndex = flat.findIndex(\n121:  (l) => l.courseSlug === nextExercise.courseSlug && l.id === nextExercise.id\n122: );\n123:  if (startIndex === -1) return [];\n124:  return flat.slice(startIndex + 1, startIndex + 6);\n125:  }, [courses, nextExercise]);\n126: \n127:   function isExerciseLocked(lessonId: string, courseSlug: string): boolean {\n128:     const course = courses.find((c) => c.slug === courseSlug);\n129:     if (!course) return true;\n130:     return checkExerciseLocked(completedLessons, courseSlug, lessonId, course.exercises);\n131:   }\n132: \n133:  const progressAnim = useRef(new Animated.Value(0)).current;\n134: \n135:  const totalLessons = useMemo(() => {\n136:  return courses.reduce((sum, c) => sum + c.exercises.length, 0);\n137:  }, [courses]);\n138: \n139:  const progress = totalLessons > 0 ? completedLessons.length / totalLessons : 0;\n140: \n141:  useEffect(() => {\n142:  Animated.timing(progressAnim, {\n143:  toValue: progress,\n144:  duration: 800,\n145:  useNativeDriver: false,\n146:  }).start();\n147:  }, [progress, progressAnim]);\n148: \n149:  const progressWidth = progressAnim.interpolate({\n150:  inputRange: [0, 1],\n151:  outputRange: [\"0%\", \"100%\"],\n152:  });\n153: \n154:  const level = Math.min(10, Math.max(1, Math.floor(progress * 10) + 1));\n155:  const completedCount = completedLessons.length;\n156: \n157:  useEffect(() => {\n158:  levelAnim.setValue(0);\n159:  completedAnim.setValue(0);\n160:  streakAnim.setValue(0);\n161: \n162:  const levelListener = levelAnim.addListener(({ value }) => {\n163:  setAnimatedLevel(Math.round(value));\n164:  });\n165:  const completedListener = completedAnim.addListener(({ value }) => {\n166:  setAnimatedCompleted(Math.round(value));\n167:  });\n168:  const streakListener = streakAnim.addListener(({ value }) => {\n169:  setAnimatedStreak(Math.round(value));\n170:  });\n171: \n172:  Animated.parallel([\n173:  Animated.timing(levelAnim, {\n174:  toValue: level,\n175:  duration: 800,\n176:  useNativeDriver: false,\n177:  }),\n178:  Animated.timing(completedAnim, {\n179:  toValue: completedCount,\n180:  duration: 800,\n181:  useNativeDriver: false,\n182:  }),\n183:  Animated.timing(streakAnim, {\n184:  toValue: streakCount,\n185:  duration: 800,\n186:  useNativeDriver: false,\n187:  }),\n188:  ]).start();\n189: \n190:  return () => {\n191:  levelAnim.removeListener(levelListener);\n192:  completedAnim.removeListener(completedListener);\n193:  streakAnim.removeListener(streakListener);\n194:  };\n195:  }, [level, completedCount, streakCount]);\n196: \n197:  const styles = useMemo(\n198:  () =>\n199:  StyleSheet.create({\n200:  container: {\n201:  flex: 1,\n202:  backgroundColor: colors.surface,\n203:  },\n204:  inner: {\n205:  flex: 1,\n206:  paddingHorizontal: 24,\n207:  paddingTop: 32,\n208:  },\n209:  subtitle: {\n210:  fontFamily: \"JetBrainsMono\",\n211:  fontSize: 16,\n212:  color: colors.textSecondary,\n213:  marginTop: 4,\n214:  },\n215: progressBarOuter: {\n216:     height: 8,\n217:     backgroundColor: colors.surfaceDim,\n218:     borderRadius: 9999,\n219:     marginTop: 16,\n220:     overflow: \"hidden\",\n221:   },\n222:   progressBarInner: {\n223:     height: \"100%\",\n224:     backgroundColor: derivedColors.primary,\n225:     borderRadius: 9999,\n226:   },\n227:   achievementsStack: {\n228:     flexDirection: \"row\",\n229:     alignItems: \"center\",\n230:     marginTop: 14,\n231:   },\n232:   achievementCircle: {\n233:     width: 28,\n234:     height: 28,\n235:     borderRadius: 9999,\n236:     borderWidth: 2,\n237:     alignItems: \"center\",\n238:     justifyContent: \"center\",\n239:     marginRight: -6,\n240:   },\n241:   achievementsStackHint: {\n242:     fontFamily: \"JetBrainsMono\",\n243:     fontSize: 11,\n244:     color: colors.textSecondary,\n245:     marginLeft: 12,\n246:   },\n247:  statsRow: {\n248:  flexDirection: \"row\",\n249:  gap: 12,\n250:  marginTop: 24,\n251:  },\n252:   statCard: {\n253:   flex: 1,\n254:    backgroundColor: derivedColors.primary + \"26\",\n255:   borderRadius: 16,\n256:   paddingHorizontal: 16,\n257:   paddingVertical: 16,\n258:   alignItems: \"center\",\n259:   },\n260:  statValue: {\n261:  fontFamily: \"JetBrainsMono\",\n262:  fontSize: 24,\n263:  fontWeight: \"700\",\n264:  color: derivedColors.primary,\n265:  },\n266:  statLabel: {\n267:  fontFamily: \"JetBrainsMono\",\n268:  fontSize: 11,\n269:  color: colors.textSecondary,\n270:  marginTop: 4,\n271:  },\n272:  continueSection: {\n273:  marginTop: 40,\n274:  },\n275:  sectionTitle: {\n276:  fontFamily: \"JetBrainsMono\",\n277:  fontSize: 24,\n278:  fontWeight: \"700\",\n279:  color: colors.onSurface,\n280:  marginBottom: 16,\n281:  },\n282:   nextCard: {\n283:   backgroundColor: colors.surfaceDim,\n284:   borderRadius: 16,\n285:   paddingHorizontal: 20,\n286:   paddingVertical: 20,\n287:   marginBottom: 12,\n288:   },\n289:  nextCardPressed: {\n290:  opacity: 0.8,\n291:  },\n292:  nextCardTitle: {\n293:  fontFamily: \"JetBrainsMono\",\n294:  fontSize: 20,\n295:  fontWeight: \"700\",\n296:  color: colors.onSurface,\n297:  },\n298:  nextCardModule: {\n299:  fontFamily: \"JetBrainsMono\",\n300:  fontSize: 11,\n301:  color: derivedColors.primary,\n302:  textTransform: \"uppercase\",\n303:  letterSpacing: 1,\n304:  marginTop: 4,\n305:  },\n306:  nextCardDescription: {\n307:  fontFamily: \"JetBrainsMono\",\n308:  fontSize: 16,\n309:  color: colors.textSecondary,\n310:  marginTop: 8,\n311:  },\n312:   nextCardButton: {\n313:   borderRadius: 12,\n314:   paddingHorizontal: 20,\n315:   paddingVertical: 10,\n316:   alignSelf: \"flex-start\",\n317:   marginTop: 16,\n318:   },\n319:  nextCardButtonPressed: {\n320:  transform: [{ translateY: 2 }],\n321:  },\n322:  nextCardButtonText: {\n323:  fontFamily: \"JetBrainsMono\",\n324:  fontWeight: \"900\",\n325:  fontSize: 13,\n326:  textTransform: \"uppercase\",\n327:  letterSpacing: 0.5,\n328:  color: colors.onPrimary,\n329:  },\n330:  listTitle: {\n331:  fontFamily: \"JetBrainsMono\",\n332:  fontSize: 20,\n333:  fontWeight: \"700\",\n334:  color: colors.onSurface,\n335:  marginBottom: 12,\n336:  },\n337:   listItem: {\n338:   flexDirection: \"row\",\n339:   alignItems: \"center\",\n340:   paddingVertical: 12,\n341:   paddingHorizontal: 16,\n342:   backgroundColor: colors.surfaceDim,\n343:   borderRadius: 12,\n344:   marginBottom: 8,\n345:   },\n346:  listItemPressed: {\n347:  opacity: 0.8,\n348:  },\n349:  listItemNumber: {\n350:  fontFamily: \"JetBrainsMono\",\n351:  fontSize: 13,\n352:  fontWeight: \"700\",\n353:  color: colors.textSecondary,\n354:  width: 28,\n355:  },\n356:  listItemTitle: {\n357:  fontFamily: \"JetBrainsMono\",\n358:  fontSize: 16,\n359:  fontWeight: \"700\",\n360:  color: colors.onSurface,\n361:  flex: 1,\n362:  },\n363:  allCompleteContainer: {\n364:  alignItems: \"center\",\n365:  paddingVertical: 32,\n366:  },\n367:  allCompleteText: {\n368:  fontFamily: \"JetBrainsMono\",\n369:  fontSize: 16,\n370:  color: colors.textSecondary,\n371:  textAlign: \"center\",\n372:  },\n373:  }),\n374:  [colorScheme]\n375: );\n376: \n377:  return (\n378:  <View style={styles.container}>\n379:  <Header title=\"Dashboard\" showBack={false} />\n380:  <ScrollView\n381:  style={styles.inner}\n382:  contentContainerStyle={{ paddingBottom: 32 }}\n383:  >\n384:  <Text style={styles.subtitle}>\n385:  {Math.round(progress * 100)}% complete\n386:  </Text>\n387: \n388:  <View style={styles.progressBarOuter}>\n389:  <Animated.View style={[styles.progressBarInner, { width: progressWidth }]} />\n390:  </View>\n391: \n392:  <View style={styles.achievementsStack}>\n393:  {unlockedAchievements.length === 0 ? (\n394:  <Text style={styles.achievementsStackHint}>No achievements yet</Text>\n395:  ) : (\n396:  unlockedAchievements\n397:  .map((id) => ACHIEVEMENTS.find((a) => a.id === id))\n398:  .filter((a): a is typeof ACHIEVEMENTS[number] => Boolean(a))\n399:  .map((a) => (\n400:  <View\n401:  key={a.id}\n402:  style={[\n403:  styles.achievementCircle,\n404:  {\n405:  backgroundColor: derivedColors.primary,\n406:  borderColor: colors.surface,\n407:  },\n408:  ]}\n409:  accessibilityLabel={a.title}\n410:  accessibilityRole=\"image\"\n411:  >\n412:  <MaterialCommunityIcons\n413:  name={a.icon as any}\n414:  size={16}\n415:  color={colors.onPrimary}\n416:  />\n417:  </View>\n418:  ))\n419:  )}\n420:  </View>\n421: \n422:  <View style={styles.statsRow}>\n423:  <View style={styles.statCard}>\n424:  <Text style={styles.statValue}>{animatedLevel}</Text>\n425:  <Text style={styles.statLabel}>\n426:  Level\n427:  </Text>\n428:  </View>\n429:  <View style={styles.statCard}>\n430:  <Text style={styles.statValue}>\n431:  {animatedCompleted}\n432:  </Text>\n433:  <Text style={styles.statLabel}>\n434:  Completed\n435:  </Text>\n436:  </View>\n437:  <View style={styles.statCard}>\n438:  <Text style={styles.statValue}>{animatedStreak}</Text>\n439:  <Text style={styles.statLabel}>\n440:  Streak\n441:  </Text>\n442:  </View>\n443:  </View>\n444: \n445:  <View style={styles.continueSection}>\n446:  <Text style={styles.sectionTitle}>\n447:  Pick up where you left off\n448:  </Text>\n449: \n450:  {nextExercise ? (\n451:  <Pressable\n452:  onPress={() =>\n453:  router.push(`/learn/${nextExercise.courseSlug}/${nextExercise.id}`)\n454:  }\n455:  style={({ pressed }) => [\n456:  styles.nextCard,\n457:  pressed && styles.nextCardPressed,\n458:  ]}\n459:  accessibilityRole=\"button\"\n460:  accessibilityLabel={`Continue with ${nextExercise.title}`}\n461:  >\n462:  <Text style={styles.nextCardTitle}>\n463:  {nextExercise.title}\n464:  </Text>\n465:  <Text style={styles.nextCardModule}>\n466:   {nextExercise.courseTitle}\n467:  </Text>\n468:  <Text style={styles.nextCardDescription} numberOfLines={2}>\n469:  {nextExercise.description}\n470:  </Text>\n471:  <Pressable\n472:  onPress={() =>\n473:  router.push(`/learn/${nextExercise.courseSlug}/${nextExercise.id}`)\n474:  }\n475:  style={({ pressed }) => [\n476:  styles.nextCardButton,\n477:  { backgroundColor: ctaColor },\n478:  pressed && styles.nextCardButtonPressed,\n479:  ]}\n480:  accessibilityRole=\"button\"\n481:  accessibilityLabel=\"Continue\"\n482:  >\n483:  <Text style={styles.nextCardButtonText}>\n484:  Continue\n485:  </Text>\n486:  </Pressable>\n487:  </Pressable>\n488: ) : (\n489:  <View style={styles.allCompleteContainer}>\n490:  <Text style={styles.allCompleteText}>\n491:  All exercises complete! 🎉\n492:  </Text>\n493:  </View>\n494: )}\n495: \n496:  {upcomingExercises.length > 0 && (\n497:  <>\n498:  <Text style={[styles.listTitle, { marginTop: 24 }]}>\n499:  Up Next\n500:  </Text>\n501:  {upcomingExercises.map((ex) => {\n502:  const locked = isExerciseLocked(ex.id, ex.courseSlug);\n503:  return (\n504:  <Pressable\n505:  key={`${ex.courseSlug}/${ex.id}`}\n506:  disabled={locked}\n507:  onPress={() =>\n508:  router.push(`/learn/${ex.courseSlug}/${ex.id}`)\n509:  }\n510:  style={({ pressed }) => [\n511:  styles.listItem,\n512:  pressed && !locked && styles.listItemPressed,\n513:  ]}\n514:  accessibilityRole=\"button\"\n515:  accessibilityLabel={locked ? `${ex.title} (locked)` : ex.title}\n516:  >\n517:  {locked ? (\n518:  <MaterialCommunityIcons\n519:  name=\"lock\"\n520:  size={18}\n521:  color={colors.textSecondary}\n522:  style={styles.listItemNumber}\n523:  />\n524: ) : (\n525:  <Text style={styles.listItemNumber}>\n526:  {ex.id.replace(\"exercise-\", \"#\")}\n527:  </Text>\n528: )}\n529:  <Text\n530:  style={[\n531:  styles.listItemTitle,\n532:  locked && { color: colors.textSecondary },\n533:  ]}\n534:  numberOfLines={1}\n535:  >\n536:  {ex.title}\n537:  </Text>\n538:  </Pressable>\n539: );\n540:  })}\n541:  </>\n542: )}\n543:  </View>\n544: \n545:  <ActivityHeatmap activity={activity} />\n546:  </ScrollView>\n547: \n548:  <Toast\n549:  visible={greetingToastVisible}\n550:  message={greetingMessage}\n551:  duration={3000}\n552:  icon=\"weather-sunny\"\n553:  onDismiss={() => setGreetingToastVisible(false)}\n554:  />\n555:  <StreakToast\n556:  visible={streakToastVisible}\n557:  streakCount={streak.count}\n558:  tierProgress={streak.tierProgress}\n559:  nextTier={streak.nextTier}\n560:  onDismiss={() => setStreakToastVisible(false)}\n561:  />\n562:  </View>\n563: );\n564: }\n\n(End of file - total 564 lines)\n</content>",
+            "metadata": {
+              "preview": "import { useMemo, useState, useCallback, useRef, useEffect } from \"react\";\nimport { View, Text, Pressable, ScrollView, StyleSheet, Animated } from \"react-native\";\nimport { useRouter, useFocusEffect } from \"expo-router\";\nimport { MaterialCommunityIcons } from \"@expo/vector-icons\";\nimport AsyncStorage from \"@react-native-async-storage/async-storage\";\nimport { useThemeContext } from \"../components/ThemeProvider\";\nimport { Colors } from \"../constants/Colors\";\nimport Header from \"../components/Header\";\nimport Toast from \"../components/Toast\";\nimport StreakToast from \"../components/StreakToast\";\nimport { loadAllCourses } from \"../utils/courseLoader\";\nimport { Exercise, Course } from \"../data/types\";\nimport { isExerciseLocked as checkExerciseLocked } from \"../utils/isExerciseLocked\";\nimport { getStreakFromStorage, useStreak } from \"../hooks/useStreak\";\nimport { useAchievements, ACHIEVEMENTS } from \"../hooks/useAchievements\";\nimport { useActivityLog } from \"../hooks/useActivityLog\";\nimport ActivityHeatmap from \"../components/ActivityHeatmap\";\n\nconst LAST_GREETING_KEY = \"last_greeting_period\";\n",
+              "truncated": false,
+              "loaded": [],
+              "display": {
+                "type": "file",
+                "path": "/workspaces/learn-p5/src/app/dashboard.tsx",
+                "text": "import { useMemo, useState, useCallback, useRef, useEffect } from \"react\";\nimport { View, Text, Pressable, ScrollView, StyleSheet, Animated } from \"react-native\";\nimport { useRouter, useFocusEffect } from \"expo-router\";\nimport { MaterialCommunityIcons } from \"@expo/vector-icons\";\nimport AsyncStorage from \"@react-native-async-storage/async-storage\";\nimport { useThemeContext } from \"../components/ThemeProvider\";\nimport { Colors } from \"../constants/Colors\";\nimport Header from \"../components/Header\";\nimport Toast from \"../components/Toast\";\nimport StreakToast from \"../components/StreakToast\";\nimport { loadAllCourses } from \"../utils/courseLoader\";\nimport { Exercise, Course } from \"../data/types\";\nimport { isExerciseLocked as checkExerciseLocked } from \"../utils/isExerciseLocked\";\nimport { getStreakFromStorage, useStreak } from \"../hooks/useStreak\";\nimport { useAchievements, ACHIEVEMENTS } from \"../hooks/useAchievements\";\nimport { useActivityLog } from \"../hooks/useActivityLog\";\nimport ActivityHeatmap from \"../components/ActivityHeatmap\";\n\nconst LAST_GREETING_KEY = \"last_greeting_period\";\n\nfunction getPeriodKey(): string {\n const hour = new Date().getHours();\n if (hour < 12) return \"morning\";\n if (hour < 18) return \"afternoon\";\n return \"evening\";\n}\n\nfunction getGreeting(): string {\n const hour = new Date().getHours();\n if (hour < 12) return \"Good morning\";\n if (hour < 18) return \"Good afternoon\";\n return \"Good evening\";\n}\n\nexport default function Dashboard() {\n const router = useRouter();\n const { colorScheme, ctaColor, derivedColors } = useThemeContext();\n const colors = Colors[colorScheme === \"dark\" ? \"dark\" : \"light\"];\n const [completedLessons, setCompletedLessons] = useState<string[]>([]);\n const [courses, setCourses] = useState<Course[]>([]);\n const [streakCount, setStreakCount] = useState(0);\n const [streakLongest, setStreakLongest] = useState(0);\n const streak = useStreak();\n const [streakToastVisible, setStreakToastVisible] = useState(false);\nconst { unlocked: unlockedAchievements, refresh: refreshAchievements } = useAchievements();\nconst { activity, refresh: refreshActivity } = useActivityLog();\n const [greetingToastVisible, setGreetingToastVisible] = useState(false);\n const [greetingMessage, setGreetingMessage] = useState(\"\");\n const levelAnim = useRef(new Animated.Value(0)).current;\n const completedAnim = useRef(new Animated.Value(0)).current;\n const streakAnim = useRef(new Animated.Value(0)).current;\n const [animatedLevel, setAnimatedLevel] = useState(1);\n const [animatedCompleted, setAnimatedCompleted] = useState(0);\n const [animatedStreak, setAnimatedStreak] = useState(0);\n\n useFocusEffect(\n useCallback(() => {\n AsyncStorage.getItem(\"completedLessons\").then((val) => {\n if (val) {\n try {\n setCompletedLessons(JSON.parse(val));\n } catch {\n setCompletedLessons([]);\n }\n }\n });\n loadAllCourses().then(setCourses);\n getStreakFromStorage().then(({ count, longest }) => {\n setStreakCount(count);\n setStreakLongest(longest);\n });\nrefreshAchievements();\n refreshActivity();\n }, [])\n);\n\n useEffect(() => {\n streak.consumePendingToast().then((data) => {\n if (data) {\n setStreakToastVisible(true);\n }\n });\n refreshAchievements();\n refreshActivity();\n }, []);\n\n useEffect(() => {\n const timer = setTimeout(async () => {\n const period = getPeriodKey();\n const lastPeriod = await AsyncStorage.getItem(LAST_GREETING_KEY);\n if (lastPeriod === period) return;\n const onboardingRaw = await AsyncStorage.getItem(\"onboardingData\");\n let name = \"\";\n if (onboardingRaw) {\n try {\n const data = JSON.parse(onboardingRaw);\n name = data.displayName || \"\";\n } catch {}\n }\n setGreetingMessage(`${getGreeting()}${name ? `, ${name}` : \"!\"}`);\n setGreetingToastVisible(true);\n await AsyncStorage.setItem(LAST_GREETING_KEY, period);\n }, 1000);\n return () => clearTimeout(timer);\n }, []);\n\n const nextExercise: (Exercise & { courseSlug: string; courseTitle: string }) | null = useMemo(() => {\n if (courses.length === 0) return null;\n const flat = courses.flatMap((c) =>\n c.exercises.map((l) => ({ ...l, courseSlug: c.slug, courseTitle: c.title }))\n );\n return flat.find((l) => !completedLessons.includes(`${l.courseSlug}/${l.id}`)) ?? null;\n }, [courses, completedLessons]);\n\n const upcomingExercises = useMemo(() => {\n if (courses.length === 0 || !nextExercise) return [];\n const flat = courses.flatMap((c) =>\n c.exercises.map((l) => ({ ...l, courseSlug: c.slug, courseTitle: c.title }))\n );\n const startIndex = flat.findIndex(\n (l) => l.courseSlug === nextExercise.courseSlug && l.id === nextExercise.id\n);\n if (startIndex === -1) return [];\n return flat.slice(startIndex + 1, startIndex + 6);\n }, [courses, nextExercise]);\n\n  function isExerciseLocked(lessonId: string, courseSlug: string): boolean {\n    const course = courses.find((c) => c.slug === courseSlug);\n    if (!course) return true;\n    return checkExerciseLocked(completedLessons, courseSlug, lessonId, course.exercises);\n  }\n\n const progressAnim = useRef(new Animated.Value(0)).current;\n\n const totalLessons = useMemo(() => {\n return courses.reduce((sum, c) => sum + c.exercises.length, 0);\n }, [courses]);\n\n const progress = totalLessons > 0 ? completedLessons.length / totalLessons : 0;\n\n useEffect(() => {\n Animated.timing(progressAnim, {\n toValue: progress,\n duration: 800,\n useNativeDriver: false,\n }).start();\n }, [progress, progressAnim]);\n\n const progressWidth = progressAnim.interpolate({\n inputRange: [0, 1],\n outputRange: [\"0%\", \"100%\"],\n });\n\n const level = Math.min(10, Math.max(1, Math.floor(progress * 10) + 1));\n const completedCount = completedLessons.length;\n\n useEffect(() => {\n levelAnim.setValue(0);\n completedAnim.setValue(0);\n streakAnim.setValue(0);\n\n const levelListener = levelAnim.addListener(({ value }) => {\n setAnimatedLevel(Math.round(value));\n });\n const completedListener = completedAnim.addListener(({ value }) => {\n setAnimatedCompleted(Math.round(value));\n });\n const streakListener = streakAnim.addListener(({ value }) => {\n setAnimatedStreak(Math.round(value));\n });\n\n Animated.parallel([\n Animated.timing(levelAnim, {\n toValue: level,\n duration: 800,\n useNativeDriver: false,\n }),\n Animated.timing(completedAnim, {\n toValue: completedCount,\n duration: 800,\n useNativeDriver: false,\n }),\n Animated.timing(streakAnim, {\n toValue: streakCount,\n duration: 800,\n useNativeDriver: false,\n }),\n ]).start();\n\n return () => {\n levelAnim.removeListener(levelListener);\n completedAnim.removeListener(completedListener);\n streakAnim.removeListener(streakListener);\n };\n }, [level, completedCount, streakCount]);\n\n const styles = useMemo(\n () =>\n StyleSheet.create({\n container: {\n flex: 1,\n backgroundColor: colors.surface,\n },\n inner: {\n flex: 1,\n paddingHorizontal: 24,\n paddingTop: 32,\n },\n subtitle: {\n fontFamily: \"JetBrainsMono\",\n fontSize: 16,\n color: colors.textSecondary,\n marginTop: 4,\n },\nprogressBarOuter: {\n    height: 8,\n    backgroundColor: colors.surfaceDim,\n    borderRadius: 9999,\n    marginTop: 16,\n    overflow: \"hidden\",\n  },\n  progressBarInner: {\n    height: \"100%\",\n    backgroundColor: derivedColors.primary,\n    borderRadius: 9999,\n  },\n  achievementsStack: {\n    flexDirection: \"row\",\n    alignItems: \"center\",\n    marginTop: 14,\n  },\n  achievementCircle: {\n    width: 28,\n    height: 28,\n    borderRadius: 9999,\n    borderWidth: 2,\n    alignItems: \"center\",\n    justifyContent: \"center\",\n    marginRight: -6,\n  },\n  achievementsStackHint: {\n    fontFamily: \"JetBrainsMono\",\n    fontSize: 11,\n    color: colors.textSecondary,\n    marginLeft: 12,\n  },\n statsRow: {\n flexDirection: \"row\",\n gap: 12,\n marginTop: 24,\n },\n  statCard: {\n  flex: 1,\n   backgroundColor: derivedColors.primary + \"26\",\n  borderRadius: 16,\n  paddingHorizontal: 16,\n  paddingVertical: 16,\n  alignItems: \"center\",\n  },\n statValue: {\n fontFamily: \"JetBrainsMono\",\n fontSize: 24,\n fontWeight: \"700\",\n color: derivedColors.primary,\n },\n statLabel: {\n fontFamily: \"JetBrainsMono\",\n fontSize: 11,\n color: colors.textSecondary,\n marginTop: 4,\n },\n continueSection: {\n marginTop: 40,\n },\n sectionTitle: {\n fontFamily: \"JetBrainsMono\",\n fontSize: 24,\n fontWeight: \"700\",\n color: colors.onSurface,\n marginBottom: 16,\n },\n  nextCard: {\n  backgroundColor: colors.surfaceDim,\n  borderRadius: 16,\n  paddingHorizontal: 20,\n  paddingVertical: 20,\n  marginBottom: 12,\n  },\n nextCardPressed: {\n opacity: 0.8,\n },\n nextCardTitle: {\n fontFamily: \"JetBrainsMono\",\n fontSize: 20,\n fontWeight: \"700\",\n color: colors.onSurface,\n },\n nextCardModule: {\n fontFamily: \"JetBrainsMono\",\n fontSize: 11,\n color: derivedColors.primary,\n textTransform: \"uppercase\",\n letterSpacing: 1,\n marginTop: 4,\n },\n nextCardDescription: {\n fontFamily: \"JetBrainsMono\",\n fontSize: 16,\n color: colors.textSecondary,\n marginTop: 8,\n },\n  nextCardButton: {\n  borderRadius: 12,\n  paddingHorizontal: 20,\n  paddingVertical: 10,\n  alignSelf: \"flex-start\",\n  marginTop: 16,\n  },\n nextCardButtonPressed: {\n transform: [{ translateY: 2 }],\n },\n nextCardButtonText: {\n fontFamily: \"JetBrainsMono\",\n fontWeight: \"900\",\n fontSize: 13,\n textTransform: \"uppercase\",\n letterSpacing: 0.5,\n color: colors.onPrimary,\n },\n listTitle: {\n fontFamily: \"JetBrainsMono\",\n fontSize: 20,\n fontWeight: \"700\",\n color: colors.onSurface,\n marginBottom: 12,\n },\n  listItem: {\n  flexDirection: \"row\",\n  alignItems: \"center\",\n  paddingVertical: 12,\n  paddingHorizontal: 16,\n  backgroundColor: colors.surfaceDim,\n  borderRadius: 12,\n  marginBottom: 8,\n  },\n listItemPressed: {\n opacity: 0.8,\n },\n listItemNumber: {\n fontFamily: \"JetBrainsMono\",\n fontSize: 13,\n fontWeight: \"700\",\n color: colors.textSecondary,\n width: 28,\n },\n listItemTitle: {\n fontFamily: \"JetBrainsMono\",\n fontSize: 16,\n fontWeight: \"700\",\n color: colors.onSurface,\n flex: 1,\n },\n allCompleteContainer: {\n alignItems: \"center\",\n paddingVertical: 32,\n },\n allCompleteText: {\n fontFamily: \"JetBrainsMono\",\n fontSize: 16,\n color: colors.textSecondary,\n textAlign: \"center\",\n },\n }),\n [colorScheme]\n);\n\n return (\n <View style={styles.container}>\n <Header title=\"Dashboard\" showBack={false} />\n <ScrollView\n style={styles.inner}\n contentContainerStyle={{ paddingBottom: 32 }}\n >\n <Text style={styles.subtitle}>\n {Math.round(progress * 100)}% complete\n </Text>\n\n <View style={styles.progressBarOuter}>\n <Animated.View style={[styles.progressBarInner, { width: progressWidth }]} />\n </View>\n\n <View style={styles.achievementsStack}>\n {unlockedAchievements.length === 0 ? (\n <Text style={styles.achievementsStackHint}>No achievements yet</Text>\n ) : (\n unlockedAchievements\n .map((id) => ACHIEVEMENTS.find((a) => a.id === id))\n .filter((a): a is typeof ACHIEVEMENTS[number] => Boolean(a))\n .map((a) => (\n <View\n key={a.id}\n style={[\n styles.achievementCircle,\n {\n backgroundColor: derivedColors.primary,\n borderColor: colors.surface,\n },\n ]}\n accessibilityLabel={a.title}\n accessibilityRole=\"image\"\n >\n <MaterialCommunityIcons\n name={a.icon as any}\n size={16}\n color={colors.onPrimary}\n />\n </View>\n ))\n )}\n </View>\n\n <View style={styles.statsRow}>\n <View style={styles.statCard}>\n <Text style={styles.statValue}>{animatedLevel}</Text>\n <Text style={styles.statLabel}>\n Level\n </Text>\n </View>\n <View style={styles.statCard}>\n <Text style={styles.statValue}>\n {animatedCompleted}\n </Text>\n <Text style={styles.statLabel}>\n Completed\n </Text>\n </View>\n <View style={styles.statCard}>\n <Text style={styles.statValue}>{animatedStreak}</Text>\n <Text style={styles.statLabel}>\n Streak\n </Text>\n </View>\n </View>\n\n <View style={styles.continueSection}>\n <Text style={styles.sectionTitle}>\n Pick up where you left off\n </Text>\n\n {nextExercise ? (\n <Pressable\n onPress={() =>\n router.push(`/learn/${nextExercise.courseSlug}/${nextExercise.id}`)\n }\n style={({ pressed }) => [\n styles.nextCard,\n pressed && styles.nextCardPressed,\n ]}\n accessibilityRole=\"button\"\n accessibilityLabel={`Continue with ${nextExercise.title}`}\n >\n <Text style={styles.nextCardTitle}>\n {nextExercise.title}\n </Text>\n <Text style={styles.nextCardModule}>\n  {nextExercise.courseTitle}\n </Text>\n <Text style={styles.nextCardDescription} numberOfLines={2}>\n {nextExercise.description}\n </Text>\n <Pressable\n onPress={() =>\n router.push(`/learn/${nextExercise.courseSlug}/${nextExercise.id}`)\n }\n style={({ pressed }) => [\n styles.nextCardButton,\n { backgroundColor: ctaColor },\n pressed && styles.nextCardButtonPressed,\n ]}\n accessibilityRole=\"button\"\n accessibilityLabel=\"Continue\"\n >\n <Text style={styles.nextCardButtonText}>\n Continue\n </Text>\n </Pressable>\n </Pressable>\n) : (\n <View style={styles.allCompleteContainer}>\n <Text style={styles.allCompleteText}>\n All exercises complete! 🎉\n </Text>\n </View>\n)}\n\n {upcomingExercises.length > 0 && (\n <>\n <Text style={[styles.listTitle, { marginTop: 24 }]}>\n Up Next\n </Text>\n {upcomingExercises.map((ex) => {\n const locked = isExerciseLocked(ex.id, ex.courseSlug);\n return (\n <Pressable\n key={`${ex.courseSlug}/${ex.id}`}\n disabled={locked}\n onPress={() =>\n router.push(`/learn/${ex.courseSlug}/${ex.id}`)\n }\n style={({ pressed }) => [\n styles.listItem,\n pressed && !locked && styles.listItemPressed,\n ]}\n accessibilityRole=\"button\"\n accessibilityLabel={locked ? `${ex.title} (locked)` : ex.title}\n >\n {locked ? (\n <MaterialCommunityIcons\n name=\"lock\"\n size={18}\n color={colors.textSecondary}\n style={styles.listItemNumber}\n />\n) : (\n <Text style={styles.listItemNumber}>\n {ex.id.replace(\"exercise-\", \"#\")}\n </Text>\n)}\n <Text\n style={[\n styles.listItemTitle,\n locked && { color: colors.textSecondary },\n ]}\n numberOfLines={1}\n >\n {ex.title}\n </Text>\n </Pressable>\n);\n })}\n </>\n)}\n </View>\n\n <ActivityHeatmap activity={activity} />\n </ScrollView>\n\n <Toast\n visible={greetingToastVisible}\n message={greetingMessage}\n duration={3000}\n icon=\"weather-sunny\"\n onDismiss={() => setGreetingToastVisible(false)}\n />\n <StreakToast\n visible={streakToastVisible}\n streakCount={streak.count}\n tierProgress={streak.tierProgress}\n nextTier={streak.nextTier}\n onDismiss={() => setStreakToastVisible(false)}\n />\n </View>\n);\n}",
+                "lineStart": 1,
+                "lineEnd": 564,
+                "totalLines": 564,
+                "truncated": false
+              }
+            },
+            "title": "src/app/dashboard.tsx",
+            "time": {
+              "start": 1785339185415,
+              "end": 1785339185441
+            }
+          },
+          "id": "prt_fae8208f7001FzGJflvjtQFQgI",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae8202a3001Jr8GPud5v6R365"
+        },
+        {
+          "type": "tool",
+          "tool": "read",
+          "callID": "call_0c33",
+          "state": {
+            "status": "completed",
+            "input": {
+              "filePath": "/workspaces/learn-p5/src/components/ActivityHeatmap.tsx"
+            },
+            "output": "<path>/workspaces/learn-p5/src/components/ActivityHeatmap.tsx</path>\n<type>file</type>\n<content>\n1: import { useMemo } from \"react\";\n2: import { View, Text, StyleSheet } from \"react-native\";\n3: import Svg, { Rect, Text as SvgText } from \"react-native-svg\";\n4: import { useThemeContext } from \"./ThemeProvider\";\n5: import { Colors } from \"../constants/Colors\";\n6: import { deriveAccentShades } from \"../utils/colorUtils\";\n7: import { ActivityMap } from \"../hooks/useActivityLog\";\n8: \n9: const WEEKS = 13;\n10: const DAYS = 7;\n11: const CELL = 12;\n12: const GAP = 3;\n13: const STEP = CELL + GAP;\n14: \n15: const MONTHS = [\"Jan\", \"Feb\", \"Mar\", \"Apr\", \"May\", \"Jun\", \"Jul\", \"Aug\", \"Sep\", \"Oct\", \"Nov\", \"Dec\"];\n16: const WEEKDAY_LABELS = [\"\", \"M\", \"\", \"W\", \"\", \"F\", \"\"];\n17: \n18: interface Props {\n19:   activity: ActivityMap;\n20: }\n21: \n22: export default function ActivityHeatmap({ activity }: Props) {\n23:   const { colorScheme, ctaColor } = useThemeContext();\n24:   const colors = Colors[colorScheme === \"dark\" ? \"dark\" : \"light\"];\n25:   const shades = deriveAccentShades(ctaColor);\n26: \n27:   const emptyColor = colors.surfaceContainerHigh;\n28: \n29:   // 5 intensity buckets: 0 (empty), 1..4 from accent ramp\n30:   function colorForCount(count: number): string {\n31:     if (count <= 0) return emptyColor;\n32:     if (count === 1) return shades.veryLight;\n33:     if (count <= 3) return shades.light;\n34:     if (count <= 6) return shades.medium;\n35:     return shades.dark;\n36:   }\n37: \n38:   function dateKey(d: Date): string {\n39:     return d.toISOString().split(\"T\")[0];\n40:   }\n41: \n42:   // Build a 7-row × 13-week grid ending today (col 0 = oldest).\n43:   const grid = useMemo(() => {\n44:     const today = new Date();\n45:     today.setHours(0, 0, 0, 0);\n46:     // Find the most recent Saturday (end-of-week on day 6 of grid if we treat Sun=0..Sat=6)\n47:     const todayDay = today.getDay();\n48:     const end = new Date(today);\n49:     end.setDate(today.getDate() + (6 - todayDay));\n50: \n51:     const cells: Array<{ date: string; count: number; col: number; row: number } | null> = [];\n52:     const start = new Date(end);\n53:     start.setDate(start.getDate() - (WEEKS * DAYS - 1));\n54: \n55:     let idx = 0;\n56:     for (let col = 0; col < WEEKS; col++) {\n57:       for (let row = 0; row < DAYS; row++) {\n58:         const d = new Date(start);\n59:         d.setDate(start.getDate() + idx);\n60:         const isFuture = d.getTime() > today.getTime();\n61:         const key = dateKey(d);\n62:         cells.push(\n63:           isFuture\n64:             ? null\n65:             : { date: key, count: activity[key] ?? 0, col, row }\n66:         );\n67:         idx++;\n68:       }\n69:     }\n70:     return { cells, monthMarkers: buildMonthMarkers(start, end) };\n71:   }, [activity]);\n72: \n73:   function buildMonthMarkers(start: Date, end: Date) {\n74:     const markers: Array<{ label: string; col: number } | null> = [];\n75:     let lastMonth = -1;\n76:     for (let col = 0; col < WEEKS; col++) {\n77:       const d = new Date(start);\n78:       d.setDate(start.getDate() + col * DAYS);\n79:       const month = d.getMonth();\n80:       if (month !== lastMonth) {\n81:         markers.push({ label: MONTHS[month], col });\n82:         lastMonth = month;\n83:       } else {\n84:         markers.push(null);\n85:       }\n86:     }\n87:     return markers;\n88:   }\n89: \n90:   const labelWidth = 24;\n91:   const monthHeight = 16;\n92:   const legendHeight = 18;\n93:   const gridWidth = STEP * WEEKS - GAP;\n94:   const totalWidth = labelWidth + gridWidth;\n95:   const gridHeight = STEP * DAYS - GAP;\n96: \n97:   return (\n98:     <View style={styles.card}>\n99:       <Text style={[styles.title, { color: colors.onSurface }]}>Activity</Text>\n100:       <Svg\n101:         width={totalWidth + 12}\n102:         height={monthHeight + gridHeight + legendHeight + 8}\n103:       >\n104:         {/* Month markers */}\n105:         {grid.monthMarkers.map((m, i) =>\n106:           m ? (\n107:             <SvgText\n108:               key={i}\n109:               x={labelWidth + m.col * STEP}\n110:               y={monthHeight - 4}\n111:               fill={colors.onSurfaceVariant}\n112:               fontSize={9}\n113:               fontFamily=\"JetBrainsMono\"\n114:             >\n115:               {m.label}\n116:             </SvgText>\n117:           ) : null\n118:         )}\n119: \n120:         {/* Weekday ticks */}\n121:         {WEEKDAY_LABELS.map((label, row) =>\n122:           label ? (\n123:             <SvgText\n124:               key={row}\n125:               x={0}\n126:               y={monthHeight + row * STEP + CELL - 2}\n127:               fill={colors.onSurfaceVariant}\n128:               fontSize={9}\n129:               fontFamily=\"JetBrainsMono\"\n130:             >\n131:               {label}\n132:             </SvgText>\n133:           ) : null\n134:         )}\n135: \n136:         {/* Heatmap cells */}\n137:         {grid.cells.map((cell, i) => {\n138:           if (!cell) return null;\n139:           const x = labelWidth + cell.col * STEP;\n140:           const y = monthHeight + cell.row * STEP;\n141:           return (\n142:             <Rect\n143:               key={i}\n144:               x={x}\n145:               y={y}\n146:               width={CELL}\n147:               height={CELL}\n148:               rx={2}\n149:               fill={colorForCount(cell.count)}\n150:             />\n151:           );\n152:         })}\n153: \n154:         {/* Legend */}\n155:         <SvgText\n156:           x={labelWidth + (WEEKS - 5) * STEP}\n157:           y={monthHeight + gridHeight + 14}\n158:           fill={colors.onSurfaceVariant}\n159:           fontSize={9}\n160:           fontFamily=\"JetBrainsMono\"\n161:         >\n162:           Less\n163:         </SvgText>\n164:         {[0, 1, 2, 3, 4].map((level) => {\n165:           const count = level === 0 ? 0 : level === 1 ? 1 : level === 2 ? 3 : level === 3 ? 6 : 7;\n166:           return (\n167:             <Rect\n168:               key={level}\n169:               x={labelWidth + (WEEKS - 3 + level) * STEP}\n170:               y={monthHeight + gridHeight + 6}\n171:               width={CELL}\n172:               height={CELL}\n173:               rx={2}\n174:               fill={colorForCount(count)}\n175:             />\n176:           );\n177:         })}\n178:         <SvgText\n179:           x={labelWidth + (WEEKS + 2) * STEP}\n180:           y={monthHeight + gridHeight + 14}\n181:           fill={colors.onSurfaceVariant}\n182:           fontSize={9}\n183:           fontFamily=\"JetBrainsMono\"\n184:         >\n185:           More\n186:         </SvgText>\n187:       </Svg>\n188:     </View>\n189:   );\n190: }\n191: \n192: const styles = StyleSheet.create({\n193:   card: {\n194:     marginTop: 16,\n195:     paddingHorizontal: 12,\n196:     paddingVertical: 12,\n197:   },\n198:   title: {\n199:     fontFamily: \"JetBrainsMono\",\n200:     fontSize: 18,\n201:     fontWeight: \"700\",\n202:     marginBottom: 8,\n203:   },\n204: });\n\n(End of file - total 204 lines)\n</content>",
+            "metadata": {
+              "preview": "import { useMemo } from \"react\";\nimport { View, Text, StyleSheet } from \"react-native\";\nimport Svg, { Rect, Text as SvgText } from \"react-native-svg\";\nimport { useThemeContext } from \"./ThemeProvider\";\nimport { Colors } from \"../constants/Colors\";\nimport { deriveAccentShades } from \"../utils/colorUtils\";\nimport { ActivityMap } from \"../hooks/useActivityLog\";\n\nconst WEEKS = 13;\nconst DAYS = 7;\nconst CELL = 12;\nconst GAP = 3;\nconst STEP = CELL + GAP;\n\nconst MONTHS = [\"Jan\", \"Feb\", \"Mar\", \"Apr\", \"May\", \"Jun\", \"Jul\", \"Aug\", \"Sep\", \"Oct\", \"Nov\", \"Dec\"];\nconst WEEKDAY_LABELS = [\"\", \"M\", \"\", \"W\", \"\", \"F\", \"\"];\n\ninterface Props {\n  activity: ActivityMap;\n}",
+              "truncated": false,
+              "loaded": [],
+              "display": {
+                "type": "file",
+                "path": "/workspaces/learn-p5/src/components/ActivityHeatmap.tsx",
+                "text": "import { useMemo } from \"react\";\nimport { View, Text, StyleSheet } from \"react-native\";\nimport Svg, { Rect, Text as SvgText } from \"react-native-svg\";\nimport { useThemeContext } from \"./ThemeProvider\";\nimport { Colors } from \"../constants/Colors\";\nimport { deriveAccentShades } from \"../utils/colorUtils\";\nimport { ActivityMap } from \"../hooks/useActivityLog\";\n\nconst WEEKS = 13;\nconst DAYS = 7;\nconst CELL = 12;\nconst GAP = 3;\nconst STEP = CELL + GAP;\n\nconst MONTHS = [\"Jan\", \"Feb\", \"Mar\", \"Apr\", \"May\", \"Jun\", \"Jul\", \"Aug\", \"Sep\", \"Oct\", \"Nov\", \"Dec\"];\nconst WEEKDAY_LABELS = [\"\", \"M\", \"\", \"W\", \"\", \"F\", \"\"];\n\ninterface Props {\n  activity: ActivityMap;\n}\n\nexport default function ActivityHeatmap({ activity }: Props) {\n  const { colorScheme, ctaColor } = useThemeContext();\n  const colors = Colors[colorScheme === \"dark\" ? \"dark\" : \"light\"];\n  const shades = deriveAccentShades(ctaColor);\n\n  const emptyColor = colors.surfaceContainerHigh;\n\n  // 5 intensity buckets: 0 (empty), 1..4 from accent ramp\n  function colorForCount(count: number): string {\n    if (count <= 0) return emptyColor;\n    if (count === 1) return shades.veryLight;\n    if (count <= 3) return shades.light;\n    if (count <= 6) return shades.medium;\n    return shades.dark;\n  }\n\n  function dateKey(d: Date): string {\n    return d.toISOString().split(\"T\")[0];\n  }\n\n  // Build a 7-row × 13-week grid ending today (col 0 = oldest).\n  const grid = useMemo(() => {\n    const today = new Date();\n    today.setHours(0, 0, 0, 0);\n    // Find the most recent Saturday (end-of-week on day 6 of grid if we treat Sun=0..Sat=6)\n    const todayDay = today.getDay();\n    const end = new Date(today);\n    end.setDate(today.getDate() + (6 - todayDay));\n\n    const cells: Array<{ date: string; count: number; col: number; row: number } | null> = [];\n    const start = new Date(end);\n    start.setDate(start.getDate() - (WEEKS * DAYS - 1));\n\n    let idx = 0;\n    for (let col = 0; col < WEEKS; col++) {\n      for (let row = 0; row < DAYS; row++) {\n        const d = new Date(start);\n        d.setDate(start.getDate() + idx);\n        const isFuture = d.getTime() > today.getTime();\n        const key = dateKey(d);\n        cells.push(\n          isFuture\n            ? null\n            : { date: key, count: activity[key] ?? 0, col, row }\n        );\n        idx++;\n      }\n    }\n    return { cells, monthMarkers: buildMonthMarkers(start, end) };\n  }, [activity]);\n\n  function buildMonthMarkers(start: Date, end: Date) {\n    const markers: Array<{ label: string; col: number } | null> = [];\n    let lastMonth = -1;\n    for (let col = 0; col < WEEKS; col++) {\n      const d = new Date(start);\n      d.setDate(start.getDate() + col * DAYS);\n      const month = d.getMonth();\n      if (month !== lastMonth) {\n        markers.push({ label: MONTHS[month], col });\n        lastMonth = month;\n      } else {\n        markers.push(null);\n      }\n    }\n    return markers;\n  }\n\n  const labelWidth = 24;\n  const monthHeight = 16;\n  const legendHeight = 18;\n  const gridWidth = STEP * WEEKS - GAP;\n  const totalWidth = labelWidth + gridWidth;\n  const gridHeight = STEP * DAYS - GAP;\n\n  return (\n    <View style={styles.card}>\n      <Text style={[styles.title, { color: colors.onSurface }]}>Activity</Text>\n      <Svg\n        width={totalWidth + 12}\n        height={monthHeight + gridHeight + legendHeight + 8}\n      >\n        {/* Month markers */}\n        {grid.monthMarkers.map((m, i) =>\n          m ? (\n            <SvgText\n              key={i}\n              x={labelWidth + m.col * STEP}\n              y={monthHeight - 4}\n              fill={colors.onSurfaceVariant}\n              fontSize={9}\n              fontFamily=\"JetBrainsMono\"\n            >\n              {m.label}\n            </SvgText>\n          ) : null\n        )}\n\n        {/* Weekday ticks */}\n        {WEEKDAY_LABELS.map((label, row) =>\n          label ? (\n            <SvgText\n              key={row}\n              x={0}\n              y={monthHeight + row * STEP + CELL - 2}\n              fill={colors.onSurfaceVariant}\n              fontSize={9}\n              fontFamily=\"JetBrainsMono\"\n            >\n              {label}\n            </SvgText>\n          ) : null\n        )}\n\n        {/* Heatmap cells */}\n        {grid.cells.map((cell, i) => {\n          if (!cell) return null;\n          const x = labelWidth + cell.col * STEP;\n          const y = monthHeight + cell.row * STEP;\n          return (\n            <Rect\n              key={i}\n              x={x}\n              y={y}\n              width={CELL}\n              height={CELL}\n              rx={2}\n              fill={colorForCount(cell.count)}\n            />\n          );\n        })}\n\n        {/* Legend */}\n        <SvgText\n          x={labelWidth + (WEEKS - 5) * STEP}\n          y={monthHeight + gridHeight + 14}\n          fill={colors.onSurfaceVariant}\n          fontSize={9}\n          fontFamily=\"JetBrainsMono\"\n        >\n          Less\n        </SvgText>\n        {[0, 1, 2, 3, 4].map((level) => {\n          const count = level === 0 ? 0 : level === 1 ? 1 : level === 2 ? 3 : level === 3 ? 6 : 7;\n          return (\n            <Rect\n              key={level}\n              x={labelWidth + (WEEKS - 3 + level) * STEP}\n              y={monthHeight + gridHeight + 6}\n              width={CELL}\n              height={CELL}\n              rx={2}\n              fill={colorForCount(count)}\n            />\n          );\n        })}\n        <SvgText\n          x={labelWidth + (WEEKS + 2) * STEP}\n          y={monthHeight + gridHeight + 14}\n          fill={colors.onSurfaceVariant}\n          fontSize={9}\n          fontFamily=\"JetBrainsMono\"\n        >\n          More\n        </SvgText>\n      </Svg>\n    </View>\n  );\n}\n\nconst styles = StyleSheet.create({\n  card: {\n    marginTop: 16,\n    paddingHorizontal: 12,\n    paddingVertical: 12,\n  },\n  title: {\n    fontFamily: \"JetBrainsMono\",\n    fontSize: 18,\n    fontWeight: \"700\",\n    marginBottom: 8,\n  },\n});",
+                "lineStart": 1,
+                "lineEnd": 204,
+                "totalLines": 204,
+                "truncated": false
+              }
+            },
+            "title": "src/components/ActivityHeatmap.tsx",
+            "time": {
+              "start": 1785339185549,
+              "end": 1785339185562
+            }
+          },
+          "id": "prt_fae820983001O7Pvr2oEFyRMpn",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae8202a3001Jr8GPud5v6R365"
+        },
+        {
+          "type": "tool",
+          "tool": "read",
+          "callID": "call_9aeb",
+          "state": {
+            "status": "completed",
+            "input": {
+              "filePath": "/workspaces/learn-p5/src/app/learn/index.tsx"
+            },
+            "output": "<path>/workspaces/learn-p5/src/app/learn/index.tsx</path>\n<type>file</type>\n<content>\n1: import { useEffect, useState } from \"react\";\n2: import { View, Text, FlatList, StyleSheet } from \"react-native\";\n3: import { useRouter } from \"expo-router\";\n4: import Header from \"../../components/Header\";\n5: import ExerciseCard from \"../../components/ExerciseCard\";\n6: import { loadAllCourses } from \"../../utils/courseLoader\";\n7: import { Course } from \"../../data/types\";\n8: import { useThemeContext } from \"../../components/ThemeProvider\";\n9: import { Colors } from \"../../constants/Colors\";\n10: \n11: export default function Learn() {\n12:  const router = useRouter();\n13:  const [courses, setCourses] = useState<Course[]>([]);\n14:  const [loading, setLoading] = useState(true);\n15:  const [error, setError] = useState<string | null>(null);\n16:  const { colorScheme, derivedColors } = useThemeContext();\n17:  const colors = Colors[colorScheme === \"dark\" ? \"dark\" : \"light\"];\n18: \n19:  useEffect(() => {\n20:  loadAllCourses()\n21:  .then(setCourses)\n22:  .catch((e) => setError(e.message))\n23:  .finally(() => setLoading(false));\n24:  }, []);\n25: \n26:  return (\n27:  <View style={[styles.container, { backgroundColor: colors.surface }]}>\n28:   <Header title=\"Learn\" />\n29:  <FlatList\n30:  style={styles.flatList}\n31:  contentContainerStyle={{ paddingBottom: 32 }}\n32:   ListHeaderComponent={\n33:   <>\n34:    <Text style={[styles.sectionTitle, { color: derivedColors.primary }]}>\n35:   Courses\n36:   </Text>\n37:   </>\n38:   }\n39:  data={loading ? [] : courses}\n40:  keyExtractor={(item) => item.slug}\n41:  renderItem={({ item }) => (\n42:  <View style={styles.cardWrapper}>\n43: <ExerciseCard\n44:  title={item.title}\n45:  moduleName={item.moduleName}\n46:  description={`${item.exercises.length} exercise${item.exercises.length > 1 ? \"s\" : \"\"} · ${item.description}`}\n47:  onContinue={() => router.push(`/learn/${item.slug}`)}\n48: />\n49:  </View>\n50: )}\n51:  ListEmptyComponent={\n52:  loading ? (\n53:  <View style={styles.emptyContainer}>\n54:  <Text style={[styles.emptyText, { color: colors.textSecondary }]}>\n55:  Loading...\n56:  </Text>\n57:  </View>\n58: ) : error ? (\n59:  <View style={[styles.errorContainer, { backgroundColor: colors.error + \"1A\" }]}>\n60:  <Text style={[styles.errorText, { color: colors.error }]}>\n61:  Couldn&apos;t load courses: {error}\n62:  </Text>\n63:  </View>\n64: ) : null\n65:  }\n66:  />\n67:  </View>\n68: );\n69: }\n70: \n71: const styles = StyleSheet.create({\n72:   container: {\n73:   flex: 1,\n74:   },\n75:   flatList: {\n76:   flex: 1,\n77:   paddingHorizontal: 16,\n78:   paddingTop: 24,\n79:   },\n80:   sectionTitle: {\n81:   fontFamily: \"JetBrainsMono\",\n82:   fontSize: 24,\n83:   fontWeight: \"700\",\n84:   fontStyle: \"italic\",\n85:   marginBottom: 16,\n86:   },\n87:   cardWrapper: {\n88:   marginBottom: 16,\n89:   },\n90:   emptyContainer: {\n91:   alignItems: \"center\",\n92:   paddingVertical: 48,\n93:   },\n94:   emptyText: {\n95:   fontFamily: \"JetBrainsMono\",\n96:   fontSize: 16,\n97:   },\n98:   errorContainer: {\n99:   borderRadius: 12,\n100:   paddingHorizontal: 16,\n101:   paddingVertical: 24,\n102:   alignItems: \"center\",\n103:   },\n104:   errorText: {\n105:   fontFamily: \"JetBrainsMono\",\n106:   fontSize: 16,\n107:   textAlign: \"center\",\n108:   },\n109: });\n\n(End of file - total 109 lines)\n</content>",
+            "metadata": {
+              "preview": "import { useEffect, useState } from \"react\";\nimport { View, Text, FlatList, StyleSheet } from \"react-native\";\nimport { useRouter } from \"expo-router\";\nimport Header from \"../../components/Header\";\nimport ExerciseCard from \"../../components/ExerciseCard\";\nimport { loadAllCourses } from \"../../utils/courseLoader\";\nimport { Course } from \"../../data/types\";\nimport { useThemeContext } from \"../../components/ThemeProvider\";\nimport { Colors } from \"../../constants/Colors\";\n\nexport default function Learn() {\n const router = useRouter();\n const [courses, setCourses] = useState<Course[]>([]);\n const [loading, setLoading] = useState(true);\n const [error, setError] = useState<string | null>(null);\n const { colorScheme, derivedColors } = useThemeContext();\n const colors = Colors[colorScheme === \"dark\" ? \"dark\" : \"light\"];\n\n useEffect(() => {\n loadAllCourses()",
+              "truncated": false,
+              "loaded": [],
+              "display": {
+                "type": "file",
+                "path": "/workspaces/learn-p5/src/app/learn/index.tsx",
+                "text": "import { useEffect, useState } from \"react\";\nimport { View, Text, FlatList, StyleSheet } from \"react-native\";\nimport { useRouter } from \"expo-router\";\nimport Header from \"../../components/Header\";\nimport ExerciseCard from \"../../components/ExerciseCard\";\nimport { loadAllCourses } from \"../../utils/courseLoader\";\nimport { Course } from \"../../data/types\";\nimport { useThemeContext } from \"../../components/ThemeProvider\";\nimport { Colors } from \"../../constants/Colors\";\n\nexport default function Learn() {\n const router = useRouter();\n const [courses, setCourses] = useState<Course[]>([]);\n const [loading, setLoading] = useState(true);\n const [error, setError] = useState<string | null>(null);\n const { colorScheme, derivedColors } = useThemeContext();\n const colors = Colors[colorScheme === \"dark\" ? \"dark\" : \"light\"];\n\n useEffect(() => {\n loadAllCourses()\n .then(setCourses)\n .catch((e) => setError(e.message))\n .finally(() => setLoading(false));\n }, []);\n\n return (\n <View style={[styles.container, { backgroundColor: colors.surface }]}>\n  <Header title=\"Learn\" />\n <FlatList\n style={styles.flatList}\n contentContainerStyle={{ paddingBottom: 32 }}\n  ListHeaderComponent={\n  <>\n   <Text style={[styles.sectionTitle, { color: derivedColors.primary }]}>\n  Courses\n  </Text>\n  </>\n  }\n data={loading ? [] : courses}\n keyExtractor={(item) => item.slug}\n renderItem={({ item }) => (\n <View style={styles.cardWrapper}>\n<ExerciseCard\n title={item.title}\n moduleName={item.moduleName}\n description={`${item.exercises.length} exercise${item.exercises.length > 1 ? \"s\" : \"\"} · ${item.description}`}\n onContinue={() => router.push(`/learn/${item.slug}`)}\n/>\n </View>\n)}\n ListEmptyComponent={\n loading ? (\n <View style={styles.emptyContainer}>\n <Text style={[styles.emptyText, { color: colors.textSecondary }]}>\n Loading...\n </Text>\n </View>\n) : error ? (\n <View style={[styles.errorContainer, { backgroundColor: colors.error + \"1A\" }]}>\n <Text style={[styles.errorText, { color: colors.error }]}>\n Couldn&apos;t load courses: {error}\n </Text>\n </View>\n) : null\n }\n />\n </View>\n);\n}\n\nconst styles = StyleSheet.create({\n  container: {\n  flex: 1,\n  },\n  flatList: {\n  flex: 1,\n  paddingHorizontal: 16,\n  paddingTop: 24,\n  },\n  sectionTitle: {\n  fontFamily: \"JetBrainsMono\",\n  fontSize: 24,\n  fontWeight: \"700\",\n  fontStyle: \"italic\",\n  marginBottom: 16,\n  },\n  cardWrapper: {\n  marginBottom: 16,\n  },\n  emptyContainer: {\n  alignItems: \"center\",\n  paddingVertical: 48,\n  },\n  emptyText: {\n  fontFamily: \"JetBrainsMono\",\n  fontSize: 16,\n  },\n  errorContainer: {\n  borderRadius: 12,\n  paddingHorizontal: 16,\n  paddingVertical: 24,\n  alignItems: \"center\",\n  },\n  errorText: {\n  fontFamily: \"JetBrainsMono\",\n  fontSize: 16,\n  textAlign: \"center\",\n  },\n});",
+                "lineStart": 1,
+                "lineEnd": 109,
+                "totalLines": 109,
+                "truncated": false
+              }
+            },
+            "title": "src/app/learn/index.tsx",
+            "time": {
+              "start": 1785339185757,
+              "end": 1785339185768
+            }
+          },
+          "id": "prt_fae820a57001zlRG6rnEvwCmuv",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae8202a3001Jr8GPud5v6R365"
+        },
+        {
+          "type": "tool",
+          "tool": "read",
+          "callID": "call_d22a",
+          "state": {
+            "status": "completed",
+            "input": {
+              "filePath": "/workspaces/learn-p5/src/hooks/useAchievements.ts"
+            },
+            "output": "<path>/workspaces/learn-p5/src/hooks/useAchievements.ts</path>\n<type>file</type>\n<content>\n1: import { useCallback, useEffect, useState } from \"react\";\n2: import AsyncStorage from \"@react-native-async-storage/async-storage\";\n3: \n4: export interface Achievement {\n5:   id: string;\n6:   title: string;\n7:   subtitle: string;\n8:   icon: string;\n9:   rule: string;\n10: }\n11: \n12: export const ACHIEVEMENTS: Achievement[] = [\n13:   {\n14:     id: \"first-strokes\",\n15:     title: \"First Strokes\",\n16:     subtitle: \"Complete your first exercise\",\n17:     icon: \"brush-variant\",\n18:     rule: \"first completion event\",\n19:   },\n20:   {\n21:     id: \"daily-3\",\n22:     title: \"Daily 3\",\n23:     subtitle: \"Complete 3 exercises in one day\",\n24:     icon: \"calendar-check\",\n25:     rule: \"3 exercises on the same calendar day\",\n26:   },\n27:   {\n28:     id: \"quickdraw\",\n29:     title: \"Quickdraw\",\n30:     subtitle: \"Complete an exercise in under 30 seconds\",\n31:     icon: \"timer-sand\",\n32:     rule: \"durationMs < 30000\",\n33:   },\n34:   {\n35:     id: \"on-a-roll\",\n36:     title: \"On a Roll\",\n37:     subtitle: \"Complete 3 exercises within 10 minutes\",\n38:     icon: \"lightning-bolt\",\n39:     rule: \"3 events within a 10-minute window\",\n40:   },\n41:   {\n42:     id: \"weekender\",\n43:     title: \"Weekender\",\n44:     subtitle: \"Reach a 7-day streak\",\n45:     icon: \"trophy\",\n46:     rule: \"streak_count >= 7\",\n47:   },\n48: ];\n49: \n50: interface CompletionEvent {\n51:   ts: number;\n52:   exerciseId: string;\n53:   durationMs?: number;\n54: }\n55: \n56: const UNLOCKED_KEY = \"achievements_unlocked\";\n57: const EVENTS_KEY = \"completion_events\";\n58: \n59: function dateKey(ts: number): string {\n60:   return new Date(ts).toISOString().split(\"T\")[0];\n61: }\n62: \n63: /**\n64:  * Record a completion event and return the list of achievement IDs that\n65:  * became newly unlocked as a result (idempotent on exerciseId per day —\n66:  * re-running the same exercise on the same day does not double-count).\n67:  */\n68: export async function recordCompletion(\n69:   exerciseId: string,\n70:   durationMs?: number\n71: ): Promise<string[]> {\n72:   const eventsRaw = await AsyncStorage.getItem(EVENTS_KEY);\n73:   const events: CompletionEvent[] = eventsRaw ? JSON.parse(eventsRaw) : [];\n74: \n75:   // De-duplicate by exerciseId within today's date bucket.\n76:   const today = dateKey(Date.now());\n77:   const alreadyToday = events.some(\n78:     (e) => e.exerciseId === exerciseId && dateKey(e.ts) === today\n79:   );\n80:   if (!alreadyToday) {\n81:     events.push({ ts: Date.now(), exerciseId, durationMs });\n82:     await AsyncStorage.setItem(EVENTS_KEY, JSON.stringify(events));\n83:   }\n84: \n85:   const unlockedRaw = await AsyncStorage.getItem(UNLOCKED_KEY);\n86:   const unlocked: string[] = unlockedRaw ? JSON.parse(unlockedRaw) : [];\n87:   const newlyUnlocked: string[] = [];\n88: \n89:   function grant(id: string, predicate: () => boolean) {\n90:     if (!unlocked.includes(id) && !newlyUnlocked.includes(id) && predicate()) {\n91:       newlyUnlocked.push(id);\n92:       unlocked.push(id);\n93:     }\n94:   }\n95: \n96:   const todays = events.filter((e) => dateKey(e.ts) === today);\n97: \n98:   grant(\"first-strokes\", () => events.length >= 1);\n99:   grant(\"daily-3\", () => todays.length >= 3);\n100:   grant(\"quickdraw\", () => events.some((e) => (e.durationMs ?? Infinity) < 30000));\n101: \n102:   // On a Roll: 3 events within any 10-minute window.\n103:   grant(\"on-a-roll\", () => {\n104:     if (events.length < 3) return false;\n105:     const sorted = [...events].sort((a, b) => a.ts - b.ts);\n106:     for (let i = 2; i < sorted.length; i++) {\n107:       if (sorted[i].ts - sorted[i - 2].ts <= 10 * 60 * 1000) return true;\n108:     }\n109:     return false;\n110:   });\n111: \n112:   // Weekender: streak >= 7. Read live so the badge can unlock the moment\n113:   // the streak crosses the threshold, independent of completion timing.\n114:   const streakCountStr = await AsyncStorage.getItem(\"streak_count\");\n115:   const streakCount = streakCountStr ? parseInt(streakCountStr, 10) : 0;\n116:   grant(\"weekender\", () => streakCount >= 7);\n117: \n118:   if (newlyUnlocked.length > 0) {\n119:     await AsyncStorage.setItem(UNLOCKED_KEY, JSON.stringify(unlocked));\n120:   }\n121: \n122:   return newlyUnlocked;\n123: }\n124: \n125: export async function getUnlockedAchievements(): Promise<string[]> {\n126:   const raw = await AsyncStorage.getItem(UNLOCKED_KEY);\n127:   return raw ? JSON.parse(raw) : [];\n128: }\n129: \n130: export function useAchievements() {\n131:   const [unlocked, setUnlocked] = useState<string[]>([]);\n132: \n133:   const refresh = useCallback(async () => {\n134:     setUnlocked(await getUnlockedAchievements());\n135:   }, []);\n136: \n137:   useEffect(() => {\n138:     refresh();\n139:   }, [refresh]);\n140: \n141:   return { unlocked, refresh };\n142: }\n\n(End of file - total 142 lines)\n</content>",
+            "metadata": {
+              "preview": "import { useCallback, useEffect, useState } from \"react\";\nimport AsyncStorage from \"@react-native-async-storage/async-storage\";\n\nexport interface Achievement {\n  id: string;\n  title: string;\n  subtitle: string;\n  icon: string;\n  rule: string;\n}\n\nexport const ACHIEVEMENTS: Achievement[] = [\n  {\n    id: \"first-strokes\",\n    title: \"First Strokes\",\n    subtitle: \"Complete your first exercise\",\n    icon: \"brush-variant\",\n    rule: \"first completion event\",\n  },\n  {",
+              "truncated": false,
+              "loaded": [],
+              "display": {
+                "type": "file",
+                "path": "/workspaces/learn-p5/src/hooks/useAchievements.ts",
+                "text": "import { useCallback, useEffect, useState } from \"react\";\nimport AsyncStorage from \"@react-native-async-storage/async-storage\";\n\nexport interface Achievement {\n  id: string;\n  title: string;\n  subtitle: string;\n  icon: string;\n  rule: string;\n}\n\nexport const ACHIEVEMENTS: Achievement[] = [\n  {\n    id: \"first-strokes\",\n    title: \"First Strokes\",\n    subtitle: \"Complete your first exercise\",\n    icon: \"brush-variant\",\n    rule: \"first completion event\",\n  },\n  {\n    id: \"daily-3\",\n    title: \"Daily 3\",\n    subtitle: \"Complete 3 exercises in one day\",\n    icon: \"calendar-check\",\n    rule: \"3 exercises on the same calendar day\",\n  },\n  {\n    id: \"quickdraw\",\n    title: \"Quickdraw\",\n    subtitle: \"Complete an exercise in under 30 seconds\",\n    icon: \"timer-sand\",\n    rule: \"durationMs < 30000\",\n  },\n  {\n    id: \"on-a-roll\",\n    title: \"On a Roll\",\n    subtitle: \"Complete 3 exercises within 10 minutes\",\n    icon: \"lightning-bolt\",\n    rule: \"3 events within a 10-minute window\",\n  },\n  {\n    id: \"weekender\",\n    title: \"Weekender\",\n    subtitle: \"Reach a 7-day streak\",\n    icon: \"trophy\",\n    rule: \"streak_count >= 7\",\n  },\n];\n\ninterface CompletionEvent {\n  ts: number;\n  exerciseId: string;\n  durationMs?: number;\n}\n\nconst UNLOCKED_KEY = \"achievements_unlocked\";\nconst EVENTS_KEY = \"completion_events\";\n\nfunction dateKey(ts: number): string {\n  return new Date(ts).toISOString().split(\"T\")[0];\n}\n\n/**\n * Record a completion event and return the list of achievement IDs that\n * became newly unlocked as a result (idempotent on exerciseId per day —\n * re-running the same exercise on the same day does not double-count).\n */\nexport async function recordCompletion(\n  exerciseId: string,\n  durationMs?: number\n): Promise<string[]> {\n  const eventsRaw = await AsyncStorage.getItem(EVENTS_KEY);\n  const events: CompletionEvent[] = eventsRaw ? JSON.parse(eventsRaw) : [];\n\n  // De-duplicate by exerciseId within today's date bucket.\n  const today = dateKey(Date.now());\n  const alreadyToday = events.some(\n    (e) => e.exerciseId === exerciseId && dateKey(e.ts) === today\n  );\n  if (!alreadyToday) {\n    events.push({ ts: Date.now(), exerciseId, durationMs });\n    await AsyncStorage.setItem(EVENTS_KEY, JSON.stringify(events));\n  }\n\n  const unlockedRaw = await AsyncStorage.getItem(UNLOCKED_KEY);\n  const unlocked: string[] = unlockedRaw ? JSON.parse(unlockedRaw) : [];\n  const newlyUnlocked: string[] = [];\n\n  function grant(id: string, predicate: () => boolean) {\n    if (!unlocked.includes(id) && !newlyUnlocked.includes(id) && predicate()) {\n      newlyUnlocked.push(id);\n      unlocked.push(id);\n    }\n  }\n\n  const todays = events.filter((e) => dateKey(e.ts) === today);\n\n  grant(\"first-strokes\", () => events.length >= 1);\n  grant(\"daily-3\", () => todays.length >= 3);\n  grant(\"quickdraw\", () => events.some((e) => (e.durationMs ?? Infinity) < 30000));\n\n  // On a Roll: 3 events within any 10-minute window.\n  grant(\"on-a-roll\", () => {\n    if (events.length < 3) return false;\n    const sorted = [...events].sort((a, b) => a.ts - b.ts);\n    for (let i = 2; i < sorted.length; i++) {\n      if (sorted[i].ts - sorted[i - 2].ts <= 10 * 60 * 1000) return true;\n    }\n    return false;\n  });\n\n  // Weekender: streak >= 7. Read live so the badge can unlock the moment\n  // the streak crosses the threshold, independent of completion timing.\n  const streakCountStr = await AsyncStorage.getItem(\"streak_count\");\n  const streakCount = streakCountStr ? parseInt(streakCountStr, 10) : 0;\n  grant(\"weekender\", () => streakCount >= 7);\n\n  if (newlyUnlocked.length > 0) {\n    await AsyncStorage.setItem(UNLOCKED_KEY, JSON.stringify(unlocked));\n  }\n\n  return newlyUnlocked;\n}\n\nexport async function getUnlockedAchievements(): Promise<string[]> {\n  const raw = await AsyncStorage.getItem(UNLOCKED_KEY);\n  return raw ? JSON.parse(raw) : [];\n}\n\nexport function useAchievements() {\n  const [unlocked, setUnlocked] = useState<string[]>([]);\n\n  const refresh = useCallback(async () => {\n    setUnlocked(await getUnlockedAchievements());\n  }, []);\n\n  useEffect(() => {\n    refresh();\n  }, [refresh]);\n\n  return { unlocked, refresh };\n}",
+                "lineStart": 1,
+                "lineEnd": 142,
+                "totalLines": 142,
+                "truncated": false
+              }
+            },
+            "title": "src/hooks/useAchievements.ts",
+            "time": {
+              "start": 1785339185802,
+              "end": 1785339185825
+            }
+          },
+          "id": "prt_fae820a84001mkE73xgfeNjJqn",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae8202a3001Jr8GPud5v6R365"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "37ad4d2c80a96b4065d95d975f1c52058ed5ff7a",
+          "type": "step-finish",
+          "tokens": {
+            "total": 5363,
+            "input": 2358,
+            "output": 125,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 2880
+            }
+          },
+          "cost": 0.0046,
+          "id": "prt_fae820af8001AA8hIt76b2NSUy",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae8202a3001Jr8GPud5v6R365"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_fae81f3d0001virBrhLoh2YWPk",
+        "role": "assistant",
+        "mode": "explore",
+        "agent": "explore",
+        "path": {
+          "cwd": "/workspaces/learn-p5",
+          "root": "/workspaces/learn-p5"
+        },
+        "cost": 0.01899024,
+        "tokens": {
+          "total": 15207,
+          "input": 12794,
+          "output": 109,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 2304
+          }
+        },
+        "modelID": "glm-5.2",
+        "providerID": "opencode-go",
+        "time": {
+          "created": 1785339185985,
+          "completed": 1785339189347
+        },
+        "finish": "tool-calls",
+        "id": "msg_fae820b410018Be3OR3Mbrxs5L",
+        "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p"
+      },
+      "parts": [
+        {
+          "snapshot": "37ad4d2c80a96b4065d95d975f1c52058ed5ff7a",
+          "type": "step-start",
+          "id": "prt_fae8211da001EX2Ry0lYNKxfFw",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae820b410018Be3OR3Mbrxs5L"
+        },
+        {
+          "type": "reasoning",
+          "text": "Let me also read ExerciseCard and useActivityLog for full context, plus check for any \"github\" references.",
+          "time": {
+            "start": 1785339187679,
+            "end": 1785339188155
+          },
+          "id": "prt_fae8211df0014n2F230x0M1Y0J",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae820b410018Be3OR3Mbrxs5L"
+        },
+        {
+          "type": "text",
+          "text": "Let me also read the ExerciseCard component, the useActivityLog hook, and search for any GitHub references tobe thorough.",
+          "time": {
+            "start": 1785339188158,
+            "end": 1785339189196
+          },
+          "id": "prt_fae8213be001HFLbLN5fyAOIrP",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae820b410018Be3OR3Mbrxs5L"
+        },
+        {
+          "type": "tool",
+          "tool": "read",
+          "callID": "call_bab9",
+          "state": {
+            "status": "completed",
+            "input": {
+              "filePath": "/workspaces/learn-p5/src/components/ExerciseCard.tsx"
+            },
+            "output": "<path>/workspaces/learn-p5/src/components/ExerciseCard.tsx</path>\n<type>file</type>\n<content>\n1: import { View, Text, StyleSheet } from \"react-native\";\n2: import { Svg, Path } from \"react-native-svg\";\n3: import { MaterialCommunityIcons } from \"@expo/vector-icons\";\n4: import { useThemeContext } from \"./ThemeProvider\";\n5: import { Colors } from \"../constants/Colors\";\n6: import Button from \"./Button\";\n7: \n8: const asteriskPath =\n9:  \"M16.909,10.259l8.533-2.576l1.676,5.156l-8.498,2.899l5.275,7.48l-4.447,3.225l-5.553-7.348L8.487,26.25l-4.318-3.289l5.275-7.223L0.88,12.647l1.678-5.16l8.598,2.771V1.364h5.754V10.259z\";\n10: \n11: interface ExerciseCardProps {\n12:  title: string;\n13:  moduleName: string;\n14:  description: string;\n15:  locked?: boolean;\n16:  onContinue?: () => void;\n17: }\n18: \n19: export default function ExerciseCard({\n20:  title,\n21:  moduleName,\n22:  description,\n23:  locked = false,\n24:  onContinue,\n25: }: ExerciseCardProps) {\n26:   const { colorScheme, derivedColors } = useThemeContext();\n27:   const colors = Colors[colorScheme === \"dark\" ? \"dark\" : \"light\"];\n28: \n29:  return (\n30:  <View style={[styles.card, { backgroundColor: colors.surfaceDim, opacity: locked ? 0.5 : 1 }]}>\n31:   <View style={[styles.iconContainer, { backgroundColor: derivedColors.primary + \"1A\" }]}>\n32:   {locked ? (\n33:   <MaterialCommunityIcons name=\"lock\" size={28} color={colors.textSecondary} />\n34:   ) : (\n35:   <Svg width={48} height={48} viewBox=\"0 0 28 28\" fill=\"none\">\n36:   <Path d={asteriskPath} fill={derivedColors.primary} />\n37:   </Svg>\n38:   )}\n39:   </View>\n40: \n41:   <View style={styles.content}>\n42:   <Text style={[styles.title, { color: locked ? colors.textSecondary : colors.onSurface }]}>\n43:   {title}\n44:   </Text>\n45:   <Text style={[styles.moduleName, { color: derivedColors.primary }]}>\n46:   {moduleName}\n47:   </Text>\n48:  <Text style={[styles.description, { color: colors.textSecondary }]}>\n49:  {locked ? \"Complete the previous exercise to unlock this one.\" : description}\n50:  </Text>\n51:  </View>\n52: \n53:  {!locked && onContinue && (\n54:  <View style={styles.buttonContainer}>\n55:  <Button title=\"Continue\" onPress={onContinue} variant=\"primary\" />\n56:  </View>\n57: )}\n58:  </View>\n59: );\n60: }\n61: \n62: const styles = StyleSheet.create({\n63:  card: {\n64:  borderRadius: 12,\n65:  overflow: \"hidden\",\n66:  },\n67:  iconContainer: {\n68:  alignItems: \"center\",\n69:  justifyContent: \"center\",\n70:  paddingVertical: 40,\n71:  },\n72:  content: {\n73:  paddingHorizontal: 16,\n74:  paddingVertical: 16,\n75:  gap: 8,\n76:  },\n77:   title: {\n78:     fontFamily: \"JetBrainsMono\",\n79:     fontSize: 24,\n80:     fontWeight: \"700\",\n81:   },\n82:   moduleName: {\n83:     fontFamily: \"JetBrainsMono\",\n84:     fontSize: 11,\n85:  textTransform: \"uppercase\",\n86:  letterSpacing: 0.5,\n87:  },\n88:   description: {\n89:     fontFamily: \"JetBrainsMono\",\n90:     fontSize: 16,\n91:  lineHeight: 20,\n92:  },\n93:  buttonContainer: {\n94:  paddingHorizontal: 16,\n95:  paddingBottom: 16,\n96:  },\n97: });\n\n(End of file - total 97 lines)\n</content>",
+            "metadata": {
+              "preview": "import { View, Text, StyleSheet } from \"react-native\";\nimport { Svg, Path } from \"react-native-svg\";\nimport { MaterialCommunityIcons } from \"@expo/vector-icons\";\nimport { useThemeContext } from \"./ThemeProvider\";\nimport { Colors } from \"../constants/Colors\";\nimport Button from \"./Button\";\n\nconst asteriskPath =\n \"M16.909,10.259l8.533-2.576l1.676,5.156l-8.498,2.899l5.275,7.48l-4.447,3.225l-5.553-7.348L8.487,26.25l-4.318-3.289l5.275-7.223L0.88,12.647l1.678-5.16l8.598,2.771V1.364h5.754V10.259z\";\n\ninterface ExerciseCardProps {\n title: string;\n moduleName: string;\n description: string;\n locked?: boolean;\n onContinue?: () => void;\n}\n\nexport default function ExerciseCard({\n title,",
+              "truncated": false,
+              "loaded": [],
+              "display": {
+                "type": "file",
+                "path": "/workspaces/learn-p5/src/components/ExerciseCard.tsx",
+                "text": "import { View, Text, StyleSheet } from \"react-native\";\nimport { Svg, Path } from \"react-native-svg\";\nimport { MaterialCommunityIcons } from \"@expo/vector-icons\";\nimport { useThemeContext } from \"./ThemeProvider\";\nimport { Colors } from \"../constants/Colors\";\nimport Button from \"./Button\";\n\nconst asteriskPath =\n \"M16.909,10.259l8.533-2.576l1.676,5.156l-8.498,2.899l5.275,7.48l-4.447,3.225l-5.553-7.348L8.487,26.25l-4.318-3.289l5.275-7.223L0.88,12.647l1.678-5.16l8.598,2.771V1.364h5.754V10.259z\";\n\ninterface ExerciseCardProps {\n title: string;\n moduleName: string;\n description: string;\n locked?: boolean;\n onContinue?: () => void;\n}\n\nexport default function ExerciseCard({\n title,\n moduleName,\n description,\n locked = false,\n onContinue,\n}: ExerciseCardProps) {\n  const { colorScheme, derivedColors } = useThemeContext();\n  const colors = Colors[colorScheme === \"dark\" ? \"dark\" : \"light\"];\n\n return (\n <View style={[styles.card, { backgroundColor: colors.surfaceDim, opacity: locked ? 0.5 : 1 }]}>\n  <View style={[styles.iconContainer, { backgroundColor: derivedColors.primary + \"1A\" }]}>\n  {locked ? (\n  <MaterialCommunityIcons name=\"lock\" size={28} color={colors.textSecondary} />\n  ) : (\n  <Svg width={48} height={48} viewBox=\"0 0 28 28\" fill=\"none\">\n  <Path d={asteriskPath} fill={derivedColors.primary} />\n  </Svg>\n  )}\n  </View>\n\n  <View style={styles.content}>\n  <Text style={[styles.title, { color: locked ? colors.textSecondary : colors.onSurface }]}>\n  {title}\n  </Text>\n  <Text style={[styles.moduleName, { color: derivedColors.primary }]}>\n  {moduleName}\n  </Text>\n <Text style={[styles.description, { color: colors.textSecondary }]}>\n {locked ? \"Complete the previous exercise to unlock this one.\" : description}\n </Text>\n </View>\n\n {!locked && onContinue && (\n <View style={styles.buttonContainer}>\n <Button title=\"Continue\" onPress={onContinue} variant=\"primary\" />\n </View>\n)}\n </View>\n);\n}\n\nconst styles = StyleSheet.create({\n card: {\n borderRadius: 12,\n overflow: \"hidden\",\n },\n iconContainer: {\n alignItems: \"center\",\n justifyContent: \"center\",\n paddingVertical: 40,\n },\n content: {\n paddingHorizontal: 16,\n paddingVertical: 16,\n gap: 8,\n },\n  title: {\n    fontFamily: \"JetBrainsMono\",\n    fontSize: 24,\n    fontWeight: \"700\",\n  },\n  moduleName: {\n    fontFamily: \"JetBrainsMono\",\n    fontSize: 11,\n textTransform: \"uppercase\",\n letterSpacing: 0.5,\n },\n  description: {\n    fontFamily: \"JetBrainsMono\",\n    fontSize: 16,\n lineHeight: 20,\n },\n buttonContainer: {\n paddingHorizontal: 16,\n paddingBottom: 16,\n },\n});",
+                "lineStart": 1,
+                "lineEnd": 97,
+                "totalLines": 97,
+                "truncated": false
+              }
+            },
+            "title": "src/components/ExerciseCard.tsx",
+            "time": {
+              "start": 1785339188604,
+              "end": 1785339188613
+            }
+          },
+          "id": "prt_fae821574001YLvrL61rtUrmXM",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae820b410018Be3OR3Mbrxs5L"
+        },
+        {
+          "type": "tool",
+          "tool": "read",
+          "callID": "call_267a",
+          "state": {
+            "status": "completed",
+            "input": {
+              "filePath": "/workspaces/learn-p5/src/hooks/useActivityLog.ts"
+            },
+            "output": "<path>/workspaces/learn-p5/src/hooks/useActivityLog.ts</path>\n<type>file</type>\n<content>\n1: import { useCallback, useEffect, useState } from \"react\";\n2: import AsyncStorage from \"@react-native-async-storage/async-storage\";\n3: \n4: const ACTIVITY_LOG_KEY = \"activity_log\";\n5: \n6: export type ActivityMap = Record<string, number>;\n7: \n8: function dateKey(ts: number): string {\n9:   return new Date(ts).toISOString().split(\"T\")[0];\n10: }\n11: \n12: export async function recordActivity(atMs?: number): Promise<void> {\n13:   const ts = atMs ?? Date.now();\n14:   const key = dateKey(ts);\n15:   const raw = await AsyncStorage.getItem(ACTIVITY_LOG_KEY);\n16:   const map: ActivityMap = raw ? JSON.parse(raw) : {};\n17:   map[key] = (map[key] ?? 0) + 1;\n18:   await AsyncStorage.setItem(ACTIVITY_LOG_KEY, JSON.stringify(map));\n19: }\n20: \n21: export async function getActivityMap(): Promise<ActivityMap> {\n22:   const raw = await AsyncStorage.getItem(ACTIVITY_LOG_KEY);\n23:   return raw ? JSON.parse(raw) : {};\n24: }\n25: \n26: export function useActivityLog() {\n27:   const [activity, setActivity] = useState<ActivityMap>({});\n28: \n29:   const refresh = useCallback(async () => {\n30:     setActivity(await getActivityMap());\n31:   }, []);\n32: \n33:   useEffect(() => {\n34:     refresh();\n35:   }, [refresh]);\n36: \n37:   return { activity, refresh };\n38: }\n\n(End of file - total 38 lines)\n</content>",
+            "metadata": {
+              "preview": "import { useCallback, useEffect, useState } from \"react\";\nimport AsyncStorage from \"@react-native-async-storage/async-storage\";\n\nconst ACTIVITY_LOG_KEY = \"activity_log\";\n\nexport type ActivityMap = Record<string, number>;\n\nfunction dateKey(ts: number): string {\n  return new Date(ts).toISOString().split(\"T\")[0];\n}\n\nexport async function recordActivity(atMs?: number): Promise<void> {\n  const ts = atMs ?? Date.now();\n  const key = dateKey(ts);\n  const raw = await AsyncStorage.getItem(ACTIVITY_LOG_KEY);\n  const map: ActivityMap = raw ? JSON.parse(raw) : {};\n  map[key] = (map[key] ?? 0) + 1;\n  await AsyncStorage.setItem(ACTIVITY_LOG_KEY, JSON.stringify(map));\n}\n",
+              "truncated": false,
+              "loaded": [],
+              "display": {
+                "type": "file",
+                "path": "/workspaces/learn-p5/src/hooks/useActivityLog.ts",
+                "text": "import { useCallback, useEffect, useState } from \"react\";\nimport AsyncStorage from \"@react-native-async-storage/async-storage\";\n\nconst ACTIVITY_LOG_KEY = \"activity_log\";\n\nexport type ActivityMap = Record<string, number>;\n\nfunction dateKey(ts: number): string {\n  return new Date(ts).toISOString().split(\"T\")[0];\n}\n\nexport async function recordActivity(atMs?: number): Promise<void> {\n  const ts = atMs ?? Date.now();\n  const key = dateKey(ts);\n  const raw = await AsyncStorage.getItem(ACTIVITY_LOG_KEY);\n  const map: ActivityMap = raw ? JSON.parse(raw) : {};\n  map[key] = (map[key] ?? 0) + 1;\n  await AsyncStorage.setItem(ACTIVITY_LOG_KEY, JSON.stringify(map));\n}\n\nexport async function getActivityMap(): Promise<ActivityMap> {\n  const raw = await AsyncStorage.getItem(ACTIVITY_LOG_KEY);\n  return raw ? JSON.parse(raw) : {};\n}\n\nexport function useActivityLog() {\n  const [activity, setActivity] = useState<ActivityMap>({});\n\n  const refresh = useCallback(async () => {\n    setActivity(await getActivityMap());\n  }, []);\n\n  useEffect(() => {\n    refresh();\n  }, [refresh]);\n\n  return { activity, refresh };\n}",
+                "lineStart": 1,
+                "lineEnd": 38,
+                "totalLines": 38,
+                "truncated": false
+              }
+            },
+            "title": "src/hooks/useActivityLog.ts",
+            "time": {
+              "start": 1785339188762,
+              "end": 1785339188772
+            }
+          },
+          "id": "prt_fae821615001X9FHamKj5WGddW",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae820b410018Be3OR3Mbrxs5L"
+        },
+        {
+          "type": "tool",
+          "tool": "grep",
+          "callID": "call_583b",
+          "state": {
+            "status": "completed",
+            "input": {
+              "pattern": "(?i)github|commit|push|repo"
+            },
+            "output": "Found 100 matches (more matches available)\n/workspaces/learn-p5/package-lock.json:\n  Line 2756:         \"type\": \"github\",\n\n  Line 2757:         \"url\": \"https://github.com/sponsors/nzakas\"\n\n  Line 2770:         \"type\": \"github\",\n\n  Line 2771:         \"url\": \"https://github.com/sponsors/nzakas\"\n\n  Line 2929:         \"@types/istanbul-reports\": \"^3.0.0\",\n\n  Line 3040:         \"type\": \"github\",\n\n  Line 3041:         \"url\": \"https://github.com/sponsors/Brooooooklyn\"\n\n  Line 3740:         \"url\": \"https://github.com/sponsors/isaacs\"\n\n  Line 4097:     \"node_modules/@types/istanbul-lib-report\": {\n\n  Line 4099:       \"resolved\": \"https://registry.npmjs.org/@types/istanbul-lib-report/-/istanbul-lib-report-3.0.3.tgz\",\n\n  Line 4106:     \"node_modules/@types/istanbul-reports\": {\n\n  Line 4108:       \"resolved\": \"https://registry.npmjs.org/@types/istanbul-reports/-/istanbul-reports-3.0.4.tgz\",\n\n  Line 4112:         \"@types/istanbul-lib-report\": \"*\"\n\n  Line 4822:         \"type\": \"github\",\n\n  Line 4823:         \"url\": \"https://github.com/sponsors/epoberezkin\"\n\n  Line 4844:         \"url\": \"https://github.com/sponsors/sindresorhus\"\n\n  Line 4856:         \"url\": \"https://github.com/sponsors/sindresorhus\"\n\n  Line 4880:         \"url\": \"https://github.com/chalk/ansi-styles?sponsor=1\"\n\n  Line 4905:         \"url\": \"https://github.com/sponsors/jonschlinkert\"\n\n  Line 4946:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 4969:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 4990:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 5012:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 5031:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 5050:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 5089:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 5121:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 5358:           \"type\": \"github\",\n\n  Line 5359:           \"url\": \"https://github.com/sponsors/feross\"\n\n  Line 5410:         \"url\": \"https://github.com/sponsors/sindresorhus\"\n\n  Line 5484:           \"url\": \"https://tidelift.com/funding/github/npm/browserslist\"\n\n  Line 5487:           \"type\": \"github\",\n\n  Line 5488:           \"url\": \"https://github.com/sponsors/ai\"\n\n  Line 5546:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 5577:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 5599:         \"url\": \"https://github.com/sponsors/sindresorhus\"\n\n  Line 5613:           \"url\": \"https://tidelift.com/funding/github/npm/caniuse-lite\"\n\n  Line 5616:           \"type\": \"github\",\n\n  Line 5617:           \"url\": \"https://github.com/sponsors/ai\"\n\n  Line 5635:         \"url\": \"https://github.com/chalk/chalk?sponsor=1\"\n\n  Line 5697:         \"url\": \"https://github.com/sponsors/sindresorhus\"\n\n  Line 5947:         \"url\": \"https://github.com/sponsors/fb55\"\n\n  Line 5981:         \"url\": \"https://github.com/sponsors/fb55\"\n\n  Line 6006:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 6024:         \"url\": \"https://github.com/sponsors/inspect-js\"\n\n  Line 6042:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 6096:         \"url\": \"https://github.com/sponsors/sindresorhus\"\n\n  Line 6114:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 6141:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 6208:         \"url\": \"https://github.com/cheeriojs/dom-serializer?sponsor=1\"\n\n  Line 6217:           \"type\": \"github\",\n\n  Line 6218:           \"url\": \"https://github.com/sponsors/fb55\"\n\n  Line 6235:         \"url\": \"https://github.com/fb55/domhandler?sponsor=1\"\n\n  Line 6249:         \"url\": \"https://github.com/fb55/domutils?sponsor=1\"\n\n  Line 6303:         \"url\": \"https://github.com/fb55/entities?sponsor=1\"\n\n  Line 6363:         \"safe-push-apply\": \"^1.0.0\",\n\n  Line 6381:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 6488:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 6556:         \"url\": \"https://github.com/sponsors/sindresorhus\"\n\n  Line 6649:         \"url\": \"https://github.com/sponsors/sindresorhus\"\n\n  Line 6695:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 6952:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 7017:         \"url\": \"https://github.com/sponsors/sindresorhus\"\n\n  Line 7033:         \"url\": \"https://github.com/sponsors/sindresorhus\"\n\n  Line 7062:         \"url\": \"https://github.com/sponsors/sindresorhus\"\n\n  Line 7078:         \"url\": \"https://github.com/sponsors/sindresorhus\"\n\n  Line 7773:           \"type\": \"github\",\n\n  Line 7774:           \"url\": \"https://github.com/sponsors/sibiraj-s\"\n\n  Line 7935:           \"type\": \"github\",\n\n  Line 7936:           \"url\": \"https://github.com/sponsors/faisalman\"\n\n  Line 8097:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 8135:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 8156:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 8166:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 8228:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 8278:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 8291:         \"url\": \"https://github.com/privatenumber/get-tsconfig?sponsor=1\"\n\n  Line 8317:         \"url\": \"https://github.com/sponsors/isaacs\"\n\n  Line 8343:         \"url\": \"https://github.com/sponsors/sindresorhus\"\n\n  Line 8360:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 8373:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 8392:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 8414:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 8430:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 8443:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 8459:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 8614:         \"url\": \"https://github.com/sponsors/sindresorhus\"\n\n  Line 8701:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 8727:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 8743:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 8760:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 8796:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 8811:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 8829:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 8846:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 8861:         \"url\": \"https://github.com/sponsors/sindresorhus\"\n\n  Line 8887:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 8916:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 8942:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n  Line 8955:         \"url\": \"https://github.com/sponsors/ljharb\"\n\n\n(Results truncated. Consider using a more specific path or pattern.)",
+            "metadata": {
+              "matches": 100,
+              "truncated": true
+            },
+            "title": "(?i)github|commit|push|repo",
+            "time": {
+              "start": 1785339189135,
+              "end": 1785339189191
+            }
+          },
+          "id": "prt_fae821785001WaOTBPfXzt6h8j",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae820b410018Be3OR3Mbrxs5L"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "37ad4d2c80a96b4065d95d975f1c52058ed5ff7a",
+          "type": "step-finish",
+          "tokens": {
+            "total": 15207,
+            "input": 12794,
+            "output": 109,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 2304
+            }
+          },
+          "cost": 0.01899024,
+          "id": "prt_fae821815001UHl8hgEDfIvqzN",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae820b410018Be3OR3Mbrxs5L"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_fae81f3d0001virBrhLoh2YWPk",
+        "role": "assistant",
+        "mode": "explore",
+        "agent": "explore",
+        "path": {
+          "cwd": "/workspaces/learn-p5",
+          "root": "/workspaces/learn-p5"
+        },
+        "cost": 0.00978324,
+        "tokens": {
+          "total": 19032,
+          "input": 3809,
+          "output": 119,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 15104
+          }
+        },
+        "modelID": "glm-5.2",
+        "providerID": "opencode-go",
+        "time": {
+          "created": 1785339189353,
+          "completed": 1785339205938
+        },
+        "finish": "tool-calls",
+        "id": "msg_fae821869001tesa8xT3NJWoE1",
+        "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p"
+      },
+      "parts": [
+        {
+          "snapshot": "37ad4d2c80a96b4065d95d975f1c52058ed5ff7a",
+          "type": "step-start",
+          "id": "prt_fae82258a001emx5nkChe1JIUO",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae821869001tesa8xT3NJWoE1"
+        },
+        {
+          "type": "reasoning",
+          "text": "All the GitHub references are in package-lock.json (sponsor URLs). There's no actual GitHub activity integration in the app source. Let me also check what the `_layout.tsx` looks like and confirm the routing setup, and check the index.tsx (entry).\n\nActually I have enough. Let me confirm there's no GitHubActivity elsewhere in src.",
+          "time": {
+            "start": 1785339192718,
+            "end": 1785339205304
+          },
+          "id": "prt_fae82258e001SrTa8GsLz0o3Qz",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae821869001tesa8xT3NJWoE1"
+        },
+        {
+          "type": "tool",
+          "tool": "grep",
+          "callID": "call_875d",
+          "state": {
+            "status": "error",
+            "input": {
+              "pattern": "(?i)github|GitHubActivity",
+              "path": "/workspaces/learn-p5/src"
+            },
+            "error": "Ripgrep JSON record exceeded 65536 bytes",
+            "time": {
+              "start": 1785339205327,
+              "end": 1785339205412
+            }
+          },
+          "id": "prt_fae8256c1001qhFKroQH4ybNRk",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae821869001tesa8xT3NJWoE1"
+        },
+        {
+          "type": "tool",
+          "tool": "read",
+          "callID": "call_a975",
+          "state": {
+            "status": "completed",
+            "input": {
+              "filePath": "/workspaces/learn-p5/src/app/_layout.tsx"
+            },
+            "output": "<path>/workspaces/learn-p5/src/app/_layout.tsx</path>\n<type>file</type>\n<content>\n1: import { useState, useEffect } from \"react\";\n2: import { Stack } from \"expo-router\";\n3: import { GestureHandlerRootView } from \"react-native-gesture-handler\";\n4: import { useFonts } from \"expo-font\";\n5: import { Text, View } from \"react-native\";\n6: import AsyncStorage from \"@react-native-async-storage/async-storage\";\n7: import ThemeProvider from \"../components/ThemeProvider\";\n8: import StatusBarAccent from \"../components/StatusBarAccent\";\n9: import DrawerProvider from \"../contexts/DrawerContext\";\n10: import SideDrawer from \"../components/SideDrawer\";\n11: import DrawerFab from \"../components/DrawerFab\";\n12: import { DEFAULTS } from \"../constants/Defaults\";\n13: \n14: export default function RootLayout() {\n15:   const [loaded] = useFonts({\n16:     JetBrainsMono: require(\"../../assets/fonts/JetBrainsMono-Regular.ttf\"),\n17:     \"JetBrainsMono-Bold\": require(\"../../assets/fonts/JetBrainsMono-Bold.ttf\"),\n18:     \"JetBrainsMono-Italic\": require(\"../../assets/fonts/JetBrainsMono-Italic.ttf\"),\n19:     \"JetBrainsMono-BoldItalic\": require(\"../../assets/fonts/JetBrainsMono-BoldItalic.ttf\"),\n20:   });\n21: \n22:   const [accentColor, setAccentColor] = useState(DEFAULTS.ctaColor);\n23: \n24:   useEffect(() => {\n25:     AsyncStorage.getItem(\"setting_ctaColor\").then((val) => {\n26:       if (val) setAccentColor(val);\n27:     });\n28:   }, []);\n29: \n30:   if (!loaded) {\n31:     return (\n32:       <View style={{ flex: 1, backgroundColor: \"#FFFFFF\", justifyContent: \"center\", alignItems: \"center\" }}>\n33:         <Text style={{ color: accentColor, fontSize: 16 }}>Loading...</Text>\n34:       </View>\n35:     );\n36:   }\n37: \n38:   return (\n39:     <GestureHandlerRootView style={{ flex: 1 }}>\n40:       <DrawerProvider>\n41:         <ThemeProvider>\n42:           <StatusBarAccent />\n43:           <Stack screenOptions={{ headerShown: false, animation: \"slide_from_right\", animationDuration: 500 }} />\n44:           <SideDrawer />\n45:           <DrawerFab />\n46:         </ThemeProvider>\n47:       </DrawerProvider>\n48:     </GestureHandlerRootView>\n49:   );\n50: }\n\n(End of file - total 50 lines)\n</content>",
+            "metadata": {
+              "preview": "import { useState, useEffect } from \"react\";\nimport { Stack } from \"expo-router\";\nimport { GestureHandlerRootView } from \"react-native-gesture-handler\";\nimport { useFonts } from \"expo-font\";\nimport { Text, View } from \"react-native\";\nimport AsyncStorage from \"@react-native-async-storage/async-storage\";\nimport ThemeProvider from \"../components/ThemeProvider\";\nimport StatusBarAccent from \"../components/StatusBarAccent\";\nimport DrawerProvider from \"../contexts/DrawerContext\";\nimport SideDrawer from \"../components/SideDrawer\";\nimport DrawerFab from \"../components/DrawerFab\";\nimport { DEFAULTS } from \"../constants/Defaults\";\n\nexport default function RootLayout() {\n  const [loaded] = useFonts({\n    JetBrainsMono: require(\"../../assets/fonts/JetBrainsMono-Regular.ttf\"),\n    \"JetBrainsMono-Bold\": require(\"../../assets/fonts/JetBrainsMono-Bold.ttf\"),\n    \"JetBrainsMono-Italic\": require(\"../../assets/fonts/JetBrainsMono-Italic.ttf\"),\n    \"JetBrainsMono-BoldItalic\": require(\"../../assets/fonts/JetBrainsMono-BoldItalic.ttf\"),\n  });",
+              "truncated": false,
+              "loaded": [],
+              "display": {
+                "type": "file",
+                "path": "/workspaces/learn-p5/src/app/_layout.tsx",
+                "text": "import { useState, useEffect } from \"react\";\nimport { Stack } from \"expo-router\";\nimport { GestureHandlerRootView } from \"react-native-gesture-handler\";\nimport { useFonts } from \"expo-font\";\nimport { Text, View } from \"react-native\";\nimport AsyncStorage from \"@react-native-async-storage/async-storage\";\nimport ThemeProvider from \"../components/ThemeProvider\";\nimport StatusBarAccent from \"../components/StatusBarAccent\";\nimport DrawerProvider from \"../contexts/DrawerContext\";\nimport SideDrawer from \"../components/SideDrawer\";\nimport DrawerFab from \"../components/DrawerFab\";\nimport { DEFAULTS } from \"../constants/Defaults\";\n\nexport default function RootLayout() {\n  const [loaded] = useFonts({\n    JetBrainsMono: require(\"../../assets/fonts/JetBrainsMono-Regular.ttf\"),\n    \"JetBrainsMono-Bold\": require(\"../../assets/fonts/JetBrainsMono-Bold.ttf\"),\n    \"JetBrainsMono-Italic\": require(\"../../assets/fonts/JetBrainsMono-Italic.ttf\"),\n    \"JetBrainsMono-BoldItalic\": require(\"../../assets/fonts/JetBrainsMono-BoldItalic.ttf\"),\n  });\n\n  const [accentColor, setAccentColor] = useState(DEFAULTS.ctaColor);\n\n  useEffect(() => {\n    AsyncStorage.getItem(\"setting_ctaColor\").then((val) => {\n      if (val) setAccentColor(val);\n    });\n  }, []);\n\n  if (!loaded) {\n    return (\n      <View style={{ flex: 1, backgroundColor: \"#FFFFFF\", justifyContent: \"center\", alignItems: \"center\" }}>\n        <Text style={{ color: accentColor, fontSize: 16 }}>Loading...</Text>\n      </View>\n    );\n  }\n\n  return (\n    <GestureHandlerRootView style={{ flex: 1 }}>\n      <DrawerProvider>\n        <ThemeProvider>\n          <StatusBarAccent />\n          <Stack screenOptions={{ headerShown: false, animation: \"slide_from_right\", animationDuration: 500 }} />\n          <SideDrawer />\n          <DrawerFab />\n        </ThemeProvider>\n      </DrawerProvider>\n    </GestureHandlerRootView>\n  );\n}",
+                "lineStart": 1,
+                "lineEnd": 50,
+                "totalLines": 50,
+                "truncated": false
+              }
+            },
+            "title": "src/app/_layout.tsx",
+            "time": {
+              "start": 1785339205479,
+              "end": 1785339205500
+            }
+          },
+          "id": "prt_fae825755001pWZ2zVth3VVy0j",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae821869001tesa8xT3NJWoE1"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "37ad4d2c80a96b4065d95d975f1c52058ed5ff7a",
+          "type": "step-finish",
+          "tokens": {
+            "total": 19032,
+            "input": 3809,
+            "output": 119,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 15104
+            }
+          },
+          "cost": 0.00978324,
+          "id": "prt_fae825897001kvZWhGTzEioV6a",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae821869001tesa8xT3NJWoE1"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_fae81f3d0001virBrhLoh2YWPk",
+        "role": "assistant",
+        "mode": "explore",
+        "agent": "explore",
+        "path": {
+          "cwd": "/workspaces/learn-p5",
+          "root": "/workspaces/learn-p5"
+        },
+        "cost": 0.02341104,
+        "tokens": {
+          "total": 19704,
+          "input": 15708,
+          "output": 92,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 3904
+          }
+        },
+        "modelID": "glm-5.2",
+        "providerID": "opencode-go",
+        "time": {
+          "created": 1785339205946,
+          "completed": 1785339209327
+        },
+        "finish": "tool-calls",
+        "id": "msg_fae82593a0019dsY3lkTDCSuSW",
+        "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p"
+      },
+      "parts": [
+        {
+          "snapshot": "37ad4d2c80a96b4065d95d975f1c52058ed5ff7a",
+          "type": "step-start",
+          "id": "prt_fae826049001LZzONbRww4W0g3",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae82593a0019dsY3lkTDCSuSW"
+        },
+        {
+          "type": "reasoning",
+          "text": "The grep failed due to large output - probably matched the generated font base64 file. Let me try more targeted withinclude.",
+          "time": {
+            "start": 1785339207756,
+            "end": 1785339208507
+          },
+          "id": "prt_fae82604c001D0EHNg0eZBmb76",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae82593a0019dsY3lkTDCSuSW"
+        },
+        {
+          "type": "tool",
+          "tool": "grep",
+          "callID": "call_64e1",
+          "state": {
+            "status": "completed",
+            "input": {
+              "pattern": "GitHubActivity",
+              "path": "/workspaces/learn-p5/src",
+              "include": "*.{ts,tsx}"
+            },
+            "output": "No files found",
+            "metadata": {
+              "matches": 0,
+              "truncated": false
+            },
+            "title": "GitHubActivity",
+            "time": {
+              "start": 1785339208517,
+              "end": 1785339208583
+            }
+          },
+          "id": "prt_fae82633e001SjG6lBxZwsRlc1",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae82593a0019dsY3lkTDCSuSW"
+        },
+        {
+          "type": "tool",
+          "tool": "grep",
+          "callID": "call_f9e4",
+          "state": {
+            "status": "error",
+            "input": {
+              "pattern": "github",
+              "path": "/workspaces/learn-p5/src",
+              "include": "*.{ts,tsx}"
+            },
+            "error": "Ripgrep JSON record exceeded 65536 bytes",
+            "time": {
+              "start": 1785339208966,
+              "end": 1785339208997
+            }
+          },
+          "id": "prt_fae8264ff0013E3PEka7y8oNuH",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae82593a0019dsY3lkTDCSuSW"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "37ad4d2c80a96b4065d95d975f1c52058ed5ff7a",
+          "type": "step-finish",
+          "tokens": {
+            "total": 19704,
+            "input": 15708,
+            "output": 92,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 3904
+            }
+          },
+          "cost": 0.02341104,
+          "id": "prt_fae8265d9001dAnV1f2IUIuiYv",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae82593a0019dsY3lkTDCSuSW"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_fae81f3d0001virBrhLoh2YWPk",
+        "role": "assistant",
+        "mode": "explore",
+        "agent": "explore",
+        "path": {
+          "cwd": "/workspaces/learn-p5",
+          "root": "/workspaces/learn-p5"
+        },
+        "cost": 0.0263348,
+        "tokens": {
+          "total": 19765,
+          "input": 18444,
+          "output": 41,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 1280
+          }
+        },
+        "modelID": "glm-5.2",
+        "providerID": "opencode-go",
+        "time": {
+          "created": 1785339209334,
+          "completed": 1785339214305
+        },
+        "finish": "tool-calls",
+        "id": "msg_fae826676001cuEXW18hD4rQOi",
+        "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p"
+      },
+      "parts": [
+        {
+          "snapshot": "37ad4d2c80a96b4065d95d975f1c52058ed5ff7a",
+          "type": "step-start",
+          "id": "prt_fae82783c001YLSggSPf7entGz",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae826676001cuEXW18hD4rQOi"
+        },
+        {
+          "type": "tool",
+          "tool": "bash",
+          "callID": "call_3851",
+          "state": {
+            "status": "completed",
+            "input": {
+              "command": "rg -i -l \"github\" /workspaces/learn-p5/src --glob '*.ts' --glob '*.tsx' 2>/dev/null"
+            },
+            "output": "/workspaces/learn-p5/src/data/courses/io.ts\n/workspaces/learn-p5/src/utils/p5Source.ts\n/workspaces/learn-p5/src/utils/editor/themes.ts\n",
+            "metadata": {
+              "output": "/workspaces/learn-p5/src/data/courses/io.ts\n/workspaces/learn-p5/src/utils/p5Source.ts\n/workspaces/learn-p5/src/utils/editor/themes.ts\n",
+              "exit": 0,
+              "truncated": false
+            },
+            "title": "rg -i -l \"github\" /workspaces/learn-p5/src --glob '*.ts' --glob '*.tsx' 2>/dev/null",
+            "time": {
+              "start": 1785339214086,
+              "end": 1785339214091
+            }
+          },
+          "id": "prt_fae8278d8001IqM6Vt6TGQcxk8",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae826676001cuEXW18hD4rQOi"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "37ad4d2c80a96b4065d95d975f1c52058ed5ff7a",
+          "type": "step-finish",
+          "tokens": {
+            "total": 19765,
+            "input": 18444,
+            "output": 41,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 1280
+            }
+          },
+          "cost": 0.0263348,
+          "id": "prt_fae8279aa001DSExZxmsFqU205",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae826676001cuEXW18hD4rQOi"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_fae81f3d0001virBrhLoh2YWPk",
+        "role": "assistant",
+        "mode": "explore",
+        "agent": "explore",
+        "path": {
+          "cwd": "/workspaces/learn-p5",
+          "root": "/workspaces/learn-p5"
+        },
+        "cost": 0.00542972,
+        "tokens": {
+          "total": 19846,
+          "input": 95,
+          "output": 39,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 19712
+          }
+        },
+        "modelID": "glm-5.2",
+        "providerID": "opencode-go",
+        "time": {
+          "created": 1785339214311,
+          "completed": 1785339216638
+        },
+        "finish": "tool-calls",
+        "id": "msg_fae8279e7001Sp930UnPi3jzKT",
+        "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p"
+      },
+      "parts": [
+        {
+          "snapshot": "37ad4d2c80a96b4065d95d975f1c52058ed5ff7a",
+          "type": "step-start",
+          "id": "prt_fae827f49001dq84RGEAwcWY1x",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae8279e7001Sp930UnPi3jzKT"
+        },
+        {
+          "type": "tool",
+          "tool": "bash",
+          "callID": "call_c062",
+          "state": {
+            "status": "completed",
+            "input": {
+              "command": "rg -i \"github\" /workspaces/learn-p5/src --glob '*.ts' --glob '*.tsx' 2>/dev/null"
+            },
+            "output": "...output truncated...\n\nFull output saved to: /home/codespace/.local/share/opencode/tool-output/tool_fae8281d1001RpzAgeKa244Oh6\n\ndateMissing:!1,saveMissingTo:\\\"fallback\\\",saveMissingPlurals:!0,missingKeyHandler:!1,missingInterpolationHandler:!1,postProcess:!1,postProcessPassResolved:!1,returnNull:!0,returnEmptyString:!0,returnObjects:!1,joinArrays:!1,returnedObjectHandler:!1,parseMissingKeyHandler:!1,appendNamespaceToMissingKey:!1,appendNamespaceToCIMode:!1,overloadTranslationOptionHandler:function(e){var t={};if(\\\"object\\\"===jd(e[1])&&(t=e[1]),\\\"string\\\"==typeof e[1]&&(t.defaultValue=e[1]),\\\"string\\\"==typeof e[2]&&(t.tDescription=e[2]),\\\"object\\\"===jd(e[2])||\\\"object\\\"===jd(e[3])){var r=e[3]||e[2];Object.keys(r).forEach((function(e){t[e]=r[e]}))}return t},interpolation:{escapeValue:!0,format:function(e,t,r,i){return e},prefix:\\\"{{\\\",suffix:\\\"}}\\\",formatSeparator:\\\",\\\",unescapePrefix:\\\"-\\\",nestingPrefix:\\\"$t(\\\",nestingSuffix:\\\")\\\",nestingOptionsSeparator:\\\",\\\",maxReplaces:1e3,skipOnVariables:!1}},this.options,Sf(t)),this.format=this.options.interpolation.format,r||(r=Tf),!this.options.isClone){this.modules.logger?rf.init(i(this.modules.logger),this.options):rf.init(null,this.options);var n=new _f(this.options);this.store=new gf(this.options.resources,this.options);var s=this.services;s.logger=rf,s.resourceStore=this.store,s.languageUtils=n,s.pluralResolver=new Ef(n,{prepend:this.options.pluralSeparator,compatibilityJSON:this.options.compatibilityJSON,simplifyPluralSuffix:this.options.simplifyPluralSuffix}),s.interpolator=new Af(this.options),s.utils={hasLoadedNamespace:this.hasLoadedNamespace.bind(this)},s.backendConnector=new Df(i(this.modules.backend),s.resourceStore,s,this.options),s.backendConnector.on(\\\"*\\\",(function(t){for(var r=arguments.length,i=new Array(r>1?r-1:0),n=1;n<r;n++)i[n-1]=arguments[n];e.emit.apply(e,[t].concat(i))})),this.modules.languageDetector&&(s.languageDetector=i(this.modules.languageDetector),s.languageDetector.init(s,this.options.detection,this.options)),this.modules.i18nFormat&&(s.i18nFormat=i(this.modules.i18nFormat),s.i18nFormat.init&&s.i18nFormat.init(this)),this.translator=new vf(this.services,this.options),this.translator.on(\\\"*\\\",(function(t){for(var r=arguments.length,i=new Array(r>1?r-1:0),n=1;n<r;n++)i[n-1]=arguments[n];e.emit.apply(e,[t].concat(i))})),this.modules.external.forEach((function(t){t.init&&t.init(e)}))}if(this.options.fallbackLng&&!this.services.languageDetector&&!this.options.lng){var a=this.services.languageUtils.getFallbackCodes(this.options.fallbackLng);a.length>0&&\\\"dev\\\"!==a[0]&&(this.options.lng=a[0])}this.services.languageDetector||this.options.lng||this.logger.warn(\\\"init: no languageDetector is used and no lng is defined\\\");[\\\"getResource\\\",\\\"hasResourceBundle\\\",\\\"getResourceBundle\\\",\\\"getDataByLanguage\\\"].forEach((function(t){e[t]=function(){var r;return(r=e.store)[t].apply(r,arguments)}}));[\\\"addResource\\\",\\\"addResources\\\",\\\"addResourceBundle\\\",\\\"removeResourceBundle\\\"].forEach((function(t){e[t]=function(){var r;return(r=e.store)[t].apply(r,arguments),e}}));var o=sf(),h=function(){var t=function(t,i){e.isInitialized&&e.logger.warn(\\\"init: i18next is already initialized. You should call init just once!\\\"),e.isInitialized=!0,e.options.isClone||e.logger.log(\\\"initialized\\\",e.options),e.emit(\\\"initialized\\\",e.options),o.resolve(i),r(t,i)};if(e.languages&&\\\"v1\\\"!==e.options.compatibilityAPI&&!e.isInitialized)return t(null,e.t.bind(e));e.changeLanguage(e.options.lng,t)};return this.options.resources||!this.options.initImmediate?h():setTimeout(h,0),o}},{key:\\\"loadResources\\\",value:function(e){var t=this,r=arguments.length>1&&void 0!==arguments[1]?arguments[1]:Tf,i=\\\"string\\\"==typeof e?e:this.language;if(\\\"function\\\"==typeof e&&(r=e),!this.options.resources||this.options.partialBundledLanguages){if(i&&\\\"cimode\\\"===i.toLowerCase())return r();var n=[],s=function(e){e&&t.services.languageUtils.toResolveHierarchy(e).forEach((function(e){n.indexOf(e)<0&&n.push(e)}))};if(i)s(i);else this.services.languageUtils.getFallbackCodes(this.options.fallbackLng).forEach((function(e){return s(e)}));this.options.preload&&this.options.preload.forEach((function(e){return s(e)})),this.services.backendConnector.load(n,this.options.ns,r)}else r(null)}},{key:\\\"reloadResources\\\",value:function(e,t,r){var i=sf();return e||(e=this.languages),t||(t=this.options.ns),r||(r=Tf),this.services.backendConnector.reload(e,t,(function(e){i.resolve(),r(e)})),i}},{key:\\\"use\\\",value:function(e){if(!e)throw new Error(\\\"You are passing an undefined module! Please check the object you are passing to i18next.use()\\\");if(!e.type)throw new Error(\\\"You are passing a wrong module! Please check the object you are passing to i18next.use()\\\");return\\\"backend\\\"===e.type&&(this.modules.backend=e),(\\\"logger\\\"===e.type||e.log&&e.warn&&e.error)&&(this.modules.logger=e),\\\"languageDetector\\\"===e.type&&(this.modules.languageDetector=e),\\\"i18nFormat\\\"===e.type&&(this.modules.i18nFormat=e),\\\"postProcessor\\\"===e.type&&yf.addPostProcessor(e),\\\"3rdParty\\\"===e.type&&this.modules.external.push(e),this}},{key:\\\"changeLanguage\\\",value:function(e,t){var r=this;this.isLanguageChangingTo=e;var i=sf();this.emit(\\\"languageChanging\\\",e);var n=function(e){var n=\\\"string\\\"==typeof e?e:r.services.languageUtils.getBestMatchFromCodes(e);n&&(r.language||(r.language=n,r.languages=r.services.languageUtils.toResolveHierarchy(n)),r.translator.language||r.translator.changeLanguage(n),r.services.languageDetector&&r.services.languageDetector.cacheUserLanguage(n)),r.loadResources(n,(function(e){!function(e,n){n?(r.language=n,r.languages=r.services.languageUtils.toResolveHierarchy(n),r.translator.changeLanguage(n),r.isLanguageChangingTo=void 0,r.emit(\\\"languageChanged\\\",n),r.logger.log(\\\"languageChanged\\\",n)):r.isLanguageChangingTo=void 0,i.resolve((function(){return r.t.apply(r,arguments)})),t&&t(e,(function(){return r.t.apply(r,arguments)}))}(e,n)}))};return e||!this.services.languageDetector||this.services.languageDetector.async?!e&&this.services.languageDetector&&this.services.languageDetector.async?this.services.languageDetector.detect(n):n(e):n(this.services.languageDetector.detect()),i}},{key:\\\"getFixedT\\\",value:function(e,t){var r=this,i=function e(t,i){var n;if(\\\"object\\\"!==jd(i)){for(var s=arguments.length,a=new Array(s>2?s-2:0),o=2;o<s;o++)a[o-2]=arguments[o];n=r.options.overloadTranslationOptionHandler([t,i].concat(a))}else n=Hd({},i);return n.lng=n.lng||e.lng,n.lngs=n.lngs||e.lngs,n.ns=n.ns||e.ns,r.t(t,n)};return\\\"string\\\"==typeof e?i.lng=e:i.lngs=e,i.ns=t,i}},{key:\\\"t\\\",value:function(){var e;return this.translator&&(e=this.translator).translate.apply(e,arguments)}},{key:\\\"exists\\\",value:function(){var e;return this.translator&&(e=this.translator).exists.apply(e,arguments)}},{key:\\\"setDefaultNamespace\\\",value:function(e){this.options.defaultNS=e}},{key:\\\"hasLoadedNamespace\\\",value:function(e){var t=this,r=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};if(!this.isInitialized)return this.logger.warn(\\\"hasLoadedNamespace: i18next was not initialized\\\",this.languages),!1;if(!this.languages||!this.languages.length)return this.logger.warn(\\\"hasLoadedNamespace: i18n.languages were undefined or empty\\\",this.languages),!1;var i=this.languages[0],n=!!this.options&&this.options.fallbackLng,s=this.languages[this.languages.length-1];if(\\\"cimode\\\"===i.toLowerCase())return!0;var a=function(e,r){var i=t.services.backendConnector.state[\\\"\\\".concat(e,\\\"|\\\").concat(r)];return-1===i||2===i};if(r.precheck){var o=r.precheck(this,a);if(void 0!==o)return o}return!!this.hasResourceBundle(i,e)||(!this.services.backendConnector.backend||!(!a(i,e)||n&&!a(s,e)))}},{key:\\\"loadNamespaces\\\",value:function(e,t){var r=this,i=sf();return this.options.ns?(\\\"string\\\"==typeof e&&(e=[e]),e.forEach((function(e){r.options.ns.indexOf(e)<0&&r.options.ns.push(e)})),this.loadResources((function(e){i.resolve(),t&&t(e)})),i):(t&&t(),Promise.resolve())}},{key:\\\"loadLanguages\\\",value:function(e,t){var r=sf();\\\"string\\\"==typeof e&&(e=[e]);var i=this.options.preload||[],n=e.filter((function(e){return i.indexOf(e)<0}));return n.length?(this.options.preload=i.concat(n),this.loadResources((function(e){r.resolve(),t&&t(e)})),r):(t&&t(),Promise.resolve())}},{key:\\\"dir\\\",value:function(e){if(e||(e=this.languages&&this.languages.length>0?this.languages[0]:this.language),!e)return\\\"rtl\\\";return[\\\"ar\\\",\\\"shu\\\",\\\"sqr\\\",\\\"ssh\\\",\\\"xaa\\\",\\\"yhd\\\",\\\"yud\\\",\\\"aao\\\",\\\"abh\\\",\\\"abv\\\",\\\"acm\\\",\\\"acq\\\",\\\"acw\\\",\\\"acx\\\",\\\"acy\\\",\\\"adf\\\",\\\"ads\\\",\\\"aeb\\\",\\\"aec\\\",\\\"afb\\\",\\\"ajp\\\",\\\"apc\\\",\\\"apd\\\",\\\"arb\\\",\\\"arq\\\",\\\"ars\\\",\\\"ary\\\",\\\"arz\\\",\\\"auz\\\",\\\"avl\\\",\\\"ayh\\\",\\\"ayl\\\",\\\"ayn\\\",\\\"ayp\\\",\\\"bbz\\\",\\\"pga\\\",\\\"he\\\",\\\"iw\\\",\\\"ps\\\",\\\"pbt\\\",\\\"pbu\\\",\\\"pst\\\",\\\"prp\\\",\\\"prd\\\",\\\"ug\\\",\\\"ur\\\",\\\"ydd\\\",\\\"yds\\\",\\\"yih\\\",\\\"ji\\\",\\\"yi\\\",\\\"hbo\\\",\\\"men\\\",\\\"xmn\\\",\\\"fa\\\",\\\"jpr\\\",\\\"peo\\\",\\\"pes\\\",\\\"prs\\\",\\\"dv\\\",\\\"sam\\\"].indexOf(this.services.languageUtils.getLanguagePartFromCode(e))>=0?\\\"rtl\\\":\\\"ltr\\\"}},{key:\\\"createInstance\\\",value:function(){return new t(arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},arguments.length>1?arguments[1]:void 0)}},{key:\\\"cloneInstance\\\",value:function(){var e=this,r=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},i=arguments.length>1&&void 0!==arguments[1]?arguments[1]:Tf,n=Hd({},this.options,r,{isClone:!0}),s=new t(n);return[\\\"store\\\",\\\"services\\\",\\\"language\\\"].forEach((function(t){s[t]=e[t]})),s.services=Hd({},this.services),s.services.utils={hasLoadedNamespace:s.hasLoadedNamespace.bind(s)},s.translator=new vf(s.services,s.options),s.translator.on(\\\"*\\\",(function(e){for(var t=arguments.length,r=new Array(t>1?t-1:0),i=1;i<t;i++)r[i-1]=arguments[i];s.emit.apply(s,[e].concat(r))})),s.init(n,i),s.translator.options=s.options,s.translator.backendConnector.services.utils={hasLoadedNamespace:s.hasLoadedNamespace.bind(s)},s}}]),t}(nf),kf=(new Ff,[]),Mf=kf.forEach,If=kf.slice;var Bf,Lf=function(e,t,r,i){var n,s=arguments.length>4&&void 0!==arguments[4]?arguments[4]:{path:\\\"/\\\"};if(r){var a=new Date;a.setTime(a.getTime()+60*r*1e3),n=\\\"; expires=\\\"+a.toUTCString()}else n=\\\"\\\";i=i?\\\"domain=\\\"+i+\\\";\\\":\\\"\\\",s=Object.keys(s).reduce((function(e,t){return e+\\\";\\\"+t.replace(/([A-Z])/g,(function(e){return\\\"-\\\"+e.toLowerCase()}))+\\\"=\\\"+s[t]}),\\\"\\\"),document.cookie=e+\\\"=\\\"+encodeURIComponent(t)+n+\\\";\\\"+i+s},Of=function(e){for(var t=e+\\\"=\\\",r=document.cookie.split(\\\";\\\"),i=0;i<r.length;i++){for(var n=r[i];\\\" \\\"===n.charAt(0);)n=n.substring(1,n.length);if(0===n.indexOf(t))return n.substring(t.length,n.length)}return null},Pf={name:\\\"cookie\\\",lookup:function(e){var t;if(e.lookupCookie&&\\\"undefined\\\"!=typeof document){var r=Of(e.lookupCookie);r&&(t=r)}return t},cacheUserLanguage:function(e,t){t.lookupCookie&&\\\"undefined\\\"!=typeof document&&Lf(t.lookupCookie,e,t.cookieMinutes,t.cookieDomain,t.cookieOptions)}},Nf={name:\\\"querystring\\\",lookup:function(e){var t;if(\\\"undefined\\\"!=typeof window)for(var r=window.location.search.substring(1).split(\\\"&\\\"),i=0;i<r.length;i++){var n=r[i].indexOf(\\\"=\\\");if(n>0)r[i].substring(0,n)===e.lookupQuerystring&&(t=r[i].substring(n+1))}return t}};try{Bf=\\\"undefined\\\"!==window&&null!==window.localStorage;var Rf=\\\"i18next.translate.boo\\\";window.localStorage.setItem(Rf,\\\"foo\\\"),window.localStorage.removeItem(Rf)}catch(e){Bf=!1}var Vf,Uf={name:\\\"localStorage\\\",lookup:function(e){var t;if(e.lookupLocalStorage&&Bf){var r=window.localStorage.getItem(e.lookupLocalStorage);r&&(t=r)}return t},cacheUserLanguage:function(e,t){t.lookupLocalStorage&&Bf&&window.localStorage.setItem(t.lookupLocalStorage,e)}};try{Vf=\\\"undefined\\\"!==window&&null!==window.sessionStorage;var zf=\\\"i18next.translate.boo\\\";window.sessionStorage.setItem(zf,\\\"foo\\\"),window.sessionStorage.removeItem(zf)}catch(e){Vf=!1}var jf={name:\\\"sessionStorage\\\",lookup:function(e){var t;if(e.lookupsessionStorage&&Vf){var r=window.sessionStorage.getItem(e.lookupsessionStorage);r&&(t=r)}return t},cacheUserLanguage:function(e,t){t.lookupsessionStorage&&Vf&&window.sessionStorage.setItem(t.lookupsessionStorage,e)}},Gf={name:\\\"navigator\\\",lookup:function(e){var t=[];if(\\\"undefined\\\"!=typeof navigator){if(navigator.languages)for(var r=0;r<navigator.languages.length;r++)t.push(navigator.languages[r]);navigator.userLanguage&&t.push(navigator.userLanguage),navigator.language&&t.push(navigator.language)}return t.length>0?t:void 0}},$f={name:\\\"htmlTag\\\",lookup:function(e){var t,r=e.htmlTag||(\\\"undefined\\\"!=typeof document?document.documentElement:null);return r&&\\\"function\\\"==typeof r.getAttribute&&(t=r.getAttribute(\\\"lang\\\")),t}},Hf={name:\\\"path\\\",lookup:function(e){var t;if(\\\"undefined\\\"!=typeof window){var r=window.location.pathname.match(/\\\\/([a-zA-Z-]*)/g);if(r instanceof Array)if(\\\"number\\\"==typeof e.lookupFromPathIndex){if(\\\"string\\\"!=typeof r[e.lookupFromPathIndex])return;t=r[e.lookupFromPathIndex].replace(\\\"/\\\",\\\"\\\")}else t=r[0].replace(\\\"/\\\",\\\"\\\")}return t}},qf={name:\\\"subdomain\\\",lookup:function(e){var t;if(\\\"undefined\\\"!=typeof window){var r=window.location.href.match(/(?:http[s]*\\\\:\\\\/\\\\/)*(.*?)\\\\.(?=[^\\\\/]*\\\\..{2,5})/gi);r instanceof Array&&(t=\\\"number\\\"==typeof e.lookupFromSubdomainIndex?r[e.lookupFromSubdomainIndex].replace(\\\"http://\\\",\\\"\\\").replace(\\\"https://\\\",\\\"\\\").replace(\\\".\\\",\\\"\\\"):r[0].replace(\\\"http://\\\",\\\"\\\").replace(\\\"https://\\\",\\\"\\\").replace(\\\".\\\",\\\"\\\"))}return t}};var Wf=function(){function e(t){var r=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};qd(this,e),this.type=\\\"languageDetector\\\",this.detectors={},this.init(t,r)}return Xd(e,[{key:\\\"init\\\",value:function(e){var t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{},r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};this.services=e,this.options=function(e){return Mf.call(If.call(arguments,1),(function(t){if(t)for(var r in t)void 0===e[r]&&(e[r]=t[r])})),e}(t,this.options||{},{order:[\\\"querystring\\\",\\\"cookie\\\",\\\"localStorage\\\",\\\"sessionStorage\\\",\\\"navigator\\\",\\\"htmlTag\\\"],lookupQuerystring:\\\"lng\\\",lookupCookie:\\\"i18next\\\",lookupLocalStorage:\\\"i18nextLng\\\",caches:[\\\"localStorage\\\"],excludeCacheFor:[\\\"cimode\\\"],checkWhitelist:!0,checkForSimilarInWhitelist:!1}),this.options.checkForSimilarInWhitelist&&(this.options.checkWhitelist=!0),this.options.lookupFromUrlIndex&&(this.options.lookupFromPathIndex=this.options.lookupFromUrlIndex),this.i18nOptions=r,this.addDetector(Pf),this.addDetector(Nf),this.addDetector(Uf),this.addDetector(jf),this.addDetector(Gf),this.addDetector($f),this.addDetector(Hf),this.addDetector(qf)}},{key:\\\"addDetector\\\",value:function(e){this.detectors[e.name]=e}},{key:\\\"detect\\\",value:function(e){var t=this;e||(e=this.options.order);var r,i=[];if(e.forEach((function(e){if(t.detectors[e]){var r=t.detectors[e].lookup(t.options);r&&\\\"string\\\"==typeof r&&(r=[r]),r&&(i=i.concat(r))}})),i.forEach((function(e){if(!r){var i=t.services.languageUtils.formatLanguageCode(e);t.options.checkWhitelist&&!t.services.languageUtils.isWhitelisted(i)||(r=i),!r&&t.options.checkForSimilarInWhitelist&&(r=t.getSimilarInWhitelist(i))}})),!r){var n=this.i18nOptions.fallbackLng;\\\"string\\\"==typeof n&&(n=[n]),n||(n=[]),r=\\\"[object Array]\\\"===Object.prototype.toString.apply(n)?n[0]:n[0]||n.default&&n.default[0]}return r}},{key:\\\"cacheUserLanguage\\\",value:function(e,t){var r=this;t||(t=this.options.caches),t&&(this.options.excludeCacheFor&&this.options.excludeCacheFor.indexOf(e)>-1||t.forEach((function(t){r.detectors[t]&&r.detectors[t].cacheUserLanguage(e,r.options)})))}},{key:\\\"getSimilarInWhitelist\\\",value:function(e){var t=this;if(this.i18nOptions.whitelist){if(e.includes(\\\"-\\\")){var r=e.split(\\\"-\\\")[0],i=this.services.languageUtils.formatLanguageCode(r);if(this.services.languageUtils.isWhitelisted(i))return i;e=i}var n=this.i18nOptions.whitelist.find((function(r){var i=t.services.languageUtils.formatLanguageCode(r);if(i.startsWith(e))return i}));return n||void 0}}}]),e}();Wf.type=\\\"languageDetector\\\";var Xf={en:{translation:{fes:{autoplay:\\\"The media that tried to play (with '{{src}}') wasn't allowed to by this browser, most likely due to the browser's autoplay policy.\\\\n\\\\n+ More info: {{url}}\\\",checkUserDefinedFns:\\\"It seems that you may have accidentally written {{name}} instead of {{actualName}}. Please correct it if it's not intentional.\\\",fileLoadError:{bytes:\\\"It looks like there was a problem loading your file. {{suggestion}}\\\",font:\\\"It looks like there was a problem loading your font. {{suggestion}}\\\",gif:\\\"There was some trouble loading your GIF. Make sure that your GIF is using 87a or 89a encoding.\\\",image:\\\"It looks like there was a problem loading your image. {{suggestion}}\\\",json:\\\"It looks like there was a problem loading your JSON file. {{suggestion}}\\\",large:\\\"If your large file isn't fetched successfully, we recommend splitting the file into smaller segments and fetching those.\\\",strings:\\\"It looks like there was a problem loading your text file. {{suggestion}}\\\",suggestion:\\\"Try checking if the file path ({{filePath}}) is correct, hosting the file online, or running a local server.\\\\n\\\\n+ More info: {{url}}\\\",table:\\\"It looks like there was a problem loading your table file. {{suggestion}}\\\",xml:\\\"It looks like there was a problem loading your XML file. {{suggestion}}\\\"},friendlyParamError:{type_EMPTY_VAR:\\\"{{location}} {{func}}() was expecting {{formatType}} for the {{position}} parameter, received an empty variable instead. If not intentional, this is often a problem with scope.\\\\n\\\\n+ More info: {{url}}\\\",type_TOO_FEW_ARGUMENTS:\\\"{{location}} {{func}}() was expecting at least {{minParams}} arguments, but received only {{argCount}}.\\\",type_TOO_MANY_ARGUMENTS:\\\"{{location}} {{func}}() was expecting no more than {{maxParams}} arguments, but received {{argCount}}.\\\",type_WRONG_TYPE:\\\"{{location}} {{func}}() was expecting {{formatType}} for the {{position}} parameter, received {{argType}} instead.\\\"},globalErrors:{reference:{cannotAccess:'\\\\n{{location}} \\\"{{symbol}}\\\" is used before declaration. Make sure you have declared the variable before using it.\\\\n\\\\n+ More info: {{url}}',notDefined:'\\\\n{{location}} \\\"{{symbol}}\\\" is not defined in the current scope. If you have defined it in your code, you should check its scope, spelling, and letter-casing (JavaScript is case-sensitive).\\\\n\\\\n+ More info: {{url}}'},stackSubseq:\\\"└[{{location}}] \\\\n\\\\t Called from line {{line}} in {{func}}()\\\\n\\\",stackTop:\\\"┌[{{location}}] \\\\n\\\\t Error at line {{line}} in {{func}}()\\\\n\\\",syntax:{badReturnOrYield:\\\"\\\\nSyntax Error - return lies outside of a function. Make sure you’re not missing any brackets, so that return lies inside a function.\\\\n\\\\n+ More info: {{url}}\\\",invalidToken:\\\"\\\\nSyntax Error - Found a symbol that JavaScript doesn't recognize or didn't expect at it's place.\\\\n\\\\n+ More info: {{url}}\\\",missingInitializer:\\\"\\\\nSyntax Error - A const variable is declared but not initialized. In JavaScript, an initializer for a const is required. A value must be specified in the same statement in which the variable is declared. Check the line number in the error and assign the const variable a value.\\\\n\\\\n+ More info: {{url}}\\\",redeclaredVariable:'\\\\nSyntax Error - \\\"{{symbol}}\\\" is being redeclared. JavaScript doesn\\\\'t allow declaring a variable more than once. Check the line number in error for redeclaration of the variable.\\\\n\\\\n+ More info: {{url}}',unexpectedToken:\\\"\\\\nSyntax Error - Symbol present at a place that wasn't expected.\\\\nUsually this is due to a typo. Check the line number in the error for anything missing/extra.\\\\n\\\\n+ More info: {{url}}\\\"},type:{constAssign:\\\"\\\\n{{location}} A const variable is being re-assigned. In javascript, re-assigning a value to a constant is not allowed. If you want to re-assign new values to a variable, make sure it is declared as var or let.\\\\n\\\\n+ More info: {{url}}\\\",notfunc:'\\\\n{{location}} \\\"{{symbol}}\\\" could not be called as a function.\\\\nCheck the spelling, letter-casing (JavaScript is case-sensitive) and its type.\\\\n\\\\n+ More info: {{url}}',notfuncObj:'\\\\n{{location}} \\\"{{symbol}}\\\" could not be called as a function.\\\\nVerify whether \\\"{{obj}}\\\" has \\\"{{symbol}}\\\" in it and check the spelling, letter-casing (JavaScript is case-sensitive) and its type.\\\\n\\\\n+ More info: {{url}}',readFromNull:\\\"\\\\n{{location}} The property of null can't be read. In javascript the value null indicates that an object has no value.\\\\n\\\\n+ More info: {{url}}\\\",readFromUndefined:\\\"\\\\n{{location}} Cannot read property of undefined. Check the line number in error and make sure the variable which is being operated is not undefined.\\\\n\\\\n + More info: {{url}}\\\"}},libraryError:'{{location}} An error with message \\\"{{error}}\\\" occurred inside the p5js library when {{func}} was called. If not stated otherwise, it might be an issue with the arguments passed to {{func}}.',location:\\\"[{{file}}, line {{line}}]\\\",misspelling:'{{location}} It seems that you may have accidentally written \\\"{{name}}\\\" instead of \\\"{{actualName}}\\\". Please correct it to {{actualName}} if you wish to use the {{type}} from p5.js.',misspelling_plural:'{{location}} It seems that you may have accidentally written \\\"{{name}}\\\".\\\\nYou may have meant one of the following: \\\\n{{suggestions}}',misusedTopLevel:\\\"Did you just try to use p5.js's {{symbolName}} {{symbolType}}? If so, you may want to move it into your sketch's setup() function.\\\\n\\\\n+ More info: {{url}}\\\",preloadDisabled:\\\"The preload() function has been removed in p5.js 2.0. Please load assets in setup() using async / await keywords or callbacks instead. See https://github.com/processing/p5.js-compatibility for more information about 2.0 and compatibility, or https://dev.to/limzykenneth/asynchronous-p5js-20-458f for more information about promises and async/await.\\\",positions:{p_1:\\\"first\\\",p_10:\\\"tenth\\\",p_11:\\\"eleventh\\\",p_12:\\\"twelfth\\\",p_2:\\\"second\\\",p_3:\\\"third\\\",p_4:\\\"fourth\\\",p_5:\\\"fifth\\\",p_6:\\\"sixth\\\",p_7:\\\"seventh\\\",p_8:\\\"eighth\\\",p_9:\\\"ninth\\\"},pre:\\\"\\\\n🌸 p5.js says: {{message}}\\\",sketchReaderErrors:{reservedConst:'you have used a p5.js reserved variable \\\"{{symbol}}\\\" make sure you change the variable name to something else.\\\\n\\\\n+ More info: {{url}}',reservedFunc:'you have used a p5.js reserved function \\\"{{symbol}}\\\" make sure you change the function name to something else.\\\\n\\\\n+ More info: {{url}}'},welcome:\\\"Welcome! This is your friendly debugger. To turn me off, switch to using p5.min.js.\\\",wrongPreload:'{{location}} An error with message \\\"{{error}}\\\" occurred inside the p5js library when \\\"{{func}}\\\" was called. If not stated otherwise, it might be due to \\\"{{func}}\\\" being called from preload. Nothing besides load calls (loadImage, loadJSON, loadFont, loadStrings, etc.) should be inside the preload function.'}}}};const Yf=[\\\"en\\\",\\\"es\\\",\\\"ko\\\",\\\"zh\\\",\\\"hi\\\",\\\"ja\\\"];class Zf{constructor(e,t){this.init(e,t)}fetchWithTimeout(e,t,r=2e3){return Promise.race([fetch(e,t),new Promise(((e,t)=>setTimeout((()=>t(new Error(\\\"timeout\\\"))),r)))])}init(e,t={}){this.services=e,this.options=t}read(e,t,r){const i=this.options.loadPath;if(e===this.options.fallback)r(null,Xf[e][t]);else if(Yf.includes(e)){const n=this.services.interpolator.interpolate(i,{lng:e,ns:t});this.loadUrl(n,r)}else r(\\\"Not found\\\",!1)}loadUrl(e,t){this.fetchWithTimeout(e).then((t=>{if(!t.ok)throw new Error(`failed loading ${e}`);return t.json()}),(()=>{throw new Error(`failed loading ${e}`)})).then((e=>t(null,e))).catch(t)}}Zf.type=\\\"backend\\\";const Kf=Promise.resolve();return function(e){e.registerAddon(fs),e.registerAddon(ms),e.registerAddon(gs),e.registerAddon(ys),e.registerAddon(ns)}(rh),function(e){e.registerAddon(nh),e.registerAddon(sh),e.registerAddon(ah),e.registerAddon(oh),e.registerAddon(uh)}(rh),function(e){e.registerAddon(Bi),e.registerAddon(wi),e.registerAddon(xs)}(rh),function(e){e._friendlyError=()=>{},e._checkForUserDefinedFunctions=()=>{},e._fesErrorMonitor=()=>{}}(rh),function(e){e.registerAddon(lh)}(rh),function(e){e.registerAddon(ch),e.registerAddon(bn),e.registerAddon(ps),e.registerAddon(xn)}(rh),function(e){e.registerAddon(ph),e.registerAddon(dh),e.registerAddon(fh)}(rh),function(e){e.registerAddon(Es),e.registerAddon(Zs),e.registerAddon(Fn),e.registerAddon(Ks),e.registerAddon(za),e.registerAddon(Ya)}(rh),function(e){e.registerAddon(ks),e.registerAddon(gh),e.registerAddon(xh),e.registerAddon(gn)}(rh),function(e){e.registerAddon(vh),e.registerAddon(bh),e.registerAddon(_h),e.registerAddon(Ha),e.registerAddon(wh),e.registerAddon(Bn),e.registerAddon(Ah)}(rh),function(e){e.registerAddon(Dh),e.registerAddon(Sh),e.registerAddon(Th)}(rh),function(e){e.registerAddon(Pa),e.registerAddon(_l),e.registerAddon(Na),e.registerAddon(Fh),e.registerAddon(Ra),e.registerAddon(Mh),e.registerAddon($a),e.registerAddon(gl),e.registerAddon(ga),e.registerAddon(la),e.registerAddon(ia),e.registerAddon(oa),e.registerAddon(pa),e.registerAddon(uo),e.registerAddon(sa),e.registerAddon(Ya)}(rh),function(e){e.registerAddon(Fa),e.registerAddon(fl)}(rh),rh.registerAddon(za),rh.registerAddon(zd),Promise.all([(()=>{if(\\\"undefined\\\"!=typeof document)return new Promise(((e,t)=>{\\\"complete\\\"===document.readyState?e():window.addEventListener(\\\"load\\\",e,!1)}))})(),Kf]).then((()=>{if(\\\"undefined\\\"!=typeof window)if(void 0===window._setupDone){if(!window.mocha){const e=new Event(\\\"p5Ready\\\");window.dispatchEvent(e),(window.setup&&\\\"function\\\"==typeof window.setup||window.draw&&\\\"function\\\"==typeof window.draw)&&!rh.instance&&new rh}}else console.warn(\\\"p5.js seems to have been imported multiple times. Please remove the duplicate import\\\")})),rh}();\",\n/workspaces/learn-p5/src/data/courses/io.ts:      \"startingCode\": \"let lines;\\n\\nfunction setup() {\\n  createCanvas(400, 400);\\n  loadStrings(\\\"https://raw.githubusercontent.com/nicholasjackson.io/toptal-json/master/data.json\\\", function(result) {\\n    lines = result;\\n  });\\n}\\n\\nfunction draw() {\\n  background(240);\\n  fill(0);\\n  textSize(16);\\n  if (lines) {\\n    text(lines.join(\\\"\\\\n\\\"), 50, 50, 300, 300);\\n  } else {\\n    text(\\\"Loading...\\\", 50, 200);\\n  }\\n}\\n\",\n/workspaces/learn-p5/src/data/courses/io.ts:      \"solution\": \"let lines;\\n\\nfunction setup() {\\n  createCanvas(400, 400);\\n  loadStrings(\\\"https://raw.githubusercontent.com/nicholasjackson.io/toptal-json/master/data.json\\\", function(result) {\\n    lines = result;\\n  });\\n}\\n\\nfunction draw() {\\n  background(240);\\n  fill(0);\\n  textSize(16);\\n  if (lines) {\\n    text(lines.join(\\\"\\\\n\\\"), 50, 50, 300, 300);\\n  } else {\\n    text(\\\"Loading...\\\", 50, 200);\\n  }\\n}\\n\",\n/workspaces/learn-p5/src/utils/editor/themes.ts:  \"github\": {\n/workspaces/learn-p5/src/utils/editor/themes.ts:    id: \"github\",\n/workspaces/learn-p5/src/utils/editor/themes.ts:    label: \"GitHub\",\n/workspaces/learn-p5/src/utils/editor/themes.ts:      name: \"GitHub Light\",\n/workspaces/learn-p5/src/utils/editor/themes.ts:      name: \"GitHub Dark\",\n/workspaces/learn-p5/src/utils/editor/themes.ts:  \"github-cvd\": {\n/workspaces/learn-p5/src/utils/editor/themes.ts:    id: \"github-cvd\",\n/workspaces/learn-p5/src/utils/editor/themes.ts:    label: \"GitHub CVD\",\n/workspaces/learn-p5/src/utils/editor/themes.ts:      name: \"GitHub CVD Light\",\n/workspaces/learn-p5/src/utils/editor/themes.ts:      name: \"GitHub CVD Dark\",\n",
+            "metadata": {
+              "output": "...\n\nlogger.warn(\\\"\\\".concat(r,\\\"loading namespace \\\").concat(s,\\\" for language \\\").concat(n,\\\" failed\\\"),i),!i&&a&&t.logger.log(\\\"\\\".concat(r,\\\"loaded namespace \\\").concat(s,\\\" for language \\\").concat(n),a),t.loaded(e,i,a)}))}},{key:\\\"saveMissing\\\",value:function(e,t,r,i,n){var s=arguments.length>5&&void 0!==arguments[5]?arguments[5]:{};this.services.utils&&this.services.utils.hasLoadedNamespace&&!this.services.utils.hasLoadedNamespace(t)?this.logger.warn('did not save key \\\"'.concat(r,'\\\" as the namespace \\\"').concat(t,'\\\" was not yet loaded'),\\\"This means something IS WRONG in your setup. You access the t function before i18next.init / i18next.loadNamespace / i18next.changeLanguage was done. Wait for the callback or Promise to resolve before accessing it!!!\\\"):null!=r&&\\\"\\\"!==r&&(this.backend&&this.backend.create&&this.backend.create(e,t,r,i,null,Hd({},s,{isUpdate:n})),e&&e[0]&&this.store.addResource(e[0],t,r,i))}}]),t}(nf);function Sf(e){return\\\"string\\\"==typeof e.ns&&(e.ns=[e.ns]),\\\"string\\\"==typeof e.fallbackLng&&(e.fallbackLng=[e.fallbackLng]),\\\"string\\\"==typeof e.fallbackNS&&(e.fallbackNS=[e.fallbackNS]),e.whitelist&&(e.whitelist&&e.whitelist.indexOf(\\\"cimode\\\")<0&&(e.whitelist=e.whitelist.concat([\\\"cimode\\\"])),e.supportedLngs=e.whitelist),e.nonExplicitWhitelist&&(e.nonExplicitSupportedLngs=e.nonExplicitWhitelist),e.supportedLngs&&e.supportedLngs.indexOf(\\\"cimode\\\")<0&&(e.supportedLngs=e.supportedLngs.concat([\\\"cimode\\\"])),e}function Tf(){}var Ff=function(e){function t(){var e,r=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},i=arguments.length>1?arguments[1]:void 0;if(qd(this,t),e=Zd(this,Kd(t).call(this)),mf&&nf.call(Yd(e)),e.options=Sf(r),e.services={},e.logger=rf,e.modules={external:[]},i&&!e.isInitialized&&!r.isClone){if(!e.options.initImmediate)return e.init(r,i),Zd(e,Yd(e));setTimeout((function(){e.init(r,i)}),0)}return e}return Qd(t,e),Xd(t,[{key:\\\"init\\\",value:function(){var e=this,t=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},r=arguments.length>1?arguments[1]:void 0;function i(e){return e?\\\"function\\\"==typeof e?new e:e:null}if(\\\"function\\\"==typeof t&&(r=t,t={}),t.whitelist&&!t.supportedLngs&&this.logger.deprecate(\\\"whitelist\\\",'option \\\"whitelist\\\" will be renamed to \\\"supportedLngs\\\" in the next major - please make sure to rename this option asap.'),t.nonExplicitWhitelist&&!t.nonExplicitSupportedLngs&&this.logger.deprecate(\\\"whitelist\\\",'options \\\"nonExplicitWhitelist\\\" will be renamed to \\\"nonExplicitSupportedLngs\\\" in the next major - please make sure to rename this option asap.'),this.options=Hd({},{debug:!1,initImmediate:!0,ns:[\\\"translation\\\"],defaultNS:[\\\"translation\\\"],fallbackLng:[\\\"dev\\\"],fallbackNS:!1,whitelist:!1,nonExplicitWhitelist:!1,supportedLngs:!1,nonExplicitSupportedLngs:!1,load:\\\"all\\\",preload:!1,simplifyPluralSuffix:!0,keySeparator:\\\".\\\",nsSeparator:\\\":\\\",pluralSeparator:\\\"_\\\",contextSeparator:\\\"_\\\",partialBundledLanguages:!1,saveMissing:!1,updateMissing:!1,saveMissingTo:\\\"fallback\\\",saveMissingPlurals:!0,missingKeyHandler:!1,missingInterpolationHandler:!1,postProcess:!1,postProcessPassResolved:!1,returnNull:!0,returnEmptyString:!0,returnObjects:!1,joinArrays:!1,returnedObjectHandler:!1,parseMissingKeyHandler:!1,appendNamespaceToMissingKey:!1,appendNamespaceToCIMode:!1,overloadTranslationOptionHandler:function(e){var t={};if(\\\"object\\\"===jd(e[1])&&(t=e[1]),\\\"string\\\"==typeof e[1]&&(t.defaultValue=e[1]),\\\"string\\\"==typeof e[2]&&(t.tDescription=e[2]),\\\"object\\\"===jd(e[2])||\\\"object\\\"===jd(e[3])){var r=e[3]||e[2];Object.keys(r).forEach((function(e){t[e]=r[e]}))}return t},interpolation:{escapeValue:!0,format:function(e,t,r,i){return e},prefix:\\\"{{\\\",suffix:\\\"}}\\\",formatSeparator:\\\",\\\",unescapePrefix:\\\"-\\\",nestingPrefix:\\\"$t(\\\",nestingSuffix:\\\")\\\",nestingOptionsSeparator:\\\",\\\",maxReplaces:1e3,skipOnVariables:!1}},this.options,Sf(t)),this.format=this.options.interpolation.format,r||(r=Tf),!this.options.isClone){this.modules.logger?rf.init(i(this.modules.logger),this.options):rf.init(null,this.options);var n=new _f(this.options);this.store=new gf(this.options.resources,this.options);var s=this.services;s.logger=rf,s.resourceStore=this.store,s.languageUtils=n,s.pluralResolver=new Ef(n,{prepend:this.options.pluralSeparator,compatibilityJSON:this.options.compatibilityJSON,simplifyPluralSuffix:this.options.simplifyPluralSuffix}),s.interpolator=new Af(this.options),s.utils={hasLoadedNamespace:this.hasLoadedNamespace.bind(this)},s.backendConnector=new Df(i(this.modules.backend),s.resourceStore,s,this.options),s.backendConnector.on(\\\"*\\\",(function(t){for(var r=arguments.length,i=new Array(r>1?r-1:0),n=1;n<r;n++)i[n-1]=arguments[n];e.emit.apply(e,[t].concat(i))})),this.modules.languageDetector&&(s.languageDetector=i(this.modules.languageDetector),s.languageDetector.init(s,this.options.detection,this.options)),this.modules.i18nFormat&&(s.i18nFormat=i(this.modules.i18nFormat),s.i18nFormat.init&&s.i18nFormat.init(this)),this.translator=new vf(this.services,this.options),this.translator.on(\\\"*\\\",(function(t){for(var r=arguments.length,i=new Array(r>1?r-1:0),n=1;n<r;n++)i[n-1]=arguments[n];e.emit.apply(e,[t].concat(i))})),this.modules.external.forEach((function(t){t.init&&t.init(e)}))}if(this.options.fallbackLng&&!this.services.languageDetector&&!this.options.lng){var a=this.services.languageUtils.getFallbackCodes(this.options.fallbackLng);a.length>0&&\\\"dev\\\"!==a[0]&&(this.options.lng=a[0])}this.services.languageDetector||this.options.lng||this.logger.warn(\\\"init: no languageDetector is used and no lng is defined\\\");[\\\"getResource\\\",\\\"hasResourceBundle\\\",\\\"getResourceBundle\\\",\\\"getDataByLanguage\\\"].forEach((function(t){e[t]=function(){var r;return(r=e.store)[t].apply(r,arguments)}}));[\\\"addResource\\\",\\\"addResources\\\",\\\"addResourceBundle\\\",\\\"removeResourceBundle\\\"].forEach((function(t){e[t]=function(){var r;return(r=e.store)[t].apply(r,arguments),e}}));var o=sf(),h=function(){var t=function(t,i){e.isInitialized&&e.logger.warn(\\\"init: i18next is already initialized. You should call init just once!\\\"),e.isInitialized=!0,e.options.isClone||e.logger.log(\\\"initialized\\\",e.options),e.emit(\\\"initialized\\\",e.options),o.resolve(i),r(t,i)};if(e.languages&&\\\"v1\\\"!==e.options.compatibilityAPI&&!e.isInitialized)return t(null,e.t.bind(e));e.changeLanguage(e.options.lng,t)};return this.options.resources||!this.options.initImmediate?h():setTimeout(h,0),o}},{key:\\\"loadResources\\\",value:function(e){var t=this,r=arguments.length>1&&void 0!==arguments[1]?arguments[1]:Tf,i=\\\"string\\\"==typeof e?e:this.language;if(\\\"function\\\"==typeof e&&(r=e),!this.options.resources||this.options.partialBundledLanguages){if(i&&\\\"cimode\\\"===i.toLowerCase())return r();var n=[],s=function(e){e&&t.services.languageUtils.toResolveHierarchy(e).forEach((function(e){n.indexOf(e)<0&&n.push(e)}))};if(i)s(i);else this.services.languageUtils.getFallbackCodes(this.options.fallbackLng).forEach((function(e){return s(e)}));this.options.preload&&this.options.preload.forEach((function(e){return s(e)})),this.services.backendConnector.load(n,this.options.ns,r)}else r(null)}},{key:\\\"reloadResources\\\",value:function(e,t,r){var i=sf();return e||(e=this.languages),t||(t=this.options.ns),r||(r=Tf),this.services.backendConnector.reload(e,t,(function(e){i.resolve(),r(e)})),i}},{key:\\\"use\\\",value:function(e){if(!e)throw new Error(\\\"You are passing an undefined module! Please check the object you are passing to i18next.use()\\\");if(!e.type)throw new Error(\\\"You are passing a wrong module! Please check the object you are passing to i18next.use()\\\");return\\\"backend\\\"===e.type&&(this.modules.backend=e),(\\\"logger\\\"===e.type||e.log&&e.warn&&e.error)&&(this.modules.logger=e),\\\"languageDetector\\\"===e.type&&(this.modules.languageDetector=e),\\\"i18nFormat\\\"===e.type&&(this.modules.i18nFormat=e),\\\"postProcessor\\\"===e.type&&yf.addPostProcessor(e),\\\"3rdParty\\\"===e.type&&this.modules.external.push(e),this}},{key:\\\"changeLanguage\\\",value:function(e,t){var r=this;this.isLanguageChangingTo=e;var i=sf();this.emit(\\\"languageChanging\\\",e);var n=function(e){var n=\\\"string\\\"==typeof e?e:r.services.languageUtils.getBestMatchFromCodes(e);n&&(r.language||(r.language=n,r.languages=r.services.languageUtils.toResolveHierarchy(n)),r.translator.language||r.translator.changeLanguage(n),r.services.languageDetector&&r.services.languageDetector.cacheUserLanguage(n)),r.loadResources(n,(function(e){!function(e,n){n?(r.language=n,r.languages=r.services.languageUtils.toResolveHierarchy(n),r.translator.changeLanguage(n),r.isLanguageChangingTo=void 0,r.emit(\\\"languageChanged\\\",n),r.logger.log(\\\"languageChanged\\\",n)):r.isLanguageChangingTo=void 0,i.resolve((function(){return r.t.apply(r,arguments)})),t&&t(e,(function(){return r.t.apply(r,arguments)}))}(e,n)}))};return e||!this.services.languageDetector||this.services.languageDetector.async?!e&&this.services.languageDetector&&this.services.languageDetector.async?this.services.languageDetector.detect(n):n(e):n(this.services.languageDetector.detect()),i}},{key:\\\"getFixedT\\\",value:function(e,t){var r=this,i=function e(t,i){var n;if(\\\"object\\\"!==jd(i)){for(var s=arguments.length,a=new Array(s>2?s-2:0),o=2;o<s;o++)a[o-2]=arguments[o];n=r.options.overloadTranslationOptionHandler([t,i].concat(a))}else n=Hd({},i);return n.lng=n.lng||e.lng,n.lngs=n.lngs||e.lngs,n.ns=n.ns||e.ns,r.t(t,n)};return\\\"string\\\"==typeof e?i.lng=e:i.lngs=e,i.ns=t,i}},{key:\\\"t\\\",value:function(){var e;return this.translator&&(e=this.translator).translate.apply(e,arguments)}},{key:\\\"exists\\\",value:function(){var e;return this.translator&&(e=this.translator).exists.apply(e,arguments)}},{key:\\\"setDefaultNamespace\\\",value:function(e){this.options.defaultNS=e}},{key:\\\"hasLoadedNamespace\\\",value:function(e){var t=this,r=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};if(!this.isInitialized)return this.logger.warn(\\\"hasLoadedNamespace: i18next was not initialized\\\",this.languages),!1;if(!this.languages||!this.languages.length)return this.logger.warn(\\\"hasLoadedNamespace: i18n.languages were undefined or empty\\\",this.languages),!1;var i=this.languages[0],n=!!this.options&&this.options.fallbackLng,s=this.languages[this.languages.length-1];if(\\\"cimode\\\"===i.toLowerCase())return!0;var a=function(e,r){var i=t.services.backendConnector.state[\\\"\\\".concat(e,\\\"|\\\").concat(r)];return-1===i||2===i};if(r.precheck){var o=r.precheck(this,a);if(void 0!==o)return o}return!!this.hasResourceBundle(i,e)||(!this.services.backendConnector.backend||!(!a(i,e)||n&&!a(s,e)))}},{key:\\\"loadNamespaces\\\",value:function(e,t){var r=this,i=sf();return this.options.ns?(\\\"string\\\"==typeof e&&(e=[e]),e.forEach((function(e){r.options.ns.indexOf(e)<0&&r.options.ns.push(e)})),this.loadResources((function(e){i.resolve(),t&&t(e)})),i):(t&&t(),Promise.resolve())}},{key:\\\"loadLanguages\\\",value:function(e,t){var r=sf();\\\"string\\\"==typeof e&&(e=[e]);var i=this.options.preload||[],n=e.filter((function(e){return i.indexOf(e)<0}));return n.length?(this.options.preload=i.concat(n),this.loadResources((function(e){r.resolve(),t&&t(e)})),r):(t&&t(),Promise.resolve())}},{key:\\\"dir\\\",value:function(e){if(e||(e=this.languages&&this.languages.length>0?this.languages[0]:this.language),!e)return\\\"rtl\\\";return[\\\"ar\\\",\\\"shu\\\",\\\"sqr\\\",\\\"ssh\\\",\\\"xaa\\\",\\\"yhd\\\",\\\"yud\\\",\\\"aao\\\",\\\"abh\\\",\\\"abv\\\",\\\"acm\\\",\\\"acq\\\",\\\"acw\\\",\\\"acx\\\",\\\"acy\\\",\\\"adf\\\",\\\"ads\\\",\\\"aeb\\\",\\\"aec\\\",\\\"afb\\\",\\\"ajp\\\",\\\"apc\\\",\\\"apd\\\",\\\"arb\\\",\\\"arq\\\",\\\"ars\\\",\\\"ary\\\",\\\"arz\\\",\\\"auz\\\",\\\"avl\\\",\\\"ayh\\\",\\\"ayl\\\",\\\"ayn\\\",\\\"ayp\\\",\\\"bbz\\\",\\\"pga\\\",\\\"he\\\",\\\"iw\\\",\\\"ps\\\",\\\"pbt\\\",\\\"pbu\\\",\\\"pst\\\",\\\"prp\\\",\\\"prd\\\",\\\"ug\\\",\\\"ur\\\",\\\"ydd\\\",\\\"yds\\\",\\\"yih\\\",\\\"ji\\\",\\\"yi\\\",\\\"hbo\\\",\\\"men\\\",\\\"xmn\\\",\\\"fa\\\",\\\"jpr\\\",\\\"peo\\\",\\\"pes\\\",\\\"prs\\\",\\\"dv\\\",\\\"sam\\\"].indexOf(this.services.languageUtils.getLanguagePartFromCode(e))>=0?\\\"rtl\\\":\\\"ltr\\\"}},{key:\\\"createInstance\\\",value:function(){return new t(arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},arguments.length>1?arguments[1]:void 0)}},{key:\\\"cloneInstance\\\",value:function(){var e=this,r=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},i=arguments.length>1&&void 0!==arguments[1]?arguments[1]:Tf,n=Hd({},this.options,r,{isClone:!0}),s=new t(n);return[\\\"store\\\",\\\"services\\\",\\\"language\\\"].forEach((function(t){s[t]=e[t]})),s.services=Hd({},this.services),s.services.utils={hasLoadedNamespace:s.hasLoadedNamespace.bind(s)},s.translator=new vf(s.services,s.options),s.translator.on(\\\"*\\\",(function(e){for(var t=arguments.length,r=new Array(t>1?t-1:0),i=1;i<t;i++)r[i-1]=arguments[i];s.emit.apply(s,[e].concat(r))})),s.init(n,i),s.translator.options=s.options,s.translator.backendConnector.services.utils={hasLoadedNamespace:s.hasLoadedNamespace.bind(s)},s}}]),t}(nf),kf=(new Ff,[]),Mf=kf.forEach,If=kf.slice;var Bf,Lf=function(e,t,r,i){var n,s=arguments.length>4&&void 0!==arguments[4]?arguments[4]:{path:\\\"/\\\"};if(r){var a=new Date;a.setTime(a.getTime()+60*r*1e3),n=\\\"; expires=\\\"+a.toUTCString()}else n=\\\"\\\";i=i?\\\"domain=\\\"+i+\\\";\\\":\\\"\\\",s=Object.keys(s).reduce((function(e,t){return e+\\\";\\\"+t.replace(/([A-Z])/g,(function(e){return\\\"-\\\"+e.toLowerCase()}))+\\\"=\\\"+s[t]}),\\\"\\\"),document.cookie=e+\\\"=\\\"+encodeURIComponent(t)+n+\\\";\\\"+i+s},Of=function(e){for(var t=e+\\\"=\\\",r=document.cookie.split(\\\";\\\"),i=0;i<r.length;i++){for(var n=r[i];\\\" \\\"===n.charAt(0);)n=n.substring(1,n.length);if(0===n.indexOf(t))return n.substring(t.length,n.length)}return null},Pf={name:\\\"cookie\\\",lookup:function(e){var t;if(e.lookupCookie&&\\\"undefined\\\"!=typeof document){var r=Of(e.lookupCookie);r&&(t=r)}return t},cacheUserLanguage:function(e,t){t.lookupCookie&&\\\"undefined\\\"!=typeof document&&Lf(t.lookupCookie,e,t.cookieMinutes,t.cookieDomain,t.cookieOptions)}},Nf={name:\\\"querystring\\\",lookup:function(e){var t;if(\\\"undefined\\\"!=typeof window)for(var r=window.location.search.substring(1).split(\\\"&\\\"),i=0;i<r.length;i++){var n=r[i].indexOf(\\\"=\\\");if(n>0)r[i].substring(0,n)===e.lookupQuerystring&&(t=r[i].substring(n+1))}return t}};try{Bf=\\\"undefined\\\"!==window&&null!==window.localStorage;var Rf=\\\"i18next.translate.boo\\\";window.localStorage.setItem(Rf,\\\"foo\\\"),window.localStorage.removeItem(Rf)}catch(e){Bf=!1}var Vf,Uf={name:\\\"localStorage\\\",lookup:function(e){var t;if(e.lookupLocalStorage&&Bf){var r=window.localStorage.getItem(e.lookupLocalStorage);r&&(t=r)}return t},cacheUserLanguage:function(e,t){t.lookupLocalStorage&&Bf&&window.localStorage.setItem(t.lookupLocalStorage,e)}};try{Vf=\\\"undefined\\\"!==window&&null!==window.sessionStorage;var zf=\\\"i18next.translate.boo\\\";window.sessionStorage.setItem(zf,\\\"foo\\\"),window.sessionStorage.removeItem(zf)}catch(e){Vf=!1}var jf={name:\\\"sessionStorage\\\",lookup:function(e){var t;if(e.lookupsessionStorage&&Vf){var r=window.sessionStorage.getItem(e.lookupsessionStorage);r&&(t=r)}return t},cacheUserLanguage:function(e,t){t.lookupsessionStorage&&Vf&&window.sessionStorage.setItem(t.lookupsessionStorage,e)}},Gf={name:\\\"navigator\\\",lookup:function(e){var t=[];if(\\\"undefined\\\"!=typeof navigator){if(navigator.languages)for(var r=0;r<navigator.languages.length;r++)t.push(navigator.languages[r]);navigator.userLanguage&&t.push(navigator.userLanguage),navigator.language&&t.push(navigator.language)}return t.length>0?t:void 0}},$f={name:\\\"htmlTag\\\",lookup:function(e){var t,r=e.htmlTag||(\\\"undefined\\\"!=typeof document?document.documentElement:null);return r&&\\\"function\\\"==typeof r.getAttribute&&(t=r.getAttribute(\\\"lang\\\")),t}},Hf={name:\\\"path\\\",lookup:function(e){var t;if(\\\"undefined\\\"!=typeof window){var r=window.location.pathname.match(/\\\\/([a-zA-Z-]*)/g);if(r instanceof Array)if(\\\"number\\\"==typeof e.lookupFromPathIndex){if(\\\"string\\\"!=typeof r[e.lookupFromPathIndex])return;t=r[e.lookupFromPathIndex].replace(\\\"/\\\",\\\"\\\")}else t=r[0].replace(\\\"/\\\",\\\"\\\")}return t}},qf={name:\\\"subdomain\\\",lookup:function(e){var t;if(\\\"undefined\\\"!=typeof window){var r=window.location.href.match(/(?:http[s]*\\\\:\\\\/\\\\/)*(.*?)\\\\.(?=[^\\\\/]*\\\\..{2,5})/gi);r instanceof Array&&(t=\\\"number\\\"==typeof e.lookupFromSubdomainIndex?r[e.lookupFromSubdomainIndex].replace(\\\"http://\\\",\\\"\\\").replace(\\\"https://\\\",\\\"\\\").replace(\\\".\\\",\\\"\\\"):r[0].replace(\\\"http://\\\",\\\"\\\").replace(\\\"https://\\\",\\\"\\\").replace(\\\".\\\",\\\"\\\"))}return t}};var Wf=function(){function e(t){var r=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};qd(this,e),this.type=\\\"languageDetector\\\",this.detectors={},this.init(t,r)}return Xd(e,[{key:\\\"init\\\",value:function(e){var t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{},r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};this.services=e,this.options=function(e){return Mf.call(If.call(arguments,1),(function(t){if(t)for(var r in t)void 0===e[r]&&(e[r]=t[r])})),e}(t,this.options||{},{order:[\\\"querystring\\\",\\\"cookie\\\",\\\"localStorage\\\",\\\"sessionStorage\\\",\\\"navigator\\\",\\\"htmlTag\\\"],lookupQuerystring:\\\"lng\\\",lookupCookie:\\\"i18next\\\",lookupLocalStorage:\\\"i18nextLng\\\",caches:[\\\"localStorage\\\"],excludeCacheFor:[\\\"cimode\\\"],checkWhitelist:!0,checkForSimilarInWhitelist:!1}),this.options.checkForSimilarInWhitelist&&(this.options.checkWhitelist=!0),this.options.lookupFromUrlIndex&&(this.options.lookupFromPathIndex=this.options.lookupFromUrlIndex),this.i18nOptions=r,this.addDetector(Pf),this.addDetector(Nf),this.addDetector(Uf),this.addDetector(jf),this.addDetector(Gf),this.addDetector($f),this.addDetector(Hf),this.addDetector(qf)}},{key:\\\"addDetector\\\",value:function(e){this.detectors[e.name]=e}},{key:\\\"detect\\\",value:function(e){var t=this;e||(e=this.options.order);var r,i=[];if(e.forEach((function(e){if(t.detectors[e]){var r=t.detectors[e].lookup(t.options);r&&\\\"string\\\"==typeof r&&(r=[r]),r&&(i=i.concat(r))}})),i.forEach((function(e){if(!r){var i=t.services.languageUtils.formatLanguageCode(e);t.options.checkWhitelist&&!t.services.languageUtils.isWhitelisted(i)||(r=i),!r&&t.options.checkForSimilarInWhitelist&&(r=t.getSimilarInWhitelist(i))}})),!r){var n=this.i18nOptions.fallbackLng;\\\"string\\\"==typeof n&&(n=[n]),n||(n=[]),r=\\\"[object Array]\\\"===Object.prototype.toString.apply(n)?n[0]:n[0]||n.default&&n.default[0]}return r}},{key:\\\"cacheUserLanguage\\\",value:function(e,t){var r=this;t||(t=this.options.caches),t&&(this.options.excludeCacheFor&&this.options.excludeCacheFor.indexOf(e)>-1||t.forEach((function(t){r.detectors[t]&&r.detectors[t].cacheUserLanguage(e,r.options)})))}},{key:\\\"getSimilarInWhitelist\\\",value:function(e){var t=this;if(this.i18nOptions.whitelist){if(e.includes(\\\"-\\\")){var r=e.split(\\\"-\\\")[0],i=this.services.languageUtils.formatLanguageCode(r);if(this.services.languageUtils.isWhitelisted(i))return i;e=i}var n=this.i18nOptions.whitelist.find((function(r){var i=t.services.languageUtils.formatLanguageCode(r);if(i.startsWith(e))return i}));return n||void 0}}}]),e}();Wf.type=\\\"languageDetector\\\";var Xf={en:{translation:{fes:{autoplay:\\\"The media that tried to play (with '{{src}}') wasn't allowed to by this browser, most likely due to the browser's autoplay policy.\\\\n\\\\n+ More info: {{url}}\\\",checkUserDefinedFns:\\\"It seems that you may have accidentally written {{name}} instead of {{actualName}}. Please correct it if it's not intentional.\\\",fileLoadError:{bytes:\\\"It looks like there was a problem loading your file. {{suggestion}}\\\",font:\\\"It looks like there was a problem loading your font. {{suggestion}}\\\",gif:\\\"There was some trouble loading your GIF. Make sure that your GIF is using 87a or 89a encoding.\\\",image:\\\"It looks like there was a problem loading your image. {{suggestion}}\\\",json:\\\"It looks like there was a problem loading your JSON file. {{suggestion}}\\\",large:\\\"If your large file isn't fetched successfully, we recommend splitting the file into smaller segments and fetching those.\\\",strings:\\\"It looks like there was a problem loading your text file. {{suggestion}}\\\",suggestion:\\\"Try checking if the file path ({{filePath}}) is correct, hosting the file online, or running a local server.\\\\n\\\\n+ More info: {{url}}\\\",table:\\\"It looks like there was a problem loading your table file. {{suggestion}}\\\",xml:\\\"It looks like there was a problem loading your XML file. {{suggestion}}\\\"},friendlyParamError:{type_EMPTY_VAR:\\\"{{location}} {{func}}() was expecting {{formatType}} for the {{position}} parameter, received an empty variable instead. If not intentional, this is often a problem with scope.\\\\n\\\\n+ More info: {{url}}\\\",type_TOO_FEW_ARGUMENTS:\\\"{{location}} {{func}}() was expecting at least {{minParams}} arguments, but received only {{argCount}}.\\\",type_TOO_MANY_ARGUMENTS:\\\"{{location}} {{func}}() was expecting no more than {{maxParams}} arguments, but received {{argCount}}.\\\",type_WRONG_TYPE:\\\"{{location}} {{func}}() was expecting {{formatType}} for the {{position}} parameter, received {{argType}} instead.\\\"},globalErrors:{reference:{cannotAccess:'\\\\n{{location}} \\\"{{symbol}}\\\" is used before declaration. Make sure you have declared the variable before using it.\\\\n\\\\n+ More info: {{url}}',notDefined:'\\\\n{{location}} \\\"{{symbol}}\\\" is not defined in the current scope. If you have defined it in your code, you should check its scope, spelling, and letter-casing (JavaScript is case-sensitive).\\\\n\\\\n+ More info: {{url}}'},stackSubseq:\\\"└[{{location}}] \\\\n\\\\t Called from line {{line}} in {{func}}()\\\\n\\\",stackTop:\\\"┌[{{location}}] \\\\n\\\\t Error at line {{line}} in {{func}}()\\\\n\\\",syntax:{badReturnOrYield:\\\"\\\\nSyntax Error - return lies outside of a function. Make sure you’re not missing any brackets, so that return lies inside a function.\\\\n\\\\n+ More info: {{url}}\\\",invalidToken:\\\"\\\\nSyntax Error - Found a symbol that JavaScript doesn't recognize or didn't expect at it's place.\\\\n\\\\n+ More info: {{url}}\\\",missingInitializer:\\\"\\\\nSyntax Error - A const variable is declared but not initialized. In JavaScript, an initializer for a const is required. A value must be specified in the same statement in which the variable is declared. Check the line number in the error and assign the const variable a value.\\\\n\\\\n+ More info: {{url}}\\\",redeclaredVariable:'\\\\nSyntax Error - \\\"{{symbol}}\\\" is being redeclared. JavaScript doesn\\\\'t allow declaring a variable more than once. Check the line number in error for redeclaration of the variable.\\\\n\\\\n+ More info: {{url}}',unexpectedToken:\\\"\\\\nSyntax Error - Symbol present at a place that wasn't expected.\\\\nUsually this is due to a typo. Check the line number in the error for anything missing/extra.\\\\n\\\\n+ More info: {{url}}\\\"},type:{constAssign:\\\"\\\\n{{location}} A const variable is being re-assigned. In javascript, re-assigning a value to a constant is not allowed. If you want to re-assign new values to a variable, make sure it is declared as var or let.\\\\n\\\\n+ More info: {{url}}\\\",notfunc:'\\\\n{{location}} \\\"{{symbol}}\\\" could not be called as a function.\\\\nCheck the spelling, letter-casing (JavaScript is case-sensitive) and its type.\\\\n\\\\n+ More info: {{url}}',notfuncObj:'\\\\n{{location}} \\\"{{symbol}}\\\" could not be called as a function.\\\\nVerify whether \\\"{{obj}}\\\" has \\\"{{symbol}}\\\" in it and check the spelling, letter-casing (JavaScript is case-sensitive) and its type.\\\\n\\\\n+ More info: {{url}}',readFromNull:\\\"\\\\n{{location}} The property of null can't be read. In javascript the value null indicates that an object has no value.\\\\n\\\\n+ More info: {{url}}\\\",readFromUndefined:\\\"\\\\n{{location}} Cannot read property of undefined. Check the line number in error and make sure the variable which is being operated is not undefined.\\\\n\\\\n + More info: {{url}}\\\"}},libraryError:'{{location}} An error with message \\\"{{error}}\\\" occurred inside the p5js library when {{func}} was called. If not stated otherwise, it might be an issue with the arguments passed to {{func}}.',location:\\\"[{{file}}, line {{line}}]\\\",misspelling:'{{location}} It seems that you may have accidentally written \\\"{{name}}\\\" instead of \\\"{{actualName}}\\\". Please correct it to {{actualName}} if you wish to use the {{type}} from p5.js.',misspelling_plural:'{{location}} It seems that you may have accidentally written \\\"{{name}}\\\".\\\\nYou may have meant one of the following: \\\\n{{suggestions}}',misusedTopLevel:\\\"Did you just try to use p5.js's {{symbolName}} {{symbolType}}? If so, you may want to move it into your sketch's setup() function.\\\\n\\\\n+ More info: {{url}}\\\",preloadDisabled:\\\"The preload() function has been removed in p5.js 2.0. Please load assets in setup() using async / await keywords or callbacks instead. See https://github.com/processing/p5.js-compatibility for more information about 2.0 and compatibility, or https://dev.to/limzykenneth/asynchronous-p5js-20-458f for more information about promises and async/await.\\\",positions:{p_1:\\\"first\\\",p_10:\\\"tenth\\\",p_11:\\\"eleventh\\\",p_12:\\\"twelfth\\\",p_2:\\\"second\\\",p_3:\\\"third\\\",p_4:\\\"fourth\\\",p_5:\\\"fifth\\\",p_6:\\\"sixth\\\",p_7:\\\"seventh\\\",p_8:\\\"eighth\\\",p_9:\\\"ninth\\\"},pre:\\\"\\\\n🌸 p5.js says: {{message}}\\\",sketchReaderErrors:{reservedConst:'you have used a p5.js reserved variable \\\"{{symbol}}\\\" make sure you change the variable name to something else.\\\\n\\\\n+ More info: {{url}}',reservedFunc:'you have used a p5.js reserved function \\\"{{symbol}}\\\" make sure you change the function name to something else.\\\\n\\\\n+ More info: {{url}}'},welcome:\\\"Welcome! This is your friendly debugger. To turn me off, switch to using p5.min.js.\\\",wrongPreload:'{{location}} An error with message \\\"{{error}}\\\" occurred inside the p5js library when \\\"{{func}}\\\" was called. If not stated otherwise, it might be due to \\\"{{func}}\\\" being called from preload. Nothing besides load calls (loadImage, loadJSON, loadFont, loadStrings, etc.) should be inside the preload function.'}}}};const Yf=[\\\"en\\\",\\\"es\\\",\\\"ko\\\",\\\"zh\\\",\\\"hi\\\",\\\"ja\\\"];class Zf{constructor(e,t){this.init(e,t)}fetchWithTimeout(e,t,r=2e3){return Promise.race([fetch(e,t),new Promise(((e,t)=>setTimeout((()=>t(new Error(\\\"timeout\\\"))),r)))])}init(e,t={}){this.services=e,this.options=t}read(e,t,r){const i=this.options.loadPath;if(e===this.options.fallback)r(null,Xf[e][t]);else if(Yf.includes(e)){const n=this.services.interpolator.interpolate(i,{lng:e,ns:t});this.loadUrl(n,r)}else r(\\\"Not found\\\",!1)}loadUrl(e,t){this.fetchWithTimeout(e).then((t=>{if(!t.ok)throw new Error(`failed loading ${e}`);return t.json()}),(()=>{throw new Error(`failed loading ${e}`)})).then((e=>t(null,e))).catch(t)}}Zf.type=\\\"backend\\\";const Kf=Promise.resolve();return function(e){e.registerAddon(fs),e.registerAddon(ms),e.registerAddon(gs),e.registerAddon(ys),e.registerAddon(ns)}(rh),function(e){e.registerAddon(nh),e.registerAddon(sh),e.registerAddon(ah),e.registerAddon(oh),e.registerAddon(uh)}(rh),function(e){e.registerAddon(Bi),e.registerAddon(wi),e.registerAddon(xs)}(rh),function(e){e._friendlyError=()=>{},e._checkForUserDefinedFunctions=()=>{},e._fesErrorMonitor=()=>{}}(rh),function(e){e.registerAddon(lh)}(rh),function(e){e.registerAddon(ch),e.registerAddon(bn),e.registerAddon(ps),e.registerAddon(xn)}(rh),function(e){e.registerAddon(ph),e.registerAddon(dh),e.registerAddon(fh)}(rh),function(e){e.registerAddon(Es),e.registerAddon(Zs),e.registerAddon(Fn),e.registerAddon(Ks),e.registerAddon(za),e.registerAddon(Ya)}(rh),function(e){e.registerAddon(ks),e.registerAddon(gh),e.registerAddon(xh),e.registerAddon(gn)}(rh),function(e){e.registerAddon(vh),e.registerAddon(bh),e.registerAddon(_h),e.registerAddon(Ha),e.registerAddon(wh),e.registerAddon(Bn),e.registerAddon(Ah)}(rh),function(e){e.registerAddon(Dh),e.registerAddon(Sh),e.registerAddon(Th)}(rh),function(e){e.registerAddon(Pa),e.registerAddon(_l),e.registerAddon(Na),e.registerAddon(Fh),e.registerAddon(Ra),e.registerAddon(Mh),e.registerAddon($a),e.registerAddon(gl),e.registerAddon(ga),e.registerAddon(la),e.registerAddon(ia),e.registerAddon(oa),e.registerAddon(pa),e.registerAddon(uo),e.registerAddon(sa),e.registerAddon(Ya)}(rh),function(e){e.registerAddon(Fa),e.registerAddon(fl)}(rh),rh.registerAddon(za),rh.registerAddon(zd),Promise.all([(()=>{if(\\\"undefined\\\"!=typeof document)return new Promise(((e,t)=>{\\\"complete\\\"===document.readyState?e():window.addEventListener(\\\"load\\\",e,!1)}))})(),Kf]).then((()=>{if(\\\"undefined\\\"!=typeof window)if(void 0===window._setupDone){if(!window.mocha){const e=new Event(\\\"p5Ready\\\");window.dispatchEvent(e),(window.setup&&\\\"function\\\"==typeof window.setup||window.draw&&\\\"function\\\"==typeof window.draw)&&!rh.instance&&new rh}}else console.warn(\\\"p5.js seems to have been imported multiple times. Please remove the duplicate import\\\")})),rh}();\",\n/workspaces/learn-p5/src/data/courses/io.ts:      \"startingCode\": \"let lines;\\n\\nfunction setup() {\\n  createCanvas(400, 400);\\n  loadStrings(\\\"https://raw.githubusercontent.com/nicholasjackson.io/toptal-json/master/data.json\\\", function(result) {\\n    lines = result;\\n  });\\n}\\n\\nfunction draw() {\\n  background(240);\\n  fill(0);\\n  textSize(16);\\n  if (lines) {\\n    text(lines.join(\\\"\\\\n\\\"), 50, 50, 300, 300);\\n  } else {\\n    text(\\\"Loading...\\\", 50, 200);\\n  }\\n}\\n\",\n/workspaces/learn-p5/src/data/courses/io.ts:      \"solution\": \"let lines;\\n\\nfunction setup() {\\n  createCanvas(400, 400);\\n  loadStrings(\\\"https://raw.githubusercontent.com/nicholasjackson.io/toptal-json/master/data.json\\\", function(result) {\\n    lines = result;\\n  });\\n}\\n\\nfunction draw() {\\n  background(240);\\n  fill(0);\\n  textSize(16);\\n  if (lines) {\\n    text(lines.join(\\\"\\\\n\\\"), 50, 50, 300, 300);\\n  } else {\\n    text(\\\"Loading...\\\", 50, 200);\\n  }\\n}\\n\",\n/workspaces/learn-p5/src/utils/editor/themes.ts:  \"github\": {\n/workspaces/learn-p5/src/utils/editor/themes.ts:    id: \"github\",\n/workspaces/learn-p5/src/utils/editor/themes.ts:    label: \"GitHub\",\n/workspaces/learn-p5/src/utils/editor/themes.ts:      name: \"GitHub Light\",\n/workspaces/learn-p5/src/utils/editor/themes.ts:      name: \"GitHub Dark\",\n/workspaces/learn-p5/src/utils/editor/themes.ts:  \"github-cvd\": {\n/workspaces/learn-p5/src/utils/editor/themes.ts:    id: \"github-cvd\",\n/workspaces/learn-p5/src/utils/editor/themes.ts:    label: \"GitHub CVD\",\n/workspaces/learn-p5/src/utils/editor/themes.ts:      name: \"GitHub CVD Light\",\n/workspaces/learn-p5/src/utils/editor/themes.ts:      name: \"GitHub CVD Dark\",\n",
+              "exit": 0,
+              "truncated": true,
+              "outputPath": "/home/codespace/.local/share/opencode/tool-output/tool_fae8281d1001RpzAgeKa244Oh6"
+            },
+            "title": "rg -i \"github\" /workspaces/learn-p5/src --glob '*.ts' --glob '*.tsx' 2>/dev/null",
+            "time": {
+              "start": 1785339216354,
+              "end": 1785339216369
+            }
+          },
+          "id": "prt_fae8281b3001oOvcs1iwjKKDnm",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae8279e7001Sp930UnPi3jzKT"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "37ad4d2c80a96b4065d95d975f1c52058ed5ff7a",
+          "type": "step-finish",
+          "tokens": {
+            "total": 19846,
+            "input": 95,
+            "output": 39,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 19712
+            }
+          },
+          "cost": 0.00542972,
+          "id": "prt_fae8282c5001Eh3Pq8W8oIbtSZ",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae8279e7001Sp930UnPi3jzKT"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_fae81f3d0001virBrhLoh2YWPk",
+        "role": "assistant",
+        "mode": "explore",
+        "agent": "explore",
+        "path": {
+          "cwd": "/workspaces/learn-p5",
+          "root": "/workspaces/learn-p5"
+        },
+        "cost": 0.0161762,
+        "tokens": {
+          "total": 27487,
+          "input": 7543,
+          "output": 104,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 19840
+          }
+        },
+        "modelID": "glm-5.2",
+        "providerID": "opencode-go",
+        "time": {
+          "created": 1785339216644,
+          "completed": 1785339223422
+        },
+        "finish": "tool-calls",
+        "id": "msg_fae8283040011VJbcw5ZKF5uVC",
+        "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p"
+      },
+      "parts": [
+        {
+          "snapshot": "37ad4d2c80a96b4065d95d975f1c52058ed5ff7a",
+          "type": "step-start",
+          "id": "prt_fae828b15001Hb7wmOo3L2neBL",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae8283040011VJbcw5ZKF5uVC"
+        },
+        {
+          "type": "reasoning",
+          "text": "So \"github\" references in src are only: a sample URL in the io course exercise code, and editor CodeMirror themes (GitHub light/dark). There is NO GitHub activity component — the \"activity\" component on the dashboard is the ActivityHeatmap (local exercise activity), not GitHub commits. Let me record findings clearly. Also check the index.tsx (root) to see if it redirectsto dashboard.",
+          "time": {
+            "start": 1785339218712,
+            "end": 1785339223112
+          },
+          "id": "prt_fae828b18001s6uQgJ7zvOGnh5",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae8283040011VJbcw5ZKF5uVC"
+        },
+        {
+          "type": "tool",
+          "tool": "read",
+          "callID": "call_4992",
+          "state": {
+            "status": "completed",
+            "input": {
+              "filePath": "/workspaces/learn-p5/src/app/index.tsx"
+            },
+            "output": "<path>/workspaces/learn-p5/src/app/index.tsx</path>\n<type>file</type>\n<content>\n1: import { useEffect, useState } from \"react\";\n2: import { Redirect } from \"expo-router\";\n3: import { useOnboarding } from \"../hooks/useOnboarding\";\n4: import SplashScreen from \"../components/SplashScreen\";\n5: \n6: export default function Index() {\n7:   const { loading, isOnboardingComplete } = useOnboarding();\n8:   const [minTimePassed, setMinTimePassed] = useState(false);\n9: \n10:   useEffect(() => {\n11:     const timer = setTimeout(() => setMinTimePassed(true), 600);\n12:     return () => clearTimeout(timer);\n13:   }, []);\n14: \n15:   if (loading || !minTimePassed) {\n16:     return <SplashScreen />;\n17:   }\n18: \n19:   if (!isOnboardingComplete) {\n20:     return <Redirect href=\"/onboarding/1\" />;\n21:   }\n22: \n23:   return <Redirect href=\"/dashboard\" />;\n24: }\n\n(End of file - total 24 lines)\n</content>",
+            "metadata": {
+              "preview": "import { useEffect, useState } from \"react\";\nimport { Redirect } from \"expo-router\";\nimport { useOnboarding } from \"../hooks/useOnboarding\";\nimport SplashScreen from \"../components/SplashScreen\";\n\nexport default function Index() {\n  const { loading, isOnboardingComplete } = useOnboarding();\n  const [minTimePassed, setMinTimePassed] = useState(false);\n\n  useEffect(() => {\n    const timer = setTimeout(() => setMinTimePassed(true), 600);\n    return () => clearTimeout(timer);\n  }, []);\n\n  if (loading || !minTimePassed) {\n    return <SplashScreen />;\n  }\n\n  if (!isOnboardingComplete) {\n    return <Redirect href=\"/onboarding/1\" />;",
+              "truncated": false,
+              "loaded": [],
+              "display": {
+                "type": "file",
+                "path": "/workspaces/learn-p5/src/app/index.tsx",
+                "text": "import { useEffect, useState } from \"react\";\nimport { Redirect } from \"expo-router\";\nimport { useOnboarding } from \"../hooks/useOnboarding\";\nimport SplashScreen from \"../components/SplashScreen\";\n\nexport default function Index() {\n  const { loading, isOnboardingComplete } = useOnboarding();\n  const [minTimePassed, setMinTimePassed] = useState(false);\n\n  useEffect(() => {\n    const timer = setTimeout(() => setMinTimePassed(true), 600);\n    return () => clearTimeout(timer);\n  }, []);\n\n  if (loading || !minTimePassed) {\n    return <SplashScreen />;\n  }\n\n  if (!isOnboardingComplete) {\n    return <Redirect href=\"/onboarding/1\" />;\n  }\n\n  return <Redirect href=\"/dashboard\" />;\n}",
+                "lineStart": 1,
+                "lineEnd": 24,
+                "totalLines": 24,
+                "truncated": false
+              }
+            },
+            "title": "src/app/index.tsx",
+            "time": {
+              "start": 1785339223121,
+              "end": 1785339223128
+            }
+          },
+          "id": "prt_fae829c4c001euKUXuOtn1A2M2",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae8283040011VJbcw5ZKF5uVC"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "37ad4d2c80a96b4065d95d975f1c52058ed5ff7a",
+          "type": "step-finish",
+          "tokens": {
+            "total": 27487,
+            "input": 7543,
+            "output": 104,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 19840
+            }
+          },
+          "cost": 0.0161762,
+          "id": "prt_fae829d43001VjBSokHMHn6KSu",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae8283040011VJbcw5ZKF5uVC"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_fae81f3d0001virBrhLoh2YWPk",
+        "role": "assistant",
+        "mode": "explore",
+        "agent": "explore",
+        "path": {
+          "cwd": "/workspaces/learn-p5",
+          "root": "/workspaces/learn-p5"
+        },
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        },
+        "modelID": "glm-5.2",
+        "providerID": "opencode-go",
+        "time": {
+          "created": 1785339223427,
+          "completed": 1785339363291
+        },
+        "error": {
+          "name": "UnknownError",
+          "data": {
+            "message": "Type validation failed: Value: {\"model\":\"glm-5.2\"}.\nError message: [\n  {\n    \"code\": \"invalid_union\",\n    \"errors\": [\n      [\n        {\n          \"expected\": \"array\",\n          \"code\": \"invalid_type\",\n          \"path\": [\n            \"choices\"\n          ],\n          \"message\": \"Invalid input: expected array, received undefined\"\n        }\n      ],\n      [\n        {\n          \"expected\": \"object\",\n          \"code\": \"invalid_type\",\n          \"path\": [\n            \"error\"\n          ],\n          \"message\": \"Invalid input: expected object, received undefined\"\n        }\n      ]\n    ],\n    \"path\": [],\n    \"message\": \"Invalid input\"\n  }\n]"
+          }
+        },
+        "id": "msg_fae829d82001KMiTG5prag90AI",
+        "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p"
+      },
+      "parts": [
+        {
+          "snapshot": "37ad4d2c80a96b4065d95d975f1c52058ed5ff7a",
+          "type": "step-start",
+          "id": "prt_fae82a8a7001mwuna2mNN9F8sh",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae829d82001KMiTG5prag90AI"
+        },
+        {
+          "type": "text",
+          "text": "I have a complete picture. Here is my thorough report.\n\n# Dashboard & Activity – Codebase Findings\n\n## Summary\n\nThe app uses **Expo Router** with the route structure under `/workspaces/learn-p5/src/app/`. There is **no actual \"GitHub activity\" component** in this codebase — searches for `GitHubActivity`, `commits`, `push`, GitHub-API integration, etc. found nothing in app source. The closest thing is the **`ActivityHeatmap` component**, a GitHub-contributions-graph-style heatmap that renders **local exercise-completion activity** (stored in AsyncStorage), not GitHub data. \"GitHub\" only appears in source as: (a) a CodeMirror editor theme (`src/utils/editor/themes.ts`) and (b) a sample `raw.githubusercontent.com` URL inside an `io` course exercise's starting code/solution.\n\nThe app's root route redirects to `/dashboard`, which is the main landing screen after onboarding.\n\n---\n\n## 1. Dashboard route file\n\n**Path:** `/workspaces/learn-p5/src/app/dashboard.tsx` (564 lines, read in full)\n\nStructure of the dashboard screen (top-to-bottom render order):\n\n- **L36–L54**: State setup — loads `completedLessons`, `courses`, streak data; hooks `useStreak`, `useAchievements` (line 45), `useActivityLog` (line 46); animated counters (`animatedLevel`, `animatedCompleted`, `animatedStreak`).\n- **L56–L75** `useFocusEffect`: refreshes completed lessons, courses, streak, achievements, and activity on focus.\n- **L87–L105**: Time-of-day greeting toast (morning/afternoon/evening) shown once per period (key `last_greeting_period`).\n- **L107–L125** `nextExercise` / `upcomingExercises` (useMemo): flattens all course exercises and finds the first uncompleted one, plus the next 5 upcoming.\n- **L154–L195**: Animated triple-stat counter (Level / Completed / Streak) using `Animated.parallel`.\n- **Render (L377–L563)**, in order:\n  1. `<Header title=\"Dashboard\" showBack={false} />` (L379)\n  2. `% complete` subtitle + progress bar (L384–L390)\n  3. **Achievement badges stack** (L392–L420)\n  4. Stats row:",
+          "time": {
+            "start": 1785339228930,
+            "end": 1785339363288
+          },
+          "id": "prt_fae82b3020013TQxUkSY0XV7Li",
+          "sessionID": "ses_0517e0c52ffeVIW5xdq0NqMe8p",
+          "messageID": "msg_fae829d82001KMiTG5prag90AI"
+        }
+      ]
+    }
+  ]
+}

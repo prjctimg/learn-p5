@@ -1,0 +1,9 @@
+Explore the learn-p5 Expo app codebase at /workspaces/learn-p5. I need to understand the dashboard route and any "GitHub activity" component on it.
+
+Find:
+1. The dashboard route file (likely under src/ or app/ routing). Read the whole file.
+2. Any component that renders GitHub activity (search for "GitHubActivity", "github", "activity", "commits", etc.). Read it.
+3. The achievement badge rendering on the dashboard — where badges are displayed. Read relevant files.
+4. How modules list / "Continue" CTA appears on the Learn index route (search for "Continue", module list rendering).
+
+Return: file paths with line numbers, key code snippets, and a clear summary of how dashboard is structured, where the GitHub activity component lives, and how achievement badges are rendered. Be thorough.

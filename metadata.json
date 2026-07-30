@@ -3,9 +3,14 @@
   "checkpoint_id": "01KYRWCPDPNDFXFBK0M6SEFH1W",
   "strategy": "manual-commit",
   "branch": "main",
-  "checkpoints_count": 9,
+  "checkpoints_count": 11,
   "files_touched": [
-    "scripts/hooks/pre-push"
+    "scripts/hooks/commit-msg",
+    "scripts/hooks/post-commit",
+    "scripts/hooks/post-rewrite",
+    "scripts/hooks/pre-push",
+    "scripts/hooks/pre-push.pre-entire",
+    "scripts/hooks/prepare-commit-msg"
   ],
   "sessions": [
     {
@@ -70,13 +75,20 @@
       "compact_transcript": "/8/transcript.jsonl",
       "content_hash": "/8/content_hash.txt",
       "prompt": "/8/prompt.txt"
+    },
+    {
+      "metadata": "/9/metadata.json",
+      "transcript": "/9/full.jsonl",
+      "compact_transcript": "/9/transcript.jsonl",
+      "content_hash": "/9/content_hash.txt",
+      "prompt": "/9/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 804680,
+    "input_tokens": 867066,
     "cache_creation_tokens": 0,
-    "cache_read_tokens": 3581760,
-    "output_tokens": 50611,
-    "api_call_count": 112
+    "cache_read_tokens": 3649088,
+    "output_tokens": 51292,
+    "api_call_count": 121
   }
 }
