@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef } from "react";
-import { View, Text, Modal, Pressable, StyleSheet, FlatList, Dimensions } from "react-native";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { View, Text, Modal, Pressable, StyleSheet, FlatList, useWindowDimensions } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useThemeContext } from "./ThemeProvider";
 import { Colors } from "../constants/Colors";
@@ -12,8 +12,6 @@ interface Props {
   unlockedAt: Record<string, string>;
   onDismiss: () => void;
 }
-
-const SCREEN_WIDTH = Dimensions.get("window").width;
 
 function formatDate(iso?: string): string {
   if (!iso) return "Previously unlocked";
@@ -37,12 +35,12 @@ export default function AchievementBadgeModal({
 }: Props) {
   const { colorScheme, derivedColors } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const { width: screenWidth } = useWindowDimensions();
   const listRef = useRef<FlatList>(null);
-  const indexRef = useRef(startIndex);
+  const [currentIndex, setCurrentIndex] = useState(startIndex);
 
-  // The unlocked order ( oldest unlock first ), mapped to full achievement
-  // objects. Tapping a badge on the dashboard opens this at that badge's
-  // position; swipe left/right moves to the next/prev unlocked badge.
+  const pageWidth = screenWidth - 48;
+
   const items = useMemo<Achievement[]>(() => {
     return unlocked
       .map((id) => ACHIEVEMENTS.find((a) => a.id === id))
@@ -51,22 +49,22 @@ export default function AchievementBadgeModal({
 
   useEffect(() => {
     if (!visible) return;
-    indexRef.current = Math.max(0, Math.min(startIndex, items.length - 1));
+    const idx = Math.max(0, Math.min(startIndex, items.length - 1));
+    setCurrentIndex(idx);
     const t = setTimeout(() => {
       listRef.current?.scrollToIndex({
-        index: indexRef.current,
+        index: idx,
         animated: false,
+        viewOffset: 0,
       });
     }, 60);
     return () => clearTimeout(t);
   }, [visible, startIndex, items.length]);
 
-  const currentIndex = indexRef.current;
-
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onDismiss}>
       <Pressable style={styles.overlay} onPress={onDismiss}>
-        <Pressable style={[styles.card, { backgroundColor: colors.surfaceContainerHigh }]} onPress={() => {}}>
+        <Pressable style={[styles.card, { backgroundColor: colors.surfaceContainerHigh, width: pageWidth }]} onPress={() => {}}>
           {items.length === 0 ? (
             <View style={styles.emptyWrap}>
               <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
@@ -86,18 +84,18 @@ export default function AchievementBadgeModal({
                   listRef.current?.scrollToOffset({ offset: info.averageItemLength * info.index, animated: false });
                 }}
                 onMomentumScrollEnd={(e) => {
-                  const idx = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH);
-                  indexRef.current = Math.max(0, Math.min(idx, items.length - 1));
+                  const idx = Math.round(e.nativeEvent.contentOffset.x / pageWidth);
+                  setCurrentIndex(Math.max(0, Math.min(idx, items.length - 1)));
                 }}
                 getItemLayout={(_, index) => ({
-                  length: SCREEN_WIDTH,
-                  offset: SCREEN_WIDTH * index,
+                  length: pageWidth,
+                  offset: pageWidth * index,
                   index,
                 })}
                 renderItem={({ item }) => {
                   const earnedAt = unlockedAt[item.id];
                   return (
-                    <View style={[styles.page, { width: SCREEN_WIDTH }]}>
+                    <View style={[styles.page, { width: pageWidth }]}>
                       <View style={[styles.badgeCircle, { backgroundColor: derivedColors.primary, borderColor: colors.surface }]}>
                         <MaterialCommunityIcons name={item.icon as any} size={56} color={colors.onPrimary} />
                       </View>
@@ -107,14 +105,6 @@ export default function AchievementBadgeModal({
                       <Text style={[styles.badgeSubtitle, { color: derivedColors.primary }]}>
                         {item.subtitle}
                       </Text>
-                      <View style={[styles.ruleBox, { backgroundColor: colors.surfaceDim, borderLeftColor: derivedColors.primary }]}>
-                        <Text style={[styles.ruleLabel, { color: colors.textSecondary }]}>
-                          HOW TO EARN
-                        </Text>
-                        <Text style={[styles.ruleText, { color: colors.onSurface }]}>
-                          {item.rule}
-                        </Text>
-                      </View>
                       <Text style={[styles.earnedDate, { color: colors.textSecondary }]}>
                         Earned {formatDate(earnedAt)}
                       </Text>
@@ -123,12 +113,22 @@ export default function AchievementBadgeModal({
                 }}
               />
               <View style={styles.footerRow}>
-                <Text style={[styles.counter, { color: colors.textSecondary }]}>
-                  {Math.min(currentIndex + 1, items.length)} / {items.length}
-                </Text>
-                <Text style={[styles.swipeHint, { color: colors.textSecondary }]}>
-                  Swipe ← / →
-                </Text>
+                <View style={styles.dotsContainer}>
+                  {items.map((_, i) => (
+                    <View
+                      key={i}
+                      style={[
+                        styles.dot,
+                        {
+                          backgroundColor: i === currentIndex ? derivedColors.primary : colors.textSecondary + "40",
+                          width: i === currentIndex ? 8 : 6,
+                          height: i === currentIndex ? 8 : 6,
+                          borderRadius: i === currentIndex ? 4 : 3,
+                        },
+                      ]}
+                    />
+                  ))}
+                </View>
               </View>
             </>
           )}
@@ -147,15 +147,14 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   card: {
-    width: SCREEN_WIDTH - 48,
     maxWidth: 420,
     borderRadius: 20,
     paddingVertical: 32,
-    paddingHorizontal: 16,
+    paddingHorizontal: 0,
   },
   emptyWrap: { paddingVertical: 40, alignItems: "center" },
   emptyText: { fontFamily: "JetBrainsMono", fontSize: 14 },
-  page: { alignItems: "center", paddingHorizontal: 16, paddingVertical: 8 },
+  page: { alignItems: "center", paddingHorizontal: 24, paddingVertical: 8 },
   badgeCircle: {
     width: 96,
     height: 96,
@@ -177,25 +176,6 @@ const styles = StyleSheet.create({
     marginTop: 6,
     textAlign: "center",
   },
-  ruleBox: {
-    borderRadius: 12,
-    padding: 14,
-    borderLeftWidth: 3,
-    marginTop: 20,
-    width: "100%",
-  },
-  ruleLabel: {
-    fontFamily: "JetBrainsMono",
-    fontSize: 10,
-    fontWeight: "700",
-    letterSpacing: 1,
-    marginBottom: 4,
-  },
-  ruleText: {
-    fontFamily: "JetBrainsMono",
-    fontSize: 13,
-    lineHeight: 20,
-  },
   earnedDate: {
     fontFamily: "JetBrainsMono",
     fontSize: 12,
@@ -204,11 +184,17 @@ const styles = StyleSheet.create({
   },
   footerRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
-    marginTop: 12,
-    paddingHorizontal: 8,
+    marginTop: 16,
+    paddingHorizontal: 16,
   },
-  counter: { fontFamily: "JetBrainsMono", fontSize: 12, fontWeight: "700" },
-  swipeHint: { fontFamily: "JetBrainsMono", fontSize: 11 },
+  dotsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  dot: {
+    borderRadius: 3,
+  },
 });
