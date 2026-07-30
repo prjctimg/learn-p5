@@ -63,8 +63,9 @@ export default function AchievementBadgeModal({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onDismiss}>
-      <Pressable style={styles.overlay} onPress={onDismiss}>
-        <Pressable style={[styles.card, { backgroundColor: colors.surfaceContainerHigh, width: pageWidth }]} onPress={() => {}}>
+      <View style={styles.overlay}>
+        <Pressable style={StyleSheet.absoluteFill} onPress={onDismiss} />
+        <View style={[styles.card, { backgroundColor: colors.surfaceContainerHigh, width: pageWidth }]}>
           {items.length === 0 ? (
             <View style={styles.emptyWrap}>
               <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
@@ -77,9 +78,11 @@ export default function AchievementBadgeModal({
                 ref={listRef}
                 data={items}
                 horizontal
-                pagingEnabled
                 showsHorizontalScrollIndicator={false}
                 keyExtractor={(item) => item.id}
+                snapToInterval={pageWidth}
+                decelerationRate="fast"
+                snapToAlignment="start"
                 onScrollToIndexFailed={(info) => {
                   listRef.current?.scrollToOffset({ offset: info.averageItemLength * info.index, animated: false });
                 }}
@@ -132,8 +135,8 @@ export default function AchievementBadgeModal({
               </View>
             </>
           )}
-        </Pressable>
-      </Pressable>
+        </View>
+      </View>
     </Modal>
   );
 }

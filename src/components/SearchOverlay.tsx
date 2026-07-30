@@ -84,8 +84,9 @@ export default function SearchOverlay({ visible, onClose, inline = false, onSele
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
-      <Pressable style={styles.overlay} onPress={handleClose}>
-        <Pressable style={[styles.card, { backgroundColor: colors.surfaceContainerHigh }]} onPress={() => {}}>
+      <View style={styles.overlay}>
+        <Pressable style={StyleSheet.absoluteFill} onPress={handleClose} />
+        <View style={[styles.card, { backgroundColor: colors.surfaceContainerHigh }, selected && inline && styles.cardExpanded]}>
           {selected && inline ? (
             <SymbolInlineDetail
               sym={selected}
@@ -150,8 +151,8 @@ export default function SearchOverlay({ visible, onClose, inline = false, onSele
               />
             </>
           )}
-        </Pressable>
-      </Pressable>
+        </View>
+      </View>
     </Modal>
   );
 }
@@ -281,6 +282,9 @@ const styles = StyleSheet.create({
     maxHeight: "92%",
     borderRadius: 16,
     padding: 16,
+  },
+  cardExpanded: {
+    flex: 1,
   },
   header: {
     flexDirection: "row",
