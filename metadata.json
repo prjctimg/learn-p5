@@ -3,7 +3,7 @@
   "checkpoint_id": "01KYRWCPDPNDFXFBK0M6SEFH1W",
   "strategy": "manual-commit",
   "branch": "main",
-  "checkpoints_count": 22,
+  "checkpoints_count": 23,
   "files_touched": [
     "scripts/hooks/commit-msg",
     "scripts/hooks/post-commit",
@@ -152,6 +152,13 @@
       "compact_transcript": "/19/transcript.jsonl",
       "content_hash": "/19/content_hash.txt",
       "prompt": "/19/prompt.txt"
+    },
+    {
+      "metadata": "/20/metadata.json",
+      "transcript": "/20/full.jsonl",
+      "compact_transcript": "/20/transcript.jsonl",
+      "content_hash": "/20/content_hash.txt",
+      "prompt": "/20/prompt.txt"
     }
   ],
   "token_usage": {
