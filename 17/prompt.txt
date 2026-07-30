@@ -1,0 +1,10 @@
+In this React Native + Expo p5 learning app, there's a "Word Wrap" editor feature that crashes the editor when toggled ON. We previously fixed a related crash (the `lineWrapping` import from @codemirror/view was undefined; we now use `_CM.EditorView.lineWrapping`). But toggling word wrap on still crashes.
+
+Please research:
+1. The WebView-side `setWordWrap` handler in `/workspaces/learn-p5/src/utils/editor/exerciseHtml.ts` (search for "setWordWrap", "wordWrap", "lineWrapping", "EditorView.lineWrapping"). Show the full handler and any reconfigure logic.
+2. The React-side toggle that sends the `setWordWrap` message (likely in `/workspaces/learn-p5/src/app/learn/[course]/[id].tsx` or a settings menu). Search for "setWordWrap", "wordWrap", "wrap". Show the toggle UI + the postMessage call.
+3. Any place where `EditorView.lineWrapping` is referenced (it's a static on EditorView, accessed as `_CM.EditorView.lineWrapping`). Check if there's a null guard or if the dispatch/reconfigure path could fail (e.g. calling view.dispatch with an undefined extension, or Compartment.reconfigure with undefined).
+4. The CodeMirror bundle generated file `/workspaces/learn-p5/src/utils/editor/codemirror-bundle.generated.ts` — check whether `EditorView` is exported and whether `lineWrapping` is still referenced anywhere as a named export.
+5. Any other `@codemirror/view` extension reconfigurations (e.g. a `wrapCompartment`).
+
+Report file paths + line numbers + exact code excerpts (10-20 line windows). Read only, no edits.
