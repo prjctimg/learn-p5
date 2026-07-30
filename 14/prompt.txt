@@ -1,0 +1,10 @@
+In this React Native + Expo p5 learning app, there's a "Run" button on the exercise page. The user wants a long-press on the Run button to show the reference search modal.
+
+Please research `/workspaces/learn-p5/src/app/learn/[course]/[id].tsx`:
+1. Find the Run button (search for "Run", "handleRun", "onRun", "running", "isRunning"). Report file path + line numbers and the full JSX of the button (~15 line window). Show whether it has `onLongPress` already and what `onPress` does.
+2. Find any existing reference search modal/sheet usage on this page (search for "searchVisible", "SearchOverlay", "openRef", "ref", "router.push('/ref'", "search"). Does the page already import or render `<SearchOverlay>`? Does it route to `/ref`? Report what's wired today.
+3. Show the imports at the top of the file and the state declarations related to run/search.
+
+Also check `/workspaces/learn-p5/src/components/SearchOverlay.tsx` exists and its props (visible, onClose, onSelectSymbol) so we know how to mount it.
+
+Report file paths + line numbers + code excerpts. Read only, no edits.
