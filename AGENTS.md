@@ -10,6 +10,7 @@
 - `scripts/build-courses.mjs` reads every `.yaml` in `src/data/courses/` and emits a matching `.ts` next to it (`<slug>Course` export).
 - `build-courses` runs automatically via `postinstall` (so a fresh clone is buildable) and via `npm start` (so local edits propagate). CI's release workflow runs it explicitly after `npm install`.
 - **`src/data/courses/*.ts` are gitignored build artifacts** (see `.gitignore`, same convention as `src/data/reference.generated.json`). Never commit them.
+- `expo-clipboard` is used for copy-to-clipboard on symbol reference pages. Add it to `package.json` if the feature requires it (already present as of v0.7.4). Type declarations live in `src/types/expo-clipboard.d.ts`.
 - After editing any `.yaml`, re-run `npm run build-courses` before type-checking or starting the app.
 
 ## p5.js bundling (always latest)

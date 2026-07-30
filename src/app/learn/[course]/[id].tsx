@@ -890,7 +890,7 @@ return (
    <WebView
    ref={webViewRef}
    source={{ html: exerciseHtml }}
-   style={fullscreen ? styles.fullscreenWebView : styles.webview}
+   style={fullscreen ? (styles.fullscreenWebView as any) : styles.webview}
    onMessage={handleMessage}
    onLoadStart={() => setEditorViewReady(false)}
    javaScriptEnabled
