@@ -136,10 +136,10 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "700",
     fontStyle: "italic",
-    marginBottom: 16,
+    marginBottom: 20,
   },
   cardWrapper: {
-    marginBottom: 16,
+    marginBottom: 24,
   },
   emptyContainer: {
     alignItems: "center",

@@ -27,9 +27,9 @@ interface ThemeDefinition {
 export const EDITOR_THEMES: Record<string, ThemeDefinition> = {
   "p5-learn": {
     id: "p5-learn",
-    label: "p5 Learn",
+    label: "Default",
     light: {
-      name: "p5 Light",
+      name: "Default Light",
       bg: "#FFFFFF",
       fg: "#1F2937",
       gutterFg: "#9CA3AF",
@@ -47,7 +47,7 @@ export const EDITOR_THEMES: Record<string, ThemeDefinition> = {
       constant: "#D31D4E",
     },
     dark: {
-      name: "p5 Dark",
+      name: "Default Dark",
       bg: "#0D0E12",
       fg: "#E3E2E7",
       gutterFg: "#6B7280",
