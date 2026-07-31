@@ -20,17 +20,17 @@
     },
     "cost": 0,
     "tokens": {
-      "input": 656212,
-      "output": 34241,
+      "input": 657232,
+      "output": 35122,
       "reasoning": 54166,
       "cache": {
-        "read": 12013952,
+        "read": 12498304,
         "write": 0
       }
     },
     "time": {
       "created": 1785502415255,
-      "updated": 1785505027546
+      "updated": 1785505112417
     }
   },
   "messages": [
@@ -18057,19 +18057,22 @@
         },
         "cost": 0,
         "tokens": {
-          "input": 0,
-          "output": 0,
+          "total": 121001,
+          "input": 151,
+          "output": 274,
           "reasoning": 0,
           "cache": {
-            "read": 0,
-            "write": 0
+            "write": 0,
+            "read": 120576
           }
         },
         "modelID": "big-pickle",
         "providerID": "opencode",
         "time": {
-          "created": 1785505027543
+          "created": 1785505027543,
+          "completed": 1785505099050
         },
+        "finish": "tool-calls",
         "id": "msg_fb86495d7002qqKnstYDZ7ZfPV",
         "sessionID": "ses_047c34668ffeSld0m8zn9gicjf"
       },
@@ -18086,20 +18089,357 @@
           "tool": "bash",
           "callID": "call_00_ET_9HfHyZcnzeSTGAznmOzS6836",
           "state": {
-            "metadata": {
-              "output": ""
-            },
-            "status": "running",
+            "status": "completed",
             "input": {
               "command": "git commit -m \"chore: prune dead code and redundant scripts\n\n- Delete unused legacy editor cluster (CodeEditor.tsx, editor.ts,\n  bridge.ts, styles.ts, colors.ts) superseded by the CodeMirror WebView.\n- Remove stale type overrides that shadowed real package types:\n  react-native-webview.d.ts (missing onLoadStart/ref/keyboard props) and\n  expo-clipboard.d.ts (lazy require is untyped). Fixes the two pre-existing\n  tsc errors; StatusBarAccent now uses <StatusBar hidden />.\n- Drop redundant scripts/ensure-clipboard.mjs: expo-clipboard is a declared\n  dependency and src/utils/clipboard.ts degrades gracefully. Removed from\n  postinstall/start chains.\n- Remove unused expo-web-browser dependency.\n- release.yaml: rely on postinstall for course generation and replace the\n  inline CodeMirror size check with npm run bundle-editor (threshold lives\n  in one place).\n- AGENTS.md: reflect the above.\" && git log --oneline -2"
             },
+            "output": "[cleanup/dead-code 980f61a] chore: prune dead code and redundant scripts\n Author: Dean Tarisai <prjctimg@outlook.com>\n 12 files changed, 7 insertions(+), 721 deletions(-)\n delete mode 100644 scripts/ensure-clipboard.mjs\n delete mode 100644 src/components/CodeEditor.tsx\n delete mode 100644 src/types/expo-clipboard.d.ts\n delete mode 100644 src/types/react-native-webview.d.ts\n delete mode 100644 src/utils/editor/bridge.ts\n delete mode 100644 src/utils/editor/colors.ts\n delete mode 100644 src/utils/editor/editor.ts\n delete mode 100644 src/utils/editor/styles.ts\n980f61a chore: prune dead code and redundant scripts\nccd9d88 v0.7.6: fullscreen modal, badge modal paging, clipboard copy, shake-to-report\n",
+            "metadata": {
+              "output": "[cleanup/dead-code 980f61a] chore: prune dead code and redundant scripts\n Author: Dean Tarisai <prjctimg@outlook.com>\n 12 files changed, 7 insertions(+), 721 deletions(-)\n delete mode 100644 scripts/ensure-clipboard.mjs\n delete mode 100644 src/components/CodeEditor.tsx\n delete mode 100644 src/types/expo-clipboard.d.ts\n delete mode 100644 src/types/react-native-webview.d.ts\n delete mode 100644 src/utils/editor/bridge.ts\n delete mode 100644 src/utils/editor/colors.ts\n delete mode 100644 src/utils/editor/editor.ts\n delete mode 100644 src/utils/editor/styles.ts\n980f61a chore: prune dead code and redundant scripts\nccd9d88 v0.7.6: fullscreen modal, badge modal paging, clipboard copy, shake-to-report\n",
+              "exit": 0,
+              "truncated": false
+            },
+            "title": "git commit -m \"chore: prune dead code and redundant scripts\n\n- Delete unused legacy editor cluster (CodeEditor.tsx, editor.ts,\n  bridge.ts, styles.ts, colors.ts) superseded by the CodeMirror WebView.\n- Remove stale type overrides that shadowed real package types:\n  react-native-webview.d.ts (missing onLoadStart/ref/keyboard props) and\n  expo-clipboard.d.ts (lazy require is untyped). Fixes the two pre-existing\n  tsc errors; StatusBarAccent now uses <StatusBar hidden />.\n- Drop redundant scripts/ensure-clipboard.mjs: expo-clipboard is a declared\n  dependency and src/utils/clipboard.ts degrades gracefully. Removed from\n  postinstall/start chains.\n- Remove unused expo-web-browser dependency.\n- release.yaml: rely on postinstall for course generation and replace the\n  inline CodeMirror size check with npm run bundle-editor (threshold lives\n  in one place).\n- AGENTS.md: reflect the above.\" && git log --oneline -2",
             "time": {
-              "start": 1785505032617
+              "start": 1785505098866,
+              "end": 1785505098873
             }
           },
           "id": "prt_fb864a246001RK9VlSP9JNs7lV",
           "sessionID": "ses_047c34668ffeSld0m8zn9gicjf",
           "messageID": "msg_fb86495d7002qqKnstYDZ7ZfPV"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "62497c89d97e7a0195eadcb987b2ab63153209a4",
+          "type": "step-finish",
+          "tokens": {
+            "total": 121001,
+            "input": 151,
+            "output": 274,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 120576
+            }
+          },
+          "cost": 0,
+          "id": "prt_fb865acdc001kyF2TQqQRMAEeP",
+          "sessionID": "ses_047c34668ffeSld0m8zn9gicjf",
+          "messageID": "msg_fb86495d7002qqKnstYDZ7ZfPV"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_fb8635238001Cbi4nxXqtNz1IU",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/workspaces/learn-p5",
+          "root": "/workspaces/learn-p5"
+        },
+        "cost": 0,
+        "tokens": {
+          "total": 121282,
+          "input": 253,
+          "output": 69,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 120960
+          }
+        },
+        "modelID": "big-pickle",
+        "providerID": "opencode",
+        "time": {
+          "created": 1785505099096,
+          "completed": 1785505108031
+        },
+        "finish": "tool-calls",
+        "id": "msg_fb865ad58002zito3adp3aVSQT",
+        "sessionID": "ses_047c34668ffeSld0m8zn9gicjf"
+      },
+      "parts": [
+        {
+          "snapshot": "62497c89d97e7a0195eadcb987b2ab63153209a4",
+          "type": "step-start",
+          "id": "prt_fb865b437001IhEzkq3qg2sijJ",
+          "sessionID": "ses_047c34668ffeSld0m8zn9gicjf",
+          "messageID": "msg_fb865ad58002zito3adp3aVSQT"
+        },
+        {
+          "type": "tool",
+          "tool": "bash",
+          "callID": "call_00_ET_SbOOFtkf2gHk95WI4E4C6806",
+          "state": {
+            "status": "completed",
+            "input": {
+              "command": "git push -u origin cleanup/dead-code",
+              "timeout": 60000
+            },
+            "output": "[entire] Pushing 2 checkpoint ref(s) to origin...... done\nremote: \nremote: Create a pull request for 'cleanup/dead-code' on GitHub by visiting:        \nremote:      https://github.com/prjctimg/learn-p5/pull/new/cleanup/dead-code        \nremote: \nTo https://github.com/prjctimg/learn-p5\n * [new branch]      cleanup/dead-code -> cleanup/dead-code\nbranch 'cleanup/dead-code' set up to track 'origin/cleanup/dead-code'.\n",
+            "metadata": {
+              "output": "[entire] Pushing 2 checkpoint ref(s) to origin...... done\nremote: \nremote: Create a pull request for 'cleanup/dead-code' on GitHub by visiting:        \nremote:      https://github.com/prjctimg/learn-p5/pull/new/cleanup/dead-code        \nremote: \nTo https://github.com/prjctimg/learn-p5\n * [new branch]      cleanup/dead-code -> cleanup/dead-code\nbranch 'cleanup/dead-code' set up to track 'origin/cleanup/dead-code'.\n",
+              "exit": 0,
+              "truncated": false
+            },
+            "title": "git push -u origin cleanup/dead-code",
+            "time": {
+              "start": 1785505107904,
+              "end": 1785505107909
+            }
+          },
+          "id": "prt_fb865b6fe001Sz4f9mpECFXqvf",
+          "sessionID": "ses_047c34668ffeSld0m8zn9gicjf",
+          "messageID": "msg_fb865ad58002zito3adp3aVSQT"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "62497c89d97e7a0195eadcb987b2ab63153209a4",
+          "type": "step-finish",
+          "tokens": {
+            "total": 121282,
+            "input": 253,
+            "output": 69,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 120960
+            }
+          },
+          "cost": 0,
+          "id": "prt_fb865cffa001bFBAGFJETnF34P",
+          "sessionID": "ses_047c34668ffeSld0m8zn9gicjf",
+          "messageID": "msg_fb865ad58002zito3adp3aVSQT"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_fb8635238001Cbi4nxXqtNz1IU",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/workspaces/learn-p5",
+          "root": "/workspaces/learn-p5"
+        },
+        "cost": 0,
+        "tokens": {
+          "total": 121708,
+          "input": 196,
+          "output": 296,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 121216
+          }
+        },
+        "modelID": "big-pickle",
+        "providerID": "opencode",
+        "time": {
+          "created": 1785505108063,
+          "completed": 1785505112384
+        },
+        "finish": "tool-calls",
+        "id": "msg_fb865d05f002xjdB7pt3spEYiV",
+        "sessionID": "ses_047c34668ffeSld0m8zn9gicjf"
+      },
+      "parts": [
+        {
+          "snapshot": "62497c89d97e7a0195eadcb987b2ab63153209a4",
+          "type": "step-start",
+          "id": "prt_fb865d7b0001Uif4S0T0sR11OZ",
+          "sessionID": "ses_047c34668ffeSld0m8zn9gicjf",
+          "messageID": "msg_fb865d05f002xjdB7pt3spEYiV"
+        },
+        {
+          "type": "tool",
+          "tool": "todowrite",
+          "callID": "call_00_ET_JOhfBjCaplu8opBtgEEn5025",
+          "state": {
+            "status": "completed",
+            "input": {
+              "todos": [
+                {
+                  "content": "Delete dead code files (CodeEditor, editor.ts, bridge.ts, styles.ts, colors.ts, webview/expo-clipboard d.ts)",
+                  "priority": "high",
+                  "status": "completed"
+                },
+                {
+                  "content": "Fix StatusBarAccent style=\"hidden\" tsc error",
+                  "priority": "medium",
+                  "status": "completed"
+                },
+                {
+                  "content": "Remove expo-web-browser from package.json; drop ensure-clipboard from postinstall/start; delete ensure-clipboard.mjs",
+                  "priority": "high",
+                  "status": "completed"
+                },
+                {
+                  "content": "Clean up release.yaml (remove redundant course steps, replace CodeMirror check with npm run bundle-editor)",
+                  "priority": "medium",
+                  "status": "completed"
+                },
+                {
+                  "content": "Update AGENTS.md (ensure-clipboard, CI notes, expo-clipboard import location)",
+                  "priority": "low",
+                  "status": "completed"
+                },
+                {
+                  "content": "Verify: tsc, lint, check-exercises",
+                  "priority": "high",
+                  "status": "completed"
+                },
+                {
+                  "content": "Commit to cleanup/dead-code branch and push",
+                  "priority": "high",
+                  "status": "completed"
+                }
+              ]
+            },
+            "output": "[\n  {\n    \"content\": \"Delete dead code files (CodeEditor, editor.ts, bridge.ts, styles.ts, colors.ts, webview/expo-clipboard d.ts)\",\n    \"status\": \"completed\",\n    \"priority\": \"high\"\n  },\n  {\n    \"content\": \"Fix StatusBarAccent style=\\\"hidden\\\" tsc error\",\n    \"status\": \"completed\",\n    \"priority\": \"medium\"\n  },\n  {\n    \"content\": \"Remove expo-web-browser from package.json; drop ensure-clipboard from postinstall/start; delete ensure-clipboard.mjs\",\n    \"status\": \"completed\",\n    \"priority\": \"high\"\n  },\n  {\n    \"content\": \"Clean up release.yaml (remove redundant course steps, replace CodeMirror check with npm run bundle-editor)\",\n    \"status\": \"completed\",\n    \"priority\": \"medium\"\n  },\n  {\n    \"content\": \"Update AGENTS.md (ensure-clipboard, CI notes, expo-clipboard import location)\",\n    \"status\": \"completed\",\n    \"priority\": \"low\"\n  },\n  {\n    \"content\": \"Verify: tsc, lint, check-exercises\",\n    \"status\": \"completed\",\n    \"priority\": \"high\"\n  },\n  {\n    \"content\": \"Commit to cleanup/dead-code branch and push\",\n    \"status\": \"completed\",\n    \"priority\": \"high\"\n  }\n]",
+            "metadata": {
+              "todos": [
+                {
+                  "content": "Delete dead code files (CodeEditor, editor.ts, bridge.ts, styles.ts, colors.ts, webview/expo-clipboard d.ts)",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Fix StatusBarAccent style=\"hidden\" tsc error",
+                  "status": "completed",
+                  "priority": "medium"
+                },
+                {
+                  "content": "Remove expo-web-browser from package.json; drop ensure-clipboard from postinstall/start; delete ensure-clipboard.mjs",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Clean up release.yaml (remove redundant course steps, replace CodeMirror check with npm run bundle-editor)",
+                  "status": "completed",
+                  "priority": "medium"
+                },
+                {
+                  "content": "Update AGENTS.md (ensure-clipboard, CI notes, expo-clipboard import location)",
+                  "status": "completed",
+                  "priority": "low"
+                },
+                {
+                  "content": "Verify: tsc, lint, check-exercises",
+                  "status": "completed",
+                  "priority": "high"
+                },
+                {
+                  "content": "Commit to cleanup/dead-code branch and push",
+                  "status": "completed",
+                  "priority": "high"
+                }
+              ],
+              "truncated": false
+            },
+            "title": "0 todos",
+            "time": {
+              "start": 1785505112202,
+              "end": 1785505112206
+            }
+          },
+          "id": "prt_fb865dbc1001NHsqxh4geeFAfG",
+          "sessionID": "ses_047c34668ffeSld0m8zn9gicjf",
+          "messageID": "msg_fb865d05f002xjdB7pt3spEYiV"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "62497c89d97e7a0195eadcb987b2ab63153209a4",
+          "type": "step-finish",
+          "tokens": {
+            "total": 121708,
+            "input": 196,
+            "output": 296,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 121216
+            }
+          },
+          "cost": 0,
+          "id": "prt_fb865e0f8001G9GSAOg7o9ZLXF",
+          "sessionID": "ses_047c34668ffeSld0m8zn9gicjf",
+          "messageID": "msg_fb865d05f002xjdB7pt3spEYiV"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_fb8635238001Cbi4nxXqtNz1IU",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/workspaces/learn-p5",
+          "root": "/workspaces/learn-p5"
+        },
+        "cost": 0,
+        "tokens": {
+          "total": 122262,
+          "input": 420,
+          "output": 242,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 121600
+          }
+        },
+        "modelID": "big-pickle",
+        "providerID": "opencode",
+        "time": {
+          "created": 1785505112415,
+          "completed": 1785505116912
+        },
+        "finish": "stop",
+        "id": "msg_fb865e15f002pVj7rHUHgI1SlE",
+        "sessionID": "ses_047c34668ffeSld0m8zn9gicjf"
+      },
+      "parts": [
+        {
+          "snapshot": "62497c89d97e7a0195eadcb987b2ab63153209a4",
+          "type": "step-start",
+          "id": "prt_fb865e7b1001V4Dj5X1Lg5QeYp",
+          "sessionID": "ses_047c34668ffeSld0m8zn9gicjf",
+          "messageID": "msg_fb865e15f002pVj7rHUHgI1SlE"
+        },
+        {
+          "type": "text",
+          "text": "Done. Committed as `980f61a` on `cleanup/dead-code` and pushed.\n\n**Deleted** (721 lines removed): `CodeEditor.tsx` + the dead `editor.ts`/`bridge.ts`/`styles.ts`/`colors.ts` chain, both stale type overrides (`react-native-webview.d.ts`, `expo-clipboard.d.ts`), and `ensure-clipboard.mjs`.\n\n**Changed**: dropped `expo-web-browser` dep; `postinstall`/`start` chains simplified; `release.yaml` now relies on `postinstall` for courses and regenerates the CodeMirror bundle via `npm run bundle-editor`; `AGENTS.md` updated.\n\n**Verified**: `tsc` went from 2 errors to **0** (removing the webview override fixed `onLoadStart`; `StatusBarAccent` fixed separately), lint 0 errors, `check-exercises` passes.\n\nNo version bump / tag / release, per your choice. PR link: https://github.com/prjctimg/learn-p5/pull/new/cleanup/dead-code",
+          "time": {
+            "start": 1785505114836,
+            "end": 1785505116753
+          },
+          "id": "prt_fb865ead40017ydGEKMnKIgFTs",
+          "sessionID": "ses_047c34668ffeSld0m8zn9gicjf",
+          "messageID": "msg_fb865e15f002pVj7rHUHgI1SlE"
+        },
+        {
+          "reason": "stop",
+          "snapshot": "62497c89d97e7a0195eadcb987b2ab63153209a4",
+          "type": "step-finish",
+          "tokens": {
+            "total": 122262,
+            "input": 420,
+            "output": 242,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 121600
+            }
+          },
+          "cost": 0,
+          "id": "prt_fb865f293001ubrbUzof9UaX91",
+          "sessionID": "ses_047c34668ffeSld0m8zn9gicjf",
+          "messageID": "msg_fb865e15f002pVj7rHUHgI1SlE"
         }
       ]
     }
