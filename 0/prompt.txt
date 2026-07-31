@@ -1,0 +1,4 @@
+- Improve the fullscreen feature to fully cover the viewport as expected. This is useful for interactive previews of the user's sketch. The current implementation is not working as expected
+- When you click on an achievement badge on the dashboard ,allow the user to swipe left/right to see the next/prev achievements whilst the popup is active. Current implement has improper layout and the swipe is not working. Also remove the "How to Earn" section from it
+- On the symbol reference pages, add a copy-to-clipboard button (reuse the logic from the exercise view's code editor) . Currently pressing the copy icon crashes the app. Also use the copy icon on the exercise view code block 
+- Restrict the shake festure to just allow the user to report errors on all other routes and keep the exercise options in the modal as is and reduce the sensitivity
