@@ -1,6 +1,6 @@
 import { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import { View, Text, Pressable, ScrollView, StyleSheet, Animated } from "react-native";
-import { useRouter, useFocusEffect } from "expo-router";
+import { useRouter, useFocusEffect, useIsFocused } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useThemeContext } from "../components/ThemeProvider";
@@ -14,6 +14,8 @@ import { isExerciseLocked as checkExerciseLocked } from "../utils/isExerciseLock
 import { getStreakFromStorage, useStreak } from "../hooks/useStreak";
 import { useAchievements, ACHIEVEMENTS } from "../hooks/useAchievements";
 import AchievementBadgeModal from "../components/AchievementBadgeModal";
+import { useShakeDetection } from "../hooks/useShakeDetection";
+import ReportErrorModal from "../components/ReportErrorModal";
 
 const LAST_GREETING_KEY = "last_greeting_period";
 
@@ -52,6 +54,13 @@ const { unlocked: unlockedAchievements, unlockedAt, refresh: refreshAchievements
  const [animatedLevel, setAnimatedLevel] = useState(1);
  const [animatedCompleted, setAnimatedCompleted] = useState(0);
  const [animatedStreak, setAnimatedStreak] = useState(0);
+ const [shakeModalVisible, setShakeModalVisible] = useState(false);
+ const isFocused = useIsFocused();
+
+ useShakeDetection(
+  useCallback(() => setShakeModalVisible(true), []),
+  { enabled: isFocused }
+ );
 
  useFocusEffect(
  useCallback(() => {
@@ -559,13 +568,18 @@ progressBarOuter: {
  nextTier={streak.nextTier}
  onDismiss={() => setStreakToastVisible(false)}
  />
- <AchievementBadgeModal
- visible={badgeModalVisible}
- startIndex={badgeModalIndex}
- unlocked={unlockedAchievements}
- unlockedAt={unlockedAt}
- onDismiss={() => setBadgeModalVisible(false)}
- />
- </View>
+  <AchievementBadgeModal
+  visible={badgeModalVisible}
+  startIndex={badgeModalIndex}
+  unlocked={unlockedAchievements}
+  unlockedAt={unlockedAt}
+  onDismiss={() => setBadgeModalVisible(false)}
+  />
+  <ReportErrorModal
+  visible={shakeModalVisible}
+  onDismiss={() => setShakeModalVisible(false)}
+  route="/dashboard"
+  />
+  </View>
 );
 }

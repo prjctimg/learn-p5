@@ -1,6 +1,6 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { View, Text, FlatList, StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useIsFocused } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Header from "../../components/Header";
 import ExerciseCard from "../../components/ExerciseCard";
@@ -8,6 +8,8 @@ import { loadAllCourses } from "../../utils/courseLoader";
 import { Course } from "../../data/types";
 import { useThemeContext } from "../../components/ThemeProvider";
 import { Colors } from "../../constants/Colors";
+import { useShakeDetection } from "../../hooks/useShakeDetection";
+import ReportErrorModal from "../../components/ReportErrorModal";
 
 const COMPLETED_COURSES_KEY = "completedCourses";
 
@@ -20,6 +22,13 @@ export default function Learn() {
   const [error, setError] = useState<string | null>(null);
   const { colorScheme, derivedColors } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const [shakeModalVisible, setShakeModalVisible] = useState(false);
+  const isFocused = useIsFocused();
+
+  useShakeDetection(
+    useCallback(() => setShakeModalVisible(true), []),
+    { enabled: isFocused }
+  );
 
   useEffect(() => {
     Promise.all([
@@ -117,6 +126,11 @@ export default function Learn() {
             </View>
           ) : null
         }
+      />
+      <ReportErrorModal
+        visible={shakeModalVisible}
+        onDismiss={() => setShakeModalVisible(false)}
+        route="/learn"
       />
     </View>
   );

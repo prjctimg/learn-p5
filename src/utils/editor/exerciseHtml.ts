@@ -178,33 +178,9 @@ export function getExerciseHtml(params: {
     align-items: center;
     justify-content: center;
     position: relative;
-    transition: height 0.3s ease;
-  }
-  .sketch-box.expanded {
-    height: 400px;
-    border-radius: 0;
   }
    .sketch-box canvas { display: block; touch-action: pan-y !important; }
-  /* Fullscreen: cover the entire OS viewport when the sketch box is the
-     active fullscreen element (HTML Fullscreen API). */
-  .sketch-box:fullscreen {
-    width: 100vw;
-    height: 100vh;
-    background: #000000;
-    border-radius: 0;
-  }
-  .sketch-box:-webkit-full-screen {
-    width: 100vw;
-    height: 100vh;
-    background: #000000;
-    border-radius: 0;
-  }
-  .sketch-box:fullscreen canvas,
-  .sketch-box:-webkit-full-screen canvas {
-    max-width: 100%;
-    max-height: 100%;
-  }
-  .run-btn {
+   .run-btn {
     position: absolute;
     bottom: 8px;
     right: 8px;
@@ -302,6 +278,9 @@ export function getExerciseHtml(params: {
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
   }
   .editor-header-btn:active {
     background: ${colors.primaryContainer}44;
@@ -427,7 +406,7 @@ ${
     </div>
     <div class="editor-header-right">
       <button class="editor-header-btn" id="resetBtn">Reset</button>
-      <button class="editor-header-btn" id="copyBtn">Copy</button>
+      <button class="editor-header-btn" id="copyBtn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg><span id="copyLabel">Copy</span></button>
     </div>
   </div>
   <div id="editor"></div>
@@ -1366,18 +1345,13 @@ if (solutionToggle) {
 }
 
 var maximizeBtn = document.getElementById('maximize-btn');
-function setMaximizeIcon(isFullscreen) {
-  var icon = document.getElementById('maximize-icon');
-  if (icon) icon.innerHTML = isFullscreen ? '&#x2715;' : '&#x26F6;';
-}
 if (maximizeBtn) {
+  // Fullscreen is driven entirely by React Native (native full-screen Modal
+  // covering the whole viewport). The WebView only notifies RN to toggle.
   maximizeBtn.addEventListener('click', function() {
-    var sketch = document.getElementById('user-sketch');
     if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
       window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'toggleFullscreen' }));
     }
-    sketch.classList.toggle('expanded');
-    setMaximizeIcon(sketch.classList.contains('expanded'));
   });
 }
 
@@ -1415,24 +1389,24 @@ if (resetBtn) {
 }
 
 var copyBtn = document.getElementById('copyBtn');
+var copyLabel = document.getElementById('copyLabel');
 if (copyBtn) {
   copyBtn.addEventListener('click', function() {
     if (view) {
       var code = view.state.doc.toString();
       copyToClipboard(code).then(function() {
-        copyBtn.innerHTML = '<span style="color:#22C55E">&#10003;</span> Copied';
         copyBtn.style.backgroundColor = '#22C55E22';
         copyBtn.style.borderColor = '#22C55E';
         copyBtn.style.color = '#22C55E';
+        if (copyLabel) copyLabel.textContent = 'Copied';
         if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
           window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'codeCopied' }));
         }
         setTimeout(function() {
-          copyBtn.innerHTML = 'Copy';
           copyBtn.style.backgroundColor = '';
           copyBtn.style.borderColor = '';
           copyBtn.style.color = '';
-          copyBtn.classList.remove('copied');
+          if (copyLabel) copyLabel.textContent = 'Copy';
         }, 2000);
       });
     }

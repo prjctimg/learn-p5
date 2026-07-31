@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useReducer, useMemo, useCallback } from "react";
 import { View, Text, Pressable, StyleSheet, Modal, Switch, ScrollView, StatusBar } from "react-native";
-import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
+import { useLocalSearchParams, useRouter, useFocusEffect, useIsFocused } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -21,6 +21,7 @@ import { loadExercise, loadCourse } from "../../../utils/courseLoader";
 import { Exercise as ExerciseType } from "../../../data/types";
 import { P5_FUNCTION_NAMES, ONCE_ONLY_P5_FUNCTIONS } from "../../../data/reference";
 import { getExerciseHtml } from "../../../utils/editor/exerciseHtml";
+import { getFullscreenPreviewHtml } from "../../../utils/editor/fullscreenPreviewHtml";
 import { EDITOR_THEMES, getThemeSwatches } from "../../../utils/editor/themes";
 import { useStreak } from "../../../hooks/useStreak";
 import { recordCompletion, ACHIEVEMENTS } from "../../../hooks/useAchievements";
@@ -167,8 +168,8 @@ export default function Exercise() {
 
   const [toastTone, setToastTone] = useState<"success" | "failure" | undefined>(undefined);
 
- const exerciseHtml = useMemo(() => {
- if (!state.exercise) return null;
+  const exerciseHtml = useMemo(() => {
+  if (!state.exercise) return null;
     return getExerciseHtml({
       title: state.exercise.title,
       moduleName: state.exercise.module,
@@ -186,6 +187,11 @@ export default function Exercise() {
       disableSystemKeyboard,
     });
   }, [state.exercise, state.currentTaskIndex, colorScheme, id, editorTheme, codeFontSize, ctaColor]);
+
+  const fullscreenPreviewHtml = useMemo(
+    () => getFullscreenPreviewHtml(state.code, colorScheme === "dark" ? "dark" : "light"),
+    [state.code, colorScheme]
+  );
 
  const styles = useMemo(
  () =>
@@ -266,13 +272,13 @@ export default function Exercise() {
   webview: {
   flex: 1,
   },
-  fullscreenWebView: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    zIndex: 50,
+  fullscreenContainer: {
+    flex: 1,
+    backgroundColor: "#000000",
+  },
+  fullscreenWebViewInner: {
+    flex: 1,
+    backgroundColor: "#000000",
   },
   fullscreenCloseBtn: {
     position: "absolute",
@@ -615,7 +621,11 @@ case "sketchError":
     setShakeModalVisible(true);
   }, []);
 
-  useShakeDetection(handleShake, { enabled: !state.loading && !!state.exercise });
+  const isFocused = useIsFocused();
+
+  useShakeDetection(handleShake, {
+    enabled: isFocused && !state.loading && !!state.exercise,
+  });
 
   useEffect(() => {
     if (editorViewReady && webViewRef.current && state.exercise?.tasks) {
@@ -890,13 +900,12 @@ return (
    <WebView
    ref={webViewRef}
    source={{ html: exerciseHtml }}
-   style={fullscreen ? (styles.fullscreenWebView as any) : styles.webview}
+   style={styles.webview}
    onMessage={handleMessage}
    onLoadStart={() => setEditorViewReady(false)}
    javaScriptEnabled
    domStorageEnabled
    originWhitelist={["*"]}
-   scrollEnabled={!fullscreen}
    bounces={false}
    {...({
      hideKeyboardAccessoryView: true,
@@ -904,6 +913,34 @@ return (
    } as Record<string, boolean>)}
   />
  )}
+
+  <Modal
+    visible={fullscreen}
+    animationType="fade"
+    presentationStyle="fullScreen"
+    statusBarTranslucent
+    onRequestClose={() => setFullscreen(false)}
+  >
+    <View style={styles.fullscreenContainer}>
+      <WebView
+        source={{ html: fullscreenPreviewHtml }}
+        style={styles.fullscreenWebViewInner}
+        javaScriptEnabled
+        domStorageEnabled
+        originWhitelist={["*"]}
+        scrollEnabled={false}
+        bounces={false}
+      />
+      <Pressable
+        onPress={() => setFullscreen(false)}
+        style={styles.fullscreenCloseBtn}
+        accessibilityRole="button"
+        accessibilityLabel="Exit fullscreen"
+      >
+        <MaterialCommunityIcons name="close" size={24} color="#FFFFFF" />
+      </Pressable>
+    </View>
+  </Modal>
 
   {!fullscreen && (
   <View
@@ -933,17 +970,6 @@ return (
   />
   </Pressable>
   </View>
-  )}
-
-  {fullscreen && (
-    <Pressable
-      onPress={() => setFullscreen(false)}
-      style={styles.fullscreenCloseBtn}
-      accessibilityRole="button"
-      accessibilityLabel="Exit fullscreen"
-    >
-      <MaterialCommunityIcons name="close" size={24} color="#FFFFFF" />
-    </Pressable>
   )}
 
   <StreakToast

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { View, Text, TextInput, Switch, Pressable, ScrollView, StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useIsFocused } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
@@ -9,6 +9,8 @@ import TimePicker from "../../components/TimePicker";
 import { useThemeContext } from "../../components/ThemeProvider";
 import { Colors } from "../../constants/Colors";
 import { DEFAULTS } from "../../constants/Defaults";
+import { useShakeDetection } from "../../hooks/useShakeDetection";
+import ReportErrorModal from "../../components/ReportErrorModal";
 
 import { EDITOR_THEMES, getThemeSwatches } from "../../utils/editor/themes";
 import { PROCESSING_COLOR_HEX } from "../../constants/ProcessingColors";
@@ -95,6 +97,13 @@ export default function Settings() {
   const [showDrawerFab, setShowDrawerFab] = useState(true);
   const [showStatusBar, setShowStatusBar] = useState(true);
   const [disableSystemKeyboard, setDisableSystemKeyboard] = useState(false);
+  const [shakeModalVisible, setShakeModalVisible] = useState(false);
+  const isFocused = useIsFocused();
+
+  useShakeDetection(
+    useCallback(() => setShakeModalVisible(true), []),
+    { enabled: isFocused }
+  );
 
   useEffect(() => {
     AsyncStorage.multiGet([
@@ -565,6 +574,11 @@ export default function Settings() {
           </Pressable>
         </View>
       </ScrollView>
+      <ReportErrorModal
+        visible={shakeModalVisible}
+        onDismiss={() => setShakeModalVisible(false)}
+        route="/settings"
+      />
     </View>
   );
 }

@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter, useIsFocused } from "expo-router";
 import { useRef, useMemo, useState, useCallback } from "react";
 import { View, Text, FlatList, ScrollView, Pressable, Alert, StyleSheet, Linking } from "react-native";
 
@@ -11,10 +11,11 @@ import { useThemeContext } from "../../components/ThemeProvider";
 import { Colors } from "../../constants/Colors";
 import { useModuleProgress } from "../../hooks/useModuleProgress";
 import { useShakeDetection } from "../../hooks/useShakeDetection";
-import ShakeModal from "../../components/ShakeModal";
+import ReportErrorModal from "../../components/ReportErrorModal";
 import SearchOverlay from "../../components/SearchOverlay";
 import { getExampleHtml } from "../../utils/editor/exampleHtml";
 import { highlightSyntax, parseDescription } from "../../utils/referenceRender";
+import { copyToClipboard } from "../../utils/clipboard";
 
 const DESCRIBE_RE = /describe\s*\(\s*(["'])((?:(?!\1).)*)\1\s*\)\s*;?\s*/g;
 
@@ -38,6 +39,45 @@ const MODULE_GROUPS = P5_SYMBOLS.reduce<{ module: string; symbols: P5Symbol[] }[
   return acc;
 }, []);
 
+ function CopyButton({ text }: { text: string }) {
+  const { derivedColors } = useThemeContext();
+  const [copied, setCopied] = useState(false);
+
+  const onPress = useCallback(async () => {
+    const ok = await copyToClipboard(text);
+    if (ok) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }
+  }, [text]);
+
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => ({
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 4,
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 6,
+        backgroundColor: pressed ? derivedColors.primaryContainer : "transparent",
+      })}
+      accessibilityRole="button"
+      accessibilityLabel="Copy code"
+    >
+      <MaterialCommunityIcons
+        name={copied ? "check" : "content-copy"}
+        size={14}
+        color={copied ? "#22C55E" : derivedColors.primary}
+      />
+      <Text style={{ fontFamily: "JetBrainsMono", fontSize: 10, fontWeight: "700", color: copied ? "#22C55E" : derivedColors.primary }}>
+        {copied ? "Copied" : "Copy"}
+      </Text>
+    </Pressable>
+  );
+ }
+
  function SymbolDetail({ symbol, onOpenSearch }: { symbol: string; onOpenSearch: () => void }) {
   const router = useRouter();
   const sym = P5_SYMBOLS_BY_NAME[symbol];
@@ -47,16 +87,6 @@ const MODULE_GROUPS = P5_SYMBOLS.reduce<{ module: string; symbols: P5Symbol[] }[
   const currentIndex = sym ? P5_SYMBOLS.indexOf(sym) : -1;
   const prevSym = currentIndex > 0 ? P5_SYMBOLS[currentIndex - 1] : null;
   const nextSym = currentIndex >= 0 && currentIndex < P5_SYMBOLS.length - 1 ? P5_SYMBOLS[currentIndex + 1] : null;
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = useCallback(async (text: string) => {
-    try {
-      const Clipboard = require("expo-clipboard");
-      await Clipboard.setStringAsync(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    } catch {}
-  }, []);
 
  const handleSymbolPress = (name: string) => {
  const lockedCourse = getLockedCourseName(P5_SYMBOLS_BY_NAME[name]?.module ?? "");
@@ -139,29 +169,7 @@ const MODULE_GROUPS = P5_SYMBOLS.reduce<{ module: string; symbols: P5Symbol[] }[
   <Text style={[styles.sectionTitle, { color: colors.onSurface }]}>
   Usage
   </Text>
-  <Pressable
-    onPress={() => handleCopy(sym.syntax)}
-    style={({ pressed }) => ({
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 4,
-      paddingHorizontal: 8,
-      paddingVertical: 4,
-      borderRadius: 6,
-      backgroundColor: pressed ? derivedColors.primaryContainer : "transparent",
-    })}
-    accessibilityRole="button"
-    accessibilityLabel="Copy syntax"
-  >
-    <MaterialCommunityIcons
-      name={copied ? "check" : "content-copy"}
-      size={14}
-      color={copied ? "#22C55E" : derivedColors.primary}
-    />
-    <Text style={{ fontFamily: "JetBrainsMono", fontSize: 10, fontWeight: "700", color: copied ? "#22C55E" : derivedColors.primary }}>
-      {copied ? "Copied" : "Copy"}
-    </Text>
-  </Pressable>
+  <CopyButton text={sym.syntax} />
   </View>
    <View style={[styles.syntaxBox, { backgroundColor: colors.surfaceDim, marginBottom: 24, borderLeftColor: derivedColors.primary }]}>
   <Text style={{ fontFamily: "JetBrainsMono", fontSize: 16, lineHeight: 24 }}>
@@ -183,11 +191,12 @@ const MODULE_GROUPS = P5_SYMBOLS.reduce<{ module: string; symbols: P5Symbol[] }[
     const code = stripDescribe(ex);
     return (
   <View key={i} style={{ marginBottom: 16 }}>
-  {caption && (
-    <Text style={[styles.exampleCaption, { color: colors.textSecondary, marginBottom: 6 }]}>
-      {caption}
-    </Text>
-  )}
+  <View style={[styles.flexRow, { alignItems: "flex-start", justifyContent: "space-between", marginBottom: 6, gap: 8 }]}>
+  <Text style={[styles.exampleCaption, { color: colors.textSecondary, flex: 1 }]}>
+    {caption || `Example ${i + 1}`}
+  </Text>
+  <CopyButton text={code} />
+  </View>
   {sym.norender ? (
   <View style={[styles.codeBlock, { backgroundColor: colors.surfaceDim }]}>
   <Text style={{ fontFamily: "JetBrainsMono", fontSize: 13, lineHeight: 20 }}>
@@ -322,6 +331,7 @@ export default function Reference() {
    const [searchVisible, setSearchVisible] = useState(false);
    const [shakeModalVisible, setShakeModalVisible] = useState(false);
    const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>({});
+   const isFocused = useIsFocused();
 
    const toggleModule = useCallback((module: string) => {
      setExpandedModules((prev) => ({ ...prev, [module]: !prev[module] }));
@@ -329,7 +339,7 @@ export default function Reference() {
 
    useShakeDetection(
      useCallback(() => setShakeModalVisible(true), []),
-     { enabled: true, haptic: true }
+     { enabled: isFocused, haptic: true }
    );
 
   const handleSelectSymbol = useCallback((name: string) => {
@@ -345,41 +355,15 @@ export default function Reference() {
            onClose={() => setSearchVisible(false)}
            onSelectSymbol={handleSelectSymbol}
          />
-         <ShakeModal
-           visible={shakeModalVisible}
-           onDismiss={() => setShakeModalVisible(false)}
-           title="Reference"
-           subtitle="What would you like to do?"
-           actions={[
-             {
-               icon: "magnify",
-               label: "Search Symbols",
-               variant: "primary",
-               onPress: () => {
-                 setShakeModalVisible(false);
-                 setSearchVisible(true);
-               },
-             },
-             {
-               icon: "book-open-variant",
-               label: "Browse All",
-               variant: "secondary",
-               onPress: () => {
-                 setShakeModalVisible(false);
-                 router.push("/ref");
-               },
-             },
-             {
-               icon: "close",
-               label: "Dismiss",
-               variant: "ghost",
-               onPress: () => setShakeModalVisible(false),
-             },
-           ]}
-         />
-       </>
-     );
-   }
+          <ReportErrorModal
+            visible={shakeModalVisible}
+            onDismiss={() => setShakeModalVisible(false)}
+            route="/ref"
+            context={symbol}
+          />
+        </>
+      );
+    }
 
    return (
    <View style={[styles.flex1, { backgroundColor: colors.surface }]}>
@@ -449,37 +433,10 @@ export default function Reference() {
     onClose={() => setSearchVisible(false)}
     onSelectSymbol={handleSelectSymbol}
   />
-  <ShakeModal
+  <ReportErrorModal
     visible={shakeModalVisible}
     onDismiss={() => setShakeModalVisible(false)}
-    title="Reference"
-    subtitle="What would you like to do?"
-    actions={[
-      {
-        icon: "magnify",
-        label: "Search Symbols",
-        variant: "primary",
-        onPress: () => {
-          setShakeModalVisible(false);
-          setSearchVisible(true);
-        },
-      },
-      {
-        icon: "book-open-variant",
-        label: "Browse All",
-        variant: "secondary",
-        onPress: () => {
-          setShakeModalVisible(false);
-          router.push("/ref");
-        },
-      },
-      {
-        icon: "close",
-        label: "Dismiss",
-        variant: "ghost",
-        onPress: () => setShakeModalVisible(false),
-      },
-    ]}
+    route="/ref"
   />
   </View>
   );

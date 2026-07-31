@@ -1,8 +1,12 @@
+import { useState, useCallback } from "react";
 import { View, Text, ScrollView, StyleSheet } from "react-native";
+import { useIsFocused } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useThemeContext } from "../../components/ThemeProvider";
 import { Colors } from "../../constants/Colors";
 import Header from "../../components/Header";
+import { useShakeDetection } from "../../hooks/useShakeDetection";
+import ReportErrorModal from "../../components/ReportErrorModal";
 
 const tips = [
   {
@@ -15,7 +19,7 @@ const tips = [
     icon: "vibrate",
     title: "Shake for Quick Actions",
     description:
-      "Shake your device during an exercise to open the quick actions menu. Get hints, view references, or reset your code instantly.",
+      "Shake your device to report an error from any screen. During an exercise, shake opens the quick actions menu — get hints, view references, or reset your code.",
   },
   {
     icon: "gesture-swipe-right",
@@ -70,6 +74,13 @@ const tips = [
 export default function Tips() {
   const { colorScheme, derivedColors } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const [shakeModalVisible, setShakeModalVisible] = useState(false);
+  const isFocused = useIsFocused();
+
+  useShakeDetection(
+    useCallback(() => setShakeModalVisible(true), []),
+    { enabled: isFocused }
+  );
 
   return (
     <View style={[styles.container, { backgroundColor: colors.surface }]}>
@@ -101,6 +112,11 @@ export default function Tips() {
           </View>
         ))}
       </ScrollView>
+      <ReportErrorModal
+        visible={shakeModalVisible}
+        onDismiss={() => setShakeModalVisible(false)}
+        route="/tips"
+      />
     </View>
   );
 }

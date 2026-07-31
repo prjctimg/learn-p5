@@ -5,6 +5,9 @@ import { useThemeContext } from "./ThemeProvider";
 import { Colors } from "../constants/Colors";
 import { Achievement, ACHIEVEMENTS } from "../hooks/useAchievements";
 
+const MAX_CARD_WIDTH = 420;
+const CARD_PADDING = 48;
+
 interface Props {
   visible: boolean;
   startIndex: number;
@@ -39,7 +42,7 @@ export default function AchievementBadgeModal({
   const listRef = useRef<FlatList>(null);
   const [currentIndex, setCurrentIndex] = useState(startIndex);
 
-  const pageWidth = screenWidth - 48;
+  const pageWidth = Math.min(screenWidth - CARD_PADDING, MAX_CARD_WIDTH);
 
   const items = useMemo<Achievement[]>(() => {
     return unlocked
@@ -49,17 +52,13 @@ export default function AchievementBadgeModal({
 
   useEffect(() => {
     if (!visible) return;
-    const idx = Math.max(0, Math.min(startIndex, items.length - 1));
+    const idx = items.length > 0 ? Math.max(0, Math.min(startIndex, items.length - 1)) : 0;
     setCurrentIndex(idx);
     const t = setTimeout(() => {
-      listRef.current?.scrollToIndex({
-        index: idx,
-        animated: false,
-        viewOffset: 0,
-      });
+      listRef.current?.scrollToOffset({ offset: pageWidth * idx, animated: false });
     }, 60);
     return () => clearTimeout(t);
-  }, [visible, startIndex, items.length]);
+  }, [visible, startIndex, items.length, pageWidth]);
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onDismiss}>
@@ -79,13 +78,12 @@ export default function AchievementBadgeModal({
                 data={items}
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                keyExtractor={(item) => item.id}
+                pagingEnabled
                 snapToInterval={pageWidth}
-                decelerationRate="fast"
                 snapToAlignment="start"
-                onScrollToIndexFailed={(info) => {
-                  listRef.current?.scrollToOffset({ offset: info.averageItemLength * info.index, animated: false });
-                }}
+                decelerationRate="fast"
+                disableIntervalMomentum
+                onScrollToIndexFailed={() => {}}
                 onMomentumScrollEnd={(e) => {
                   const idx = Math.round(e.nativeEvent.contentOffset.x / pageWidth);
                   setCurrentIndex(Math.max(0, Math.min(idx, items.length - 1)));
@@ -115,24 +113,26 @@ export default function AchievementBadgeModal({
                   );
                 }}
               />
-              <View style={styles.footerRow}>
-                <View style={styles.dotsContainer}>
-                  {items.map((_, i) => (
-                    <View
-                      key={i}
-                      style={[
-                        styles.dot,
-                        {
-                          backgroundColor: i === currentIndex ? derivedColors.primary : colors.textSecondary + "40",
-                          width: i === currentIndex ? 8 : 6,
-                          height: i === currentIndex ? 8 : 6,
-                          borderRadius: i === currentIndex ? 4 : 3,
-                        },
-                      ]}
-                    />
-                  ))}
+              {items.length > 1 && (
+                <View style={styles.footerRow}>
+                  <View style={styles.dotsContainer}>
+                    {items.map((_, i) => (
+                      <View
+                        key={i}
+                        style={[
+                          styles.dot,
+                          {
+                            backgroundColor: i === currentIndex ? derivedColors.primary : colors.textSecondary + "40",
+                            width: i === currentIndex ? 8 : 6,
+                            height: i === currentIndex ? 8 : 6,
+                            borderRadius: i === currentIndex ? 4 : 3,
+                          },
+                        ]}
+                      />
+                    ))}
+                  </View>
                 </View>
-              </View>
+              )}
             </>
           )}
         </View>
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   card: {
-    maxWidth: 420,
+    maxWidth: MAX_CARD_WIDTH,
     borderRadius: 20,
     paddingVertical: 32,
     paddingHorizontal: 0,
