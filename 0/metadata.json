@@ -1,0 +1,60 @@
+{
+  "cli_version": "0.8.42",
+  "checkpoint_id": "01KYW69AJ30NSJPTFMWE5QEYMF",
+  "session_id": "ses_047c34668ffeSld0m8zn9gicjf",
+  "strategy": "manual-commit",
+  "created_at": "2026-07-31T13:37:21.170344357Z",
+  "branch": "cleanup/dead-code",
+  "checkpoints_count": 2,
+  "files_touched": [
+    ".github/workflows/release.yaml",
+    "AGENTS.md",
+    "package.json",
+    "scripts/ensure-clipboard.mjs",
+    "src/components/CodeEditor.tsx",
+    "src/components/StatusBarAccent.tsx",
+    "src/types/expo-clipboard.d.ts",
+    "src/types/react-native-webview.d.ts",
+    "src/utils/editor/bridge.ts",
+    "src/utils/editor/colors.ts",
+    "src/utils/editor/editor.ts",
+    "src/utils/editor/styles.ts"
+  ],
+  "agent": "OpenCode",
+  "model": "big-pickle",
+  "turn_id": "007b01424ad2",
+  "checkpoint_transcript_start": 115,
+  "transcript_lines_at_start": 115,
+  "compact_transcript_start": 115,
+  "token_usage": {
+    "input_tokens": 258830,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 4510976,
+    "output_tokens": 8951,
+    "api_call_count": 50
+  },
+  "session_metrics": {
+    "turn_count": 4
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-07-31T13:37:20.84958308Z",
+    "agent_lines": 0,
+    "agent_removed": 0,
+    "human_added": 0,
+    "human_modified": 7,
+    "human_removed": 714,
+    "total_committed": 0,
+    "total_lines_changed": 721,
+    "agent_percentage": 0,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0
+    }
+  ]
+}
