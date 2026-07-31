@@ -8,10 +8,9 @@
 
 - **Source of truth: `src/data/courses/*.yaml`** — edit YAML, never the `.ts` files.
 - `scripts/build-courses.mjs` reads every `.yaml` in `src/data/courses/` and emits a matching `.ts` next to it (`<slug>Course` export).
-- `build-courses` runs automatically via `postinstall` (so a fresh clone is buildable) and via `npm start` (so local edits propagate). CI's release workflow runs it explicitly after `npm install`.
+- `build-courses` runs automatically via `postinstall` (so a fresh clone is buildable) and via `npm start` (so local edits propagate). CI's release workflow relies on `postinstall` during `npm install` — it does not re-run `build-courses` itself.
 - **`src/data/courses/*.ts` are gitignored build artifacts** (see `.gitignore`, same convention as `src/data/reference.generated.json`). Never commit them.
-- `expo-clipboard` is used for copy-to-clipboard on symbol reference pages. Add it to `package.json` if the feature requires it (already present as of v0.7.4). Type declarations live in `src/types/expo-clipboard.d.ts`.
-- `scripts/ensure-clipboard.mjs` auto-installs `expo-clipboard` via `npx expo install` if missing. It runs as the first step of `postinstall` and `npm start` so the dependency is always available after a build. The import in `src/app/ref/index.tsx` uses try-catch `require` so it degrades gracefully if the package isn't installed.
+- `expo-clipboard` is used for copy-to-clipboard on symbol reference pages and the exercise editor. Add it to `package.json` if the feature requires it (already present as of v0.7.4). Shared copy logic lives in `src/utils/clipboard.ts`, which lazy-`require`s `expo-clipboard` on native (try-catch) so it degrades gracefully if the package isn't installed.
 - After editing any `.yaml`, re-run `npm run build-courses` before type-checking or starting the app.
 
 ## p5.js bundling (always latest)
