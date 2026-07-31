@@ -1,0 +1,42 @@
+{
+  "cli_version": "0.8.42",
+  "checkpoint_id": "01KYW4VZY2F5HZ3CE4D1Q1WB42",
+  "session_id": "ses_04e43e3e2ffe3lkToWGyV4A1U8",
+  "strategy": "manual-commit",
+  "created_at": "2026-07-31T13:12:54.220788846Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "save_step_count": 1,
+  "files_touched": [
+    "src/app/learn/index.tsx",
+    "src/app/dashboard.tsx",
+    "src/utils/editor/exerciseHtml.ts",
+    "src/app/learn/[course]/[id].tsx"
+  ],
+  "agent": "OpenCode",
+  "model": "big-pickle",
+  "turn_id": "f17bc47c9153",
+  "compact_transcript_start": 0,
+  "token_usage": {
+    "input_tokens": 617961,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 11277568,
+    "output_tokens": 34052,
+    "api_call_count": 133
+  },
+  "session_metrics": {
+    "turn_count": 2
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-07-31T13:12:54.00644356Z",
+    "agent_lines": 0,
+    "agent_removed": 0,
+    "human_added": 345,
+    "human_modified": 71,
+    "human_removed": 0,
+    "total_committed": 345,
+    "total_lines_changed": 558,
+    "agent_percentage": 0,
+    "metric_version": 2
+  }
+}
