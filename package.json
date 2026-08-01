@@ -1,7 +1,7 @@
 {
   "name": "learn-p5",
   "main": "expo-router/entry",
-  "version": "0.7.6",
+  "version": "0.7.7",
   "scripts": {
     "postinstall": "npm run bundle-p5 && npm run gen-reference && npm run build-courses",
     "start": "npm run bundle-p5 && npm run gen-reference && npm run build-courses && npm run bundle-editor && expo start",
@@ -29,7 +29,6 @@
     "codemirror": "6.0.1",
     "expo": "~55.0.26",
     "expo-build-properties": "~55.0.14",
-    "expo-clipboard": "~7.0.0",
     "expo-constants": "~55.0.16",
     "expo-font": "~55.0.8",
     "expo-haptics": "~55.0.9",
