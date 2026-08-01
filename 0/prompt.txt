@@ -1,1 +1,1 @@
-Proceed
+The changes were merged and do all the needed clean up and tag and push when done
