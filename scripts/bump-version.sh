@@ -1,24 +1,26 @@
 #!/bin/sh
 set -e
 
-# Usage: ./scripts/bump-version.sh <version>
-# Example: ./scripts/bump-version.sh 0.6.56
+# Bump the app version in app.json (expo.version) and package.json (version).
 #
-# Updates version in:
-#   - app.json (expo.version)
-#   - package.json (version)
+# Usage:
+#   ./scripts/bump-version.sh          # auto-increment the patch (0.6.118 -> 0.6.119)
+#   ./scripts/bump-version.sh <X.Y.Z>  # override with an explicit version
 
 VERSION="$1"
 
 if [ -z "$VERSION" ]; then
-  echo "Usage: $0 <version>"
-  echo "Example: $0 0.6.56"
-  exit 1
+  CURRENT=$(node -e "process.stdout.write(require('./package.json').version)")
+  if ! echo "$CURRENT" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+    echo "Error: current version '$CURRENT' is not semver; pass an explicit <X.Y.Z>" >&2
+    exit 1
+  fi
+  VERSION=$(echo "$CURRENT" | awk -F. '{printf "%d.%d.%d", $1, $2, $3+1}')
+  echo "Auto-incrementing patch: $CURRENT -> $VERSION"
 fi
 
-# Validate version format (semver-like: X.Y.Z)
 if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
-  echo "Error: Version must be in semver format (e.g., 0.6.56)"
+  echo "Error: version must be in semver format (e.g., 0.6.118)"
   exit 1
 fi
 

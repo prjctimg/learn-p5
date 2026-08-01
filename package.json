@@ -1,7 +1,7 @@
 {
   "name": "learn-p5",
   "main": "expo-router/entry",
-  "version": "0.7.7",
+  "version": "0.6.118",
   "scripts": {
     "postinstall": "npm run bundle-p5 && npm run gen-reference && npm run build-courses",
     "start": "npm run bundle-p5 && npm run gen-reference && npm run build-courses && npm run bundle-editor && expo start",
@@ -10,7 +10,7 @@
     "bundle-editor": "node scripts/bundle-editor.mjs",
     "build-courses": "node scripts/build-courses.mjs",
     "check-exercises": "node scripts/check-exercises.mjs",
-    "version": "sh scripts/bump-version.sh",
+    "prepare": "husky",
     "android": "expo start --android",
     "web": "expo start --web",
     "lint": "expo lint"
@@ -56,6 +56,7 @@
     "esbuild": "^0.25.3",
     "eslint": "^9.0.0",
     "eslint-config-expo": "~55.0.1",
+    "husky": "^9.1.7",
     "js-yaml": "^4.1.0",
     "typescript": "~5.9.2"
   },
