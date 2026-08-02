@@ -377,9 +377,9 @@ ${
     ? `<div class="solution-section" id="solution-section">
   <button class="solution-header" id="solution-toggle">
     <span class="preview-label" style="margin-bottom:0; font-size:13px; letter-spacing:0.8px; color:${colors.onSurface}">Target Solution</span>
-    <span class="solution-chevron" id="solution-chevron" style="font-size:14px; color:${colors.onSurfaceVariant}">&#9650;</span>
+    <span class="solution-chevron" id="solution-chevron" style="font-size:14px; color:${colors.onSurfaceVariant}">&#9660;</span>
   </button>
-  <div id="solution-content">
+  <div id="solution-content" style="display:none">
     <div style="position:relative">
       <div id="solution-sketch" class="sketch-box"></div>
       <button id="solution-run-btn" class="run-btn">&#9654; Run</button>
@@ -1340,6 +1340,10 @@ if (solutionToggle) {
       var isVisible = content.style.display !== 'none';
       content.style.display = isVisible ? 'none' : '';
       if (chevron) chevron.innerHTML = isVisible ? '&#9660;' : '&#9650;';
+      // Auto-run the target solution the moment the pane is expanded so the
+      // preview is populated without an extra tap; the Run/Replay button stays
+      // available to re-run animated solutions.
+      if (!isVisible && typeof runSolution === 'function') runSolution();
     }
   });
 }
@@ -1415,22 +1419,23 @@ if (copyBtn) {
 
 var solRunBtn = document.getElementById('solution-run-btn');
 var solutionHasRun = false;
-if (solRunBtn) {
-  solRunBtn.addEventListener('click', function() {
-    if (view && SOLUTION_CODE) {
-      renderSketch('solution-sketch', SOLUTION_CODE).then(function() {
-        setTimeout(function() {
-          var el = document.getElementById('solution-sketch');
-          if (el) smoothScrollTo(el, 600);
-        }, 100);
-      }).catch(function(e) { console.error('Solution render error:', e); });
-      if (!solutionHasRun) {
-        solutionHasRun = true;
-        solRunBtn.innerHTML = '<span style="font-size:1.3em">&#x21bb;</span> Replay';
-      }
-      if (typeof window.__tutRun === 'function') window.__tutRun();
+function runSolution() {
+  if (view && SOLUTION_CODE) {
+    renderSketch('solution-sketch', SOLUTION_CODE).then(function() {
+      setTimeout(function() {
+        var el = document.getElementById('solution-sketch');
+        if (el) smoothScrollTo(el, 600);
+      }, 100);
+    }).catch(function(e) { console.error('Solution render error:', e); });
+    if (!solutionHasRun) {
+      solutionHasRun = true;
+      if (solRunBtn) solRunBtn.innerHTML = '<span style="font-size:1.3em">&#x21bb;</span> Replay';
     }
-  });
+    if (typeof window.__tutRun === 'function') window.__tutRun();
+  }
+}
+if (solRunBtn) {
+  solRunBtn.addEventListener('click', runSolution);
 }
 
 initEditor();

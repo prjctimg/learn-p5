@@ -83,8 +83,8 @@ exercises:
       function draw() {
         background(35);
         fill(255, 200, 80);
-        let a = createVector(300, 100);
-        let b = createVector(100, 200);
+        let a = createVector(300, 200);
+        let b = createVector(100, 100);
         a.sub(b);
         a.mult(1.5);
         circle(a.x, a.y, 50);
@@ -93,7 +93,7 @@ exercises:
       - id: task-1
         title: "Use Vector Math"
         instruction: |
-          Create vector `a` at (300, 100) and vector `b` at (100, 200).
+          Create vector `a` at (300, 200) and vector `b` at (100, 100).
           Call a.sub(b) to subtract b from a, then a.mult(1.5).
         validation:
           - type: functionCall
@@ -109,8 +109,8 @@ exercises:
         title: "Draw the Result"
         instruction: |
           Draw a circle at the resulting vector position using a.x and a.y.
-          After subtracting (100, 200) from (300, 100) and multiplying by 1.5,
-          the circle should be at (300, -150) — partially above the canvas.
+          After subtracting (100, 100) from (300, 200) and multiplying by 1.5,
+          the circle should be at (300, 150).
         validation:
           - type: functionCall
             name: circle

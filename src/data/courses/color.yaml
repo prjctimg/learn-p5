@@ -133,6 +133,18 @@ exercises:
           - type: functionCall
             name: circle
             exactArgs: 3
+        solution: |
+          function setup() {
+            createCanvas(400, 400);
+          }
+
+          function draw() {
+            background(255);
+            noFill();
+            stroke(0);
+            strokeWeight(3);
+            circle(130, 200, 120);
+          }
       - id: task-2
         title: "Filled Circle"
         instruction: |

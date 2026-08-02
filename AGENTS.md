@@ -6,6 +6,7 @@
 
 - Edit `src/data/courses/*.yaml` only — the generated `.ts` files are gitignored build artifacts.
 - After YAML edits, re-run `npm run build-courses`, then `npm run check-exercises` (validates each task's rules against its `solution`).
+- Also run `npm run check-symbols` after YAML edits (flags unknown p5/JS symbols in `startingCode`/`solution` blocks).
 
 ## Generated artifacts
 

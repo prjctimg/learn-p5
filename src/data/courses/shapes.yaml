@@ -45,6 +45,16 @@ exercises:
             y: 200
             expected: [255, 105, 180]
             tolerance: 120
+        solution: |
+          function setup() {
+            createCanvas(400, 400);
+          }
+
+          function draw() {
+            background(255);
+            fill(255, 105, 180);
+            circle(200, 200, 100);
+          }
       - id: task-2
         title: "Change the Color"
         instruction: |
@@ -59,6 +69,16 @@ exercises:
             y: 200
             expected: [255, 165, 0]
             tolerance: 120
+        solution: |
+          function setup() {
+            createCanvas(400, 400);
+          }
+
+          function draw() {
+            background(255);
+            fill(255, 165, 0);
+            circle(200, 200, 100);
+          }
 
   - id: exercise-2
     title: "Rectangle Rebel"
@@ -101,6 +121,16 @@ exercises:
             y: 200
             expected: [100, 200, 255]
             tolerance: 120
+        solution: |
+          function setup() {
+            createCanvas(400, 400);
+          }
+
+          function draw() {
+            background(30);
+            fill(100, 200, 255);
+            rect(100, 100, 200, 200);
+          }
       - id: task-2
         title: "Rounded Corners"
         instruction: |
@@ -157,6 +187,16 @@ exercises:
             y: 200
             expected: [255, 220, 100]
             tolerance: 120
+        solution: |
+          function setup() {
+            createCanvas(400, 400);
+          }
+
+          function draw() {
+            background(40);
+            fill(255, 220, 100);
+            ellipse(200, 200, 300, 150);
+          }
       - id: task-2
         title: "Circle via Ellipse"
         instruction: |
@@ -194,6 +234,7 @@ exercises:
         stroke(255, 100, 100);
         strokeWeight(4);
         line(0, 0, 400, 400);
+        line(0, 400, 400, 0);
       }
     tasks:
       - id: task-1
@@ -205,6 +246,17 @@ exercises:
           - type: functionCall
             name: line
             exactArgs: 4
+        solution: |
+          function setup() {
+            createCanvas(400, 400);
+          }
+
+          function draw() {
+            background(15);
+            stroke(255, 100, 100);
+            strokeWeight(4);
+            line(0, 0, 400, 400);
+          }
       - id: task-2
         title: "Add a Second Line"
         instruction: |
@@ -348,6 +400,17 @@ exercises:
             y: 120
             expected: [255, 150, 200]
             tolerance: 120
+        solution: |
+          function setup() {
+            createCanvas(400, 400);
+          }
+
+          function draw() {
+            background(30);
+            fill(255, 150, 200);
+            noStroke();
+            arc(200, 200, 300, 300, PI, TWO_PI);
+          }
       - id: task-2
         title: "Pie Slice"
         instruction: |

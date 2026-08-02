@@ -161,32 +161,55 @@ exercises:
         strokeWeight(2);
         beginShape();
         vertex(100, 200);
-        bezierVertex(100, 50, 300, 50, 300, 200);
-        bezierVertex(300, 350, 100, 350, 100, 200);
+        bezierVertex(100, 50);
+        bezierVertex(300, 50);
+        bezierVertex(300, 200);
+        bezierVertex(300, 350);
+        bezierVertex(100, 350);
+        bezierVertex(100, 200);
         endShape(CLOSE);
       }
     tasks:
       - id: task-1
         title: "First Bezier Curve"
         instruction: |
-          Add a bezierVertex() call to create the top curve of the blob.
-          Use bezierVertex(100, 50, 300, 50, 300, 200) — it takes 6 args: three control points and an endpoint.
+          Add three bezierVertex() calls to create the top curve of the blob.
+          In p5.js v2 each bezierVertex(x, y) call sets one control point.
+          Use bezierVertex(100, 50), bezierVertex(300, 50), and bezierVertex(300, 200).
         validation:
           - type: functionCall
             name: bezierVertex
-            exactArgs: 6
+            exactArgs: 2
           - type: functionCall
             name: beginShape
             exactArgs: 0
+        solution: |
+          function setup() {
+            createCanvas(400, 400);
+          }
+
+          function draw() {
+            background(20);
+            fill(200, 100, 255);
+            stroke(255);
+            strokeWeight(2);
+            beginShape();
+            vertex(100, 200);
+            bezierVertex(100, 50);
+            bezierVertex(300, 50);
+            bezierVertex(300, 200);
+            endShape(CLOSE);
+          }
       - id: task-2
         title: "Complete the Blob"
         instruction: |
-          Add a second bezierVertex() to create the bottom curve.
-          Use bezierVertex(300, 350, 100, 350, 100, 200) to loop back to the start.
+          Add three more bezierVertex() calls to create the bottom curve.
+          Use bezierVertex(300, 350), bezierVertex(100, 350), and
+          bezierVertex(100, 200) to loop back to the start.
         validation:
           - type: functionCall
             name: bezierVertex
-            exactArgs: 6
+            exactArgs: 2
           - type: pixelMatch
             x: 200
             y: 200

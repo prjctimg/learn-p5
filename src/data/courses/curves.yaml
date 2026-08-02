@@ -96,8 +96,8 @@ exercises:
             name: spline
             exactArgs: 8
           - type: pixelMatch
-            x: 200
-            y: 180
+            x: 260
+            y: 320
             expected: [100, 200, 255]
             tolerance: 120
 
