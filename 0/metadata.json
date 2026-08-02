@@ -1,0 +1,75 @@
+{
+  "cli_version": "0.8.42",
+  "checkpoint_id": "01KZ1MMXT3QQ32QWEPFJHA2RZC",
+  "session_id": "ses_03ceaf612ffewjSUbIIK8LuhXu",
+  "strategy": "manual-commit",
+  "created_at": "2026-08-02T16:24:40.901939927Z",
+  "branch": "main",
+  "checkpoints_count": 3,
+  "files_touched": [
+    "src/utils/editor/exerciseHtml.ts",
+    "src/app/learn/[course]/[id].tsx",
+    "scripts/check-exercises.mjs",
+    "src/data/courses/shapes.yaml",
+    "src/data/courses/events.yaml",
+    "src/data/courses/image.yaml",
+    "src/data/courses/math.yaml",
+    "src/data/courses/random-noise.yaml",
+    "src/data/courses/custom-shapes.yaml",
+    "src/data/courses/io.yaml",
+    "src/data/courses/vectors.yaml",
+    "src/data/courses/transform.yaml",
+    "src/data/courses/curves.yaml",
+    "src/data/courses/color.yaml",
+    "src/data/courses/dom.yaml",
+    "scripts/check-symbols.mjs",
+    "package.json",
+    "AGENTS.md"
+  ],
+  "agent": "OpenCode",
+  "model": "big-pickle",
+  "turn_id": "cdd205b13d6f",
+  "compact_transcript_start": 0,
+  "token_usage": {
+    "input_tokens": 604123,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 12860032,
+    "output_tokens": 51904,
+    "api_call_count": 173
+  },
+  "session_metrics": {
+    "turn_count": 3
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-08-02T16:24:40.532795969Z",
+    "agent_lines": 511,
+    "agent_removed": 135,
+    "human_added": 0,
+    "human_modified": 1,
+    "human_removed": 41,
+    "total_committed": 512,
+    "total_lines_changed": 689,
+    "agent_percentage": 93.75907111756169,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 107,
+      "user_lines_removed": 42,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0,
+      "user_added_per_file": {
+        "scripts/check-exercises.mjs": 31,
+        "src/app/learn/[course]/[id].tsx": 14,
+        "src/data/courses/shapes.yaml": 40,
+        "src/utils/editor/exerciseHtml.ts": 22
+      },
+      "user_removed_per_file": {
+        "scripts/check-exercises.mjs": 12,
+        "src/app/learn/[course]/[id].tsx": 13,
+        "src/utils/editor/exerciseHtml.ts": 17
+      }
+    }
+  ]
+}

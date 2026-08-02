@@ -1,0 +1,43 @@
+{
+  "cli_version": "0.8.42",
+  "checkpoint_id": "01KZ1MMXT3QQ32QWEPFJHA2RZC",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 3,
+  "files_touched": [
+    "AGENTS.md",
+    "package.json",
+    "scripts/check-exercises.mjs",
+    "scripts/check-symbols.mjs",
+    "src/app/learn/[course]/[id].tsx",
+    "src/data/courses/color.yaml",
+    "src/data/courses/curves.yaml",
+    "src/data/courses/custom-shapes.yaml",
+    "src/data/courses/dom.yaml",
+    "src/data/courses/events.yaml",
+    "src/data/courses/image.yaml",
+    "src/data/courses/io.yaml",
+    "src/data/courses/math.yaml",
+    "src/data/courses/random-noise.yaml",
+    "src/data/courses/shapes.yaml",
+    "src/data/courses/transform.yaml",
+    "src/data/courses/vectors.yaml",
+    "src/utils/editor/exerciseHtml.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/0/metadata.json",
+      "transcript": "/0/full.jsonl",
+      "compact_transcript": "/0/transcript.jsonl",
+      "content_hash": "/0/content_hash.txt",
+      "prompt": "/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 604123,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 12860032,
+    "output_tokens": 51904,
+    "api_call_count": 173
+  }
+}
