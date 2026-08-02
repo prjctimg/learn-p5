@@ -1,6 +1,12 @@
-- Allow the target solution to run itself automatically,  when the preview pane is expanded initially. This means that the target solution must be collapsed by default 
-- Use the default long press duration for the Run sketch button to trigger the symbol reference modal, currently it feels a bit too long. 
-- For each exercise ensure that the solution makes sense both as code and visually. Fix any logic inconsistencies and ensure that all the important and publicly used modules' symbols are included. Ask questions for clarification.
+Proceed and bump patch and push when done
+
+---
+
+Resume the session
+
+---
+
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
 
 ---
 
