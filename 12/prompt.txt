@@ -1,0 +1,17 @@
+- Strip the describe() call in example code blocks and improve syntax highlighting support on the symbol reference floating modal that is shown on the exercises view
+- Fix the popup that shows on keypress on the qwerty keyboard so that it shows over the pressed key not at the same place, which is the current behavior 
+- Make the system keyboard respect the setti g option to disable it by not getting triggered automatically when the user clicks on the code block
+- Add an icon to the Reset button on the codeblock in exercises view
+- Remove the snippet alternatives option in settings
+- Instead of just saying "Complete the current module to unlock this one" refer to the actual prior module that the user must complete to open the module. 
+- Research on a way to include .obj files in the reference bundle so that examples that depend on these files work as expected. Also look at the current files needed in examples in the reference which are not being bundled and see if there's a way to include them in the app without breaking the build
+
+## Next task/exercise cue
+
+When the user moves on to the next task make the visual cue more noticeable. 
+
+When the user completes all exercises and they must now go to the next exercise, navigate there automatically but make the cue clearly noticeable so that the user is not taken by surprise 
+
+
+## Module cover graphic
+ On the learn route, make the default asterisk cover for each module be a p5 canvas that renders a small looped graphic to give the user an idea what the module is about. The graphic can be looped so that it animates after  an interval, search the internet for inspirations on how to implement something like this.
