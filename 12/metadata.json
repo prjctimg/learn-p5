@@ -1,0 +1,42 @@
+{
+  "cli_version": "0.8.42",
+  "checkpoint_id": "01KZ6P7VM9H8H3HBDFNKAVWH6M",
+  "session_id": "ses_032dee788ffe1iW4cG1aRPLcd3",
+  "strategy": "manual-commit",
+  "created_at": "2026-08-04T15:30:13.559930195Z",
+  "branch": "main",
+  "checkpoints_count": 2,
+  "files_touched": [
+    "src/components/ModuleCover.tsx",
+    "src/components/ExerciseCard.tsx",
+    "src/app/learn/index.tsx"
+  ],
+  "agent": "OpenCode",
+  "model": "glm-5.2",
+  "turn_id": "f2941f8c644d",
+  "checkpoint_transcript_start": 140,
+  "transcript_lines_at_start": 140,
+  "compact_transcript_start": 140,
+  "token_usage": {
+    "input_tokens": 11930,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 2834914,
+    "output_tokens": 10257,
+    "api_call_count": 21
+  },
+  "session_metrics": {
+    "turn_count": 2
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-08-04T15:30:13.309149258Z",
+    "agent_lines": 519,
+    "agent_removed": 72,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 519,
+    "total_lines_changed": 591,
+    "agent_percentage": 100,
+    "metric_version": 2
+  }
+}

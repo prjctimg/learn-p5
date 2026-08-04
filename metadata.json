@@ -3,7 +3,7 @@
   "checkpoint_id": "01KZ6P7VM9H8H3HBDFNKAVWH6M",
   "strategy": "manual-commit",
   "branch": "main",
-  "checkpoints_count": 12,
+  "checkpoints_count": 14,
   "files_touched": [
     "src/app/learn/index.tsx",
     "src/components/ExerciseCard.tsx",
@@ -93,13 +93,20 @@
       "compact_transcript": "/11/transcript.jsonl",
       "content_hash": "/11/content_hash.txt",
       "prompt": ""
+    },
+    {
+      "metadata": "/12/metadata.json",
+      "transcript": "/12/full.jsonl",
+      "compact_transcript": "/12/transcript.jsonl",
+      "content_hash": "/12/content_hash.txt",
+      "prompt": ""
     }
   ],
   "token_usage": {
-    "input_tokens": 0,
+    "input_tokens": 11930,
     "cache_creation_tokens": 0,
-    "cache_read_tokens": 0,
-    "output_tokens": 0,
-    "api_call_count": 0
+    "cache_read_tokens": 2834914,
+    "output_tokens": 10257,
+    "api_call_count": 21
   }
 }
