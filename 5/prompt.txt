@@ -1,0 +1,9 @@
+Explore the learn-p5 Expo app codebase (thorough). I need to understand the "module cover" on the learn route. The user says the default cover is currently an asterisk ("*").
+
+Find:
+1. The learn route screen file path. Find how modules are listed and how each module's "cover graphic" is rendered. Find where the default asterisk placeholder appears (likely a fallback when no cover image/emoji is set).
+2. Find the module data structure - is there a `cover`, `icon`, `emoji`, `graphic`, or `sketch` field on each module? 
+3. Find existing p5 sketch runner components (webview-based) that embed p5.js sketches in the app. Could a small p5 canvas be embedded as a module cover? Report the webview sketch runner and whether it can run in a small tile/list item context (multiple instances at once? performance concerns?).
+4. Check if there's any existing animated cover/thumbnail pattern in the app (e.g. lottie, react-native-reanimated animations) for inspiration.
+
+Report: file paths, line numbers, the learn route module list rendering, the module data model, the sketch runner capabilities, and the asterisk fallback location. Be very thorough - include how modules specify their identity (title, topic) so a "looped graphic reflecting the module topic" could be derived.
