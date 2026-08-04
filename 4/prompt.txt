@@ -1,0 +1,10 @@
+Explore the learn-p5 Expo app codebase (very thorough). I need to understand the "symbol reference floating modal" shown on the exercises view.
+
+Find and report:
+1. The component that renders the floating modal/popover showing p5 symbol reference, triggered when a user taps a p5 symbol in the code block (e.g. a function like `ellipse(...)`). Report its file path.
+2. How that modal renders example code blocks. Find where the example text comes from (likely a "code" field from the reference JSON). Find whether examples contain wrapper `describe(...) { ... }` calls (jest/test-style) that the user wants stripped so only the sketch code remains.
+3. How syntax highlighting is applied to those example code blocks in the modal. Is there any highlighting at all? Plain monospace text? Compare to the syntax highlighting used in the main code editor (CodeMirror inside a WebView - is there a non-WebView lighter highlighter anywhere?).
+4. The reference data source: `src/data/reference.generated.json` - find the script that generates it, and the structure of an entry (does it have `code`, `example`, `parameters`, etc).
+5. Find any existing syntax highlighting library available in the codebase (search package.json for prism, highlight.js, refractor, react-syntax-highlighter, shiki, etc).
+
+Report file paths, line numbers, and code snippets of: the modal component, the example rendering, the describe() occurrence in examples, the reference generator script, and any highlighter libraries found. Be very thorough.
