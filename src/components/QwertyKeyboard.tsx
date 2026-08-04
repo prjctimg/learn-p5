@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useMemo } from "react";
-import { View, Text, Pressable, ScrollView, StyleSheet, useWindowDimensions, LayoutChangeEvent, GestureResponderEvent } from "react-native";
+import { View, Text, Pressable, ScrollView, StyleSheet, useWindowDimensions, GestureResponderEvent } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useThemeContext } from "./ThemeProvider";
@@ -116,6 +116,7 @@ export default function QwertyKeyboard({
   const [shifted, setShifted] = useState(false);
   const [popupSelected, setPopupSelected] = useState(0);
   const keyLayouts = useRef<Record<string, { x: number; y: number; w: number; h: number }>>({});
+  const keyRefs = useRef<Record<string, View | null>>({});
   const containerRef = useRef<View>(null);
   const containerScreenXRef = useRef(0);
 
@@ -131,41 +132,52 @@ export default function QwertyKeyboard({
     };
   }, [screenWidth, height]);
 
-  const handleKeyLayout = useCallback((key: string, event: LayoutChangeEvent) => {
-    const { x, y, width, height: h } = event.nativeEvent.layout;
-    keyLayouts.current[key] = { x, y, w: width, h };
-  }, []);
-
   const showPopup = useCallback((key: string) => {
-    const layout = keyLayouts.current[key];
     const row1Key = ROW1.find((k) => k.type === "letter" && k.primary === key);
     const row2Key = ROW2.find((k) => k.type === "letter" && k.primary === key);
     const row3Key = ROW3.find((k) => k.type === "letter" && k.primary === key);
     const found = (row1Key ?? row2Key ?? row3Key) as QwertyLetterKey | undefined;
     const alts = found ? getAlternates(found) : [];
-    if (!found || !layout || alts.length === 0) return;
+    if (!found || alts.length === 0) return;
+    const keyRef = keyRefs.current[key];
+    const container = containerRef.current;
+    if (!keyRef || !container) return;
     // Measure the keyboard container's screen-absolute x so finger pageX can
     // be mapped onto the popup row regardless of how the keyboard is inset.
-    containerRef.current?.measure((_fx, _fy, _w, _h, px) => {
+    container.measure((_fx, _fy, _w, _h, px) => {
       containerScreenXRef.current = px;
     });
-    const w = Math.min(screenWidth - 8, Math.max(ALT_CELL_WIDTH, alts.length * ALT_CELL_WIDTH));
-    const centerX = layout.x + layout.w / 2;
-    let left = centerX - w / 2;
-    if (left < 4) left = 4;
-    if (left + w > screenWidth - 4) left = screenWidth - w - 4;
-    setPopupKey(key);
-    setPopupLayout({ x: centerX, y: layout.y });
-    setPopupAlternates(alts);
-    setPopupRowLeft(left);
-    setPopupWidth(w);
-    setPopupSelected(0);
-    if (popupDismissTimer.current) clearTimeout(popupDismissTimer.current);
-    popupDismissTimer.current = setTimeout(() => {
-      setPopupKey(null);
-      setPopupLayout(null);
-      setPopupAlternates([]);
-    }, POPUP_DISMISS_DELAY);
+    // Measure the key relative to the keyboard container so the popup can be
+    // positioned directly over the pressed key. onLayout would report coords
+    // relative to the key's wrapping View (always 0,0); measureLayout gives
+    // true container-relative {x,y,w,h}.
+    keyRef.measureLayout(
+      container,
+      (x, y, w, h) => {
+        const layout = { x, y, w, h };
+        keyLayouts.current[key] = layout;
+        const popupW = Math.min(screenWidth - 8, Math.max(ALT_CELL_WIDTH, alts.length * ALT_CELL_WIDTH));
+        const centerX = layout.x + layout.w / 2;
+        let left = centerX - popupW / 2;
+        if (left < 4) left = 4;
+        if (left + popupW > screenWidth - 4) left = screenWidth - popupW - 4;
+        setPopupKey(key);
+        setPopupLayout({ x: centerX, y: layout.y });
+        setPopupAlternates(alts);
+        setPopupRowLeft(left);
+        setPopupWidth(popupW);
+        setPopupSelected(0);
+        if (popupDismissTimer.current) clearTimeout(popupDismissTimer.current);
+        popupDismissTimer.current = setTimeout(() => {
+          setPopupKey(null);
+          setPopupLayout(null);
+          setPopupAlternates([]);
+        }, POPUP_DISMISS_DELAY);
+      },
+      () => {
+        // measureLayout failed (e.g. view not yet laid out) — bail out.
+      }
+    );
   }, [screenWidth]);
 
   const handlePressIn = useCallback((key: QwertyLetterKey) => {
@@ -284,9 +296,11 @@ export default function QwertyKeyboard({
       const isPopup = popupKey === key.primary;
       const primaryAlt = getAlternates(key)[0];
       return (
-        <View key={key.primary}>
+        <View
+          key={key.primary}
+          ref={(r) => { keyRefs.current[key.primary] = r; }}
+        >
           <Pressable
-            onLayout={(e) => handleKeyLayout(key.primary, e)}
             onPressIn={() => handlePressIn(key)}
             onPressOut={() => handlePressOut(key)}
             onTouchMove={handleTouchMove}
@@ -335,7 +349,7 @@ export default function QwertyKeyboard({
         </View>
       );
     },
-    [longPressActive, popupKey, colors, derivedColors, handlePressIn, handlePressOut, handleTouchMove, dims, handleKeyLayout, shifted]
+    [longPressActive, popupKey, colors, derivedColors, handlePressIn, handlePressOut, handleTouchMove, dims, shifted]
   );
 
   const handleShiftPress = useCallback(() => {
