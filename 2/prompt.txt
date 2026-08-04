@@ -1,0 +1,17 @@
+Research task on the learn-p5 Expo app codebase (very thorough). I need to understand how to include .obj files (and other external asset files) in the p5 reference bundle so that examples which depend on these files work.
+
+Find and report:
+1. The reference generation script: `/workspaces/learn-p5/scripts/generate-reference.mjs`. How does it fetch p5 reference data? (clones p5.js-website repo). Where does it write output (`src/data/reference.generated.json`). Does it currently download/copy any example asset files? List all asset-related handling.
+2. How examples are executed in the app: the sketch runner. Find `src/utils/editor/exampleHtml.ts` `getExampleHtml` and how the WebView renders examples. Find where the p5.js library itself is loaded (CDN? local? bundled?). Report the exact HTML wrapper and the `<script src=...>` for p5.js.
+3. Search the generated reference JSON (or the generator logic) for examples that reference external files: `loadModel(`, `loadImage(`, `loadShader(`, `createShader(`, `loadFont(`, `loadTable(`, `loadJSON(`, `loadStrings(`, `loadBytes(`. List ~10-20 concrete examples of what file paths/URLs they reference (e.g. `assets/teapot.obj`, `https://...`, `media/...`). Are URLs remote (p5 CDN) or relative?
+4. Check `metro.config.js` for `assetExts` - is `.obj` listed? What about `.glsl`, `.mtl`, `.frag`, `.vert`? Report the resolver config.
+5. Check `app.json` / `app.config.*` for any asset bundling config, and check if there's a `public/` or `assets/` dir containing any p5 example assets.
+6. Investigate: since examples run in a WebView with p5.js loaded from a CDN (likely), could `loadModel('https://p5js.org/assets/teapot.obj')` just work with internet permission? Check iOS/Android permissions for network access (`info.plist` NSAppTransportSecurity, Android `usesCleartextTraffic`, etc). 
+7. Research options for bundling .obj/.glsl files so they're accessible from the WebView: 
+   - Option A: bundle as Expo assets (require()) and pass as base64 data URIs into the WebView HTML
+   - Option B: download assets at reference-generation time into the app's bundled `assets/` and rewrite example code to reference them via `require()` or a local `file://`/Android-resource URL
+   - Option C: rewrite relative paths in example code to absolute p5 CDN URLs at generation time (simplest, needs network)
+   - Option D: include the p5 examples asset directory via the `metro.config.js` `assetExts` and bundling
+   Report which is most feasible given the WebView-based runner.
+
+Report file paths, line numbers, the exact p5.js loading mechanism, concrete examples of asset-referencing sketches, and a feasibility analysis of each option. This is research - be very thorough.
