@@ -3,7 +3,7 @@
   "checkpoint_id": "01KZ6NWDRXMFDF2MCPYV4FWNX4",
   "strategy": "manual-commit",
   "branch": "main",
-  "checkpoints_count": 4,
+  "checkpoints_count": 5,
   "files_touched": [
     "src/app/learn/[course]/[id].tsx",
     "src/components/NextExerciseOverlay.tsx",
@@ -36,6 +36,13 @@
       "transcript": "/3/full.jsonl",
       "compact_transcript": "/3/transcript.jsonl",
       "content_hash": "/3/content_hash.txt",
+      "prompt": ""
+    },
+    {
+      "metadata": "/4/metadata.json",
+      "transcript": "/4/full.jsonl",
+      "compact_transcript": "/4/transcript.jsonl",
+      "content_hash": "/4/content_hash.txt",
       "prompt": ""
     }
   ],
