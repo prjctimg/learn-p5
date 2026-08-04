@@ -489,6 +489,7 @@ var prettierEstree = _CM.prettierPluginEstree;
 var prettierAcorn = _CM.prettierPluginAcorn;
 
 var WORD_WRAP = ${wordWrap ?? false};
+var DISABLE_SYSTEM_KEYBOARD = ${disableSystemKeyboard ? "true" : "false"};
 
 let view;
 const INITIAL_CODE = ${codeArg};
@@ -705,7 +706,7 @@ function initEditor() {
       var scroller = document.querySelector('.cm-scroller');
       if (scroller) scroller.style.maxHeight = maxH;
     }
-    if (${disableSystemKeyboard ? 'true' : 'false'}) {
+    if (DISABLE_SYSTEM_KEYBOARD) {
       var cmContent = document.querySelector('.cm-content');
       if (cmContent) cmContent.setAttribute('inputmode', 'none');
     }
@@ -940,9 +941,23 @@ function handleMessage(data) {
               } catch (e2) { console.warn('setWordWrap recovery failed:', e2); }
             }
           }
-          if (${disableSystemKeyboard ? 'true' : 'false'}) {
+          if (DISABLE_SYSTEM_KEYBOARD) {
             var cmContent2 = document.querySelector('.cm-content');
             if (cmContent2) cmContent2.setAttribute('inputmode', 'none');
+          }
+        }
+        break;
+      case 'setDisableSystemKeyboard':
+        DISABLE_SYSTEM_KEYBOARD = !!msg.disableSystemKeyboard;
+        var cmContentD = document.querySelector('.cm-content');
+        if (cmContentD) {
+          if (DISABLE_SYSTEM_KEYBOARD) {
+            cmContentD.setAttribute('inputmode', 'none');
+            // If the system keyboard is currently open because the editor was
+            // focused before the toggle took effect, blur to dismiss it.
+            if (view && view.hasFocus) view.contentDOM.blur();
+          } else {
+            cmContentD.removeAttribute('inputmode');
           }
         }
         break;

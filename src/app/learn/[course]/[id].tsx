@@ -186,7 +186,7 @@ export default function Exercise() {
       activeTaskIndex: state.currentTaskIndex,
       disableSystemKeyboard,
     });
-  }, [state.exercise, state.currentTaskIndex, colorScheme, id, editorTheme, codeFontSize, ctaColor]);
+  }, [state.exercise, state.currentTaskIndex, colorScheme, id, editorTheme, codeFontSize, ctaColor, wordWrap, disableSystemKeyboard]);
 
   const fullscreenPreviewHtml = useMemo(
     () => getFullscreenPreviewHtml(state.code, colorScheme === "dark" ? "dark" : "light"),
@@ -527,6 +527,12 @@ case "sketchError":
   webViewRef.current.postMessage(JSON.stringify({ type: "setWordWrap", wordWrap }));
   }
   }, [editorViewReady, wordWrap]);
+
+  useEffect(() => {
+  if (editorViewReady && webViewRef.current) {
+  webViewRef.current.postMessage(JSON.stringify({ type: "setDisableSystemKeyboard", disableSystemKeyboard }));
+  }
+  }, [editorViewReady, disableSystemKeyboard]);
 
   useEffect(() => {
   if (editorViewReady && pendingInserts.current.length > 0) {
