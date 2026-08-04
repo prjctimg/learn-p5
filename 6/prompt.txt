@@ -1,0 +1,9 @@
+Explore the learn-p5 Expo app codebase (thorough). I need to understand the "next task/exercise" navigation and visual cue flow.
+
+Find:
+1. When a user completes all the tasks/exercises in an exercise (or the current exercise), what visual cue is shown to move them to the next one? Find the component that shows "next" / "continue" / completion cue.
+2. Find the logic that determines "all exercises complete" and triggers navigation to the next exercise. Report whether navigation is automatic or manual currently.
+3. Find the "task" vs "exercise" vs "module" structure - clarify the hierarchy. The user said "When the user completes all exercises and they must now go to the next exercise" - find the navigation that moves between exercises within a module (or between modules).
+4. Find existing animation/visual cue components used for transitions (e.g. Reanimated, Lottie). Report what's available for making a "more noticeable" cue.
+
+Report: file paths, line numbers, the completion/navigation flow, and the current cue rendering. Be thorough.
