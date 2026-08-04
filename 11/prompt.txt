@@ -1,0 +1,9 @@
+Explore the learn-p5 Expo app codebase (thorough). I need to understand the "symbol reference floating modal" that is shown on the exercises view.
+
+Find:
+1. The component that renders the floating modal showing symbol reference (likely triggered when user taps a p5 symbol in code). Report its file path and how it renders example code blocks. Look for `describe()` calls in example code that come from the p5 reference data.
+2. How example code blocks are rendered in that modal - is there syntax highlighting? What library/component is used? Find the syntax highlighter component used elsewhere in the app for comparison.
+3. The reference data source: `src/data/reference.generated.json` and how it's built - look at scripts that generate it. Find where examples come from and whether they contain `describe()` calls (jest-style test wrappers).
+4. Any existing syntax highlighting component(s) in the codebase (e.g. Prism, react-syntax-highlighter, hljs) - report file paths and usage.
+
+Report back: file paths, relevant line numbers, code snippets of key parts, and how the modal currently renders examples. Be very thorough.
