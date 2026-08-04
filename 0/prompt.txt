@@ -1,0 +1,23 @@
+Explore the learn-p5 Expo app codebase (thorough). I need the full picture to plan replacing the default asterisk module cover on the learn route with an animated p5 canvas (small looped graphic per module).
+
+Previously found:
+- `src/app/learn/index.tsx` renders a FlatList of courses via `<ExerciseCard>` (lines 84-129).
+- `src/components/ExerciseCard.tsx` lines 44-54: iconContainer with lock/check/asterisk fallback. Asterisk SVG path at lines 8-9. Container styled lines 82-86 (`paddingVertical: 40`).
+- `Course` type at `src/data/types.ts` lines 36-42: `{ slug, title, moduleName, description, exercises }` - NO cover/icon/emoji/sketch field.
+- 16 course YAML files in `src/data/courses/*.yaml`.
+- The main code editor uses CodeMirror in a WebView. Examples in the reference modal also use a WebView (`getExampleHtml` in `src/utils/editor/exampleHtml.ts`).
+
+Now find and report:
+1. The full content of `src/components/ExerciseCard.tsx` - all props, the iconContainer area, dimensions, and how it's laid out. Report line numbers.
+2. The full content of `src/utils/editor/exampleHtml.ts` `getExampleHtml` - how it wraps p5 code into HTML for a WebView. Could a similar minimal wrapper render a tiny per-module sketch? Report it.
+3. How p5.js is loaded in those WebViews (CDN URL? version? local?). Find the exact p5.js script src. Check `src/utils/p5Version.ts` and `src/utils/p5Source.ts` (both gitignored generated). Report how the version/source is determined and injected.
+4. The 16 course slugs and their titles/moduleNames (the topic of each), so I can brainstorm a small looped animation per topic. List all 16.
+5. Performance concerns: would rendering 16 simultaneous WebViews (one per visible card) be feasible? Check `react-native-webview` usage and any existing multiple-WebView patterns. Consider: is FlatList recycling compatible with WebViews? Report FlatList config in `src/app/learn/index.tsx` (initialNumToRender, windowSize, etc).
+6. Alternative approaches to an animated cover WITHOUT a WebView: 
+   - react-native-reanimated + react-native-svg animated shapes
+   - Animated.Loop with rotated/translated SVG asterisks per module
+   - Lottie (not installed)
+   Report which is most aligned with the existing stack (Reanimated 4.2.1 + react-native-svg 15.15.3 are installed).
+7. Search the web (you can use WebFetch) for inspiration on "looped p5 thumbnail animation" or "generative art cover animation small canvas" patterns that could inspire per-module graphics. Report 2-3 concrete ideas.
+
+Report file paths, line numbers, the p5 loading mechanism, the 16 module topics, FlatList config, and a recommended implementation approach (WebView per card vs Reanimated SVG). Be very thorough.
