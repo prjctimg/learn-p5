@@ -112,6 +112,7 @@ export default function Learn() {
                 title={item.title}
                 moduleName={item.moduleName}
                 description={`${item.exercises.length} exercise${item.exercises.length > 1 ? "s" : ""} · ${item.description}`}
+                slug={item.slug}
                 locked={locked}
                 completed={completed}
                 isCurrent={isCurrent}
