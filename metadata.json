@@ -3,7 +3,7 @@
   "checkpoint_id": "01KZ6NJW3EYKKJTWAWB82TJKYE",
   "strategy": "manual-commit",
   "branch": "main",
-  "checkpoints_count": 10,
+  "checkpoints_count": 11,
   "files_touched": [
     ".gitignore",
     "AGENTS.md",
@@ -81,6 +81,13 @@
       "transcript": "/9/full.jsonl",
       "compact_transcript": "/9/transcript.jsonl",
       "content_hash": "/9/content_hash.txt",
+      "prompt": ""
+    },
+    {
+      "metadata": "/10/metadata.json",
+      "transcript": "/10/full.jsonl",
+      "compact_transcript": "/10/transcript.jsonl",
+      "content_hash": "/10/content_hash.txt",
       "prompt": ""
     }
   ],
