@@ -10,7 +10,8 @@
 
 ## Generated artifacts
 
-- `src/data/courses/*.ts`, `src/utils/p5Source.ts`, `src/utils/p5Version.ts`, and `src/data/reference.generated.json` are gitignored and regenerated on `postinstall`/`npm start`. Never commit them.
+- `src/data/courses/*.ts`, `src/utils/p5Source.ts`, `src/utils/p5Version.ts`, `src/data/reference.generated.json`, and `src/data/p5Assets.generated.json` are gitignored and regenerated on `postinstall`/`npm start`. Never commit them.
+- `p5Assets.generated.json` holds base64 `data:` URIs for p5.js-website example assets (`.obj`, `.frag`, `.vert`, fonts, images, etc.) keyed by `__P5_ASSET__<basename>__P5_ASSET__` placeholders inserted into example strings by `scripts/generate-reference.mjs`. `getExampleHtml` substitutes the placeholders at render time so `load*()` calls resolve to bundled blobs offline. Large media (`.mp3`/`.mp4`/`.mov`/`.wav`/`.webm`/`.ogv`) and files >1.5MB are skipped.
 
 ## Release cadence
 
