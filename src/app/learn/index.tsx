@@ -72,6 +72,15 @@ export default function Learn() {
     return null;
   }, [courses, completedLessons, completedCourses]);
 
+  // The single "current" (first incomplete) course is the blocker for every
+  // locked card under the sequential completion model. Surface its title so a
+  // locked card can name the exact prior module to finish instead of a generic
+  // "complete the current module" message.
+  const currentCourse = useMemo(
+    () => (currentSlug ? courses.find((c) => c.slug === currentSlug) ?? null : null),
+    [currentSlug, courses]
+  );
+
   const orderedCourses = useMemo(() => {
     const active = courses.filter((c) => !isCourseCompleted(c));
     const completed = courses.filter((c) => isCourseCompleted(c));
@@ -106,6 +115,7 @@ export default function Learn() {
                 locked={locked}
                 completed={completed}
                 isCurrent={isCurrent}
+                lockHint={locked && currentCourse ? currentCourse.title : undefined}
                 onContinue={() => router.push(`/learn/${item.slug}`)}
               />
             </View>
