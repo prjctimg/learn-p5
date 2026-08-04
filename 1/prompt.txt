@@ -1,0 +1,14 @@
+Explore the learn-p5 Expo app codebase (thorough). I need the full picture of the "locked module" messaging on the learn route and how to refer to the actual prior module.
+
+Previously found:
+- `src/components/ExerciseCard.tsx` line 64 has the hardcoded string "Complete the current module to unlock this one."
+- `src/app/learn/index.tsx` lines 97-110 renders `<ExerciseCard locked={locked} ... />` for each course, where `locked = !completed && !isCurrent` (line 99), `isCurrent = currentSlug === item.slug` (line 98), `completed = isCourseCompleted(item)` (line 97).
+
+Now find and report:
+1. The full content of `src/app/learn/index.tsx` - especially how `orderedCourses` is built (lines 75-79 mentioned reordering), how `currentSlug`/`isCurrent` is determined (lines 68-73), and how `isCourseCompleted` works. Report the order/sequencing logic.
+2. The full content of `src/components/ExerciseCard.tsx` including the prop interface (does it accept a `priorModuleTitle` or similar?). Report all props.
+3. The `Course` type and whether there's any explicit "prerequisite" / "order" / "previousModule" field. If sequencing is purely positional (order in the courses array), report how the array is ordered.
+4. The data source: `src/data/courses/index.ts` (or similar) - how courses are listed/ordered. Is there a fixed canonical order? Report it.
+5. Identify the cleanest way to compute, for a locked course, the title of the prior course the user must complete first. (Likely: find the highest-indexed incomplete course before this one in canonical order; or the immediately-preceding incomplete course.)
+
+Report file paths, line numbers, the exact current string location, the ordering mechanism, and the recommended approach to surface the prior module's title. Be thorough.
