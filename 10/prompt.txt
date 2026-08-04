@@ -1,0 +1,8 @@
+Explore the learn-p5 Expo app codebase (thorough). I need to understand the custom "qwerty keyboard" component used in the exercises view.
+
+Find:
+1. The QWERTY keyboard component file path. It's a custom on-screen keyboard for entering code on mobile.
+2. Specifically find the "popup that shows on keypress" - the visual indicator/popup that appears when a key is pressed. Report exactly how it's positioned. The current bug: the popup shows at the same place as the pressed key instead of over it. Find the code that computes the popup position.
+3. Report the relevant styling/layout code, the key layout structure, and how the pressed key's position is tracked.
+
+Report back: file paths, line numbers, and code snippets of the popup positioning logic. Be thorough.
