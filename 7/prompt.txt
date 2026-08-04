@@ -1,0 +1,8 @@
+Explore the learn-p5 Expo app codebase (thorough). I need to find the text "Complete the current module to unlock this one" (or similar) shown on a locked module in the learn route.
+
+Find:
+1. The component that renders a locked module card/tile on the learn route. Find the exact string "Complete the current module to unlock this one" or any string mentioning "unlock" with "Complete the current module".
+2. How modules are structured (course -> modules -> exercises). Find the data model for modules and their prerequisites/order. Is there a field linking a module to its prior/previous module?
+3. How the app determines a module is locked and which prior module must be completed. Find the logic that could be used to surface the actual prior module's name.
+
+Report: file paths, line numbers, the exact current string, the modules data structure, and the locking logic. Be thorough.
