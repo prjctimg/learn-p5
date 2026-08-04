@@ -1,0 +1,7 @@
+Explore the learn-p5 Expo app codebase (thorough). I need to understand:
+
+1. The code block component in the exercises view - the file path where the user taps to edit code. Find how it triggers the system keyboard (native OS keyboard) to open. Is it a TextInput? Something else? Report auto-focus / autoFocus / onFocus behavior.
+2. The settings options - find the settings screen and all toggles. Specifically find the setting option to "disable the system keyboard" (something like "use system keyboard" or "native keyboard" toggle). Report its key name in the settings store/state and where it's read.
+3. Where the code block reads (or fails to read) that setting. The bug: even when the setting to disable the system keyboard is on, tapping the code block still triggers the system keyboard.
+
+Report: file paths, line numbers, the settings storage mechanism (zustand? AsyncStorage?), the key name, and the code block's keyboard triggering code. Be thorough.
