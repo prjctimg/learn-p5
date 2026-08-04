@@ -405,7 +405,7 @@ ${
       <span class="lang-tag">JS</span>
     </div>
     <div class="editor-header-right">
-      <button class="editor-header-btn" id="resetBtn">Reset</button>
+      <button class="editor-header-btn" id="resetBtn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 4v5h5"></path></svg>Reset</button>
       <button class="editor-header-btn" id="copyBtn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg><span id="copyLabel">Copy</span></button>
     </div>
   </div>
