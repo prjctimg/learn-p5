@@ -14,19 +14,7 @@ import { useShakeDetection } from "../../hooks/useShakeDetection";
 import ReportErrorModal from "../../components/ReportErrorModal";
 import SearchOverlay from "../../components/SearchOverlay";
 import { getExampleHtml } from "../../utils/editor/exampleHtml";
-import { highlightSyntax, parseDescription } from "../../utils/referenceRender";
-
-const DESCRIBE_RE = /describe\s*\(\s*(["'])((?:(?!\1).)*)\1\s*\)\s*;?\s*/g;
-
-function extractDescribeCaption(code: string): string | null {
-  DESCRIBE_RE.lastIndex = 0;
-  const match = DESCRIBE_RE.exec(code);
-  return match ? match[2] : null;
-}
-
-function stripDescribe(code: string): string {
-  return code.replace(DESCRIBE_RE, "").trim();
-}
+import { highlightSyntax, parseDescription, extractDescribeCaption, stripDescribe } from "../../utils/referenceRender";
 
 const MODULE_GROUPS = P5_SYMBOLS.reduce<{ module: string; symbols: P5Symbol[] }[]>((acc, sym) => {
   const existing = acc.find((g) => g.module === sym.module);
