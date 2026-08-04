@@ -17,6 +17,8 @@ import Breadcrumbs from "../../../components/Breadcrumbs";
 import StreakToast from "../../../components/StreakToast";
 import ShakeModal from "../../../components/ShakeModal";
 import SearchOverlay from "../../../components/SearchOverlay";
+import TaskCompletePulse from "../../../components/TaskCompletePulse";
+import NextExerciseOverlay from "../../../components/NextExerciseOverlay";
 import { loadExercise, loadCourse } from "../../../utils/courseLoader";
 import { Exercise as ExerciseType } from "../../../data/types";
 import { P5_FUNCTION_NAMES, ONCE_ONLY_P5_FUNCTIONS } from "../../../data/reference";
@@ -154,6 +156,10 @@ export default function Exercise() {
 
   const [toastIcon, setToastIcon] = useState<string>("check-circle");
   const [toastIconColor, setToastIconColor] = useState<string | undefined>(undefined);
+  const [taskPulseVisible, setTaskPulseVisible] = useState(false);
+  const [taskPulseMessage, setTaskPulseMessage] = useState("");
+  const [nextOverlayVisible, setNextOverlayVisible] = useState(false);
+  const [nextTitle, setNextTitle] = useState<string | null>(null);
 
   const showToast = useCallback((message: string, actionLabel?: string, onAction?: () => void, type?: "success" | "failure") => {
     setToastMessage(message);
@@ -467,9 +473,13 @@ export default function Exercise() {
       const hasMore = state.exercise?.tasks && msg.taskIndex < totalTasks - 1;
       if (hasMore && totalTasks > 1) {
         // Per M3 cadence: let the in-WebView fade-through (~450ms) settle
-        // before bringing the confirmation toast in (~480ms).
+        // before bringing the confirmation cue in (~480ms). Use a centered
+        // pulse overlay + success haptic for a more noticeable cue than the
+        // old top-of-screen toast.
         setTimeout(() => {
-          showToast(`Task ${msg.taskIndex + 1}/${totalTasks} complete`, undefined, undefined, "success");
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+          setTaskPulseMessage(`Task ${msg.taskIndex + 1}/${totalTasks} complete`);
+          setTaskPulseVisible(true);
         }, 480);
       }
       dispatch({ type: "TASK_COMPLETE", taskIndex: msg.taskIndex });
@@ -726,47 +736,65 @@ case "sketchError":
   });
   }, [state.exercise, course, id, router]);
 
- useEffect(() => {
-  if (!state.completed || !state.exercise) return;
-  const ex = state.exercise;
-  const key = `${course}/${ex.id}`;
+  useEffect(() => {
+   if (!state.completed || !state.exercise) return;
+   const ex = state.exercise;
+   const key = `${course}/${ex.id}`;
 
-  showToast("✓ Exercise completed!", "Next →", handleToastNext, "success");
+   // Show a prominent countdown overlay that auto-advances to the next
+   // exercise (or back to the module list when the module is complete).
+   // The overlay has a "Stay here" affordance so the user is never taken
+   // by surprise. Fall back to the legacy toast if the course data isn't
+   // available to compute the next title.
+   Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+   loadCourse(course).then((courseData) => {
+     if (!courseData) {
+       showToast("✓ Exercise completed!", "Next →", handleToastNext, "success");
+       return;
+     }
+     const currentIndex = courseData.exercises.findIndex((l) => l.id === id);
+     if (currentIndex >= 0 && currentIndex < courseData.exercises.length - 1) {
+       setNextTitle(courseData.exercises[currentIndex + 1].title);
+     } else {
+       setNextTitle(null); // last exercise of the module
+     }
+     setNextOverlayVisible(true);
+   });
 
-  (async () => {
-  const durationMs = runStartTimeRef.current ? Date.now() - runStartTimeRef.current : undefined;
-  const newlyUnlocked = await recordCompletion(`${course}/${ex.id}`, durationMs);
-  if (newlyUnlocked.length > 0) {
-    const first = ACHIEVEMENTS.find((a) => a.id === newlyUnlocked[0]);
-    if (first) {
-      // Defer slightly so the exercise-completion toast doesn't overlap.
-      setTimeout(() => showToast(`🏆 ${first.title} unlocked`, undefined, undefined, "success"), 2200);
-    }
-  }
+   (async () => {
+   const durationMs = runStartTimeRef.current ? Date.now() - runStartTimeRef.current : undefined;
+   const newlyUnlocked = await recordCompletion(`${course}/${ex.id}`, durationMs);
+   if (newlyUnlocked.length > 0) {
+     const first = ACHIEVEMENTS.find((a) => a.id === newlyUnlocked[0]);
+     if (first) {
+       // Defer slightly so the completion overlay doesn't overlap.
+       setTimeout(() => showToast(`🏆 ${first.title} unlocked`, undefined, undefined, "success"), 3200);
+     }
+   }
 
-  const val = await AsyncStorage.getItem("completedLessons");
-  const arr: string[] = val ? JSON.parse(val) : [];
-  if (!arr.includes(key)) {
-  arr.push(key);
-  await AsyncStorage.setItem("completedLessons", JSON.stringify(arr));
-  }
+   const val = await AsyncStorage.getItem("completedLessons");
+   const arr: string[] = val ? JSON.parse(val) : [];
+   if (!arr.includes(key)) {
+   arr.push(key);
+   await AsyncStorage.setItem("completedLessons", JSON.stringify(arr));
+   }
 
-  const courseData = await loadCourse(course);
-  if (!courseData) return;
+   const courseData = await loadCourse(course);
+   if (!courseData) return;
 
-  const allDone = courseData.exercises.every((l) =>
-  arr.includes(`${course}/${l.id}`)
-  );
-  if (allDone) {
-  const prev = await AsyncStorage.getItem("completedCourses");
-  const courses: string[] = prev ? JSON.parse(prev) : [];
-  if (!courses.includes(course)) {
-  courses.push(course);
-  await AsyncStorage.setItem("completedCourses", JSON.stringify(courses));
-  }
-  }
-  })();
-  }, [state.completed, state.exercise, course, webViewReady, handleToastNext, showToast]);
+   const allDone = courseData.exercises.every((l) =>
+   arr.includes(`${course}/${l.id}`)
+   );
+   if (allDone) {
+   const prev = await AsyncStorage.getItem("completedCourses");
+   const courses: string[] = prev ? JSON.parse(prev) : [];
+   if (!courses.includes(course)) {
+   courses.push(course);
+   await AsyncStorage.setItem("completedCourses", JSON.stringify(courses));
+   }
+   }
+   })();
+   }, [state.completed, state.exercise, course, webViewReady, handleToastNext, showToast]);
 
   const exerciseSymbols = useMemo(() => {
   if (!state.exercise) return [];
@@ -1053,6 +1081,19 @@ return (
     icon={toastIcon}
     iconColor={toastIconColor}
     tone={toastTone}
+  />
+
+  <TaskCompletePulse
+    visible={taskPulseVisible}
+    message={taskPulseMessage}
+    onDone={() => setTaskPulseVisible(false)}
+  />
+
+  <NextExerciseOverlay
+    visible={nextOverlayVisible}
+    nextTitle={nextTitle}
+    onCancel={() => setNextOverlayVisible(false)}
+    onAdvance={handleToastNext}
   />
 
   {!fullscreen && keyboardVisible && keyboardMode === "programming" && (
