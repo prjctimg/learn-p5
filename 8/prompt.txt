@@ -1,0 +1,7 @@
+Explore the learn-p5 Expo app codebase (thorough). I need to find:
+
+1. The "Reset button" on the codeblock in the exercises view. Find its file path, how it's rendered (text? button? icon?), and the text/icon it currently shows. The user wants to ADD an icon to it. Report existing icon library usage in the app (e.g. @expo/vector-icons, Ionicons, FontAwesome) so I know what's available.
+
+2. The "snippet alternatives" option in settings. Find the settings screen file and the specific toggle/option for "snippet alternatives" (or similar name like "alternative snippets", "snippet variants", "show alternatives"). Report: the settings store key, where it's defined, where it's read/used in the app (which component consumes it), and how removing it would affect those consumers.
+
+Report: file paths, line numbers, and relevant code snippets. Be thorough.
