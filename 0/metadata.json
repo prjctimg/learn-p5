@@ -1,0 +1,62 @@
+{
+  "cli_version": "0.8.42",
+  "checkpoint_id": "01KZ8R77ADCET846R8GKNKZW1N",
+  "session_id": "ses_02ea1607affeE0eAu5V0VHEGbQ",
+  "strategy": "manual-commit",
+  "created_at": "2026-08-05T10:41:36.547962139Z",
+  "branch": "main",
+  "checkpoints_count": 2,
+  "save_step_count": 1,
+  "files_touched": [
+    "scripts/bundle-validation.mjs",
+    "src/utils/editor/exerciseHtml.ts",
+    "src/utils/editor/validation-core.generated.ts",
+    "src/utils/editor/validation.ts"
+  ],
+  "agent": "OpenCode",
+  "model": "big-pickle",
+  "turn_id": "ff0ef14d91c8",
+  "compact_transcript_start": 0,
+  "token_usage": {
+    "input_tokens": 548235,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 8856128,
+    "output_tokens": 38337,
+    "api_call_count": 122
+  },
+  "session_metrics": {
+    "turn_count": 2
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-08-05T10:41:36.385757646Z",
+    "agent_lines": 62,
+    "agent_removed": 83,
+    "human_added": 100,
+    "human_modified": 14,
+    "human_removed": 0,
+    "total_committed": 163,
+    "total_lines_changed": 383,
+    "agent_percentage": 37.85900783289817,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 568,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0,
+      "user_added_per_file": {
+        "scripts/bundle-validation.mjs": 47,
+        "src/utils/editor/validation.ts": 521
+      }
+    },
+    {
+      "checkpoint_number": 2,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 631,
+      "agent_lines_removed": 83
+    }
+  ]
+}
