@@ -1,4 +1,5 @@
 import { CODEMIRROR_BUNDLE } from "./codemirror-bundle.generated";
+import { VALIDATION_CORE } from "./validation-core.generated";
 import { p5Source } from "../p5Source";
 import { P5_FUNCTION_NAMES } from "../../data/reference";
 import { Colors } from "../../constants/Colors";
@@ -415,6 +416,7 @@ ${
 
 <script>${p5Source}</script>
 <script>${CODEMIRROR_BUNDLE}</script>
+<script>${VALIDATION_CORE}</script>
 <script>
  ${getBridgeScript(params.startingCode, params.solution, themeColors, params.colorScheme, params.exerciseNumber, ctaColor, params.wordWrap, tasksJson, activeTaskIdx, params.disableSystemKeyboard)}
 </script>
@@ -1086,45 +1088,6 @@ function handleMessage(data) {
             }
             return out;
           }
-          function findCallArgsList(sanitized, startIdx) {
-            var i2 = startIdx;
-            while (i2 < sanitized.length && sanitized[i2] !== '(') i2++;
-            if (sanitized[i2] !== '(') return null;
-            var depth = 0;
-            var argStart = i2 + 1;
-            var args = [];
-            for (var j = i2; j < sanitized.length; j++) {
-              var ch = sanitized[j];
-              if (ch === '(') depth++;
-              else if (ch === ')') {
-                depth--;
-                if (depth === 0) {
-                  var raw = sanitized.slice(argStart, j);
-                  if (raw.trim().length > 0) args.push(raw);
-                  return args;
-                }
-              } else if (ch === ',' && depth === 1) {
-                args.push(sanitized.slice(argStart, j));
-                argStart = j + 1;
-              }
-            }
-            return null;
-          }
-          function findCallsByName(code, name) {
-            var sanitized = stripIgnoredRegions(code);
-            var calls = [];
-            var nameRe = new RegExp('\\\\b' + name + '\\\\b', 'g');
-            var m;
-            var idxs = [];
-            while ((m = nameRe.exec(sanitized)) !== null) { idxs.push(m.index + m[0].length); }
-            for (var k = 0; k < idxs.length; k++) {
-              var argList = findCallArgsList(sanitized, idxs[k]);
-              if (argList !== null) {
-                calls.push(argList.map(function(a) { return a.trim(); }).filter(function(a) { return a.length > 0; }));
-              }
-            }
-            return calls;
-          }
           function normalizeForCompare(src) {
             var stripped = stripIgnoredRegions(src);
             return stripped.replace(/\\s+/g, ' ').trim();
@@ -1134,38 +1097,17 @@ function handleMessage(data) {
             return normalizeForCompare(userCode) === normalizeForCompare(solutionCode);
           }
           function validateSync(code, rules) {
-            for (var ri = 0; ri < rules.length; ri++) {
-              var rule = rules[ri];
-              if (rule.type === 'functionCall') {
-                var matches = findCallsByName(code, rule.name);
-                if (matches.length === 0) return { passed: false, reason: 'Add a ' + rule.name + '() call' };
-                if (rule.exactArgs !== undefined) {
-                  var hasCorrect = false;
-                  for (var mi = 0; mi < matches.length; mi++) {
-                    if (matches[mi].length === rule.exactArgs) { hasCorrect = true; break; }
-                  }
-                  if (!hasCorrect) return { passed: false, reason: rule.name + '() needs ' + rule.exactArgs + ' arguments' };
-                }
-                if (rule.minArgs !== undefined) {
-                  var hasMin = false;
-                  for (var mi2 = 0; mi2 < matches.length; mi2++) {
-                    if (matches[mi2].length >= rule.minArgs) { hasMin = true; break; }
-                  }
-                  if (!hasMin) return { passed: false, reason: rule.name + '() needs at least ' + rule.minArgs + ' arguments' };
-                }
-              } else if (rule.type === 'functionExists') {
-                var fnRe = new RegExp('\\b' + rule.name + '\\s*[=:]\\s*function|function\\s+' + rule.name + '\\s*\\(', 'g');
-                if (!fnRe.test(code)) return { passed: false, reason: 'Define a ' + rule.name + '() function' };
-              } else if (rule.type === 'canvasSize') {
-                var canvasRe = /createCanvas\s*\(\s*(\d+)\s*,\s*(\d+)\s*\)/g;
-                var canvasMatch = canvasRe.exec(code);
-                if (!canvasMatch) return { passed: false, reason: 'Use createCanvas() to set canvas size' };
-                var w = parseInt(canvasMatch[1], 10);
-                var h = parseInt(canvasMatch[2], 10);
-                if (w !== rule.width || h !== rule.height) return { passed: false, reason: 'Canvas should be ' + rule.width + 'x' + rule.height };
-              }
+            if (typeof __VAL_CORE === 'undefined') {
+              return { passed: false, reason: 'Validation engine failed to load' };
             }
-            return { passed: true, reason: '' };
+            // Reuse the live CodeMirror syntax tree — it always matches the
+            // current document, so no re-parse is needed on the bridge.
+            var tree = syntaxTree(view.state);
+            var adapter = {
+              cursor: function() { return tree.cursor(); },
+              slice: function(from, to) { return code.slice(from, to); }
+            };
+            return __VAL_CORE.evaluateRules(__VAL_CORE.analyze(adapter), rules);
           }
 
           var syncResult = { passed: false, reason: '' };
@@ -1173,6 +1115,15 @@ function handleMessage(data) {
           var activeRules = TASKS.length > 0 && TASKS[ACTIVE_TASK_INDEX]
             ? (TASKS[ACTIVE_TASK_INDEX].validation || [])
             : [];
+          if (typeof __VAL_CORE !== 'undefined' && __VAL_CORE.schemaErrors) {
+            var schemaIssues = __VAL_CORE.schemaErrors(activeRules);
+            if (schemaIssues.length > 0) {
+              if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+                window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'validationFailed', reason: 'Validation rules are misconfigured: ' + schemaIssues[0] }));
+              }
+              return;
+            }
+          }
           try {
             if (activeRules.length > 0) {
               var nonPixelRules = activeRules.filter(function(r) { return r.type !== 'pixelMatch' && r.type !== 'expectedPixels'; });
@@ -1219,13 +1170,28 @@ function handleMessage(data) {
               }
             }
           }
-          function waitForFrame(p5Inst, cb) {
+          function frameCountOf(p5Inst) {
+            try { return typeof p5Inst.frameCount === 'function' ? p5Inst.frameCount() : p5Inst.frameCount; } catch(e) { return 0; }
+          }
+          // Wait for the first drawn frame, then stop the loop and force exactly
+          // one redraw at a reset frame counter. This makes the sampled frame
+          // deterministic (the "first frame" rendering) instead of an arbitrary
+          // mid-animation snapshot. Looping is restored by the caller afterward.
+          function settleForValidation(p5Inst, cb) {
             var start = Date.now();
             function check() {
-              var fc = 0;
-              try { fc = typeof p5Inst.frameCount === 'function' ? p5Inst.frameCount() : p5Inst.frameCount; } catch(e) {}
-              if (fc > 0) { cb(true); return; }
-              if (Date.now() - start > 2000) { cb(false); return; }
+              if (frameCountOf(p5Inst) > 0) {
+                var wasLooping = false;
+                try { wasLooping = typeof p5Inst.isLooping === 'function' ? p5Inst.isLooping() : !!p5Inst.isLooping; } catch(e) {}
+                try { p5Inst.noLoop(); } catch(e) {}
+                try { p5Inst.frameCount = 0; } catch(e) {}
+                Promise.resolve()
+                  .then(function() { return p5Inst.redraw(); })
+                  .then(function() { cb(true, wasLooping); })
+                  .catch(function() { cb(false, wasLooping); });
+                return;
+              }
+              if (Date.now() - start > 2000) { cb(false, false); return; }
               if (typeof requestAnimationFrame === 'function') { requestAnimationFrame(check); } else { setTimeout(check, 32); }
             }
             check();
@@ -1235,16 +1201,22 @@ function handleMessage(data) {
             if (!cnv) { postValidationFailed('Canvas not found'); return false; }
             var ctx = cnv.getContext('2d');
             if (!ctx) { postValidationFailed('Cannot read canvas pixels'); return false; }
+            if (!cnv.width || !cnv.height) { postValidationFailed('Canvas has no size'); return false; }
             var d = (p5Instance.width && cnv.width) ? (cnv.width / p5Instance.width) : 1;
             function checkPoint(pt) {
-              var tol = pt.tolerance !== undefined ? pt.tolerance : 30;
+              var tol = (typeof __VAL_CORE !== 'undefined' && __VAL_CORE.effectiveTolerance)
+                ? __VAL_CORE.effectiveTolerance(pt)
+                : (pt.tolerance !== undefined ? pt.tolerance : 30);
               var px = Math.min(Math.max(0, Math.floor(pt.x * d)), cnv.width - 1);
               var py = Math.min(Math.max(0, Math.floor(pt.y * d)), cnv.height - 1);
               var dat = ctx.getImageData(px, py, 1, 1).data;
-              var rDiff = Math.abs(dat[0] - pt.expected[0]);
-              var gDiff = Math.abs(dat[1] - pt.expected[1]);
-              var bDiff = Math.abs(dat[2] - pt.expected[2]);
-              return (rDiff <= tol && gDiff <= tol && bDiff <= tol);
+              var expected = [pt.expected[0], pt.expected[1], pt.expected[2]];
+              if (typeof __VAL_CORE !== 'undefined' && __VAL_CORE.pixelMatches) {
+                return __VAL_CORE.pixelMatches(dat, expected, tol);
+              }
+              return Math.abs(dat[0] - expected[0]) <= tol
+                && Math.abs(dat[1] - expected[1]) <= tol
+                && Math.abs(dat[2] - expected[2]) <= tol;
             }
             for (var pi = 0; pi < pixelMatches.length; pi++) {
               var pr = pixelMatches[pi];
@@ -1264,7 +1236,9 @@ function handleMessage(data) {
               for (var pi2 = 0; pi2 < pts.length; pi2++) {
                 if (checkPoint(pts[pi2])) passed++;
               }
-              var minFrac = er.minPassFraction !== undefined ? er.minPassFraction : 0.9;
+              var minFrac = (typeof __VAL_CORE !== 'undefined' && __VAL_CORE.effectiveMinPassFraction)
+                ? __VAL_CORE.effectiveMinPassFraction(er.minPassFraction)
+                : (er.minPassFraction !== undefined ? er.minPassFraction : 0.9);
               if (passed / pts.length < minFrac) {
                 postValidationFailed('Sketch output does not match (' + passed + '/' + pts.length + ' pixels matched)');
                 return false;
@@ -1277,10 +1251,14 @@ function handleMessage(data) {
             postValidationFailed('Sketch did not render');
             return;
           }
-          waitForFrame(frameContainer.__p5, function(rendered) {
+          settleForValidation(frameContainer.__p5, function(rendered, wasLooping) {
             if (!rendered) { postValidationFailed('Sketch did not render in time — try again'); return; }
             try {
-              if (sampleAllPoints(frameContainer.__p5)) postSuccess();
+              var ok = sampleAllPoints(frameContainer.__p5);
+              if (wasLooping) {
+                try { frameContainer.__p5.loop(); } catch(e) {}
+              }
+              if (ok) postSuccess();
             } catch(e) {
               console.error('Pixel validation error:', e);
               postValidationFailed('Could not verify sketch output');

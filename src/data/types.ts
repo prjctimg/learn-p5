@@ -10,8 +10,7 @@ export type ValidationRule =
   | { type: "functionExists"; name: string }
   | { type: "canvasSize"; width: number; height: number }
   | { type: "pixelMatch"; x: number; y: number; expected: [number, number, number]; tolerance?: number }
-  | { type: "expectedPixels"; points: ExpectedPixel[]; minPassFraction?: number }
-  | { type: string; [key: string]: unknown };
+  | { type: "expectedPixels"; points: ExpectedPixel[]; minPassFraction?: number };
 
 export interface ExerciseTask {
   id: string;
