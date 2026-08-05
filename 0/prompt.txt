@@ -1,5 +1,1 @@
-Let's look at how exercise validation is actually handled, the types/interfaces for defining a validator and all the validators used for each exercise and it's associated tasks. 
-
-Analyze the current inaccuracies and loopholes in the current code related to the above features, duplication and how we can improve the current features. 
-
-Don't be a yes-man. Use reasoning to pinpoint feasibility and technical implications before recommending a solution. Feel free to ignore impractical or unfeasible solutions from the start instead of wasting time following them.
+Resume the session
