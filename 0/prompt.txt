@@ -1,1 +1,54 @@
-Look at the session.md and refer me to the locations of each validator a d explain how it works
+Write a VALIDATORS.md file that has all tge specifics about the validation logic only and commit and push the file. Delete the old @SESSION.md 
+Called the Read tool with the following input: {"filePath":"/workspaces/learn-p5/SESSION.md"}
+<path>/workspaces/learn-p5/SESSION.md</path>
+<type>file</type>
+<content>
+1: # Session: Exercise Validation Refactor
+2: 
+3: ## Goal
+4: Refactor exercise validation into a single source of truth and harden pixel validation (Phase 1 + Phase 2).
+5: 
+6: ## What was done
+7: 
+8: ### Phase 1: Single source of truth (`src/utils/editor/validation.ts`)
+9: - Wrote a dependency-free module that all validation flows now share: the exercise WebView bridge and the Node dev checks (`check-exercises.mjs`).
+10: - The module walks a caller-provided syntax tree (`TreeCursorLike` interface) so it runs identically in the browser and in Node — no lezer import in the runtime bundle.
+11: - Exports: `analyze`, `evaluateRules`, `schemaErrors`, `hasPixelRules`, `hasSyncRules`, `pixelMatches`, `effectiveTolerance`, `effectiveMinPassFraction`.
+12: - `RULE_SCHEMAS` validates all five rule types (`functionCall`, `functionExists`, `canvasSize`, `pixelMatch`, `expectedPixels`) and catches malformed rules (typos like `excatArgs`, unknown types, missing fields).
+13: - `analyze()` distinguishes real calls from definitions (handles plain calls, member calls, function declarations, arrow/function-valued variables, object methods, class methods).
+14: - `evaluateRules()` handles sync rules; pixel rules are deferred to the renderer.
+15: 
+16: ### Phase 2: Pixel hardening (in the WebView bridge)
+17: - Replaced the ad-hoc `waitForFrame` (poll until `frameCount > 0`) with `settleForValidation`: stops the loop via `noLoop()`, resets `frameCount` to 0, then calls `redraw()` exactly once for a deterministic "first frame" sample, then restores `loop()` if the sketch was looping.
+18: - `sampleAllPoints` now uses `__VAL_CORE.pixelMatches` and `__VAL_CORE.effectiveTolerance`/`effectiveMinPassFraction` from the shared core, keeping a single source of truth for pixel comparison semantics.
+19: - Added canvas-size sanity check (`!cnv.width || !cnv.height`) before sampling.
+20: - The default per-channel tolerance is now 30 (matching the core's `PIXEL_DEFAULT_TOLERANCE`), replacing the old implicit 120.
+21: 
+22: ### Bridge integration (`src/utils/editor/exerciseHtml.ts`)
+23: - Added `<script>${VALIDATION_CORE}</script>` (the IIFE bundle) before the bridge script so `__VAL_CORE` is available globally.
+24: - Replaced the regex-based `validateSync`, `findCallsByName`, and `findCallArgsList` with calls to `__VAL_CORE.analyze` + `__VAL_CORE.evaluateRules`.
+25: - Added a `schemaErrors` guard in the run-sketch flow so malformed rules fail loudly rather than silently weakening.
+26: - Removed dead `VALIDATION_RULES = []` and the dead regex helpers.
+27: 
+28: ### Dev checks (`scripts/check-exercises.mjs`)
+29: - Rewritten to use the shared core via the generated IIFE bundle (same mechanism as the bridge).
+30: - Now runs `schemaErrors` on every task's rules before evaluating them, catching malformed rules early.
+31: - Covers all tasks (not just the 88/94 previously covered) since the core handles all rule types uniformly.
+32: 
+33: ### Type tightening (`src/data/types.ts`)
+34: - Removed the catch-all `{ type: string; [key: string]: unknown }` from `ValidationRule`, making the union exhaustive.
+35: - Updated `build-courses.mjs` to emit `: Course` type annotations on generated course exports so TypeScript validates the generated data against the tightened type.
+36: 
+37: ### Build plumbing
+38: - Added `scripts/bundle-validation.mjs` (mirrors `bundle-editor.mjs` pattern) and `src/utils/editor/validation-core.generated.ts` (gitignored? No — committed, like `codemirror-bundle.generated.ts`).
+39: - Added `bundle-validation` script to `package.json`; wired into `postinstall` and `start`.
+40: 
+41: ## Key technical notes
+42: - `@lezer/javascript` 1.5.4 is present as a transitive dep. Lezer bundle ≈ 126 KB minified (not imported by the core — the core uses a caller-provided tree cursor).
+43: - `tree.topNode.iterate` does NOT exist in @lezer/javascript; cursor-based `firstChild`/`nextSibling`/`parent` recursion is used.
+44: - Lezer arg-count quirk: `f(...args)` counts as 1 arg (spread node excluded). `new p5(...)` is a `NewExpression` whose first child is the `new` keyword, not the callee — handled by `findCallee`.
+45: - `reference.generated.json` arity is unreliable (createVector → 1, heading → 0); do not build arity checks on it.
+46: - Version: 0.6.126 (to be bumped).
+
+(End of file - total 46 lines)
+</content>
