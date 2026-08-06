@@ -296,7 +296,7 @@ function collectCanvasNumbers(
         const n = cursor.type.name as string;
         if (n === "Number" || n === "UnaryExpression") {
           const num = Number(adapter.slice(cursor.from, cursor.to));
-          if (Number.isFinite(num)) numbers.push(num);
+          if (isFinite(num)) numbers.push(num);
         }
       } while (cursor.nextSibling());
       cursor.parent();
@@ -403,12 +403,12 @@ function kindCheck(kind: FieldKind, value: unknown): string | null {
     case "string?":
       return value === undefined || typeof value === "string" ? null : "must be a string";
     case "number":
-      return typeof value === "number" && Number.isFinite(value)
+      return typeof value === "number" && isFinite(value)
         ? null
         : "must be a finite number";
     case "number?":
       return value === undefined ||
-        (typeof value === "number" && Number.isFinite(value))
+        (typeof value === "number" && isFinite(value))
         ? null
         : "must be a finite number";
     case "boolean?":
@@ -418,7 +418,7 @@ function kindCheck(kind: FieldKind, value: unknown): string | null {
     case "num3":
       return Array.isArray(value) &&
         value.length === 3 &&
-        value.every((v) => typeof v === "number" && Number.isFinite(v))
+        value.every((v) => typeof v === "number" && isFinite(v))
         ? null
         : "must be an [r, g, b] array of three numbers";
     case "points":
