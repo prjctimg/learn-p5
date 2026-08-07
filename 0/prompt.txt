@@ -1,0 +1,1 @@
+Using best practices,  write tests for the app to detect regressions as we improve the app.

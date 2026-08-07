@@ -1,0 +1,96 @@
+{
+  "cli_version": "0.8.42",
+  "checkpoint_id": "01KZF5MN92F8Q53H4ZYXCY4CG5",
+  "session_id": "ses_021eea4a2ffe7BXgm5S3f7NqiE",
+  "strategy": "manual-commit",
+  "created_at": "2026-08-07T22:31:35.870032952Z",
+  "branch": "main",
+  "checkpoints_count": 3,
+  "save_step_count": 1,
+  "files_touched": [
+    "jest.setup.js",
+    "package.json",
+    "src/components/Breadcrumbs.test.tsx",
+    "src/components/Button.test.tsx",
+    "src/components/ExerciseCard.test.tsx",
+    "src/components/Header.test.tsx",
+    "src/components/ModuleCover.test.tsx",
+    "src/components/StatusBarAccent.test.tsx",
+    "src/components/ThemeProvider.test.tsx",
+    "src/contexts/DrawerContext.test.tsx",
+    "src/hooks/useAchievements.test.ts",
+    "src/hooks/useStreak.test.ts",
+    "src/hooks/useStreak.ts",
+    "src/test/expoRouterMock.ts",
+    "src/test/lezerAdapter.ts",
+    "src/test/renderWithProviders.tsx",
+    "src/utils/colorUtils.test.ts",
+    "src/utils/colorUtils.ts",
+    "src/utils/courseLoader.test.ts",
+    "src/utils/editor/exampleHtml.test.ts",
+    "src/utils/editor/validation-bundle-sync.test.ts",
+    "src/utils/editor/validation.test.ts",
+    "src/utils/isExerciseLocked.test.ts",
+    "src/utils/referenceRender.test.ts",
+    "src/utils/streakLogic.test.ts",
+    "src/utils/streakLogic.ts"
+  ],
+  "agent": "OpenCode",
+  "model": "big-pickle",
+  "turn_id": "1f6b7aa11a55",
+  "compact_transcript_start": 0,
+  "token_usage": {
+    "input_tokens": 385954,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 12469120,
+    "output_tokens": 47881,
+    "api_call_count": 151
+  },
+  "session_metrics": {
+    "turn_count": 3
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-08-07T22:31:35.64883468Z",
+    "agent_lines": 1285,
+    "agent_removed": 0,
+    "human_added": 0,
+    "human_modified": 2,
+    "human_removed": 54,
+    "total_committed": 1286,
+    "total_lines_changed": 1342,
+    "agent_percentage": 95.75260804769002,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 552,
+      "user_lines_removed": 55,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0,
+      "user_added_per_file": {
+        "jest.setup.js": 16,
+        "package.json": 18,
+        "src/hooks/useStreak.ts": 30,
+        "src/test/expoRouterMock.ts": 34,
+        "src/test/lezerAdapter.ts": 15,
+        "src/test/renderWithProviders.tsx": 22,
+        "src/utils/colorUtils.ts": 7,
+        "src/utils/editor/validation.test.ts": 343,
+        "src/utils/streakLogic.ts": 67
+      },
+      "user_removed_per_file": {
+        "package.json": 1,
+        "src/hooks/useStreak.ts": 47,
+        "src/utils/colorUtils.ts": 7
+      }
+    },
+    {
+      "checkpoint_number": 2,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 1892,
+      "agent_lines_removed": 55
+    }
+  ]
+}

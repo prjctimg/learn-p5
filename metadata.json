@@ -1,0 +1,51 @@
+{
+  "cli_version": "0.8.42",
+  "checkpoint_id": "01KZF5MN92F8Q53H4ZYXCY4CG5",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 3,
+  "files_touched": [
+    "jest.setup.js",
+    "package.json",
+    "src/components/Breadcrumbs.test.tsx",
+    "src/components/Button.test.tsx",
+    "src/components/ExerciseCard.test.tsx",
+    "src/components/Header.test.tsx",
+    "src/components/ModuleCover.test.tsx",
+    "src/components/StatusBarAccent.test.tsx",
+    "src/components/ThemeProvider.test.tsx",
+    "src/contexts/DrawerContext.test.tsx",
+    "src/hooks/useAchievements.test.ts",
+    "src/hooks/useStreak.test.ts",
+    "src/hooks/useStreak.ts",
+    "src/test/expoRouterMock.ts",
+    "src/test/lezerAdapter.ts",
+    "src/test/renderWithProviders.tsx",
+    "src/utils/colorUtils.test.ts",
+    "src/utils/colorUtils.ts",
+    "src/utils/courseLoader.test.ts",
+    "src/utils/editor/exampleHtml.test.ts",
+    "src/utils/editor/validation-bundle-sync.test.ts",
+    "src/utils/editor/validation.test.ts",
+    "src/utils/isExerciseLocked.test.ts",
+    "src/utils/referenceRender.test.ts",
+    "src/utils/streakLogic.test.ts",
+    "src/utils/streakLogic.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/0/metadata.json",
+      "transcript": "/0/full.jsonl",
+      "compact_transcript": "/0/transcript.jsonl",
+      "content_hash": "/0/content_hash.txt",
+      "prompt": "/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 385954,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 12469120,
+    "output_tokens": 47881,
+    "api_call_count": 151
+  }
+}
