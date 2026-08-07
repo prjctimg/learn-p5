@@ -1,12 +1,17 @@
 import { useState, useEffect, useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  STREAK_TIERS,
+  getTierInfo,
+  computeStreakTransition,
+} from "../utils/streakLogic";
 
 const STREAK_COUNT_KEY = "streak_count";
 const LAST_VISIT_KEY = "streak_last_visit";
 const LONGEST_STREAK_KEY = "streak_longest";
 const STREAK_TOAST_PENDING_KEY = "streak_toast_pending";
 
-export const STREAK_TIERS = [3, 7, 14, 30, 100, 365];
+export { STREAK_TIERS };
 
 interface StreakData {
   count: number;
@@ -19,13 +24,6 @@ interface StreakData {
 
 function getDateString(date: Date): string {
   return date.toISOString().split("T")[0];
-}
-
-function getCurrentTierIndex(days: number): number {
-  for (let i = STREAK_TIERS.length - 1; i >= 0; i--) {
-    if (days >= STREAK_TIERS[i]) return i;
-  }
-  return -1;
 }
 
 export function useStreak(): StreakData & {
@@ -47,54 +45,39 @@ export function useStreak(): StreakData & {
     const prevCount = parseInt(await AsyncStorage.getItem(STREAK_COUNT_KEY) || "0", 10);
     const prevLongest = parseInt(await AsyncStorage.getItem(LONGEST_STREAK_KEY) || "0", 10);
 
-    if (lastVisit === today) {
-      const idx = getCurrentTierIndex(prevCount);
-      const nextTierVal = idx >= STREAK_TIERS.length - 1 ? STREAK_TIERS[STREAK_TIERS.length - 1] : STREAK_TIERS[idx + 1];
-      const tierProgressVal = nextTierVal > 0 ? prevCount / nextTierVal : 1;
-      setStreakData({
-        count: prevCount,
-        longest: prevLongest,
-        isNewDay: false,
-        currentTier: idx >= 0 ? STREAK_TIERS[idx] : 0,
-        nextTier: nextTierVal,
-        tierProgress: tierProgressVal,
-      });
-      return false;
-    }
-
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = getDateString(yesterday);
 
-    let newCount: number;
-    if (lastVisit === yesterdayStr) {
-      newCount = prevCount + 1;
-    } else {
-      newCount = 1;
-    }
-
-    const newLongest = Math.max(prevLongest, newCount);
-    const idx = getCurrentTierIndex(newCount);
-    const nextTierVal = idx >= STREAK_TIERS.length - 1 ? STREAK_TIERS[STREAK_TIERS.length - 1] : STREAK_TIERS[idx + 1];
-    const tierProgressVal = nextTierVal > 0 ? newCount / nextTierVal : 1;
-
-    await AsyncStorage.multiSet([
-      [STREAK_COUNT_KEY, newCount.toString()],
-      [LAST_VISIT_KEY, today],
-      [LONGEST_STREAK_KEY, newLongest.toString()],
-      [STREAK_TOAST_PENDING_KEY, "true"],
-    ]);
-
-    setStreakData({
-      count: newCount,
-      longest: newLongest,
-      isNewDay: true,
-      currentTier: idx >= 0 ? STREAK_TIERS[idx] : 0,
-      nextTier: nextTierVal,
-      tierProgress: tierProgressVal,
+    const transition = computeStreakTransition({
+      lastVisit,
+      today,
+      yesterday: getDateString(yesterday),
+      prevCount,
+      prevLongest,
     });
 
-    return true;
+    const { count, longest, isNewDay } = transition;
+    const tier = getTierInfo(count);
+
+    if (isNewDay) {
+      await AsyncStorage.multiSet([
+        [STREAK_COUNT_KEY, count.toString()],
+        [LAST_VISIT_KEY, today],
+        [LONGEST_STREAK_KEY, longest.toString()],
+        [STREAK_TOAST_PENDING_KEY, "true"],
+      ]);
+    }
+
+    setStreakData({
+      count,
+      longest,
+      isNewDay,
+      currentTier: tier.currentTier,
+      nextTier: tier.nextTier,
+      tierProgress: tier.tierProgress,
+    });
+
+    return isNewDay;
   }, []);
 
   const consumePendingToast = useCallback(async (): Promise<StreakData | null> => {
