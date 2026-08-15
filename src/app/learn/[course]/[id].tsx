@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useReducer, useMemo, useCallback } from "react";
-import { View, Text, Pressable, StyleSheet, Modal, Switch, ScrollView } from "react-native";
-import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
+import { View, Text, Pressable, StyleSheet, Modal, Switch, ScrollView, StatusBar } from "react-native";
+import { useLocalSearchParams, useRouter, useFocusEffect, useIsFocused } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -21,6 +21,7 @@ import { loadExercise, loadCourse } from "../../../utils/courseLoader";
 import { Exercise as ExerciseType } from "../../../data/types";
 import { P5_FUNCTION_NAMES, ONCE_ONLY_P5_FUNCTIONS } from "../../../data/reference";
 import { getExerciseHtml } from "../../../utils/editor/exerciseHtml";
+import { getFullscreenPreviewHtml } from "../../../utils/editor/fullscreenPreviewHtml";
 import { EDITOR_THEMES, getThemeSwatches } from "../../../utils/editor/themes";
 import { useStreak } from "../../../hooks/useStreak";
 import { recordCompletion, ACHIEVEMENTS } from "../../../hooks/useAchievements";
@@ -149,6 +150,7 @@ export default function Exercise() {
   const [streakToastVisible, setStreakToastVisible] = useState(false);
   const [shakeModalVisible, setShakeModalVisible] = useState(false);
   const [searchVisible, setSearchVisible] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
 
   const [toastIcon, setToastIcon] = useState<string>("check-circle");
   const [toastIconColor, setToastIconColor] = useState<string | undefined>(undefined);
@@ -166,8 +168,8 @@ export default function Exercise() {
 
   const [toastTone, setToastTone] = useState<"success" | "failure" | undefined>(undefined);
 
- const exerciseHtml = useMemo(() => {
- if (!state.exercise) return null;
+  const exerciseHtml = useMemo(() => {
+  if (!state.exercise) return null;
     return getExerciseHtml({
       title: state.exercise.title,
       moduleName: state.exercise.module,
@@ -185,6 +187,11 @@ export default function Exercise() {
       disableSystemKeyboard,
     });
   }, [state.exercise, state.currentTaskIndex, colorScheme, id, editorTheme, codeFontSize, ctaColor]);
+
+  const fullscreenPreviewHtml = useMemo(
+    () => getFullscreenPreviewHtml(state.code, colorScheme === "dark" ? "dark" : "light"),
+    [state.code, colorScheme]
+  );
 
  const styles = useMemo(
  () =>
@@ -262,9 +269,29 @@ export default function Exercise() {
  spacer: {
  flex: 1,
  },
- webview: {
- flex: 1,
- },
+  webview: {
+  flex: 1,
+  },
+  fullscreenContainer: {
+    flex: 1,
+    backgroundColor: "#000000",
+  },
+  fullscreenWebViewInner: {
+    flex: 1,
+    backgroundColor: "#000000",
+  },
+  fullscreenCloseBtn: {
+    position: "absolute",
+    top: 50,
+    right: 16,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 100,
+  },
  keyboardFab: {
  position: "absolute",
  right: 16,
@@ -454,8 +481,14 @@ export default function Exercise() {
       break;
 case "sketchError":
       break;
+   case "toggleFullscreen":
+     setFullscreen((prev) => {
+       if (!prev) setKeyboardVisible(false);
+       return !prev;
+     });
+     break;
    case "goToNextLesson":
-  loadCourse(course).then((courseData) => {
+   loadCourse(course).then((courseData) => {
   if (!courseData) return;
   const currentIndex = courseData.exercises.findIndex((l) => l.id === id);
   if (currentIndex >= 0 && currentIndex < courseData.exercises.length - 1) {
@@ -588,7 +621,11 @@ case "sketchError":
     setShakeModalVisible(true);
   }, []);
 
-  useShakeDetection(handleShake, { enabled: !state.loading && !!state.exercise });
+  const isFocused = useIsFocused();
+
+  useShakeDetection(handleShake, {
+    enabled: isFocused && !state.loading && !!state.exercise,
+  });
 
   useEffect(() => {
     if (editorViewReady && webViewRef.current && state.exercise?.tasks) {
@@ -820,88 +857,120 @@ if (state.loading) {
  }
 
 return (
-   <View style={styles.container}>
-   <View
-   style={[styles.header, { paddingTop: insets.top + 4 }]}
-   >
+    <View style={styles.container}>
+    {fullscreen && <StatusBar hidden />}
+    {!fullscreen && (
+    <View
+    style={[styles.header, { paddingTop: insets.top + 4 }]}
+    >
+    <Pressable
+    onPress={() => router.back()}
+    style={styles.menuButton}
+    accessibilityRole="button"
+    accessibilityLabel="Go back"
+    >
+    <MaterialCommunityIcons name="arrow-left" size={24} color={colors.onSurfaceVariant} />
+    </Pressable>
+   <Text style={styles.logoText} numberOfLines={1}>
+   {state.exercise?.title ?? ""}
+   </Text>
+   <View style={styles.spacer} />
    <Pressable
-   onPress={() => router.back()}
+   onPress={() => setSettingsMenuVisible(true)}
    style={styles.menuButton}
    accessibilityRole="button"
-   accessibilityLabel="Go back"
+   accessibilityLabel="Editor settings"
    >
-   <MaterialCommunityIcons name="arrow-left" size={24} color={colors.onSurfaceVariant} />
+   <MaterialCommunityIcons name="dots-vertical" size={24} color={colors.onSurfaceVariant} />
    </Pressable>
-  <Text style={styles.logoText} numberOfLines={1}>
-  {state.exercise?.title ?? ""}
-  </Text>
-  <View style={styles.spacer} />
-  <Pressable
-  onPress={() => setSettingsMenuVisible(true)}
-  style={styles.menuButton}
-  accessibilityRole="button"
-  accessibilityLabel="Editor settings"
+   </View>
+   )}
+
+   {!fullscreen && courseTitle && (
+   <Breadcrumbs
+   segments={[
+     { label: "Learn", href: "/learn" },
+     { label: courseTitle, href: `/learn/${course}` },
+     { label: state.exercise?.title ?? "" },
+   ]}
+   />
+   )}
+
+  {exerciseHtml && (
+   <WebView
+   ref={webViewRef}
+   source={{ html: exerciseHtml }}
+   style={styles.webview}
+   onMessage={handleMessage}
+   onLoadStart={() => setEditorViewReady(false)}
+   javaScriptEnabled
+   domStorageEnabled
+   originWhitelist={["*"]}
+   bounces={false}
+   {...({
+     hideKeyboardAccessoryView: true,
+     keyboardDisplayRequiresUserAction: true,
+   } as Record<string, boolean>)}
+  />
+ )}
+
+  <Modal
+    visible={fullscreen}
+    animationType="fade"
+    presentationStyle="fullScreen"
+    statusBarTranslucent
+    onRequestClose={() => setFullscreen(false)}
   >
-  <MaterialCommunityIcons name="dots-vertical" size={24} color={colors.onSurfaceVariant} />
+    <View style={styles.fullscreenContainer}>
+      <WebView
+        source={{ html: fullscreenPreviewHtml }}
+        style={styles.fullscreenWebViewInner}
+        javaScriptEnabled
+        domStorageEnabled
+        originWhitelist={["*"]}
+        scrollEnabled={false}
+        bounces={false}
+      />
+      <Pressable
+        onPress={() => setFullscreen(false)}
+        style={styles.fullscreenCloseBtn}
+        accessibilityRole="button"
+        accessibilityLabel="Exit fullscreen"
+      >
+        <MaterialCommunityIcons name="close" size={24} color="#FFFFFF" />
+      </Pressable>
+    </View>
+  </Modal>
+
+  {!fullscreen && (
+  <View
+  style={[
+  styles.fabWrapper,
+  { bottom: runButtonBottom },
+  ]}
+  pointerEvents="box-none"
+  >
+  <Pressable
+  onPressIn={handleRunPressIn}
+  onPressOut={handleRunPressOut}
+  disabled={state.isRunning}
+   style={({ pressed }) => [
+   styles.runButton,
+   { backgroundColor: ctaColor },
+   pressed && styles.runButtonPressed,
+   ]}
+  accessibilityRole="button"
+  accessibilityLabel="Run sketch"
+  accessibilityState={{ disabled: state.isRunning }}
+  >
+  <MaterialCommunityIcons
+  name={state.isRunning ? "reload" : "play"}
+  size={28}
+  color="#FFFFFF"
+  />
   </Pressable>
   </View>
-
-  {courseTitle && (
-  <Breadcrumbs
-  segments={[
-    { label: "Learn", href: "/learn" },
-    { label: courseTitle, href: `/learn/${course}` },
-    { label: state.exercise?.title ?? "" },
-  ]}
-  />
   )}
-
- {exerciseHtml && (
-  <WebView
-  ref={webViewRef}
-  source={{ html: exerciseHtml }}
-  style={styles.webview}
-  onMessage={handleMessage}
-  onLoadStart={() => setEditorViewReady(false)}
-  javaScriptEnabled
-  domStorageEnabled
-  originWhitelist={["*"]}
-  scrollEnabled={true}
-  bounces={false}
-  {...({
-    hideKeyboardAccessoryView: true,
-    keyboardDisplayRequiresUserAction: true,
-  } as Record<string, boolean>)}
- />
-)}
-
- <View
- style={[
- styles.fabWrapper,
- { bottom: runButtonBottom },
- ]}
- pointerEvents="box-none"
- >
- <Pressable
- onPressIn={handleRunPressIn}
- onPressOut={handleRunPressOut}
- disabled={state.isRunning}
-  style={({ pressed }) => [
-  styles.runButton,
-  { backgroundColor: ctaColor },
-  pressed && styles.runButtonPressed,
-  ]}
- accessibilityRole="button"
- accessibilityLabel="Run sketch"
- accessibilityState={{ disabled: state.isRunning }}
- >
- <MaterialCommunityIcons
- name={state.isRunning ? "reload" : "play"}
- size={28}
- color="#FFFFFF"
- />
- </Pressable>
- </View>
 
   <StreakToast
   visible={streakToastVisible}
@@ -979,8 +1048,8 @@ return (
     tone={toastTone}
   />
 
- {keyboardVisible && keyboardMode === "programming" && (
- <ProgrammingKeyboard
+  {!fullscreen && keyboardVisible && keyboardMode === "programming" && (
+  <ProgrammingKeyboard
  onInsert={handleInsert}
  exerciseSymbols={exerciseSymbols}
  onToggleKeyboard={handleToggleKeyboard}
@@ -995,8 +1064,8 @@ return (
  />
 )}
 
- {keyboardVisible && keyboardMode === "qwerty" && (
- <QwertyKeyboard
+  {!fullscreen && keyboardVisible && keyboardMode === "qwerty" && (
+  <QwertyKeyboard
  onInsert={handleInsert}
  onBackspace={handleBackspace}
  onNewline={handleNewline}
@@ -1007,8 +1076,8 @@ return (
  />
 )}
 
- {!keyboardVisible && (
- <Pressable
+  {!fullscreen && !keyboardVisible && (
+  <Pressable
  onPress={handleToggleKeyboard}
  style={({ pressed }) => [
  styles.keyboardFab,
@@ -1022,11 +1091,12 @@ return (
  </Pressable>
 )}
 
- <Modal
- visible={settingsMenuVisible}
- transparent
- animationType="fade"
- onRequestClose={() => setSettingsMenuVisible(false)}
+  {!fullscreen && (
+  <Modal
+  visible={settingsMenuVisible}
+  transparent
+  animationType="fade"
+  onRequestClose={() => setSettingsMenuVisible(false)}
  >
  <Pressable
  style={styles.modalOverlay}
@@ -1210,8 +1280,9 @@ return (
   </View>
   </ScrollView>
  </Pressable>
- </Pressable>
- </Modal>
- </View>
+  </Pressable>
+  </Modal>
+  )}
+  </View>
 );
 }

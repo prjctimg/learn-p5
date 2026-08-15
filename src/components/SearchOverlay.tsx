@@ -84,8 +84,9 @@ export default function SearchOverlay({ visible, onClose, inline = false, onSele
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
-      <Pressable style={styles.overlay} onPress={handleClose}>
-        <Pressable style={[styles.card, { backgroundColor: colors.surfaceContainerHigh }]} onPress={() => {}}>
+      <View style={styles.overlay}>
+        <Pressable style={StyleSheet.absoluteFill} onPress={handleClose} />
+        <View style={[styles.card, { backgroundColor: colors.surfaceContainerHigh }, selected && inline && styles.cardExpanded]}>
           {selected && inline ? (
             <SymbolInlineDetail
               sym={selected}
@@ -150,8 +151,8 @@ export default function SearchOverlay({ visible, onClose, inline = false, onSele
               />
             </>
           )}
-        </Pressable>
-      </Pressable>
+        </View>
+      </View>
     </Modal>
   );
 }
@@ -278,9 +279,12 @@ const styles = StyleSheet.create({
   card: {
     width: "100%",
     maxWidth: 480,
-    maxHeight: "85%",
+    maxHeight: "92%",
     borderRadius: 16,
-    padding: 20,
+    padding: 16,
+  },
+  cardExpanded: {
+    flex: 1,
   },
   header: {
     flexDirection: "row",
@@ -343,7 +347,7 @@ const styles = StyleSheet.create({
   detailName: { fontFamily: "JetBrainsMono", fontSize: 18, fontWeight: "900" },
   moduleBadge: { borderRadius: 9999, paddingHorizontal: 8, paddingVertical: 2 },
   moduleBadgeText: { fontFamily: "JetBrainsMono", fontSize: 10, fontWeight: "700" },
-  detailScroll: { flex: 1 },
+  detailScroll: { flex: 1, flexGrow: 1 },
   detailDescription: { fontFamily: "JetBrainsMono", fontSize: 13, lineHeight: 20, marginBottom: 12 },
   detailSection: {
     fontFamily: "JetBrainsMono",

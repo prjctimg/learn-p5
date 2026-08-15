@@ -1,10 +1,10 @@
 {
   "name": "learn-p5",
   "main": "expo-router/entry",
-  "version": "0.7.3",
+  "version": "0.7.6",
   "scripts": {
-    "postinstall": "npm run bundle-p5 && npm run gen-reference && npm run build-courses",
-    "start": "npm run bundle-p5 && npm run gen-reference && npm run build-courses && npm run bundle-editor && expo start",
+    "postinstall": "node scripts/ensure-clipboard.mjs && npm run bundle-p5 && npm run gen-reference && npm run build-courses",
+    "start": "node scripts/ensure-clipboard.mjs && npm run bundle-p5 && npm run gen-reference && npm run build-courses && npm run bundle-editor && expo start",
     "gen-reference": "node scripts/generate-reference.mjs",
     "bundle-p5": "node scripts/bundle-p5.mjs",
     "bundle-editor": "node scripts/bundle-editor.mjs",
