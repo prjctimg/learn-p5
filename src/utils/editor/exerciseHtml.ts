@@ -266,6 +266,7 @@ export function getExerciseHtml(params: {
   .cm-editor { height: 100%; font-size: ${fontSize}px; background: ${editorBg}; }
   .cm-editor .cm-scroller { font-family: 'JetBrains Mono', monospace; overflow: auto; }
   .cm-editor.cm-focused { outline: none; }
+  .cm-editor .cm-cursor { display: block !important; }
   .cm-editor .cm-gutters { background: ${editorBg}; border-right: 1px solid ${params.colorScheme === 'dark' ? '#292A2E' : '#E5E7EB'}; color: ${params.colorScheme === 'dark' ? '#6B7280' : '#9CA3AF'}; }
   .cm-editor .cm-activeLineGutter { background: ${params.colorScheme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}; }
   .cm-editor .cm-activeLine { background: ${params.colorScheme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}; }
@@ -666,7 +667,10 @@ function initEditor() {
     postReady();
     postEditorReady();
     setTimeout(function() {
-      if (view) view.dom.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      if (view) {
+        view.focus();
+        view.dom.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
     }, 300);
   } catch(e) {
     console.error('Editor init failed:', e);
@@ -715,10 +719,15 @@ async function renderSketch(containerId, code) {
 
   if (!code) return;
 
+  var tagId = 'sketch-script-' + containerId;
+  var oldScript = document.getElementById(tagId);
+  if (oldScript) oldScript.remove();
+
   delete window.setup;
   delete window.draw;
 
   var script = document.createElement('script');
+  script.id = tagId;
   script.textContent = code;
   document.body.appendChild(script);
 
@@ -804,6 +813,23 @@ function handleMessage(data) {
         var scroller = view && view.dom && view.dom.querySelector('.cm-scroller');
         if (scroller) scroller.style.fontSize = msg.fontSize + 'px';
         break;
+      case 'setWordWrap':
+        if (view) {
+          WORD_WRAP = msg.wordWrap;
+          var savedDoc = view.state.doc.toString();
+          var savedSel = view.state.selection.main.head;
+          view.destroy();
+          view = new EditorView({
+            state: EditorState.create({
+              doc: savedDoc,
+              extensions: getExtensions(),
+            }),
+            parent: document.getElementById('editor'),
+          });
+          view.dispatch({ selection: { anchor: savedSel, head: savedSel } });
+          view.focus();
+        }
+        break;
       case 'backspace':
         if (view) {
           var cur = view.state.selection.main.head;
@@ -868,8 +894,8 @@ function handleMessage(data) {
                 endOfLine: 'lf',
               }).then(function(formatted) {
                 // Also strip trailing whitespace from each line
-                var lines = formatted.split('\n');
-                var cleaned = lines.map(function(line) { return line.replace(/\s+$/, ''); }).join('\n');
+                var lines = formatted.split('\\n');
+                var cleaned = lines.map(function(line) { return line.replace(/\\s+$/, ''); }).join('\\n');
                 if (cleaned !== codeToFormat) {
                   view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: cleaned } });
                 }
@@ -893,129 +919,74 @@ function handleMessage(data) {
           }
           break;
         }
-        renderSketch('user-sketch', userCode);
-        if (typeof window.__tutRun === 'function') window.__tutRun();
+        renderSketch('user-sketch', userCode).then(function() {
+          if (typeof window.__tutRun === 'function') window.__tutRun();
 
-        function validateSync(code, rules) {
-          for (var ri = 0; ri < rules.length; ri++) {
-            var rule = rules[ri];
-            if (rule.type === 'functionCall') {
-              var argRe = new RegExp('\\b' + rule.name + '[\\s]*\\(([^)]*)\\)', 'g');
-              var matches = [];
-              var rm;
-              while ((rm = argRe.exec(code)) !== null) {
-                var rawArgs = rm[1];
-                var args = rawArgs.split(',').map(function(a) { return a.trim(); }).filter(function(a) { return a.length > 0; });
-                matches.push(args);
-              }
-              if (matches.length === 0) return { passed: false, reason: 'Add a ' + rule.name + '() call' };
-              if (rule.exactArgs !== undefined) {
-                var hasCorrect = false;
-                for (var mi = 0; mi < matches.length; mi++) {
-                  if (matches[mi].length === rule.exactArgs) { hasCorrect = true; break; }
+          function validateSync(code, rules) {
+            for (var ri = 0; ri < rules.length; ri++) {
+              var rule = rules[ri];
+              if (rule.type === 'functionCall') {
+                var argRe = new RegExp('\\b' + rule.name + '[\\s]*\\(([^)]*)\\)', 'g');
+                var matches = [];
+                var rm;
+                while ((rm = argRe.exec(code)) !== null) {
+                  var rawArgs = rm[1];
+                  var args = rawArgs.split(',').map(function(a) { return a.trim(); }).filter(function(a) { return a.length > 0; });
+                  matches.push(args);
                 }
-                if (!hasCorrect) return { passed: false, reason: rule.name + '() needs ' + rule.exactArgs + ' arguments' };
-              }
-              if (rule.minArgs !== undefined) {
-                var hasMin = false;
-                for (var mi2 = 0; mi2 < matches.length; mi2++) {
-                  if (matches[mi2].length >= rule.minArgs) { hasMin = true; break; }
+                if (matches.length === 0) return { passed: false, reason: 'Add a ' + rule.name + '() call' };
+                if (rule.exactArgs !== undefined) {
+                  var hasCorrect = false;
+                  for (var mi = 0; mi < matches.length; mi++) {
+                    if (matches[mi].length === rule.exactArgs) { hasCorrect = true; break; }
+                  }
+                  if (!hasCorrect) return { passed: false, reason: rule.name + '() needs ' + rule.exactArgs + ' arguments' };
                 }
-                if (!hasMin) return { passed: false, reason: rule.name + '() needs at least ' + rule.minArgs + ' arguments' };
+                if (rule.minArgs !== undefined) {
+                  var hasMin = false;
+                  for (var mi2 = 0; mi2 < matches.length; mi2++) {
+                    if (matches[mi2].length >= rule.minArgs) { hasMin = true; break; }
+                  }
+                  if (!hasMin) return { passed: false, reason: rule.name + '() needs at least ' + rule.minArgs + ' arguments' };
+                }
+              } else if (rule.type === 'functionExists') {
+                var fnRe = new RegExp('\\b' + rule.name + '\\s*[=:]\\s*function|function\\s+' + rule.name + '\\s*\\(', 'g');
+                if (!fnRe.test(code)) return { passed: false, reason: 'Define a ' + rule.name + '() function' };
+              } else if (rule.type === 'canvasSize') {
+                var canvasRe = /createCanvas\s*\(\s*(\d+)\s*,\s*(\d+)\s*\)/g;
+                var canvasMatch = canvasRe.exec(code);
+                if (!canvasMatch) return { passed: false, reason: 'Use createCanvas() to set canvas size' };
+                var w = parseInt(canvasMatch[1], 10);
+                var h = parseInt(canvasMatch[2], 10);
+                if (w !== rule.width || h !== rule.height) return { passed: false, reason: 'Canvas should be ' + rule.width + 'x' + rule.height };
               }
-            } else if (rule.type === 'functionExists') {
-              var fnRe = new RegExp('\\b' + rule.name + '\\s*[=:]\\s*function|function\\s+' + rule.name + '\\s*\\(', 'g');
-              if (!fnRe.test(code)) return { passed: false, reason: 'Define a ' + rule.name + '() function' };
-            } else if (rule.type === 'canvasSize') {
-              var canvasRe = /createCanvas\s*\(\s*(\d+)\s*,\s*(\d+)\s*\)/g;
-              var canvasMatch = canvasRe.exec(code);
-              if (!canvasMatch) return { passed: false, reason: 'Use createCanvas() to set canvas size' };
-              var w = parseInt(canvasMatch[1], 10);
-              var h = parseInt(canvasMatch[2], 10);
-              if (w !== rule.width || h !== rule.height) return { passed: false, reason: 'Canvas should be ' + rule.width + 'x' + rule.height };
             }
+            return { passed: true, reason: '' };
           }
-          return { passed: true, reason: '' };
-        }
 
-        var syncResult = { passed: false, reason: '' };
-        var hasPixelRules = false;
-        var activeRules = TASKS.length > 0 && TASKS[ACTIVE_TASK_INDEX]
-          ? (TASKS[ACTIVE_TASK_INDEX].validation || [])
-          : [];
-        try {
-          if (activeRules.length > 0) {
-            var nonPixelRules = activeRules.filter(function(r) { return r.type !== 'pixelMatch'; });
-            hasPixelRules = activeRules.some(function(r) { return r.type === 'pixelMatch'; });
-            syncResult = validateSync(userCode, nonPixelRules);
-          } else {
-            syncResult = { passed: SOLUTION_CODE && userCode.trim() === SOLUTION_CODE.trim(), reason: '' };
-          }
-        } catch(ve) { console.error('Validation error:', ve); }
-
-        if (!syncResult.passed) {
-          if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-            window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'validationFailed', reason: syncResult.reason }));
-          }
-          break;
-        }
-
-        if (!hasPixelRules) {
-          if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-            if (TASKS.length > 0 && ACTIVE_TASK_INDEX < TASKS.length - 1) {
-              window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'taskComplete', taskIndex: ACTIVE_TASK_INDEX }));
+          var syncResult = { passed: false, reason: '' };
+          var hasPixelRules = false;
+          var activeRules = TASKS.length > 0 && TASKS[ACTIVE_TASK_INDEX]
+            ? (TASKS[ACTIVE_TASK_INDEX].validation || [])
+            : [];
+          try {
+            if (activeRules.length > 0) {
+              var nonPixelRules = activeRules.filter(function(r) { return r.type !== 'pixelMatch'; });
+              hasPixelRules = activeRules.some(function(r) { return r.type === 'pixelMatch'; });
+              syncResult = validateSync(userCode, nonPixelRules);
             } else {
-              window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'exerciseComplete' }));
+              syncResult = { passed: SOLUTION_CODE && userCode.trim() === SOLUTION_CODE.trim(), reason: '' };
             }
-          }
-          break;
-        }
+          } catch(ve) { console.error('Validation error:', ve); }
 
-        var pixelRules = activeRules.filter(function(r) { return r.type === 'pixelMatch'; });
-        var pixelDelay = 300;
-        setTimeout(function() {
-          var container = document.getElementById('user-sketch');
-          if (!container || !container.__p5) {
+          if (!syncResult.passed) {
             if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-              window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'validationFailed', reason: 'Sketch did not render' }));
+              window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'validationFailed', reason: syncResult.reason }));
             }
             return;
           }
-          var p5Instance = container.__p5;
-          try {
-            var cnv = p5Instance.canvas;
-            if (!cnv) {
-              if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-                window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'validationFailed', reason: 'Canvas not found' }));
-              }
-              return;
-            }
-            var ctx = cnv.getContext('2d');
-            if (!ctx) {
-              if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-                window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'validationFailed', reason: 'Cannot read canvas pixels' }));
-              }
-              return;
-            }
-            for (var pi = 0; pi < pixelRules.length; pi++) {
-              var pr = pixelRules[pi];
-              var tol = pr.tolerance !== undefined ? pr.tolerance : 30;
-              var px = Math.min(Math.max(0, Math.floor(pr.x)), cnv.width - 1);
-              var py = Math.min(Math.max(0, Math.floor(pr.y)), cnv.height - 1);
-              var imageData = ctx.getImageData(px, py, 1, 1).data;
-              var rDiff = Math.abs(imageData[0] - pr.expected[0]);
-              var gDiff = Math.abs(imageData[1] - pr.expected[1]);
-              var bDiff = Math.abs(imageData[2] - pr.expected[2]);
-              if (rDiff > tol || gDiff > tol || bDiff > tol) {
-                if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-                  window.ReactNativeWebView.postMessage(JSON.stringify({
-                    type: 'validationFailed',
-                    reason: 'Color at (' + pr.x + ',' + pr.y + ') is wrong — expected rgb(' + pr.expected.join(',') + ') but got rgb(' + imageData[0] + ',' + imageData[1] + ',' + imageData[2] + ')'
-                  }));
-                }
-                return;
-              }
-            }
+
+          if (!hasPixelRules) {
             if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
               if (TASKS.length > 0 && ACTIVE_TASK_INDEX < TASKS.length - 1) {
                 window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'taskComplete', taskIndex: ACTIVE_TASK_INDEX }));
@@ -1023,31 +994,85 @@ function handleMessage(data) {
                 window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'exerciseComplete' }));
               }
             }
-          } catch(e) {
-            console.error('Pixel validation error:', e);
-            if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-              window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'validationFailed', reason: 'Could not verify sketch output' }));
-            }
+            return;
           }
-        }, pixelDelay);
 
-        if (typeof prettierLib !== 'undefined' && prettierLib.format) {
-          var postCode = view.state.doc.toString();
-          // Use mobile-friendly printWidth (60) for better readability on small screens
-          var pw2 = 60;
-          prettierLib.format(postCode, { parser: 'acorn', plugins: [prettierEstree, prettierAcorn], printWidth: pw2, semi: true, singleQuote: false, trailingComma: 'es5', bracketSpacing: true, arrowParens: 'avoid', endOfLine: 'lf' }).then(function(formatted) {
-            // Strip trailing whitespace from each line
-            var lines = formatted.split('\n');
-            var cleaned = lines.map(function(line) { return line.replace(/\s+$/, ''); }).join('\n');
-            if (cleaned !== postCode) {
-              view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: cleaned } });
+          var pixelRules = activeRules.filter(function(r) { return r.type === 'pixelMatch'; });
+          var pixelDelay = 300;
+          setTimeout(function() {
+            var container = document.getElementById('user-sketch');
+            if (!container || !container.__p5) {
+              if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+                window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'validationFailed', reason: 'Sketch did not render' }));
+              }
+              return;
             }
-          }).catch(function() {});
-        }
-        setTimeout(function() {
-          var el = document.getElementById('user-sketch');
-          if (el) smoothScrollTo(el, 600);
-        }, 100);
+            var p5Instance = container.__p5;
+            try {
+              var cnv = p5Instance.canvas;
+              if (!cnv) {
+                if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+                  window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'validationFailed', reason: 'Canvas not found' }));
+                }
+                return;
+              }
+              var ctx = cnv.getContext('2d');
+              if (!ctx) {
+                if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+                  window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'validationFailed', reason: 'Cannot read canvas pixels' }));
+                }
+                return;
+              }
+              for (var pi = 0; pi < pixelRules.length; pi++) {
+                var pr = pixelRules[pi];
+                var tol = pr.tolerance !== undefined ? pr.tolerance : 30;
+                var px = Math.min(Math.max(0, Math.floor(pr.x)), cnv.width - 1);
+                var py = Math.min(Math.max(0, Math.floor(pr.y)), cnv.height - 1);
+                var imageData = ctx.getImageData(px, py, 1, 1).data;
+                var rDiff = Math.abs(imageData[0] - pr.expected[0]);
+                var gDiff = Math.abs(imageData[1] - pr.expected[1]);
+                var bDiff = Math.abs(imageData[2] - pr.expected[2]);
+                if (rDiff > tol || gDiff > tol || bDiff > tol) {
+                  if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+                    window.ReactNativeWebView.postMessage(JSON.stringify({
+                      type: 'validationFailed',
+                      reason: 'Color at (' + pr.x + ',' + pr.y + ') is wrong — expected rgb(' + pr.expected.join(',') + ') but got rgb(' + imageData[0] + ',' + imageData[1] + ',' + imageData[2] + ')'
+                    }));
+                  }
+                  return;
+                }
+              }
+              if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+                if (TASKS.length > 0 && ACTIVE_TASK_INDEX < TASKS.length - 1) {
+                  window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'taskComplete', taskIndex: ACTIVE_TASK_INDEX }));
+                } else {
+                  window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'exerciseComplete' }));
+                }
+              }
+            } catch(e) {
+              console.error('Pixel validation error:', e);
+              if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+                window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'validationFailed', reason: 'Could not verify sketch output' }));
+              }
+            }
+          }, pixelDelay);
+
+          if (typeof prettierLib !== 'undefined' && prettierLib.format) {
+            var postCode = view.state.doc.toString();
+            var pw2 = 60;
+            prettierLib.format(postCode, { parser: 'acorn', plugins: [prettierEstree, prettierAcorn], printWidth: pw2, semi: true, singleQuote: false, trailingComma: 'es5', bracketSpacing: true, arrowParens: 'avoid', endOfLine: 'lf' }).then(function(formatted) {
+              var lines = formatted.split('\\n');
+              var cleaned = lines.map(function(line) { return line.replace(/\\s+$/, ''); }).join('\\n');
+              if (cleaned !== postCode) {
+                view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: cleaned } });
+              }
+            }).catch(function() {});
+          }
+          setTimeout(function() {
+            var el = document.getElementById('user-sketch');
+            if (el) smoothScrollTo(el, 600);
+          }, 100);
+        }).catch(function(e) { console.error('Render error:', e); });
         break;
 
     }
@@ -1057,7 +1082,6 @@ function handleMessage(data) {
 }
 
 window.addEventListener('message', function(event) { handleMessage(event.data); });
-document.addEventListener('message', function(event) { handleMessage(event.data); });
 
 (function() {
   var lastScrollY = window.scrollY || 0;
@@ -1178,16 +1202,17 @@ var solutionHasRun = false;
 if (solRunBtn) {
   solRunBtn.addEventListener('click', function() {
     if (view && SOLUTION_CODE) {
-      renderSketch('solution-sketch', SOLUTION_CODE);
+      renderSketch('solution-sketch', SOLUTION_CODE).then(function() {
+        setTimeout(function() {
+          var el = document.getElementById('solution-sketch');
+          if (el) smoothScrollTo(el, 600);
+        }, 100);
+      }).catch(function(e) { console.error('Solution render error:', e); });
       if (!solutionHasRun) {
         solutionHasRun = true;
         solRunBtn.innerHTML = '<span style="font-size:1.3em">&#x21bb;</span> Replay';
       }
       if (typeof window.__tutRun === 'function') window.__tutRun();
-      setTimeout(function() {
-        var el = document.getElementById('solution-sketch');
-        if (el) smoothScrollTo(el, 600);
-      }, 100);
     }
   });
 }

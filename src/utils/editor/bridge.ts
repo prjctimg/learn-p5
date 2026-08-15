@@ -137,7 +137,7 @@ const p5Highlight = HighlightStyle.define([
 
 let view;
 
-function createEditor(initialCode) {
+function getExtensions() {
   var exts = [
     basicSetup,
     javascript(),
@@ -158,10 +158,13 @@ function createEditor(initialCode) {
     }),
   ];
   if (WORD_WRAP) exts.push(lineWrapping);
+  return exts;
+}
 
+function createEditor(initialCode) {
   const state = EditorState.create({
     doc: initialCode || '',
-    extensions: exts,
+    extensions: getExtensions(),
   });
 
   view = new EditorView({
@@ -221,6 +224,22 @@ function handleMessage(data) {
       var scroller = view?.dom.querySelector('.cm-scroller');
       if (scroller) {
         scroller.style.fontSize = msg.fontSize + 'px';
+      }
+    } else if (msg.type === 'setWordWrap') {
+      if (view) {
+        WORD_WRAP = msg.wordWrap;
+        var savedDoc = view.state.doc.toString();
+        var savedSel = view.state.selection.main.head;
+        view.destroy();
+        view = new EditorView({
+          state: EditorState.create({
+            doc: savedDoc,
+            extensions: getExtensions(),
+          }),
+          parent: document.getElementById('editor'),
+        });
+        view.dispatch({ selection: { anchor: savedSel, head: savedSel } });
+        view.focus();
       }
     } else if (msg.type === 'copyCode') {
       if (view) {
@@ -304,7 +323,6 @@ function handleMessage(data) {
 }
 
 window.addEventListener('message', function(event) { handleMessage(event.data); });
-document.addEventListener('message', function(event) { handleMessage(event.data); });
 
 document.getElementById('formatBtn').addEventListener('click', function() {
   if (view) {

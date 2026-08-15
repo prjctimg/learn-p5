@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { View, Text, Pressable, StyleSheet, Animated } from "react-native";
+import { View, Text, Pressable, StyleSheet, Animated, ScrollView } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useThemeContext } from "./ThemeProvider";
 
@@ -95,7 +95,7 @@ export default function ShakeModal({
           {subtitle}
         </Text>
 
-        <View style={styles.actions}>
+        <ScrollView style={styles.actionsScroll} contentContainerStyle={styles.actions}>
           {actions.map((action, i) => {
             const variant = action.variant ?? (i === 0 ? "primary" : "secondary");
             const bg = variant === "primary" ? derivedColors.primary : derivedColors.onPrimaryContainer;
@@ -123,7 +123,7 @@ export default function ShakeModal({
               </Pressable>
             );
           })}
-        </View>
+        </ScrollView>
       </Animated.View>
     </View>
   );
@@ -172,6 +172,10 @@ const styles = StyleSheet.create({
   actions: {
     width: "100%",
     gap: 8,
+  },
+  actionsScroll: {
+    width: "100%",
+    maxHeight: 300,
   },
   actionButton: {
     flexDirection: "row",

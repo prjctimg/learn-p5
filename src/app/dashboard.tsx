@@ -300,7 +300,7 @@ export default function Dashboard() {
  },
  listTitle: {
  fontFamily: "JetBrainsMono",
- fontSize: 16,
+ fontSize: 20,
  fontWeight: "700",
  color: colors.onSurface,
  marginBottom: 12,

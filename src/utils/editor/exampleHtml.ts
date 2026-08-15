@@ -8,7 +8,16 @@ import {
 export function getExampleHtml(code: string, colorScheme?: "light" | "dark"): string {
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
   const needsWrap = !code.includes("function setup");
-  const sketch = needsWrap ? `function setup() {\n  createCanvas(400, 400);\n${code.split("\n").map((l) => "  " + l).join("\n")}\n}` : code;
+
+  let sketch = code;
+  if (needsWrap) {
+    sketch = `function setup() {\n  createCanvas(400, 400);\n${code.split("\n").map((l) => "  " + l).join("\n")}\n}`;
+  } else {
+    sketch = code.replace(
+      /createCanvas\s*\(\s*\d+\s*,\s*\d+\s*\)/g,
+      "createCanvas(400, 400)"
+    );
+  }
 
   return `
 <!DOCTYPE html>

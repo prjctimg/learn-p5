@@ -36,6 +36,7 @@ const SETTINGS_KEYS = {
   wordWrap: "setting_wordWrap",
   devMode: "setting_devMode",
   showDrawerFab: "setting_showDrawerFab",
+  showStatusBar: "setting_showStatusBar",
 };
 
 const createStyles = (colors: Record<string, string>) =>
@@ -102,6 +103,7 @@ export default function Settings() {
   const [displayName, setDisplayName] = useState("");
   const [devMode, setDevMode] = useState(false);
   const [showDrawerFab, setShowDrawerFab] = useState(true);
+  const [showStatusBar, setShowStatusBar] = useState(true);
   const [debugToastVisible, setDebugToastVisible] = useState(false);
   const [debugStreakToastVisible, setDebugStreakToastVisible] = useState(false);
   const [debugStreakCount, setDebugStreakCount] = useState("7");
@@ -120,7 +122,8 @@ export default function Settings() {
       SETTINGS_KEYS.wordWrap,
       SETTINGS_KEYS.devMode,
       SETTINGS_KEYS.showDrawerFab,
-    ]).then(([reminder, snippet, hour, minute, fontSize, bg, kb, theme, wrap, dev, drawerFab]) => {
+      SETTINGS_KEYS.showStatusBar,
+    ]).then(([reminder, snippet, hour, minute, fontSize, bg, kb, theme, wrap, dev, drawerFab, statusBar]) => {
       setDailyReminder(reminder[1] === "true");
       setSnippetAlternatives(snippet[1] === "true");
       if (hour[1]) setNotificationHour(parseInt(hour[1], 10));
@@ -132,6 +135,7 @@ export default function Settings() {
       setWordWrap(wrap[1] === "true");
       setDevMode(dev[1] === "true");
       if (drawerFab[1] !== null) setShowDrawerFab(drawerFab[1] !== "false");
+      if (statusBar[1] !== null) setShowStatusBar(statusBar[1] !== "false");
     });
     AsyncStorage.getItem("onboardingData").then((val) => {
       if (val) {
@@ -229,6 +233,11 @@ export default function Settings() {
   const toggleShowDrawerFab = async (value: boolean) => {
     setShowDrawerFab(value);
     await AsyncStorage.setItem(SETTINGS_KEYS.showDrawerFab, value.toString());
+  };
+
+  const toggleShowStatusBar = async (value: boolean) => {
+    setShowStatusBar(value);
+    await AsyncStorage.setItem(SETTINGS_KEYS.showStatusBar, value.toString());
   };
 
   const handleCompleteAllExercises = async () => {
@@ -350,6 +359,20 @@ export default function Settings() {
             <Switch
               value={showDrawerFab}
               onValueChange={toggleShowDrawerFab}
+              trackColor={{ false: "#767577", true: ctaColor }}
+              thumbColor="#ffffff"
+            />
+          </View>
+        </View>
+        <View style={[styles.card, { marginTop: 8 }]}>
+          <View style={styles.cardRow}>
+            <View style={styles.flexChild}>
+              <Text style={styles.settingTitle}>Status Bar</Text>
+              <Text style={styles.settingDescription}>Show the status bar at the top of the screen</Text>
+            </View>
+            <Switch
+              value={showStatusBar}
+              onValueChange={toggleShowStatusBar}
               trackColor={{ false: "#767577", true: ctaColor }}
               thumbColor="#ffffff"
             />

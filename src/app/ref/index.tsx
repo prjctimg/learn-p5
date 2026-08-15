@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useRef, useMemo, useState, useCallback } from "react";
-import { View, Text, FlatList, Pressable, Alert, StyleSheet, Linking, TextInput, Modal, Keyboard } from "react-native";
+import { View, Text, FlatList, Pressable, Alert, StyleSheet, Linking } from "react-native";
 import { WebView } from "react-native-webview";
 import Header from "../../components/Header";
 import { P5_SYMBOLS_BY_NAME, P5_SYMBOLS, P5_FUNCTION_NAMES, GENERATED_REFERENCE, P5SymbolView as P5Symbol } from "../../data/reference";
@@ -10,9 +10,9 @@ import { Colors } from "../../constants/Colors";
 import { useModuleProgress } from "../../hooks/useModuleProgress";
 import { useShakeDetection } from "../../hooks/useShakeDetection";
 import ShakeModal from "../../components/ShakeModal";
+import SearchOverlay from "../../components/SearchOverlay";
 import { getEditorTheme } from "../../utils/editor/themes";
 import { getExampleHtml } from "../../utils/editor/exampleHtml";
-import Fuse from "fuse.js";
 
 const MODULE_GROUPS = P5_SYMBOLS.reduce<{ module: string; symbols: P5Symbol[] }[]>((acc, sym) => {
  const existing = acc.find((g) => g.module === sym.module);
@@ -127,99 +127,6 @@ function parseDescription(
  }
 
  return parts.length > 0 ? parts : [<Text key="full" style={{ color: colors.textSecondary }}>{text}</Text>];
-}
-
-function SearchOverlay({ visible, onClose, onSelectSymbol }: { visible: boolean; onClose: () => void; onSelectSymbol: (name: string) => void }) {
- const { colorScheme, derivedColors } = useThemeContext();
- const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
- const [query, setQuery] = useState("");
- const inputRef = useRef<TextInput>(null);
-
- const fuse = useMemo(
-   () =>
-     new Fuse(P5_SYMBOLS, {
-       keys: [
-         { name: "name", weight: 2 },
-         { name: "description", weight: 1 },
-         { name: "module", weight: 1 },
-       ],
-       threshold: 0.4,
-       includeScore: true,
-     }),
-   []
- );
-
- const results = useMemo(() => {
-   if (!query.trim()) return P5_SYMBOLS.slice(0, 20);
-   return fuse.search(query.trim()).map((r) => r.item);
- }, [query, fuse]);
-
- const handleClose = useCallback(() => {
-   setQuery("");
-   Keyboard.dismiss();
-   onClose();
- }, [onClose]);
-
- return (
-   <Modal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
-     <Pressable style={styles.modalOverlay} onPress={handleClose}>
-       <Pressable style={[styles.modalCard, { backgroundColor: colors.surfaceContainerHigh }]} onPress={() => {}}>
-         <View style={styles.modalHeader}>
-           <View style={[styles.modalSearchBar, { backgroundColor: colors.surfaceContainer, borderColor: colors.outlineVariant }]}>
-             <MaterialCommunityIcons name="magnify" size={18} color={colors.onSurfaceVariant} />
-             <TextInput
-               ref={inputRef}
-               value={query}
-               onChangeText={setQuery}
-               placeholder="Search symbols..."
-               placeholderTextColor={colors.onSurfaceVariant}
-               style={[styles.modalSearchInput, { color: colors.onSurface }]}
-               autoCapitalize="none"
-               autoCorrect={false}
-               autoFocus
-             />
-             {query.length > 0 && (
-               <Pressable onPress={() => setQuery("")} accessibilityRole="button" accessibilityLabel="Clear search">
-                 <MaterialCommunityIcons name="close-circle" size={18} color={colors.onSurfaceVariant} />
-               </Pressable>
-             )}
-           </View>
-           <Pressable onPress={handleClose} style={styles.modalCloseBtn} accessibilityRole="button" accessibilityLabel="Close search">
-             <MaterialCommunityIcons name="close" size={22} color={colors.onSurfaceVariant} />
-           </Pressable>
-         </View>
-         <View style={[styles.modalDivider, { backgroundColor: colors.outlineVariant }]} />
-         <FlatList
-           data={results}
-           keyExtractor={(item) => item.name}
-           style={styles.modalResultsList}
-           contentContainerStyle={{ paddingBottom: 8 }}
-           renderItem={({ item: sym }) => (
-             <Pressable
-               onPress={() => { handleClose(); onSelectSymbol(sym.name); }}
-               style={({ pressed }) => [
-                 styles.modalResultRow,
-                 pressed && { backgroundColor: colors.surfaceContainer },
-               ]}
-               accessibilityRole="button"
-               accessibilityLabel={`View reference for ${sym.name}`}
-             >
-               <View style={styles.flex1}>
-                 <Text style={[styles.modalResultName, { color: derivedColors.primary }]}>
-                   {sym.name}()
-                 </Text>
-                 <Text style={[styles.modalResultModule, { color: colors.textSecondary }]}>
-                   {sym.module}
-                 </Text>
-               </View>
-               <MaterialCommunityIcons name="chevron-right" size={18} color={colors.onSurfaceVariant} />
-             </Pressable>
-           )}
-         />
-       </Pressable>
-     </Pressable>
-   </Modal>
- );
 }
 
 function SymbolDetail({ symbol, onOpenSearch }: { symbol: string; onOpenSearch: () => void }) {
@@ -537,15 +444,10 @@ export default function Reference() {
   ]}
   accessibilityRole="button"
   accessibilityLabel={`View reference for ${sym.name}`}
-  >
+   >
     <Text style={[styles.monoSm, { color: derivedColors.primary, flex: 1 }]}>
     {sym.name}()
     </Text>
-    <MaterialCommunityIcons
-    name="chevron-right"
-    size={18}
-    color={colors.onSurfaceVariant}
-    />
     </Pressable>
 ))}
     </View>
@@ -640,7 +542,7 @@ const styles = StyleSheet.create({
  },
  monoSm: {
  fontFamily: "JetBrainsMono",
- fontSize: 13,
+ fontSize: 16,
  fontWeight: "700",
  },
   browseButton: {
@@ -778,71 +680,5 @@ const styles = StyleSheet.create({
    shadowOffset: { width: 0, height: 2 },
    shadowOpacity: 0.25,
    shadowRadius: 4,
- },
- modalOverlay: {
-   flex: 1,
-   backgroundColor: "rgba(0,0,0,0.5)",
-   justifyContent: "center",
-   alignItems: "center",
-   padding: 24,
- },
- modalCard: {
-   width: "100%",
-   maxWidth: 400,
-   maxHeight: "70%",
-   borderRadius: 16,
-   padding: 20,
- },
- modalHeader: {
-   flexDirection: "row",
-   alignItems: "center",
-   gap: 12,
- },
- modalSearchBar: {
-   flex: 1,
-   flexDirection: "row",
-   alignItems: "center",
-   paddingHorizontal: 12,
-   height: 44,
-   borderRadius: 12,
-   borderWidth: 1,
-   gap: 8,
- },
- modalSearchInput: {
-   flex: 1,
-   fontSize: 15,
-   height: 44,
-   padding: 0,
- },
- modalCloseBtn: {
-   width: 36,
-   height: 36,
-   borderRadius: 18,
-   alignItems: "center",
-   justifyContent: "center",
- },
- modalDivider: {
-   height: StyleSheet.hairlineWidth,
-   marginTop: 12,
-   marginBottom: 4,
- },
- modalResultsList: {
-   marginTop: 4,
- },
- modalResultRow: {
-   flexDirection: "row",
-   alignItems: "center",
-   paddingVertical: 12,
-   paddingHorizontal: 4,
- },
- modalResultName: {
-   fontFamily: "JetBrainsMono",
-   fontSize: 15,
-   fontWeight: "700",
- },
- modalResultModule: {
-   fontFamily: "JetBrainsMono",
-   fontSize: 12,
-   marginTop: 2,
  },
 });

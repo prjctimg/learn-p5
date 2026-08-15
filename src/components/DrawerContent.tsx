@@ -25,6 +25,7 @@ const navItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: "view-dashboard-outline" },
   { label: "Learn", href: "/learn", icon: "book-open-outline" },
   { label: "Reference", href: "/ref", icon: "bookmark-outline" },
+  { label: "Tips", href: "/tips", icon: "lightbulb-outline" },
   { label: "Settings", href: "/settings", icon: "cog-outline" },
 ];
 

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useReducer, useMemo, useCallback } from "react";
-import { View, Text, Pressable, StyleSheet, Modal, Switch } from "react-native";
+import { View, Text, Pressable, StyleSheet, Modal, Switch, ScrollView } from "react-native";
 import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -15,6 +15,7 @@ import Toast from "../../../components/Toast";
 import Breadcrumbs from "../../../components/Breadcrumbs";
 import StreakToast from "../../../components/StreakToast";
 import ShakeModal from "../../../components/ShakeModal";
+import SearchOverlay from "../../../components/SearchOverlay";
 import { loadExercise, loadCourse } from "../../../utils/courseLoader";
 import { Exercise as ExerciseType } from "../../../data/types";
 import { P5_FUNCTION_NAMES, ONCE_ONLY_P5_FUNCTIONS } from "../../../data/reference";
@@ -143,6 +144,7 @@ export default function Exercise() {
   const streak = useStreak();
   const [streakToastVisible, setStreakToastVisible] = useState(false);
   const [shakeModalVisible, setShakeModalVisible] = useState(false);
+  const [searchVisible, setSearchVisible] = useState(false);
 
   const [toastIcon, setToastIcon] = useState<string>("check-circle");
   const [toastIconColor, setToastIconColor] = useState<string>("#22C55E");
@@ -174,7 +176,7 @@ export default function Exercise() {
       tasks: state.exercise.tasks,
       activeTaskIndex: state.currentTaskIndex,
     });
-  }, [state.exercise, colorScheme, id, editorTheme, codeFontSize, ctaColor, wordWrap]);
+  }, [state.exercise, colorScheme, id, editorTheme, codeFontSize, ctaColor]);
 
  const styles = useMemo(
  () =>
@@ -527,13 +529,34 @@ export default function Exercise() {
  }
  }, [editorViewReady]);
 
+  const runStartTimeRef = useRef<number>(0);
+
   const handleRun = useCallback(() => {
     if (!state.exercise) return;
     dispatch({ type: "RUN_START" });
+    runStartTimeRef.current = Date.now();
     if (webViewRef.current && editorViewReady) {
       webViewRef.current.postMessage(JSON.stringify({ type: "runSketch" }));
     }
+    setTimeout(() => dispatch({ type: "RUN_DONE" }), 3000);
   }, [state.exercise, editorViewReady]);
+
+  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleRunPressIn = useCallback(() => {
+    longPressTimerRef.current = setTimeout(() => {
+      longPressTimerRef.current = null;
+      setSearchVisible(true);
+    }, 2000);
+  }, []);
+
+  const handleRunPressOut = useCallback(() => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+      handleRun();
+    }
+  }, [handleRun]);
 
  const handleFormat = useCallback(() => {
  if (webViewRef.current && editorViewReady) {
@@ -621,10 +644,13 @@ export default function Exercise() {
   AsyncStorage.setItem("setting_keyboardHeight", value);
   }, []);
 
- const changeWordWrap = useCallback((value: boolean) => {
+  const changeWordWrap = useCallback((value: boolean) => {
   setWordWrap(value);
   AsyncStorage.setItem("setting_wordWrap", value.toString());
-  }, []);
+  if (webViewRef.current && editorViewReady) {
+  webViewRef.current.postMessage(JSON.stringify({ type: "setWordWrap", wordWrap: value }));
+  }
+  }, [editorViewReady]);
 
  const handleToastNext = useCallback(() => {
   setToastVisible(false);
@@ -805,16 +831,17 @@ return (
   )}
 
  {exerciseHtml && (
- <WebView
- ref={webViewRef}
- source={{ html: exerciseHtml }}
- style={styles.webview}
- onMessage={handleMessage}
- javaScriptEnabled
- domStorageEnabled
- originWhitelist={["*"]}
- scrollEnabled={true}
- bounces={false}
+  <WebView
+  ref={webViewRef}
+  source={{ html: exerciseHtml }}
+  style={styles.webview}
+  onMessage={handleMessage}
+  onLoadStart={() => setEditorViewReady(false)}
+  javaScriptEnabled
+  domStorageEnabled
+  originWhitelist={["*"]}
+  scrollEnabled={true}
+  bounces={false}
   {...({
     hideKeyboardAccessoryView: true,
     keyboardDisplayRequiresUserAction: true,
@@ -830,7 +857,8 @@ return (
  pointerEvents="box-none"
  >
  <Pressable
- onPress={handleRun}
+ onPressIn={handleRunPressIn}
+ onPressOut={handleRunPressOut}
  disabled={state.isRunning}
   style={({ pressed }) => [
   styles.runButton,
@@ -907,6 +935,13 @@ return (
     },
   ]}
   />
+  <SearchOverlay
+    visible={searchVisible}
+    onClose={() => setSearchVisible(false)}
+    onSelectSymbol={(name) => {
+      router.push(`/ref?symbol=${name}`);
+    }}
+  />
 
   <Toast
     key={toastKey}
@@ -973,21 +1008,22 @@ return (
  onPress={() => setSettingsMenuVisible(false)}
  >
  <Pressable
- style={[styles.modalCard, { backgroundColor: colors.surfaceContainerHigh }]}
- onPress={() => {}}
- >
- <View style={styles.modalHeader}>
- <Text style={[styles.modalTitle, { color: colors.onSurface }]}>Editor Settings</Text>
- <Pressable
- onPress={() => setSettingsMenuVisible(false)}
- accessibilityRole="button"
- accessibilityLabel="Close settings"
- >
- <MaterialCommunityIcons name="close" size={24} color={colors.onSurfaceVariant} />
- </Pressable>
- </View>
+  style={[styles.modalCard, { backgroundColor: colors.surfaceContainerHigh }]}
+  onPress={() => {}}
+  >
+  <View style={styles.modalHeader}>
+  <Text style={[styles.modalTitle, { color: colors.onSurface }]}>Editor Settings</Text>
+  <Pressable
+  onPress={() => setSettingsMenuVisible(false)}
+  accessibilityRole="button"
+  accessibilityLabel="Close settings"
+  >
+  <MaterialCommunityIcons name="close" size={24} color={colors.onSurfaceVariant} />
+  </Pressable>
+  </View>
 
- <View style={styles.modalSection}>
+  <ScrollView contentContainerStyle={{ paddingBottom: 8 }}>
+  <View style={styles.modalSection}>
  <Text style={[styles.modalSectionTitle, { color: colors.textSecondary }]}>Font Size</Text>
  <View style={styles.modalRow}>
  <Pressable
@@ -1147,6 +1183,7 @@ return (
 ))}
   </View>
   </View>
+  </ScrollView>
  </Pressable>
  </Pressable>
  </Modal>
