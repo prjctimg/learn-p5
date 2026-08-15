@@ -4,10 +4,12 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Button from "../../../components/Button";
+import Breadcrumbs from "../../../components/Breadcrumbs";
 import { loadCourse } from "../../../utils/courseLoader";
 import { Course } from "../../../data/types";
 import { useThemeContext } from "../../../components/ThemeProvider";
 import { Colors } from "../../../constants/Colors";
+import { isExerciseLocked as checkExerciseLocked } from "../../../utils/isExerciseLocked";
 
 export default function CourseDetail() {
  const { course } = useLocalSearchParams<{ course: string }>();
@@ -72,15 +74,10 @@ export default function CourseDetail() {
  return courseCompleted / courseData.exercises.length;
  }, [courseData, completedLessons, course]);
 
- function isLessonLocked(index: number) {
- if (!course || !courseData) return true;
- for (let j = 0; j < index; j++) {
- if (!completedLessons.includes(`${course}/${courseData.exercises[j].id}`)) {
- return true;
- }
- }
- return false;
- }
+  function isLessonLocked(index: number) {
+    if (!course || !courseData) return true;
+    return checkExerciseLocked(completedLessons, course, courseData.exercises[index].id, courseData.exercises);
+  }
 
 if (loading) {
  return (
@@ -191,23 +188,30 @@ if (loading) {
 
  return (
  <View style={[styles.container, { backgroundColor: colors.surface }]}>
- <View
- style={[
- styles.header,
- { backgroundColor: colors.surface },
- ]}
-  >
-   <Pressable onPress={() => router.push("/learn")} style={styles.backButton}>
-   <MaterialCommunityIcons
-     name="arrow-left"
-     size={24}
-     color={derivedColors.primary}
-   />
-   </Pressable>
-  <View style={{ flex: 1 }} />
-  </View>
+    <View
+      style={[
+        styles.header,
+        { backgroundColor: colors.surface },
+      ]}
+      >
+        <Pressable onPress={() => router.push("/learn")} style={styles.backButton}>
+        <MaterialCommunityIcons
+          name="arrow-left"
+          size={24}
+          color={derivedColors.primary}
+        />
+        </Pressable>
+      <View style={{ flex: 1 }} />
+      </View>
 
- <ScrollView
+      <Breadcrumbs
+        segments={[
+          { label: "Learn", href: "/learn" },
+          { label: courseData.title },
+        ]}
+      />
+
+      <ScrollView
  style={styles.scrollView}
  contentContainerStyle={styles.scrollContent}
  >

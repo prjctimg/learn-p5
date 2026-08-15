@@ -3,7 +3,7 @@ import { p5Source } from "../p5Source";
 import { P5_FUNCTION_NAMES } from "../../data/reference";
 import { Colors } from "../../constants/Colors";
 import { getEditorTheme, EditorThemeColors } from "./themes";
-import { ValidationRule, ExerciseTask } from "../../data/types";
+import { ExerciseTask } from "../../data/types";
 import {
   JETBRAINS_MONO_REGULAR_BASE64,
   JETBRAINS_MONO_BOLD_BASE64,
@@ -61,7 +61,6 @@ export function getExerciseHtml(params: {
   editorTheme?: string;
   codeFontSize?: number;
   ctaColor?: string;
-  validation?: ValidationRule[];
   wordWrap?: boolean;
   tasks?: ExerciseTask[];
   activeTaskIndex?: number;
@@ -396,7 +395,7 @@ ${
 <script>${p5Source}</script>
 <script>${CODEMIRROR_BUNDLE}</script>
 <script>
-${getBridgeScript(params.startingCode, params.solution, themeColors, params.colorScheme, params.exerciseNumber, ctaColor, params.validation, params.wordWrap, tasksJson, activeTaskIdx)}
+${getBridgeScript(params.startingCode, params.solution, themeColors, params.colorScheme, params.exerciseNumber, ctaColor, params.wordWrap, tasksJson, activeTaskIdx)}
 </script>
 
 ${params.exerciseNumber === 1 ? `
@@ -414,7 +413,7 @@ ${params.exerciseNumber === 1 ? `
 </html>`;
 }
 
-function getBridgeScript(startingCode: string, solution: string, theme: EditorThemeColors, colorScheme: "light" | "dark", exerciseNumber?: number, ctaColor?: string, validation?: ValidationRule[], wordWrap?: boolean, tasksJson?: string, activeTaskIdx?: number): string {
+function getBridgeScript(startingCode: string, solution: string, theme: EditorThemeColors, colorScheme: "light" | "dark", exerciseNumber?: number, ctaColor?: string, wordWrap?: boolean, tasksJson?: string, activeTaskIdx?: number): string {
   const codeArg = jsString(startingCode);
   const solutionArg = jsString(solution);
   const cta = ctaColor ?? '#FF69B4';
@@ -465,7 +464,7 @@ var WORD_WRAP = ${wordWrap ?? false};
 let view;
 const INITIAL_CODE = ${codeArg};
 const SOLUTION_CODE = ${solutionArg};
-const VALIDATION_RULES = ${JSON.stringify(validation ?? [])};
+const VALIDATION_RULES = [];
 const TASKS = ${tasksJson};
 var ACTIVE_TASK_INDEX = ${activeTaskIdx};
 var P5_COMPLETIONS = ${JSON.stringify(P5_FUNCTION_NAMES)};
@@ -808,7 +807,7 @@ function handleMessage(data) {
         }
         break;
       case 'setActiveTask':
-        ACTIVE_TASK_INDEX = msg.taskIndex || 0;
+        ACTIVE_TASK_INDEX = typeof msg.taskIndex === 'number' ? msg.taskIndex : 0;
         if (msg.instructionHtml || msg.instruction) {
           var descEl = document.querySelector('.description-text');
           if (descEl) descEl.innerHTML = msg.instructionHtml || msg.instruction;
@@ -973,10 +972,9 @@ function handleMessage(data) {
 
         var syncResult = { passed: false, reason: '' };
         var hasPixelRules = false;
-        var activeRules = VALIDATION_RULES;
-        if (TASKS.length > 0 && TASKS[ACTIVE_TASK_INDEX]) {
-          activeRules = TASKS[ACTIVE_TASK_INDEX].validation || [];
-        }
+        var activeRules = TASKS.length > 0 && TASKS[ACTIVE_TASK_INDEX]
+          ? (TASKS[ACTIVE_TASK_INDEX].validation || [])
+          : [];
         try {
           if (activeRules.length > 0) {
             var nonPixelRules = activeRules.filter(function(r) { return r.type !== 'pixelMatch'; });

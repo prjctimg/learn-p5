@@ -6,23 +6,25 @@ import { useThemeContext } from "./ThemeProvider";
 import { Colors } from "../constants/Colors";
 
 interface ToastProps {
- visible: boolean;
- message: string;
- actionLabel?: string;
- onAction?: () => void;
- onDismiss?: () => void;
- duration?: number;
- icon?: string;
+  visible: boolean;
+  message: string;
+  actionLabel?: string;
+  onAction?: () => void;
+  onDismiss?: () => void;
+  duration?: number;
+  icon?: string;
+  iconColor?: string;
 }
 
 export default function Toast({
- visible,
- message,
- actionLabel,
- onAction,
- onDismiss,
- duration = 4000,
- icon = "check-circle",
+  visible,
+  message,
+  actionLabel,
+  onAction,
+  onDismiss,
+  duration = 4000,
+  icon = "check-circle",
+  iconColor = "#22C55E",
 }: ToastProps) {
  const translateY = useRef(new Animated.Value(-120)).current;
  const insets = useSafeAreaInsets();
@@ -77,7 +79,7 @@ export default function Toast({
  ]}
  >
  <View style={styles.content}>
- <MaterialCommunityIcons name={icon as any} size={20} color="#22C55E" />
+    <MaterialCommunityIcons name={icon as any} size={20} color={iconColor} />
  <Text style={[styles.message, { color: colors.onSurface }]}>
  {message}
  </Text>

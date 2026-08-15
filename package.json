@@ -5,7 +5,7 @@
   "scripts": {
     "postinstall": "npm run gen-reference && npm run bundle-editor",
     "start": "npm run gen-reference && npm run bundle-editor && expo start",
-    "gen-reference": "node scripts/generate-reference.mjs --stub",
+    "gen-reference": "node scripts/generate-reference.mjs",
     "bundle-editor": "node scripts/bundle-editor.mjs",
     "version": "sh scripts/bump-version.sh",
     "android": "expo start --android",

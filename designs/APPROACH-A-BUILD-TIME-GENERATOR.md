@@ -1,0 +1,301 @@
+# Approach A — Build-Time Generator (Codegen)
+
+**Concept:** Write exercises as `.md` files containing structured metadata. A Node.js script parses them at build time and generates TypeScript. The generated files are committed to the repo. The app bundles the generated `.ts` files normally.
+
+## Architecture
+
+```
+                      ╔════════════════════════╗
+                      ║  EXERCISE AUTHOR       ║
+                      ║  (writes .md files)    ║
+                      ╚════════════════════════╝
+                               │
+                               ▼
+┌──────────────────────────────────────────────────────────┐
+│  exercises/                                               │
+│  ├── TEMPLATE.md                                         │
+│  ├── GOING-IN-CIRCLES.md           ◄── human-edited       │
+│  ├── RECTANGLE-REBEL.md                                  │
+│  └── ...                                                 │
+│                                                           │
+│  Each .md looks like:                                     │
+│  ┌────────────────────────────────────────────────────┐  │
+│  │ # Going in Circles                                  │  │
+│  │                                                     │  │
+│  │ ## Task 1 — Draw the Circle                        │  │
+│  │ Instruction text...                                 │  │
+│  │                                                     │  │
+│  │ ```json validation                                  │  │
+│  │ {                                                    │  │
+│  │   "tasks": [                                         │  │
+│  │     {                                                │  │
+│  │       "id": "task-1",                                │  │
+│  │       "title": "Draw the Circle",                    │  │
+│  │       "instruction": "...",                          │  │
+│  │       "validation": [                                │  │
+│  │         {"type":"functionCall","name":"circle",      │  │
+│  │          "exactArgs":3},                             │  │
+│  │         {"type":"pixelMatch","x":200,"y":200,        │  │
+│  │          "expected":[255,105,180],"tolerance":40}    │  │
+│  │       ]                                              │  │
+│  │     }                                                │  │
+│  │   ],                                                 │  │
+│  │   "startingCode": "function setup()...",            │  │
+│  │   "solution": "function setup()..."                 │  │
+│  │ }                                                    │  │
+│  │ ```                                                  │  │
+│  └────────────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────────────┘
+                               │
+                    (BUILD TIME)
+                               │
+                               ▼
+              ┌─────────────────────────────────────┐
+              │  scripts/parse-exercises.mjs        │
+              │                                      │
+              │  pipeline:                           │
+              │                                      │
+              │  1. glob("exercises/*.md")           │
+              │  2. for each .md:                    │
+              │     a. gray-matter parse frontmatter │
+              │     b. extract JSON fenced blocks    │
+              │        tagged ```json validation     │
+              │     c. extract title from # H1       │
+              │     d. extract description from      │
+              │        first paragraph               │
+              │     e. build Exercise object         │
+              │  3. group by course (via frontmatter)│
+              │  4. write src/data/courses/           │
+              │     auto-generated/<slug>.ts          │
+              └──────────────────────────────────────┘
+                               │
+                               ▼
+              ┌─────────────────────────────────────┐
+              │  src/data/courses/                   │
+              │  auto-generated/                      │
+              │  ├── shapes.ts            ◄── COMMIT  │
+              │  └── ...                             │
+              │                                      │
+              │  Generated .ts file:                  │
+              │  ┌─────────────────────────────────┐ │
+              │  │ // DO NOT EDIT — generated by   │ │
+              │  │ // scripts/parse-exercises.mjs  │ │
+              │  │ import { Course } from "../.."  │ │
+              │  │                                  │ │
+              │  │ export const shapesCourse:       │ │
+              │  │   Course = { ... }              │ │
+              │  └─────────────────────────────────┘ │
+              └──────────────────────────────────────┘
+                               │
+                    (Expo Metro bundler)
+                               │
+                               ▼
+                   ╔═══════════════════╗
+                   ║  EXPO BUNDLE      ║
+                   ╚═══════════════════╝
+```
+
+## How It Fixes Each Current Issue
+
+| Issue | How Approach A fixes it |
+|-------|------------------------|
+| **Validation bugs** | Validation bugs in the WebView are fixed regardless of content source. This approach doesn't fix the WebView bugs on its own — those still need patching. |
+| **Content duplication** | ✅ Eliminated. The `.md` file is the **single source of truth**. No manual copy-paste into `.ts`. |
+| **Drift** | ✅ Impossible. `.md` → `.ts` is automated. If you change the `.md`, the generated `.ts` changes. |
+| **Authoring friction** | ✅ Authors edit `.md` files with structured JSON blocks. No need to touch TypeScript at all. |
+| **Schema validation** | ✅ The codegen script can validate rules at build time: check that `circle(3)` has 3 args, pixel coords are in bounds, etc. |
+| **New exercise onboarding** | ✅ Write a new `.md` file, run codegen, commit both. |
+
+## Concrete Pseudocode
+
+### `scripts/parse-exercises.mjs`
+
+```javascript
+import { readFileSync, writeFileSync, mkdirSync } from 'fs';
+import { glob } from 'glob';
+import matter from 'gray-matter';
+
+// ------------------------------------------------------------------
+// Step 1: Find all exercise .md files
+// ------------------------------------------------------------------
+const files = await glob('exercises/**/*.md', { ignore: 'exercises/TEMPLATE.md' });
+
+for (const file of files) {
+  const content = readFileSync(file, 'utf-8');
+
+  // ------------------------------------------------------------------
+  // Step 2: Parse frontmatter (gray-matter)
+  // ------------------------------------------------------------------
+  // Each .md starts with:
+  //   ---
+  //   course: shapes
+  //   order: 1
+  //   id: exercise-1
+  //   module: Shapes
+  //   description: Draw your first shape...
+  //   ---
+  const { data: frontmatter, content: mdBody } = matter(content);
+
+  // ------------------------------------------------------------------
+  // Step 3: Extract title from # H1
+  // ------------------------------------------------------------------
+  const titleMatch = mdBody.match(/^#\s+(.+)/m);
+  const title = titleMatch?.[1] ?? path.basename(file, '.md');
+
+  // ------------------------------------------------------------------
+  // Step 4: Extract the JSON validation blocks
+  // ------------------------------------------------------------------
+  // Each task provides:
+  //   ```json validation
+  //   { "tasks": [...], "startingCode": "...", "solution": "..." }
+  //   ```
+  const jsonBlockRegex = /```json\s+validation\n([\s\S]*?)```/g;
+  const match = jsonBlockRegex.exec(mdBody);
+  const exerciseData = JSON.parse(match[1]);
+
+  // ------------------------------------------------------------------
+  // Step 5: Validate the data
+  // ------------------------------------------------------------------
+  for (const task of exerciseData.tasks) {
+    for (const rule of task.validation ?? []) {
+      if (rule.type === 'functionCall') {
+        if (typeof rule.name !== 'string') throw new Error(`...`);
+        if ('exactArgs' in rule && typeof rule.exactArgs !== 'number') throw new Error(`...`);
+      }
+    }
+  }
+
+  // ------------------------------------------------------------------
+  // Step 6: Build the Exercise object
+  // ------------------------------------------------------------------
+  const exercise = {
+    id: frontmatter.id,
+    title,
+    module: frontmatter.module,
+    description: frontmatter.description,
+    instruction: exerciseData.instruction ?? mdBody.match(/^##\s+Task\s+1/)?.[0] ?? '',
+    startingCode: exerciseData.startingCode,
+    solution: exerciseData.solution,
+    tasks: exerciseData.tasks,
+  };
+
+  // ------------------------------------------------------------------
+  // Step 7: Group by course and write
+  // ------------------------------------------------------------------
+  // For now just write individual files, grouped by course slug:
+  const slug = frontmatter.course;
+  accumulator[slug] ??= { slug, title: slug, moduleName: '...', description: '...', exercises: [] };
+  accumulator[slug].exercises.push(exercise);
+}
+
+// Write each course to auto-generated/<slug>.ts
+for (const [slug, course] of Object.entries(accumulator)) {
+  const ts = `// DO NOT EDIT — generated by scripts/parse-exercises.mjs
+import type { Course } from "../../types";
+
+export const ${slug}Course: Course = ${JSON.stringify(course, null, 2)};
+`;
+  writeFileSync(`src/data/courses/auto-generated/${slug}.ts`, ts, 'utf-8');
+}
+```
+
+### Package.json addition
+
+```json
+{
+  "scripts": {
+    "generate:exercises": "node scripts/parse-exercises.mjs",
+    "prebuild": "npm run generate:exercises"
+  }
+}
+```
+
+### Updated courseLoader.ts
+
+```typescript
+// Before:
+const COURSE_FILES = [shapesCourse];
+
+// After:
+import { shapesCourse } from './courses/auto-generated/shapes';
+const COURSE_FILES = [shapesCourse];
+```
+
+## New Template `.md` format
+
+```markdown
+---
+course: shapes
+order: 1
+id: exercise-1
+module: Shapes
+description: Draw your first shape — a pink ball on a white canvas.
+---
+
+# The First Circle
+
+Master the coordinate system by drawing your first shape.
+
+## Task 1 — Draw the Circle
+
+Draw a circle at the center of the 400x400 canvas.
+
+Use circle(x, y, diameter) with x=200, y=200, and a diameter of 100.
+
+```json validation
+{
+  "startingCode": "function setup() {\n  createCanvas(400, 400);\n}\n\nfunction draw() {\n  background(255);\n  fill(255, 105, 180);\n  circle(200, 200, 100);\n}",
+  "solution": "function setup() {\n  createCanvas(400, 400);\n}\n\nfunction draw() {\n  background(255);\n  fill(255, 165, 0);\n  circle(200, 200, 100);\n}",
+  "tasks": [
+    {
+      "id": "task-1",
+      "title": "Draw the Circle",
+      "instruction": "Draw a circle...",
+      "validation": [
+        { "type": "functionCall", "name": "circle", "exactArgs": 3 },
+        { "type": "pixelMatch", "x": 200, "y": 200, "expected": [255, 105, 180], "tolerance": 40 }
+      ]
+    },
+    {
+      "id": "task-2",
+      "title": "Change the Color",
+      "instruction": "Now change the fill color to orange...",
+      "validation": [
+        { "type": "functionCall", "name": "circle", "exactArgs": 3 },
+        { "type": "pixelMatch", "x": 200, "y": 200, "expected": [255, 165, 0], "tolerance": 40 }
+      ]
+    }
+  ]
+}
+```
+```
+
+## Advantages
+
+1. **Single source of truth** — `.md` files are canonical
+2. **TypeScript free for authors** — non-coders can add exercises
+3. **Build-time validation** — catch errors before the app runs
+4. **Commits are traceable** — generated code is committed; diff shows what changed
+5. **No runtime cost** — generated `.ts` is bundled normally
+6. **Works with any CI/CD** — just add `npm run generate:exercises` to the build
+
+## Disadvantages
+
+1. **Extra build step** — must remember to run codegen before building
+2. **Generated code in repo** — noise in PRs (large diffs from generated files)
+3. **Two passes** — author edits `.md`, runs script, sees output in `.ts`
+4. **No hot-reload** — changing `.md` doesn't automatically reflect without re-running the script
+5. **Metro bundler doesn't handle `.md` natively** — you can't just import `.md` without a custom transformer
+
+## When to Choose This
+
+✅ Your team has multiple content authors who aren't TypeScript developers  
+✅ You care about traceability and CI validation  
+✅ You don't mind a codegen step
+
+## Decision Checklist
+
+- [ ] Can we commit generated files without PR noise? → If yes, this works well  
+- [ ] Do authors have Node.js available? → Required to run codegen  
+- [ ] Does the prebuild script need to be added to CI? → Yes  
+- [ ] Are we OK with generated `.ts` files in git? → Yes for Approach A

@@ -1,0 +1,359 @@
+slug: shapes
+title: Shapes
+moduleName: Fundamentals
+description: "Master the coordinate system and draw your first primitive shapes using code."
+
+exercises:
+  - id: exercise-1
+    title: "The First Circle"
+    module: Shapes
+    description: "Draw your first shape — a pink ball on a white canvas."
+    instruction: |
+      Draw a circle at the center of the 400x400 canvas.
+      Use circle(x, y, diameter) with x=200, y=200, and a diameter of 100.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(255);
+        fill(255, 105, 180);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(255);
+        fill(255, 165, 0);
+        circle(200, 200, 100);
+      }
+    tasks:
+      - id: task-1
+        title: "Draw the Circle"
+        instruction: |
+          Draw a circle at the center of the 400x400 canvas.
+          Use circle(x, y, diameter) with x=200, y=200, and a diameter of 100.
+        validation:
+          - type: functionCall
+            name: circle
+            exactArgs: 3
+          - type: pixelMatch
+            x: 200
+            y: 200
+            expected: [255, 105, 180]
+            tolerance: 120
+      - id: task-2
+        title: "Change the Color"
+        instruction: |
+          Now change the fill color to orange.
+          Use fill(255, 165, 0) before the circle() call.
+        validation:
+          - type: functionCall
+            name: circle
+            exactArgs: 3
+          - type: pixelMatch
+            x: 200
+            y: 200
+            expected: [255, 165, 0]
+            tolerance: 120
+
+  - id: exercise-2
+    title: "Rectangle Rebel"
+    module: Shapes
+    description: "Learn how to draw rectangles and understand the coordinate system."
+    instruction: |
+      Draw a rectangle in the center of the dark canvas.
+      Use rect(x, y, width, height) to draw a 200x200 rectangle at position (100, 100).
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(30);
+        fill(100, 200, 255);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(30);
+        fill(100, 200, 255);
+        rect(100, 100, 200, 200, 20);
+      }
+    tasks:
+      - id: task-1
+        title: "Basic Rectangle"
+        instruction: |
+          Draw a rectangle at (100, 100) that is 200 wide and 200 tall.
+          Use rect(x, y, width, height).
+        validation:
+          - type: functionCall
+            name: rect
+            exactArgs: 4
+          - type: pixelMatch
+            x: 200
+            y: 200
+            expected: [100, 200, 255]
+            tolerance: 120
+      - id: task-2
+        title: "Rounded Corners"
+        instruction: |
+          Add a corner radius of 20 to round the corners.
+          Use rect(x, y, w, h, radius) with 5 arguments.
+        validation:
+          - type: functionCall
+            name: rect
+            exactArgs: 5
+          - type: pixelMatch
+            x: 200
+            y: 200
+            expected: [100, 200, 255]
+            tolerance: 120
+
+  - id: exercise-3
+    title: "Elliptical Motion"
+    module: Shapes
+    description: "Explore the difference between circles and ellipses."
+    instruction: |
+      Draw an oval shape that is wider than it is tall.
+      Use ellipse(x, y, width, height) — try 300 wide and 150 tall, centered at (200, 200).
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(40);
+        fill(255, 220, 100);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(40);
+        fill(255, 220, 100);
+        ellipse(200, 200, 300, 300);
+      }
+    tasks:
+      - id: task-1
+        title: "Basic Ellipse"
+        instruction: |
+          Draw an ellipse at (200, 200) that is 300 wide and 150 tall.
+          Use ellipse(x, y, width, height).
+        validation:
+          - type: functionCall
+            name: ellipse
+            exactArgs: 4
+          - type: pixelMatch
+            x: 200
+            y: 200
+            expected: [255, 220, 100]
+            tolerance: 120
+      - id: task-2
+        title: "Circle via Ellipse"
+        instruction: |
+          When width equals height, an ellipse becomes a circle.
+          Draw a perfect circle using ellipse() — set both width and height to 300.
+        validation:
+          - type: functionCall
+            name: ellipse
+            exactArgs: 4
+
+  - id: exercise-4
+    title: "Line Dance"
+    module: Shapes
+    description: "Connect points across the canvas using lines and customize them."
+    instruction: |
+      Draw a diagonal line from top-left to bottom-right.
+      Use line(x1, y1, x2, y2) with coordinates (0, 0) and (400, 400).
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(15);
+        stroke(255, 100, 100);
+        strokeWeight(4);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(15);
+        stroke(255, 100, 100);
+        strokeWeight(4);
+        line(0, 0, 400, 400);
+      }
+    tasks:
+      - id: task-1
+        title: "Single Line"
+        instruction: |
+          Draw a diagonal line from top-left (0, 0) to bottom-right (400, 400).
+          Use line(x1, y1, x2, y2).
+        validation:
+          - type: functionCall
+            name: line
+            exactArgs: 4
+      - id: task-2
+        title: "Add a Second Line"
+        instruction: |
+          Draw another line from bottom-left to top-right: (0, 400) to (400, 0).
+          You now have two line() calls creating an X shape.
+        validation:
+          - type: functionCall
+            name: line
+            exactArgs: 4
+
+  - id: exercise-5
+    title: "Triangle Trouble"
+    module: Shapes
+    description: "Build custom polygons by placing three vertices."
+    instruction: |
+      Draw an upward-pointing triangle.
+      Use triangle(x1, y1, x2, y2, x3, y3) with vertices at (200, 50), (100, 300), and (300, 300).
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(20);
+        fill(100, 255, 150);
+        noStroke();
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(20);
+        fill(100, 255, 150);
+        noStroke();
+        triangle(200, 50, 100, 300, 300, 300);
+      }
+    tasks:
+      - id: task-1
+        title: "Basic Triangle"
+        instruction: |
+          Draw an upward-pointing triangle.
+          Use triangle(x1, y1, x2, y2, x3, y3) with vertices at (200, 50), (100, 300), (300, 300).
+        validation:
+          - type: functionCall
+            name: triangle
+            exactArgs: 6
+          - type: pixelMatch
+            x: 200
+            y: 250
+            expected: [100, 255, 150]
+            tolerance: 120
+
+  - id: exercise-6
+    title: "Quad Squad"
+    module: Shapes
+    description: "Draw four-sided shapes with quad() and explore quadrilaterals."
+    instruction: |
+      Draw a trapezoid using four corner points.
+      Use quad(x1, y1, x2, y2, x3, y3, x4, y4) with the given coordinates.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(25);
+        fill(180, 130, 255);
+        stroke(255);
+        strokeWeight(2);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(25);
+        fill(180, 130, 255);
+        stroke(255);
+        strokeWeight(2);
+        quad(150, 100, 250, 100, 300, 300, 100, 300);
+      }
+    tasks:
+      - id: task-1
+        title: "Basic Quad"
+        instruction: |
+          Draw a trapezoid using four corner points.
+          Use quad(x1, y1, x2, y2, x3, y3, x4, y4) with vertices at (150, 100), (250, 100), (300, 300), (100, 300).
+        validation:
+          - type: functionCall
+            name: quad
+            exactArgs: 8
+          - type: pixelMatch
+            x: 200
+            y: 200
+            expected: [180, 130, 255]
+            tolerance: 120
+
+  - id: exercise-7
+    title: "Arc Adept"
+    module: Shapes
+    description: "Draw partial curves with arc() and control the visible portion."
+    instruction: |
+      Draw a semicircle that opens upward.
+      Use arc(x, y, w, h, start, stop) with PI as the start angle and TWO_PI as the stop angle.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(30);
+        fill(255, 150, 200);
+        noStroke();
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(30);
+        fill(255, 150, 200);
+        noStroke();
+        arc(200, 200, 300, 300, PI, TWO_PI, PIE);
+      }
+    tasks:
+      - id: task-1
+        title: "Semicircle"
+        instruction: |
+          Draw a semicircle that opens upward.
+          Use arc(x, y, w, h, PI, TWO_PI) with a 300x300 size.
+        validation:
+          - type: functionCall
+            name: arc
+            minArgs: 5
+          - type: pixelMatch
+            x: 200
+            y: 120
+            expected: [255, 150, 200]
+            tolerance: 120
+      - id: task-2
+        title: "Pie Slice"
+        instruction: |
+          Add the PIE mode to fill the arc as a pie shape.
+          Use arc(x, y, w, h, start, stop, PIE) with 7 arguments.
+        validation:
+          - type: functionCall
+            name: arc
+            exactArgs: 7

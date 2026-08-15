@@ -10,6 +10,7 @@ import Toast from "../components/Toast";
 import StreakToast from "../components/StreakToast";
 import { loadAllCourses } from "../utils/courseLoader";
 import { Exercise, Course } from "../data/types";
+import { isExerciseLocked as checkExerciseLocked } from "../utils/isExerciseLocked";
 import { getStreakFromStorage, useStreak } from "../hooks/useStreak";
 
 const LAST_GREETING_KEY = "last_greeting_period";
@@ -114,18 +115,11 @@ export default function Dashboard() {
  return flat.slice(startIndex + 1, startIndex + 6);
  }, [courses, nextExercise]);
 
- function isExerciseLocked(lessonId: string, courseSlug: string): boolean {
- const course = courses.find((c) => c.slug === courseSlug);
- if (!course) return true;
- const idx = course.exercises.findIndex((l) => l.id === lessonId);
- if (idx <= 0) return false;
- for (let j = 0; j < idx; j++) {
- if (!completedLessons.includes(`${courseSlug}/${course.exercises[j].id}`)) {
- return true;
- }
- }
- return false;
- }
+  function isExerciseLocked(lessonId: string, courseSlug: string): boolean {
+    const course = courses.find((c) => c.slug === courseSlug);
+    if (!course) return true;
+    return checkExerciseLocked(completedLessons, courseSlug, lessonId, course.exercises);
+  }
 
  const progressAnim = useRef(new Animated.Value(0)).current;
 

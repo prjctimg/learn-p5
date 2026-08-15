@@ -3,7 +3,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const COMPLETED_COURSES_KEY = "completedCourses";
 
-// Maps symbol module names to course slugs
 const MODULE_TO_COURSE: Record<string, string> = {
   shapes: "shapes",
 };

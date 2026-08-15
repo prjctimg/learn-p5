@@ -12,6 +12,7 @@ import ProgrammingKeyboard from "../../../components/ProgrammingKeyboard";
 import QwertyKeyboard from "../../../components/QwertyKeyboard";
 
 import Toast from "../../../components/Toast";
+import Breadcrumbs from "../../../components/Breadcrumbs";
 import StreakToast from "../../../components/StreakToast";
 import ShakeModal from "../../../components/ShakeModal";
 import { loadExercise, loadCourse } from "../../../utils/courseLoader";
@@ -136,38 +137,43 @@ export default function Exercise() {
  const [toastKey, setToastKey] = useState(0);
  const [toastVisible, setToastVisible] = useState(false);
  const [toastMessage, setToastMessage] = useState("");
- const [toastActionLabel, setToastActionLabel] = useState<string | undefined>(undefined);
- const toastActionRef = useRef<(() => void) | undefined>(undefined);
+  const [toastActionLabel, setToastActionLabel] = useState<string | undefined>(undefined);
+  const toastActionRef = useRef<(() => void) | undefined>(undefined);
+  const [courseTitle, setCourseTitle] = useState<string>("");
   const streak = useStreak();
   const [streakToastVisible, setStreakToastVisible] = useState(false);
   const [shakeModalVisible, setShakeModalVisible] = useState(false);
 
- const showToast = useCallback((message: string, actionLabel?: string, onAction?: () => void) => {
- setToastMessage(message);
- setToastActionLabel(actionLabel);
- toastActionRef.current = onAction;
- setToastKey((k) => k + 1);
- setToastVisible(true);
- }, []);
+  const [toastIcon, setToastIcon] = useState<string>("check-circle");
+  const [toastIconColor, setToastIconColor] = useState<string>("#22C55E");
+
+  const showToast = useCallback((message: string, actionLabel?: string, onAction?: () => void, type?: "success" | "failure") => {
+    setToastMessage(message);
+    setToastActionLabel(actionLabel);
+    toastActionRef.current = onAction;
+    setToastIcon(type === "failure" ? "alert-circle" : "check-circle");
+    setToastIconColor(type === "failure" ? colors.error : "#22C55E");
+    setToastKey((k) => k + 1);
+    setToastVisible(true);
+  }, [colors.error]);
 
  const exerciseHtml = useMemo(() => {
  if (!state.exercise) return null;
-  return getExerciseHtml({
-    title: state.exercise.title,
-    moduleName: state.exercise.module,
-    instruction: state.exercise.instruction,
-    exerciseNumber: parseInt(id?.replace("exercise-", "") ?? "1", 10),
-    startingCode: state.exercise.startingCode ?? "",
-    solution: state.exercise.solution ?? "",
-    colorScheme: colorScheme === "dark" ? "dark" : "light",
-    editorTheme,
-    codeFontSize,
-    ctaColor,
-    validation: state.exercise.validation,
-    wordWrap,
-    tasks: state.exercise.tasks,
-    activeTaskIndex: state.currentTaskIndex,
-  });
+    return getExerciseHtml({
+      title: state.exercise.title,
+      moduleName: state.exercise.module,
+      instruction: state.exercise.instruction,
+      exerciseNumber: parseInt(id?.replace("exercise-", "") ?? "1", 10),
+      startingCode: state.exercise.startingCode ?? "",
+      solution: state.exercise.solution ?? "",
+      colorScheme: colorScheme === "dark" ? "dark" : "light",
+      editorTheme,
+      codeFontSize,
+      ctaColor,
+      wordWrap,
+      tasks: state.exercise.tasks,
+      activeTaskIndex: state.currentTaskIndex,
+    });
   }, [state.exercise, colorScheme, id, editorTheme, codeFontSize, ctaColor, wordWrap]);
 
  const styles = useMemo(
@@ -341,14 +347,18 @@ export default function Exercise() {
  [colorScheme]
 );
 
- useEffect(() => {
- const load = async () => {
- if (!course || !id) return;
- dispatch({ type: "LOAD_START" });
- try {
- const ex = await loadExercise(course, id);
- dispatch({ type: "LOAD_DONE", exercise: ex, course, id });
- const saved = await AsyncStorage.getItem(getExerciseCodeKey(course, id));
+  useEffect(() => {
+    const load = async () => {
+      if (!course || !id) return;
+      dispatch({ type: "LOAD_START" });
+      try {
+        const [ex, courseData] = await Promise.all([
+          loadExercise(course, id),
+          loadCourse(course),
+        ]);
+        dispatch({ type: "LOAD_DONE", exercise: ex, course, id });
+        if (courseData) setCourseTitle(courseData.title);
+        const saved = await AsyncStorage.getItem(getExerciseCodeKey(course, id));
  if (saved) {
  dispatch({ type: "SET_CODE", code: saved });
  }
@@ -422,13 +432,16 @@ export default function Exercise() {
  router.push(`/ref?symbol=${msg.symbol}`);
  break;
     case "exerciseComplete":
+      dispatch({ type: "RUN_DONE" });
       dispatch({ type: "EXERCISE_COMPLETE" });
       break;
     case "taskComplete":
+      dispatch({ type: "RUN_DONE" });
       dispatch({ type: "TASK_COMPLETE", taskIndex: msg.taskIndex });
       break;
     case "validationFailed":
-      showToast(msg.reason || "Not quite right — check the instructions");
+      dispatch({ type: "RUN_DONE" });
+      showToast(msg.reason || "Not quite right — check the instructions", undefined, undefined, "failure");
       break;
     case "sketchError":
       if (msg.error) {
@@ -514,14 +527,13 @@ export default function Exercise() {
  }
  }, [editorViewReady]);
 
- const handleRun = useCallback(() => {
- if (!state.exercise) return;
- dispatch({ type: "RUN_START" });
- if (webViewRef.current && editorViewReady) {
- webViewRef.current.postMessage(JSON.stringify({ type: "runSketch" }));
- }
- setTimeout(() => dispatch({ type: "RUN_DONE" }), 500);
- }, [state.exercise, editorViewReady]);
+  const handleRun = useCallback(() => {
+    if (!state.exercise) return;
+    dispatch({ type: "RUN_START" });
+    if (webViewRef.current && editorViewReady) {
+      webViewRef.current.postMessage(JSON.stringify({ type: "runSketch" }));
+    }
+  }, [state.exercise, editorViewReady]);
 
  const handleFormat = useCallback(() => {
  if (webViewRef.current && editorViewReady) {
@@ -614,12 +626,27 @@ export default function Exercise() {
   AsyncStorage.setItem("setting_wordWrap", value.toString());
   }, []);
 
+ const handleToastNext = useCallback(() => {
+  setToastVisible(false);
+  if (!state.exercise) return;
+  loadCourse(course).then((courseData) => {
+  if (!courseData) return;
+  const currentIndex = courseData.exercises.findIndex((l) => l.id === id);
+  if (currentIndex >= 0 && currentIndex < courseData.exercises.length - 1) {
+  const nextLesson = courseData.exercises[currentIndex + 1];
+  router.replace(`/learn/${course}/${nextLesson.id}`);
+  } else {
+  router.replace(`/learn/${course}`);
+  }
+  });
+  }, [state.exercise, course, id, router]);
+
  useEffect(() => {
   if (!state.completed || !state.exercise) return;
 
   const key = `${course}/${state.exercise.id}`;
 
-  showToast("✓ Exercise completed!", "Next →", handleToastNext);
+  showToast("✓ Exercise completed!", "Next →", handleToastNext, "success");
 
   (async () => {
   const val = await AsyncStorage.getItem("completedLessons");
@@ -645,21 +672,6 @@ export default function Exercise() {
   }
   })();
   }, [state.completed, state.exercise, course, webViewReady, handleToastNext]);
-
- const handleToastNext = useCallback(() => {
- setToastVisible(false);
- if (!state.exercise) return;
- loadCourse(course).then((courseData) => {
- if (!courseData) return;
- const currentIndex = courseData.exercises.findIndex((l) => l.id === id);
- if (currentIndex >= 0 && currentIndex < courseData.exercises.length - 1) {
- const nextLesson = courseData.exercises[currentIndex + 1];
- router.replace(`/learn/${course}/${nextLesson.id}`);
- } else {
- router.replace(`/learn/${course}`);
- }
- });
- }, [state.exercise, course, id, router]);
 
  const exerciseSymbols = useMemo(() => {
  if (!state.exercise) return [];
@@ -756,31 +768,41 @@ if (state.loading) {
  }
 
  return (
- <View style={styles.container}>
- <View
- style={[styles.header, { paddingTop: insets.top + 4 }]}
- >
- <Pressable
- onPress={() => router.push(`/learn/${course}`)}
- style={styles.menuButton}
- accessibilityRole="button"
- accessibilityLabel="Go back"
- >
- <MaterialCommunityIcons name="arrow-left" size={24} color={colors.onSurfaceVariant} />
- </Pressable>
+  <View style={styles.container}>
+  <View
+  style={[styles.header, { paddingTop: insets.top + 4 }]}
+  >
+  <Pressable
+  onPress={() => router.push(`/learn/${course}`)}
+  style={styles.menuButton}
+  accessibilityRole="button"
+  accessibilityLabel="Go back"
+  >
+  <MaterialCommunityIcons name="arrow-left" size={24} color={colors.onSurfaceVariant} />
+  </Pressable>
   <Text style={styles.logoText} numberOfLines={1}>
   {state.exercise?.title ?? ""}
   </Text>
- <View style={styles.spacer} />
- <Pressable
- onPress={() => setSettingsMenuVisible(true)}
- style={styles.menuButton}
- accessibilityRole="button"
- accessibilityLabel="Editor settings"
- >
- <MaterialCommunityIcons name="dots-vertical" size={24} color={colors.onSurfaceVariant} />
- </Pressable>
- </View>
+  <View style={styles.spacer} />
+  <Pressable
+  onPress={() => setSettingsMenuVisible(true)}
+  style={styles.menuButton}
+  accessibilityRole="button"
+  accessibilityLabel="Editor settings"
+  >
+  <MaterialCommunityIcons name="dots-vertical" size={24} color={colors.onSurfaceVariant} />
+  </Pressable>
+  </View>
+
+  {courseTitle && (
+  <Breadcrumbs
+  segments={[
+    { label: "Learn", href: "/learn" },
+    { label: courseTitle, href: `/learn/${course}` },
+    { label: state.exercise?.title ?? "" },
+  ]}
+  />
+  )}
 
  {exerciseHtml && (
  <WebView
@@ -886,14 +908,16 @@ if (state.loading) {
   ]}
   />
 
- <Toast
- key={toastKey}
- visible={toastVisible}
- message={toastMessage}
- actionLabel={toastActionLabel}
- onAction={toastActionRef.current}
- onDismiss={() => setToastVisible(false)}
- />
+  <Toast
+    key={toastKey}
+    visible={toastVisible}
+    message={toastMessage}
+    actionLabel={toastActionLabel}
+    onAction={toastActionRef.current}
+    onDismiss={() => setToastVisible(false)}
+    icon={toastIcon}
+    iconColor={toastIconColor}
+  />
 
  {keyboardVisible && keyboardMode === "programming" && (
  <ProgrammingKeyboard
