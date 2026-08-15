@@ -43,7 +43,6 @@ export function getStyles(colorScheme: 'light' | 'dark', ctaColor?: string): str
   .cm-editor.cm-focused .cm-selectionBackground { background: ${selBg} !important; }
   .cm-editor .cm-matchingBracket {
     background: rgba(${ctaRgb}, 0.3);
-    outline: 1px solid ${cta};
   }
   .cm-editor .cm-foldPlaceholder {
     background: transparent;

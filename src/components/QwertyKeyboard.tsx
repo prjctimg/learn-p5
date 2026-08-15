@@ -12,6 +12,7 @@ interface QwertyKeyboardProps {
   onNewline?: () => void;
   onCursorMove?: (direction: "left" | "right" | "up" | "down") => void;
   onToggleProgramming?: () => void;
+  onHideKeyboard?: () => void;
   height?: number;
 }
 
@@ -84,6 +85,7 @@ export default function QwertyKeyboard({
   onNewline,
   onCursorMove,
   onToggleProgramming,
+  onHideKeyboard,
   height = 300,
 }: QwertyKeyboardProps) {
   const { colorScheme, derivedColors } = useThemeContext();
@@ -318,19 +320,6 @@ export default function QwertyKeyboard({
     >
       {renderPopup()}
       <View style={styles.toolbarRow}>
-        <View style={styles.toolbarFixed}>
-          <Pressable
-            onPress={onToggleProgramming}
-            style={({ pressed }) => [
-              styles.toolbarBtn,
-              { backgroundColor: pressed ? derivedColors.primaryContainer : derivedColors.primaryContainer + "33" },
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel="Switch to programming keyboard"
-          >
-            <MaterialCommunityIcons name="code-tags" size={20} color={derivedColors.primary} />
-          </Pressable>
-        </View>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -385,7 +374,7 @@ export default function QwertyKeyboard({
 
         <View style={[styles.bottomRow, { gap: KEY_GAP }]}>
           <Pressable
-            onPress={() => onCursorMove?.("left")}
+            onPress={() => onHideKeyboard?.()}
             style={({ pressed }) => [
               {
                 width: dims.keySize + 8,
@@ -399,10 +388,10 @@ export default function QwertyKeyboard({
               },
             ]}
             accessibilityRole="button"
-            accessibilityLabel="Move cursor left"
+            accessibilityLabel="Hide keyboard"
           >
             <MaterialCommunityIcons
-              name="chevron-left"
+              name="chevron-down"
               size={22}
               color={derivedColors.primary}
             />
@@ -428,7 +417,7 @@ export default function QwertyKeyboard({
           </Pressable>
 
           <Pressable
-            onPress={() => onCursorMove?.("right")}
+            onPress={onToggleProgramming}
             style={({ pressed }) => [
               {
                 width: dims.keySize + 8,
@@ -438,15 +427,15 @@ export default function QwertyKeyboard({
                 justifyContent: "center",
                 backgroundColor: pressed
                   ? derivedColors.primaryContainer
-                  : colors.surfaceContainerHigh,
+                  : derivedColors.primaryContainer + "33",
               },
             ]}
             accessibilityRole="button"
-            accessibilityLabel="Move cursor right"
+            accessibilityLabel="Switch to programming keyboard"
           >
             <MaterialCommunityIcons
-              name="chevron-right"
-              size={22}
+              name="code-tags"
+              size={20}
               color={derivedColors.primary}
             />
           </Pressable>

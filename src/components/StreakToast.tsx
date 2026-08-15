@@ -151,7 +151,7 @@ export default function StreakToast({
  <MaterialCommunityIcons
  name={isMilestone ? "trophy" : "fire"}
  size={22}
- color={isMilestone ? "#FFD700" : "#FF6B35"}
+ color={isMilestone ? colors.success : colors.cta}
  />
  <View style={styles.textWrap}>
  <Text style={[styles.title, { color: colors.onSurface }]}>

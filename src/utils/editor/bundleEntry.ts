@@ -1,6 +1,6 @@
 import { basicSetup, EditorView } from "codemirror";
 import { EditorState } from "@codemirror/state";
-import { keymap, ViewPlugin, Decoration, DecorationSet, lineWrapping } from "@codemirror/view";
+import { keymap, ViewPlugin, Decoration, DecorationSet } from "@codemirror/view";
 import { syntaxHighlighting, HighlightStyle, syntaxTree } from "@codemirror/language";
 import { indentSelection } from "@codemirror/commands";
 import { javascript } from "@codemirror/lang-javascript";
@@ -21,7 +21,6 @@ export {
   ViewPlugin,
   Decoration,
   DecorationSet,
-  lineWrapping,
   indentSelection,
   javascript,
   tags,

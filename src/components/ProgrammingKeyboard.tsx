@@ -16,7 +16,6 @@ interface ProgrammingKeyboardProps {
  onBackspace?: () => void;
  onNewline?: () => void;
  onFormat?: () => void;
- onCursorMove?: (direction: 'left' | 'right' | 'up' | 'down') => void;
  onOpenReference?: (symbol: string) => void;
  keyboardVisible?: boolean;
  usedFunctions?: string[];
@@ -26,10 +25,9 @@ interface ProgrammingKeyboardProps {
 const BACKSPACE_DELAY = 300;
 const BACKSPACE_INTERVAL = 60;
 
-export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], onToggleKeyboard, onToggleQwerty, onBackspace, onNewline, onFormat, onCursorMove, onOpenReference, keyboardVisible = true, usedFunctions = [], height = 280 }: ProgrammingKeyboardProps) {
+export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], onToggleKeyboard, onToggleQwerty, onBackspace, onNewline, onFormat, onOpenReference, keyboardVisible = true, usedFunctions = [], height = 280 }: ProgrammingKeyboardProps) {
  const { colorScheme, derivedColors } = useThemeContext();
  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
- const isMediumKeyboard = height === 280;
  const [hintType, setHintType] = useState<"string" | "array" | null>(null);
  const [popupSymbol, setPopupSymbol] = useState<string | null>(null);
  const popupAnim = useRef(new Animated.Value(0)).current;
@@ -114,42 +112,42 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
  return (
  <View style={[styles.container, { backgroundColor: colors.surfaceContainerLow, height }]}>
  <View style={styles.toolbarRow}>
- <View style={styles.toolbarFixed}>
- <Pressable
- onPress={onToggleQwerty}
- style={({ pressed }) => [
- styles.keyboardIcon,
- { backgroundColor: pressed ? derivedColors.primaryContainer : derivedColors.primaryContainer + "33" },
- ]}
- accessibilityRole="button"
- accessibilityLabel="QWERTY keyboard"
- >
- <MaterialCommunityIcons name="keyboard" size={20} color={derivedColors.primary} />
- </Pressable>
- <Pressable
- onPressIn={startBackspaceRepeat}
- onPressOut={clearBackspaceRepeat}
- style={({ pressed }) => [
- styles.keyboardIcon,
- { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
- ]}
- accessibilityRole="button"
- accessibilityLabel="Backspace"
- >
- <MaterialCommunityIcons name="backspace" size={18} color={colors.onSurfaceVariant} />
- </Pressable>
- <Pressable
- onPress={onNewline}
- style={({ pressed }) => [
- styles.keyboardIcon,
- { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
- ]}
- accessibilityRole="button"
- accessibilityLabel="New line"
- >
- <MaterialCommunityIcons name="keyboard-return" size={18} color={colors.onSurfaceVariant} />
- </Pressable>
- </View>
+  <View style={styles.toolbarFixed}>
+  <Pressable
+  onPress={onToggleQwerty}
+  style={({ pressed }) => [
+  styles.keyboardIcon,
+  { backgroundColor: pressed ? derivedColors.primaryContainer : derivedColors.primaryContainer + "33" },
+  ]}
+  accessibilityRole="button"
+  accessibilityLabel="QWERTY keyboard"
+  >
+  <MaterialCommunityIcons name="keyboard" size={18} color={derivedColors.primary} />
+  </Pressable>
+  <Pressable
+  onPressIn={startBackspaceRepeat}
+  onPressOut={clearBackspaceRepeat}
+  style={({ pressed }) => [
+  styles.keyboardIcon,
+  { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
+  ]}
+  accessibilityRole="button"
+  accessibilityLabel="Backspace"
+  >
+  <MaterialCommunityIcons name="backspace" size={18} color={colors.onSurfaceVariant} />
+  </Pressable>
+  <Pressable
+  onPress={onNewline}
+  style={({ pressed }) => [
+  styles.keyboardIcon,
+  { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
+  ]}
+  accessibilityRole="button"
+  accessibilityLabel="New line"
+  >
+  <MaterialCommunityIcons name="keyboard-return" size={18} color={colors.onSurfaceVariant} />
+  </Pressable>
+  </View>
  <ScrollView
  horizontal
  showsHorizontalScrollIndicator={false}
@@ -249,89 +247,48 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
  </Pressable>
 );
  })}
- </View>
+  </View>
 
- {!isMediumKeyboard && (
- <View style={styles.bottomCluster}>
- <View style={styles.dpad}>
- <View style={styles.dpadRow}>
- <Pressable
- onPress={() => onCursorMove?.('up')}
- style={({ pressed }) => [
- styles.dpadBtn,
- { backgroundColor: pressed ? derivedColors.primaryContainer : colors.surfaceContainer },
- ]}
- accessibilityRole="button"
- accessibilityLabel="Move cursor up"
- >
- <MaterialCommunityIcons name="chevron-up" size={20} color={colors.onSurfaceVariant} />
- </Pressable>
- </View>
- <View style={styles.dpadRow}>
- <Pressable
- onPress={() => onCursorMove?.('left')}
- style={({ pressed }) => [
- styles.dpadBtn,
- { backgroundColor: pressed ? derivedColors.primaryContainer : colors.surfaceContainer },
- ]}
- accessibilityRole="button"
- accessibilityLabel="Move cursor left"
- >
- <MaterialCommunityIcons name="chevron-left" size={20} color={colors.onSurfaceVariant} />
- </Pressable>
- <View style={styles.dpadCenter} />
- <Pressable
- onPress={() => onCursorMove?.('right')}
- style={({ pressed }) => [
- styles.dpadBtn,
- { backgroundColor: pressed ? derivedColors.primaryContainer : colors.surfaceContainer },
- ]}
- accessibilityRole="button"
- accessibilityLabel="Move cursor right"
- >
- <MaterialCommunityIcons name="chevron-right" size={20} color={colors.onSurfaceVariant} />
- </Pressable>
- </View>
- <View style={styles.dpadRow}>
- <Pressable
- onPress={() => onCursorMove?.('down')}
- style={({ pressed }) => [
- styles.dpadBtn,
- { backgroundColor: pressed ? derivedColors.primaryContainer : colors.surfaceContainer },
- ]}
- accessibilityRole="button"
- accessibilityLabel="Move cursor down"
- >
- <MaterialCommunityIcons name="chevron-down" size={20} color={colors.onSurfaceVariant} />
- </Pressable>
- </View>
- </View>
- </View>
-)}
-
- <Modal transparent visible={popupSymbol !== null} onRequestClose={() => setPopupSymbol(null)}>
- <Pressable style={styles.popupOverlay} onPress={() => setPopupSymbol(null)}>
- <Animated.View style={[styles.popupCard, { backgroundColor: colors.surfaceContainerHigh, opacity: popupAnim, transform: [{ scale: popupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) }] }]}>
- {popupSymbol && (() => {
- const ref = P5_SYMBOLS.find(s => s.name === popupSymbol);
- return ref ? (
- <>
- <Text style={[popupTextStyles.popupTitle, { color: colors.onSurface, backgroundColor: colors.surfaceContainer, borderColor: colors.outlineVariant}]}>{ref.syntax}</Text>
- <Text style={[popupTextStyles.popupDesc, { color: colors.onSurfaceVariant }]}>{ref.description}</Text>
- {ref.parameters.map(p => (
- <Text key={p.name} style={[popupTextStyles.popupParam, { color: colors.onSurfaceVariant }]}>
-   <Text style={{ fontFamily: "JetBrainsMono", color: derivedColors.primary, fontWeight: "700" }}>{p.name}</Text>
-   {' '}<Text style={{ fontFamily: "JetBrainsMono", fontSize: 11, color: derivedColors.primary }}>({p.type})</Text>: {p.description}
- </Text>
+  <Modal transparent visible={popupSymbol !== null} onRequestClose={() => setPopupSymbol(null)}>
+  <Pressable style={styles.popupOverlay} onPress={() => setPopupSymbol(null)}>
+  <Animated.View style={[styles.popupCard, { backgroundColor: colors.surfaceContainerHigh, opacity: popupAnim, transform: [{ scale: popupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) }] }]} onStartShouldSetResponder={() => true}>
+  <ScrollView showsVerticalScrollIndicator={false}>
+  {popupSymbol && (() => {
+  const ref = P5_SYMBOLS.find(s => s.name === popupSymbol);
+  return ref ? (
+  <>
+  <Text style={[popupTextStyles.popupTitle, { color: colors.onSurface, backgroundColor: colors.surfaceContainer, borderColor: colors.outlineVariant}]}>{ref.syntax}</Text>
+  <Text style={[popupTextStyles.popupDesc, { color: colors.onSurfaceVariant }]}>{ref.description}</Text>
+  {ref.parameters.map(p => (
+  <Text key={p.name} style={[popupTextStyles.popupParam, { color: colors.onSurfaceVariant }]}>
+    <Text style={{ fontFamily: "JetBrainsMono", color: derivedColors.primary, fontWeight: "700" }}>{p.name}</Text>
+    {' '}<Text style={{ fontFamily: "JetBrainsMono", fontSize: 11, color: derivedColors.primary }}>({p.type})</Text>: {p.description}
+  </Text>
 ))}
- </>
+  </>
 ) : (
- <Text style={[popupTextStyles.popupTitle, { color: colors.onSurface }]}>{popupSymbol}</Text>
+  <Text style={[popupTextStyles.popupTitle, { color: colors.onSurface }]}>{popupSymbol}</Text>
 );
- })()}
- </Animated.View>
- </Pressable>
- </Modal>
+  })()}
+  </ScrollView>
+  <Pressable
+  onPress={() => setPopupSymbol(null)}
+  style={({ pressed }) => ({
+    marginTop: 12,
+    alignSelf: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: pressed ? derivedColors.primaryContainer : colors.surfaceContainer,
+  })}
+  accessibilityRole="button"
+  accessibilityLabel="Close reference"
+  >
+  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 12, fontWeight: "700", color: derivedColors.primary }}>Close</Text>
+  </Pressable>
+  </Animated.View>
+  </Pressable>
+  </Modal>
  </View>
 );
 }
@@ -410,34 +367,6 @@ const styles = StyleSheet.create({
   justifyContent: "center",
   borderRadius: Spacing.sm,
   },
- bottomCluster: {
- position: "absolute",
- left: 12,
- right: 12,
- bottom: 24,
- flexDirection: "row",
- alignItems: "flex-end",
- justifyContent: "flex-end",
- },
- dpad: {
- gap: 3,
- },
- dpadRow: {
- flexDirection: "row",
- justifyContent: "center",
- gap: 3,
- },
-  dpadBtn: {
-  width: 44,
-  height: 44,
-  alignItems: "center",
-  justifyContent: "center",
-  borderRadius: 12,
-  },
- dpadCenter: {
- width: 44,
- height: 44,
- },
   symbolButton: {
   flexShrink: 0,
   paddingHorizontal: Spacing.sm + 4,

@@ -64,6 +64,7 @@ export function getExerciseHtml(params: {
   wordWrap?: boolean;
   tasks?: ExerciseTask[];
   activeTaskIndex?: number;
+  disableSystemKeyboard?: boolean;
 }): string {
   const colors = Colors[params.colorScheme === "dark" ? "dark" : "light"];
   const ctaColor = params.ctaColor ?? colors.cta;
@@ -274,7 +275,6 @@ export function getExerciseHtml(params: {
   .cm-editor.cm-focused .cm-selectionBackground { background: ${params.colorScheme === 'dark' ? 'rgba(255, 105, 180, 0.2)' : 'rgba(255, 105, 180, 0.15)'} !important; }
   .cm-editor .cm-matchingBracket {
     background: rgba(255, 105, 180, 0.3);
-    outline: 1px solid ${ctaColor};
   }
   body { padding-bottom: 80px; }
 
@@ -394,7 +394,7 @@ ${
 <script>${p5Source}</script>
 <script>${CODEMIRROR_BUNDLE}</script>
 <script>
-${getBridgeScript(params.startingCode, params.solution, themeColors, params.colorScheme, params.exerciseNumber, ctaColor, params.wordWrap, tasksJson, activeTaskIdx)}
+ ${getBridgeScript(params.startingCode, params.solution, themeColors, params.colorScheme, params.exerciseNumber, ctaColor, params.wordWrap, tasksJson, activeTaskIdx, params.disableSystemKeyboard)}
 </script>
 
 ${params.exerciseNumber === 1 ? `
@@ -412,7 +412,7 @@ ${params.exerciseNumber === 1 ? `
 </html>`;
 }
 
-function getBridgeScript(startingCode: string, solution: string, theme: EditorThemeColors, colorScheme: "light" | "dark", exerciseNumber?: number, ctaColor?: string, wordWrap?: boolean, tasksJson?: string, activeTaskIdx?: number): string {
+function getBridgeScript(startingCode: string, solution: string, theme: EditorThemeColors, colorScheme: "light" | "dark", exerciseNumber?: number, ctaColor?: string, wordWrap?: boolean, tasksJson?: string, activeTaskIdx?: number, disableSystemKeyboard?: boolean): string {
   const codeArg = jsString(startingCode);
   const solutionArg = jsString(solution);
   const cta = ctaColor ?? '#FF69B4';
@@ -462,7 +462,7 @@ var Decoration = _CM.Decoration;
 var DecorationSet = _CM.DecorationSet;
 var autocompletion = _CM.autocompletion;
 var CompletionContext = _CM.CompletionContext;
-var lineWrapping = _CM.lineWrapping;
+var lineWrapping = _CM.EditorView.lineWrapping;
 var prettierLib = _CM.prettier;
 var prettierEstree = _CM.prettierPluginEstree;
 var prettierAcorn = _CM.prettierPluginAcorn;
@@ -544,7 +544,7 @@ var p5Theme = EditorView.theme({
   '.cm-cursor': { borderLeft: '2px solid ${cta}', animation: 'cm-blink 1s step-end infinite' },
   '@keyframes cm-blink': { '50%': { borderLeftColor: 'transparent' } },
   '.cm-selectionBackground': { backgroundColor: '${selBg}' },
-  '.cm-matchingBracket': { backgroundColor: 'rgba(${ctaRgb}, 0.3)', outline: '1px solid ${cta}' },
+  '.cm-matchingBracket': { backgroundColor: 'rgba(${ctaRgb}, 0.3)' },
   '.cm-p5-fn': { fontWeight: '600' },
 });
 
@@ -601,7 +601,7 @@ function getExtensions() {
       }
     }),
   ];
-  if (WORD_WRAP) { exts.push(lineWrapping); }
+  if (WORD_WRAP && lineWrapping) { exts.push(lineWrapping); }
   return exts;
 }
 
@@ -664,6 +664,10 @@ function initEditorView(code) {
 function initEditor() {
   try {
     initEditorView(INITIAL_CODE);
+    if (${disableSystemKeyboard ? 'true' : 'false'}) {
+      var cmContent = document.querySelector('.cm-content');
+      if (cmContent) cmContent.setAttribute('inputmode', 'none');
+    }
     postReady();
     postEditorReady();
     setTimeout(function() {
@@ -712,7 +716,12 @@ async function renderSketch(containerId, code) {
   if (!container) return;
 
   if (container.__p5) {
-    try { await container.__p5.remove(); } catch (e) { console.error('Error removing p5 instance:', e); }
+    try {
+      await Promise.race([
+        container.__p5.remove(),
+        new Promise(function(_, reject) { setTimeout(function() { reject(new Error('p5 remove timeout')); }, 1000); })
+      ]);
+    } catch (e) { console.error('Error removing p5 instance:', e); }
     container.__p5 = null;
   }
   container.innerHTML = '';
@@ -814,7 +823,7 @@ function handleMessage(data) {
         if (scroller) scroller.style.fontSize = msg.fontSize + 'px';
         break;
       case 'setWordWrap':
-        if (view) {
+        if (view && msg.wordWrap !== WORD_WRAP) {
           WORD_WRAP = msg.wordWrap;
           var savedDoc = view.state.doc.toString();
           var savedSel = view.state.selection.main.head;
@@ -828,6 +837,10 @@ function handleMessage(data) {
           });
           view.dispatch({ selection: { anchor: savedSel, head: savedSel } });
           view.focus();
+          if (${disableSystemKeyboard ? 'true' : 'false'}) {
+            var cmContent2 = document.querySelector('.cm-content');
+            if (cmContent2) cmContent2.setAttribute('inputmode', 'none');
+          }
         }
         break;
       case 'backspace':
@@ -922,18 +935,91 @@ function handleMessage(data) {
         renderSketch('user-sketch', userCode).then(function() {
           if (typeof window.__tutRun === 'function') window.__tutRun();
 
+          function stripIgnoredRegions(src) {
+            var out = '';
+            var i = 0;
+            var n = src.length;
+            while (i < n) {
+              var c2 = src[i];
+              var c3 = src[i + 1];
+              if (c2 === '/' && c3 === '/') {
+                while (i < n && src[i] !== '\\n') i++;
+                continue;
+              }
+              if (c2 === '/' && c3 === '*') {
+                i += 2;
+                while (i < n && !(src[i] === '*' && src[i + 1] === '/')) i++;
+                i += 2;
+                continue;
+              }
+              if (c2 === '"' || c2 === '\\'' || c2 === '\`') {
+                var quote = c2;
+                out += c2;
+                i++;
+                while (i < n) {
+                  if (src[i] === '\\\\') { out += src[i]; if (i + 1 < n) { out += src[i + 1]; } i += 2; continue; }
+                  if (src[i] === quote) { out += src[i]; i++; break; }
+                  out += src[i]; i++;
+                }
+                continue;
+              }
+              out += c2;
+              i++;
+            }
+            return out;
+          }
+          function findCallArgsList(sanitized, startIdx) {
+            var i2 = startIdx;
+            while (i2 < sanitized.length && sanitized[i2] !== '(') i2++;
+            if (sanitized[i2] !== '(') return null;
+            var depth = 0;
+            var argStart = i2 + 1;
+            var args = [];
+            for (var j = i2; j < sanitized.length; j++) {
+              var ch = sanitized[j];
+              if (ch === '(') depth++;
+              else if (ch === ')') {
+                depth--;
+                if (depth === 0) {
+                  var raw = sanitized.slice(argStart, j);
+                  if (raw.trim().length > 0) args.push(raw);
+                  return args;
+                }
+              } else if (ch === ',' && depth === 1) {
+                args.push(sanitized.slice(argStart, j));
+                argStart = j + 1;
+              }
+            }
+            return null;
+          }
+          function findCallsByName(code, name) {
+            var sanitized = stripIgnoredRegions(code);
+            var calls = [];
+            var nameRe = new RegExp('\\\\b' + name + '\\\\b', 'g');
+            var m;
+            var idxs = [];
+            while ((m = nameRe.exec(sanitized)) !== null) { idxs.push(m.index + m[0].length); }
+            for (var k = 0; k < idxs.length; k++) {
+              var argList = findCallArgsList(sanitized, idxs[k]);
+              if (argList !== null) {
+                calls.push(argList.map(function(a) { return a.trim(); }).filter(function(a) { return a.length > 0; }));
+              }
+            }
+            return calls;
+          }
+          function normalizeForCompare(src) {
+            var stripped = stripIgnoredRegions(src);
+            return stripped.replace(/\\s+/g, ' ').trim();
+          }
+          function codeMatchesSolution(userCode, solutionCode) {
+            if (!solutionCode) return true;
+            return normalizeForCompare(userCode) === normalizeForCompare(solutionCode);
+          }
           function validateSync(code, rules) {
             for (var ri = 0; ri < rules.length; ri++) {
               var rule = rules[ri];
               if (rule.type === 'functionCall') {
-                var argRe = new RegExp('\\b' + rule.name + '[\\s]*\\(([^)]*)\\)', 'g');
-                var matches = [];
-                var rm;
-                while ((rm = argRe.exec(code)) !== null) {
-                  var rawArgs = rm[1];
-                  var args = rawArgs.split(',').map(function(a) { return a.trim(); }).filter(function(a) { return a.length > 0; });
-                  matches.push(args);
-                }
+                var matches = findCallsByName(code, rule.name);
                 if (matches.length === 0) return { passed: false, reason: 'Add a ' + rule.name + '() call' };
                 if (rule.exactArgs !== undefined) {
                   var hasCorrect = false;
@@ -971,11 +1057,13 @@ function handleMessage(data) {
             : [];
           try {
             if (activeRules.length > 0) {
-              var nonPixelRules = activeRules.filter(function(r) { return r.type !== 'pixelMatch'; });
-              hasPixelRules = activeRules.some(function(r) { return r.type === 'pixelMatch'; });
+              var nonPixelRules = activeRules.filter(function(r) { return r.type !== 'pixelMatch' && r.type !== 'expectedPixels'; });
+              hasPixelRules = activeRules.some(function(r) { return r.type === 'pixelMatch' || r.type === 'expectedPixels'; });
               syncResult = validateSync(userCode, nonPixelRules);
+            } else if (SOLUTION_CODE) {
+              syncResult = { passed: codeMatchesSolution(userCode, SOLUTION_CODE), reason: '' };
             } else {
-              syncResult = { passed: SOLUTION_CODE && userCode.trim() === SOLUTION_CODE.trim(), reason: '' };
+              syncResult = { passed: true, reason: '' };
             }
           } catch(ve) { console.error('Validation error:', ve); }
 
@@ -997,65 +1085,89 @@ function handleMessage(data) {
             return;
           }
 
-          var pixelRules = activeRules.filter(function(r) { return r.type === 'pixelMatch'; });
-          var pixelDelay = 300;
-          setTimeout(function() {
-            var container = document.getElementById('user-sketch');
-            if (!container || !container.__p5) {
-              if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-                window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'validationFailed', reason: 'Sketch did not render' }));
-              }
-              return;
+          var pixelMatches = activeRules.filter(function(r) { return r.type === 'pixelMatch'; });
+          var expectedPixelsRules = activeRules.filter(function(r) { return r.type === 'expectedPixels'; });
+          function postValidationFailed(reason) {
+            if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+              window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'validationFailed', reason: reason }));
             }
-            var p5Instance = container.__p5;
+          }
+          function postSuccess() {
+            if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+              if (TASKS.length > 0 && ACTIVE_TASK_INDEX < TASKS.length - 1) {
+                window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'taskComplete', taskIndex: ACTIVE_TASK_INDEX }));
+              } else {
+                window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'exerciseComplete' }));
+              }
+            }
+          }
+          function waitForFrame(p5Inst, cb) {
+            var start = Date.now();
+            function check() {
+              var fc = 0;
+              try { fc = typeof p5Inst.frameCount === 'function' ? p5Inst.frameCount() : p5Inst.frameCount; } catch(e) {}
+              if (fc > 0) { cb(true); return; }
+              if (Date.now() - start > 2000) { cb(false); return; }
+              if (typeof requestAnimationFrame === 'function') { requestAnimationFrame(check); } else { setTimeout(check, 32); }
+            }
+            check();
+          }
+          function sampleAllPoints(p5Instance) {
+            var cnv = p5Instance.canvas;
+            if (!cnv) { postValidationFailed('Canvas not found'); return false; }
+            var ctx = cnv.getContext('2d');
+            if (!ctx) { postValidationFailed('Cannot read canvas pixels'); return false; }
+            var d = (p5Instance.width && cnv.width) ? (cnv.width / p5Instance.width) : 1;
+            function checkPoint(pt) {
+              var tol = pt.tolerance !== undefined ? pt.tolerance : 30;
+              var px = Math.min(Math.max(0, Math.floor(pt.x * d)), cnv.width - 1);
+              var py = Math.min(Math.max(0, Math.floor(pt.y * d)), cnv.height - 1);
+              var dat = ctx.getImageData(px, py, 1, 1).data;
+              var rDiff = Math.abs(dat[0] - pt.expected[0]);
+              var gDiff = Math.abs(dat[1] - pt.expected[1]);
+              var bDiff = Math.abs(dat[2] - pt.expected[2]);
+              return (rDiff <= tol && gDiff <= tol && bDiff <= tol);
+            }
+            for (var pi = 0; pi < pixelMatches.length; pi++) {
+              var pr = pixelMatches[pi];
+              if (!checkPoint(pr)) {
+                var px2 = Math.min(Math.max(0, Math.floor(pr.x * d)), cnv.width - 1);
+                var py2 = Math.min(Math.max(0, Math.floor(pr.y * d)), cnv.height - 1);
+                var d2 = ctx.getImageData(px2, py2, 1, 1).data;
+                postValidationFailed('Color at (' + pr.x + ',' + pr.y + ') is wrong — expected rgb(' + pr.expected.join(',') + ') but got rgb(' + d2[0] + ',' + d2[1] + ',' + d2[2] + ')');
+                return false;
+              }
+            }
+            for (var ei = 0; ei < expectedPixelsRules.length; ei++) {
+              var er = expectedPixelsRules[ei];
+              var pts = er.points || [];
+              if (pts.length === 0) continue;
+              var passed = 0;
+              for (var pi2 = 0; pi2 < pts.length; pi2++) {
+                if (checkPoint(pts[pi2])) passed++;
+              }
+              var minFrac = er.minPassFraction !== undefined ? er.minPassFraction : 0.9;
+              if (passed / pts.length < minFrac) {
+                postValidationFailed('Sketch output does not match (' + passed + '/' + pts.length + ' pixels matched)');
+                return false;
+              }
+            }
+            return true;
+          }
+          var frameContainer = document.getElementById('user-sketch');
+          if (!frameContainer || !frameContainer.__p5) {
+            postValidationFailed('Sketch did not render');
+            return;
+          }
+          waitForFrame(frameContainer.__p5, function(rendered) {
+            if (!rendered) { postValidationFailed('Sketch did not render in time — try again'); return; }
             try {
-              var cnv = p5Instance.canvas;
-              if (!cnv) {
-                if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-                  window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'validationFailed', reason: 'Canvas not found' }));
-                }
-                return;
-              }
-              var ctx = cnv.getContext('2d');
-              if (!ctx) {
-                if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-                  window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'validationFailed', reason: 'Cannot read canvas pixels' }));
-                }
-                return;
-              }
-              for (var pi = 0; pi < pixelRules.length; pi++) {
-                var pr = pixelRules[pi];
-                var tol = pr.tolerance !== undefined ? pr.tolerance : 30;
-                var px = Math.min(Math.max(0, Math.floor(pr.x)), cnv.width - 1);
-                var py = Math.min(Math.max(0, Math.floor(pr.y)), cnv.height - 1);
-                var imageData = ctx.getImageData(px, py, 1, 1).data;
-                var rDiff = Math.abs(imageData[0] - pr.expected[0]);
-                var gDiff = Math.abs(imageData[1] - pr.expected[1]);
-                var bDiff = Math.abs(imageData[2] - pr.expected[2]);
-                if (rDiff > tol || gDiff > tol || bDiff > tol) {
-                  if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-                    window.ReactNativeWebView.postMessage(JSON.stringify({
-                      type: 'validationFailed',
-                      reason: 'Color at (' + pr.x + ',' + pr.y + ') is wrong — expected rgb(' + pr.expected.join(',') + ') but got rgb(' + imageData[0] + ',' + imageData[1] + ',' + imageData[2] + ')'
-                    }));
-                  }
-                  return;
-                }
-              }
-              if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-                if (TASKS.length > 0 && ACTIVE_TASK_INDEX < TASKS.length - 1) {
-                  window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'taskComplete', taskIndex: ACTIVE_TASK_INDEX }));
-                } else {
-                  window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'exerciseComplete' }));
-                }
-              }
+              if (sampleAllPoints(frameContainer.__p5)) postSuccess();
             } catch(e) {
               console.error('Pixel validation error:', e);
-              if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-                window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'validationFailed', reason: 'Could not verify sketch output' }));
-              }
+              postValidationFailed('Could not verify sketch output');
             }
-          }, pixelDelay);
+          });
 
           if (typeof prettierLib !== 'undefined' && prettierLib.format) {
             var postCode = view.state.doc.toString();
@@ -1075,13 +1187,19 @@ function handleMessage(data) {
         }).catch(function(e) { console.error('Render error:', e); });
         break;
 
+      case 'editorReady':
+        postEditorReady();
+        break;
+
     }
   } catch(e) {
     console.error('handleMessage error:', e);
   }
 }
 
-window.addEventListener('message', function(event) { handleMessage(event.data); });
+function handleMessageEvent(event) { handleMessage(event.data); }
+window.addEventListener('message', handleMessageEvent);
+document.addEventListener('message', handleMessageEvent);
 
 (function() {
   var lastScrollY = window.scrollY || 0;

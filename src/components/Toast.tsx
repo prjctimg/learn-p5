@@ -14,6 +14,7 @@ interface ToastProps {
   duration?: number;
   icon?: string;
   iconColor?: string;
+  tone?: "success" | "failure";
 }
 
 export default function Toast({
@@ -24,12 +25,15 @@ export default function Toast({
   onDismiss,
   duration = 4000,
   icon = "check-circle",
-  iconColor = "#22C55E",
+  iconColor,
+  tone,
 }: ToastProps) {
- const translateY = useRef(new Animated.Value(-120)).current;
- const insets = useSafeAreaInsets();
- const { colorScheme } = useThemeContext();
- const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+const translateY = useRef(new Animated.Value(-120)).current;
+  const insets = useSafeAreaInsets();
+  const { colorScheme } = useThemeContext();
+  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const effectiveIconColor =
+    iconColor ?? (tone === "failure" ? colors.error : colors.success);
 
  useEffect(() => {
  if (visible) {
@@ -72,14 +76,15 @@ export default function Toast({
  style={[
  styles.container,
  {
- backgroundColor: colors.surfaceContainerHighest,
- transform: [{ translateY }],
- paddingTop: insets.top + 8,
- },
- ]}
- >
- <View style={styles.content}>
-    <MaterialCommunityIcons name={icon as any} size={20} color={iconColor} />
+backgroundColor: colors.surfaceContainerHighest,
+  transform: [{ translateY }],
+  paddingTop: insets.top + 8,
+  shadowColor: colors.scrim,
+  },
+  ]}
+  >
+  <View style={styles.content}>
+     <MaterialCommunityIcons name={icon as any} size={20} color={effectiveIconColor} />
  <Text style={[styles.message, { color: colors.onSurface }]}>
  {message}
  </Text>
@@ -106,13 +111,12 @@ const styles = StyleSheet.create({
  justifyContent: "space-between",
  paddingHorizontal: 16,
  paddingBottom: 12,
- shadowColor: "#000",
- shadowOffset: { width: 0, height: 8 },
- shadowOpacity: 0.15,
- shadowRadius: 16,
- elevation: 8,
- zIndex: 1000,
- },
+shadowOffset: { width: 0, height: 8 },
+  shadowOpacity: 0.15,
+  shadowRadius: 16,
+  elevation: 8,
+  zIndex: 1000,
+  },
  content: {
  flexDirection: "row",
  alignItems: "center",

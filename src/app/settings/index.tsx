@@ -37,6 +37,7 @@ const SETTINGS_KEYS = {
   devMode: "setting_devMode",
   showDrawerFab: "setting_showDrawerFab",
   showStatusBar: "setting_showStatusBar",
+  disableSystemKeyboard: "setting_disableSystemKeyboard",
 };
 
 const createStyles = (colors: Record<string, string>) =>
@@ -104,6 +105,7 @@ export default function Settings() {
   const [devMode, setDevMode] = useState(false);
   const [showDrawerFab, setShowDrawerFab] = useState(true);
   const [showStatusBar, setShowStatusBar] = useState(true);
+  const [disableSystemKeyboard, setDisableSystemKeyboard] = useState(false);
   const [debugToastVisible, setDebugToastVisible] = useState(false);
   const [debugStreakToastVisible, setDebugStreakToastVisible] = useState(false);
   const [debugStreakCount, setDebugStreakCount] = useState("7");
@@ -123,7 +125,8 @@ export default function Settings() {
       SETTINGS_KEYS.devMode,
       SETTINGS_KEYS.showDrawerFab,
       SETTINGS_KEYS.showStatusBar,
-    ]).then(([reminder, snippet, hour, minute, fontSize, bg, kb, theme, wrap, dev, drawerFab, statusBar]) => {
+      SETTINGS_KEYS.disableSystemKeyboard,
+    ]).then(([reminder, snippet, hour, minute, fontSize, bg, kb, theme, wrap, dev, drawerFab, statusBar, disableSysKb]) => {
       setDailyReminder(reminder[1] === "true");
       setSnippetAlternatives(snippet[1] === "true");
       if (hour[1]) setNotificationHour(parseInt(hour[1], 10));
@@ -136,6 +139,7 @@ export default function Settings() {
       setDevMode(dev[1] === "true");
       if (drawerFab[1] !== null) setShowDrawerFab(drawerFab[1] !== "false");
       if (statusBar[1] !== null) setShowStatusBar(statusBar[1] !== "false");
+      setDisableSystemKeyboard(disableSysKb[1] === "true");
     });
     AsyncStorage.getItem("onboardingData").then((val) => {
       if (val) {
@@ -238,6 +242,11 @@ export default function Settings() {
   const toggleShowStatusBar = async (value: boolean) => {
     setShowStatusBar(value);
     await AsyncStorage.setItem(SETTINGS_KEYS.showStatusBar, value.toString());
+  };
+
+  const toggleDisableSystemKeyboard = async (value: boolean) => {
+    setDisableSystemKeyboard(value);
+    await AsyncStorage.setItem(SETTINGS_KEYS.disableSystemKeyboard, value.toString());
   };
 
   const handleCompleteAllExercises = async () => {
@@ -554,11 +563,11 @@ export default function Settings() {
             <View style={styles.flexChild}>
               <Text style={styles.settingTitle}>Keyboard Height</Text>
               <Text style={styles.settingDescription}>
-                {keyboardHeight === "small" ? "200px — compact" : keyboardHeight === "medium" ? "280px — default" : "360px — tall"}
+                {keyboardHeight === "small" ? "230px — compact" : "280px — default"}
               </Text>
             </View>
             <View style={{ flexDirection: "row", gap: 6 }}>
-              {["small", "medium", "tall"].map((opt) => (
+              {["small", "medium"].map((opt) => (
                 <Pressable
                   key={opt}
                   onPress={() => changeKeyboardHeight(opt)}
@@ -576,11 +585,23 @@ export default function Settings() {
                   accessibilityLabel={`${opt} keyboard`}
                 >
                   <Text style={{ fontFamily: "JetBrainsMono", fontSize: 10, fontWeight: "700", textTransform: "uppercase", letterSpacing: 0.5, color: colors.onSurfaceVariant }}>
-                    {opt === "small" ? "S" : opt === "medium" ? "M" : "T"}
+                    {opt === "small" ? "S" : "M"}
                   </Text>
                 </Pressable>
               ))}
             </View>
+          </View>
+          <View style={[styles.cardRow, { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.outlineVariant }]}>
+            <View style={styles.flexChild}>
+              <Text style={styles.settingTitle}>Disable System Keyboard</Text>
+              <Text style={styles.settingDescription}>Prevent the OS keyboard from appearing in the exercise editor</Text>
+            </View>
+            <Switch
+              value={disableSystemKeyboard}
+              onValueChange={toggleDisableSystemKeyboard}
+              trackColor={{ false: "#767577", true: ctaColor }}
+              thumbColor="#ffffff"
+            />
           </View>
         </View>
 

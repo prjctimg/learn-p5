@@ -1,8 +1,16 @@
+export interface ExpectedPixel {
+  x: number;
+  y: number;
+  expected: [number, number, number];
+  tolerance?: number;
+}
+
 export type ValidationRule =
   | { type: "functionCall"; name: string; exactArgs?: number; minArgs?: number }
   | { type: "functionExists"; name: string }
   | { type: "canvasSize"; width: number; height: number }
   | { type: "pixelMatch"; x: number; y: number; expected: [number, number, number]; tolerance?: number }
+  | { type: "expectedPixels"; points: ExpectedPixel[]; minPassFraction?: number }
   | { type: string; [key: string]: unknown };
 
 export interface ExerciseTask {
