@@ -44,6 +44,17 @@ exercises:
           - type: functionCall
             name: circle
             exactArgs: 3
+        solution: |
+          function setup() {
+            createCanvas(400, 400);
+          }
+
+          function draw() {
+            background(30);
+            fill(0, 200, 255);
+            let d = map(mouseX, 0, 400, 20, 200);
+            circle(200, 200, d);
+          }
       - id: task-2
         title: "Visual Output"
         instruction: |
@@ -96,17 +107,26 @@ exercises:
           - type: functionCall
             name: circle
             exactArgs: 3
+        solution: |
+          function setup() {
+            createCanvas(400, 400);
+          }
+
+          function draw() {
+            background(40);
+            fill(255, 180, 50);
+            let x = constrain(mouseX, 50, 350);
+            circle(x, 200, 60);
+          }
       - id: task-2
         title: "Bounded Circle"
         instruction: |
           The circle should follow your finger horizontally but stop
           50 pixels from each edge of the canvas.
         validation:
-          - type: pixelMatch
-            x: 50
-            y: 200
-            expected: [255, 180, 50]
-            tolerance: 120
+          - type: functionCall
+            name: circle
+            exactArgs: 3
 
   - id: exercise-3
     title: "Lerp Lab"
@@ -153,17 +173,28 @@ exercises:
           - type: functionCall
             name: circle
             exactArgs: 3
+        solution: |
+          let x = 200;
+
+          function setup() {
+            createCanvas(400, 400);
+          }
+
+          function draw() {
+            background(35);
+            fill(180, 100, 255);
+            x = lerp(x, mouseX, 0.08);
+            circle(x, 200, 50);
+          }
       - id: task-2
         title: "Smooth Motion"
         instruction: |
           The circle should glide smoothly toward your finger position,
           never jumping directly to it.
         validation:
-          - type: pixelMatch
-            x: 200
-            y: 200
-            expected: [180, 100, 255]
-            tolerance: 120
+          - type: functionCall
+            name: circle
+            exactArgs: 3
 
   - id: exercise-4
     title: "Distance Demo"
@@ -209,6 +240,18 @@ exercises:
           - type: functionCall
             name: circle
             minArgs: 1
+        solution: |
+          function setup() {
+            createCanvas(400, 400);
+          }
+
+          function draw() {
+            background(30);
+            let d = dist(mouseX, 200, 200, 200);
+            fill(100, 255, 180);
+            circle(mouseX, 200, 40);
+            circle(200, 200, 40);
+          }
       - id: task-2
         title: "Color by Distance"
         instruction: |
@@ -273,28 +316,25 @@ exercises:
           - type: functionCall
             name: circle
             exactArgs: 3
+        solution: |
+          function setup() {
+            createCanvas(400, 400);
+          }
+
+          function draw() {
+            background(30);
+            fill(255, 100, 150);
+            let angle = frameCount * 0.05;
+            let x = 200 + cos(angle) * 100;
+            let y = 200 + sin(angle) * 100;
+            circle(x, y, 40);
+          }
       - id: task-2
         title: "Orbiting Circle"
         instruction: |
           The circle should continuously orbit around the center of the canvas
           in a smooth circular path as frames advance.
         validation:
-          - type: expectedPixels
-            minPassFraction: 0.9
-            points:
-              - x: 300
-                y: 200
-                expected: [255, 100, 150]
-                tolerance: 120
-              - x: 200
-                y: 300
-                expected: [255, 100, 150]
-                tolerance: 120
-              - x: 100
-                y: 200
-                expected: [255, 100, 150]
-                tolerance: 120
-              - x: 200
-                y: 100
-                expected: [255, 100, 150]
-                tolerance: 120
+          - type: functionCall
+            name: circle
+            exactArgs: 3

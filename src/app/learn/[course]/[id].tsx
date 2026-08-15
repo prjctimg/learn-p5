@@ -176,7 +176,7 @@ export default function Exercise() {
       instruction: state.exercise.instruction,
       exerciseNumber: parseInt(id?.replace("exercise-", "") ?? "1", 10),
       startingCode: state.exercise.startingCode ?? "",
-      solution: state.exercise.solution ?? "",
+      solution: state.exercise.tasks?.[state.currentTaskIndex]?.solution ?? state.exercise.solution ?? "",
       colorScheme: colorScheme === "dark" ? "dark" : "light",
       editorTheme,
       codeFontSize,
@@ -575,18 +575,18 @@ case "sketchError":
 
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Per user choice (v0.6.114): the Run-button long-press → reference search
-  // already existed at a 2-second threshold, but that felt sluggish. Lowered to
-  // 600ms so holding the Run button reveals the SearchOverlay responsively,
-  // while a quick press still runs the sketch. Fire a light haptic the moment
-  // the search overlay opens so the user gets feedback that the long-press was
-  // recognized even before the focus effect (v0.6.110) raises the keyboard.
+  // Run-button long-press → reference search (v0.6.114): holding the Run
+  // button reveals the SearchOverlay while a quick press still runs the sketch.
+  // Uses React Native's default long-press delay (500ms). Fire a light haptic
+  // the moment the search overlay opens so the user gets feedback that the
+  // long-press was recognized even before the focus effect (v0.6.110) raises
+  // the keyboard.
   const handleRunPressIn = useCallback(() => {
     longPressTimerRef.current = setTimeout(() => {
       longPressTimerRef.current = null;
       setSearchVisible(true);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-    }, 600);
+    }, 500);
   }, []);
 
   const handleRunPressOut = useCallback(() => {
@@ -762,11 +762,12 @@ case "sketchError":
   })();
   }, [state.completed, state.exercise, course, webViewReady, handleToastNext, showToast]);
 
- const exerciseSymbols = useMemo(() => {
- if (!state.exercise) return [];
- const code = (state.exercise.startingCode + " " + (state.exercise.solution ?? "")).toLowerCase();
- return P5_FUNCTION_NAMES.filter((fn) => code.includes(fn.toLowerCase()));
- }, [state.exercise]);
+  const exerciseSymbols = useMemo(() => {
+  if (!state.exercise) return [];
+  const taskSolution = state.exercise.tasks?.[state.currentTaskIndex]?.solution ?? state.exercise.solution ?? "";
+  const code = (state.exercise.startingCode + " " + taskSolution).toLowerCase();
+  return P5_FUNCTION_NAMES.filter((fn) => code.includes(fn.toLowerCase()));
+  }, [state.exercise, state.currentTaskIndex]);
 
  const usedFunctions = useMemo(() => {
  return ONCE_ONLY_P5_FUNCTIONS.filter((fn) => {

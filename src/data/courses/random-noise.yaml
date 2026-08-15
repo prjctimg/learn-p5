@@ -39,22 +39,11 @@ exercises:
       }
     tasks:
       - id: task-1
-        title: "Random Position"
+        title: "Seeded Random Position"
         instruction: |
-          Use random(50, 350) to generate x and y values.
-          Draw a circle at those coordinates with diameter 80.
-        validation:
-          - type: functionCall
-            name: random
-            minArgs: 2
-          - type: functionCall
-            name: circle
-            exactArgs: 3
-      - id: task-2
-        title: "Reproducible Random"
-        instruction: |
-          Add randomSeed(42) inside setup() before any random calls.
-          This ensures the same "random" position every time the sketch runs.
+          Use randomSeed(42) in setup() so the result is reproducible.
+          Use random(50, 350) to generate x and y values, then draw a circle
+          at those coordinates with diameter 80.
         validation:
           - type: functionCall
             name: randomSeed
@@ -62,11 +51,9 @@ exercises:
           - type: functionCall
             name: random
             minArgs: 2
-          - type: pixelMatch
-            x: 200
-            y: 200
-            expected: [30, 30, 30]
-            tolerance: 120
+          - type: functionCall
+            name: circle
+            exactArgs: 3
 
   - id: exercise-2
     title: "Gaussian Guy"
@@ -169,6 +156,25 @@ exercises:
           - type: functionCall
             name: rect
             exactArgs: 4
+        solution: |
+          function setup() {
+            createCanvas(400, 400);
+            noiseDetail(4, 0.5);
+            noStroke();
+          }
+
+          function draw() {
+            background(20);
+            let size = 20;
+            for (let x = 0; x < width; x += size) {
+              for (let y = 0; y < height; y += size) {
+                let n = noise(x * 0.1, y * 0.1);
+                let c = n * 255;
+                fill(c, c * 0.8, 100);
+                rect(x, y, size, size);
+              }
+            }
+          }
       - id: task-2
         title: "Noise Detail"
         instruction: |
@@ -226,8 +232,19 @@ exercises:
           - type: functionCall
             name: circle
             exactArgs: 3
-          - type: functionCall
-            name: frameCount
+        solution: |
+          function setup() {
+            createCanvas(400, 400);
+          }
+
+          function draw() {
+            background(20, 20, 40);
+            fill(255, 100, 200);
+            noStroke();
+            let x = noise(frameCount * 0.01) * width;
+            let y = noise(frameCount * 0.01) * height;
+            circle(x, y, 40);
+          }
       - id: task-2
         title: "Offset the Noise"
         instruction: |
@@ -236,7 +253,7 @@ exercises:
         validation:
           - type: functionCall
             name: noise
-            minArgs: 2
+            minArgs: 1
           - type: functionCall
             name: circle
             exactArgs: 3

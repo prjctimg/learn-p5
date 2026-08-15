@@ -50,6 +50,19 @@ exercises:
           - type: functionCall
             name: createSlider
             exactArgs: 3
+        solution: |
+          let slider;
+
+          function setup() {
+            createCanvas(400, 400);
+            slider = createSlider(10, 200, 80);
+          }
+
+          function draw() {
+            background(30);
+            fill(100, 200, 255);
+            noStroke();
+          }
       - id: task-2
         title: "Read Slider Value"
         instruction: |
@@ -114,6 +127,21 @@ exercises:
           - type: functionCall
             name: createButton
             exactArgs: 1
+        solution: |
+          let btn;
+          let bgColor = 30;
+
+          function setup() {
+            createCanvas(400, 400);
+            btn = createButton("Toggle");
+          }
+
+          function draw() {
+            background(bgColor);
+            fill(255, 180, 50);
+            noStroke();
+            circle(200, 200, 100);
+          }
       - id: task-2
         title: "Attach Event"
         instruction: |
@@ -174,6 +202,19 @@ exercises:
           - type: functionCall
             name: createCheckbox
             exactArgs: 2
+        solution: |
+          let cb;
+
+          function setup() {
+            createCanvas(400, 400);
+            cb = createCheckbox("Fill", true);
+          }
+
+          function draw() {
+            background(30);
+            stroke(255);
+            strokeWeight(3);
+          }
       - id: task-2
         title: "Toggle Fill"
         instruction: |
@@ -232,6 +273,18 @@ exercises:
           - type: functionCall
             name: createColorPicker
             exactArgs: 1
+        solution: |
+          let picker;
+
+          function setup() {
+            createCanvas(400, 400);
+            picker = createColorPicker("#ff64c8");
+          }
+
+          function draw() {
+            background(30);
+            noStroke();
+          }
       - id: task-2
         title: "Apply Picked Color"
         instruction: |

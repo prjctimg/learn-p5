@@ -1,8 +1,8 @@
 > # Learn P5
 
 [![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](./LICENSE)
-[![Android build](https://github.com/skchr/learn-p5/actions/workflows/release.yaml/badge.svg)](https://github.com/skchr/learn-p5/actions/workflows/release.yaml)
-[![GitHub release](https://img.shields.io/github/v/release/skchr/learn-p5)](https://github.com/skchr/learn-p5/releases)
+[![Android build](https://github.com/prjctimg/learn-p5/actions/workflows/release.yaml/badge.svg)](https://github.com/prjctimg/learn-p5/actions/workflows/release.yaml)
+[![GitHub release](https://img.shields.io/github/v/release/prjctimg/learn-p5)](https://github.com/prjctimg/learn-p5/releases)
 
 - [What is this ?](#what-is-this)
 - [Who is this for ?](#who-is-this-for)
@@ -31,7 +31,7 @@ This app is intended for anyone who wants to learn p5.js at a relaxed pace that 
 
 The app is currently available on Android only and ChromeOS if you are on the `dev` branch.
 
-You can [grab the latest release here](https://github.com/skchr/learn-p5/releases/tag/latest)
+You can [grab the latest release here](https://github.com/prjctimg/learn-p5/releases/tag/latest)
 
 ## Where can I see and share suggestions ?
 
@@ -39,7 +39,7 @@ There's a few GitHub Discussions that are open to suggestions and where we post 
 
 More threads will be created as the project progresses:
 
-- [Accessibility](https://github.com/skchr/learn-p5/discussions/1)
+- [Accessibility](https://github.com/prjctimg/learn-p5/discussions/1)
 
 ## Roadmap & Project Status
 

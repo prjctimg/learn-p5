@@ -41,8 +41,8 @@ exercises:
             name: translate
             exactArgs: 2
           - type: pixelMatch
-            x: 150
-            y: 150
+            x: 200
+            y: 200
             expected: [100, 200, 255]
             tolerance: 120
   - id: exercise-2

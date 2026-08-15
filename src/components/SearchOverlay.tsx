@@ -6,7 +6,7 @@ import { useThemeContext } from "./ThemeProvider";
 import { Colors } from "../constants/Colors";
 import { P5_SYMBOLS, P5_SYMBOLS_BY_NAME, P5SymbolView } from "../data/reference";
 import { getExampleHtml } from "../utils/editor/exampleHtml";
-import { highlightSyntax, parseDescription } from "../utils/referenceRender";
+import { highlightSyntax, parseDescription, extractDescribeCaption, stripDescribe } from "../utils/referenceRender";
 import Fuse from "fuse.js";
 
 interface SearchOverlayProps {
@@ -214,12 +214,18 @@ function SymbolInlineDetail({
         {sym.examples && sym.examples.length > 0 && (
           <>
             <Text style={[styles.detailSection, { color: colors.onSurface }]}>Examples</Text>
-            {sym.examples.map((ex, i) => (
+            {sym.examples.map((ex, i) => {
+              const caption = extractDescribeCaption(ex);
+              const code = stripDescribe(ex);
+              return (
               <View key={i} style={{ marginBottom: 12 }}>
+                <Text style={[styles.exampleCaption, { color: colors.textSecondary, marginBottom: 6 }]}>
+                  {caption || `Example ${i + 1}`}
+                </Text>
                 {sym.norender ? (
                   <View style={[styles.codeBlock, { backgroundColor: colors.surfaceDim }]}>
                     <Text style={{ fontFamily: "JetBrainsMono", fontSize: 12, lineHeight: 18 }}>
-                      {highlightSyntax(ex, colorScheme).map((t, j) => (
+                      {highlightSyntax(code, colorScheme).map((t, j) => (
                         <Text key={j} style={{ color: t.color }}>{t.text}</Text>
                       ))}
                     </Text>
@@ -237,7 +243,7 @@ function SymbolInlineDetail({
                     />
                     <View style={[styles.codeBlock, { backgroundColor: colors.surfaceDim, marginTop: 8 }]}>
                       <Text style={{ fontFamily: "JetBrainsMono", fontSize: 12, lineHeight: 18 }}>
-                        {highlightSyntax(ex, colorScheme).map((t, j) => (
+                        {highlightSyntax(code, colorScheme).map((t, j) => (
                           <Text key={j} style={{ color: t.color }}>{t.text}</Text>
                         ))}
                       </Text>
@@ -245,7 +251,8 @@ function SymbolInlineDetail({
                   </>
                 )}
               </View>
-            ))}
+              );
+            })}
           </>
         )}
 
@@ -358,6 +365,12 @@ const styles = StyleSheet.create({
   },
   syntaxBox: { borderRadius: 8, padding: 12, borderLeftWidth: 3, marginBottom: 12 },
   codeBlock: { borderRadius: 8, padding: 10 },
+  exampleCaption: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 12,
+    lineHeight: 18,
+    fontStyle: "italic",
+  },
   exampleWebView: { height: 200, borderRadius: 8, borderWidth: 1, borderColor: "rgba(128,128,128,0.2)" },
   paramRow: { marginBottom: 8 },
   paramName: { fontFamily: "JetBrainsMono", fontSize: 12, fontWeight: "700" },

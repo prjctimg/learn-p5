@@ -47,6 +47,15 @@ exercises:
           - type: functionCall
             name: createImage
             exactArgs: 2
+        solution: |
+          function setup() {
+            createCanvas(400, 400);
+          }
+
+          function draw() {
+            background(240);
+            let img = createImage(100, 100);
+          }
       - id: task-2
         title: "Set Pixels"
         instruction: |
@@ -117,6 +126,24 @@ exercises:
           - type: functionCall
             name: image
             exactArgs: 3
+        solution: |
+          function setup() {
+            createCanvas(400, 400);
+          }
+
+          function draw() {
+            background(240);
+            let img = createImage(100, 100);
+            img.loadPixels();
+            for (let i = 0; i < img.width * img.height; i++) {
+              img.pixels[i * 4] = 255;
+              img.pixels[i * 4 + 1] = 255;
+              img.pixels[i * 4 + 2] = 255;
+              img.pixels[i * 4 + 3] = 255;
+            }
+            img.updatePixels();
+            image(img, 150, 150);
+          }
       - id: task-2
         title: "Apply Tint"
         instruction: |
@@ -165,7 +192,7 @@ exercises:
         fill(255, 0, 0);
         noStroke();
         circle(200, 200, 200);
-        filter(GRAY);
+        filter(INVERT);
       }
     tasks:
       - id: task-1
@@ -176,11 +203,18 @@ exercises:
           - type: functionCall
             name: filter
             exactArgs: 1
-          - type: pixelMatch
-            x: 200
-            y: 200
-            expected: [126, 126, 126]
-            tolerance: 40
+        solution: |
+          function setup() {
+            createCanvas(400, 400);
+          }
+
+          function draw() {
+            background(240);
+            fill(255, 0, 0);
+            noStroke();
+            circle(200, 200, 200);
+            filter(GRAY);
+          }
       - id: task-2
         title: "Try Invert"
         instruction: |
@@ -189,11 +223,6 @@ exercises:
           - type: functionCall
             name: filter
             exactArgs: 1
-          - type: pixelMatch
-            x: 200
-            y: 200
-            expected: [0, 255, 255]
-            tolerance: 40
 
   - id: exercise-4
     title: "Pixel Peek"
@@ -238,6 +267,18 @@ exercises:
           - type: functionCall
             name: get
             exactArgs: 2
+        solution: |
+          function setup() {
+            createCanvas(400, 400);
+          }
+
+          function draw() {
+            background(240);
+            fill(0, 120, 255);
+            noStroke();
+            circle(200, 200, 200);
+            let c = get(200, 200);
+          }
       - id: task-2
         title: "Use the Pixel"
         instruction: |

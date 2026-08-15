@@ -7,22 +7,54 @@ const SYMBOL_PATTERN = new RegExp(
   "g"
 );
 
+const P5_CONSTANTS = [
+  "WIDTH", "HEIGHT", "PI", "TWO_PI", "HALF_PI", "QUARTER_PI", "TAU", "EPSILON",
+  "CENTER", "CORNER", "LEFT", "RIGHT", "TOP", "BOTTOM", "BASELINE", "TOP_LEFT",
+  "TOP_RIGHT", "BOTTOM_LEFT", "BOTTOM_RIGHT", "CENTER_CENTER", "LEFT_CENTER",
+  "RIGHT_CENTER", "TOP_CENTER", "BOTTOM_CENTER",
+  "RGB", "HSB", "HSL", "HSBA", "RGBA", "WEBGL", "P2D", "P3D",
+  "NORMAL", "IMAGE", "CLAMP", "REPEAT", "MIRROR",
+  "OPEN", "CLOSE", "CHORD", "PIE", "SQUARE", "ROUND", "PROJECT", "MITER", "BEVEL",
+  "BLEND", "ADD", "SUBTRACT", "DIFFERENCE", "MULTIPLY", "SCREEN", "REPLACE",
+  "EXCLUSION", "DARKEST", "LIGHTEST", "OVERLAY", "HARD_LIGHT", "SOFT_LIGHT",
+  "DODGE", "BURN",
+  "LINEAR", "QUADRATIC", "CUBIC", "EXPONENTIAL", "SINE", "COSINE",
+  "MITER", "BEVEL", "ROUND",
+  "ARROW", "CROSS", "HAND", "MOVE", "TEXT", "WAIT",
+  "SHIFT", "CONTROL", "ALT", "OPTION", "BACKSPACE", "DELETE", "ENTER", "RETURN",
+  "TAB", "ESCAPE", "UP_ARROW", "DOWN_ARROW", "LEFT_ARROW", "RIGHT_ARROW",
+  "AMBIENT", "DIRECTIONAL", "POINT", "SPOT",
+  "LINE_LOOP", "LINE_STRIP", "TRIANGLES", "TRIANGLE_FAN", "TRIANGLE_STRIP",
+  "QUADS", "QUAD_STRIP", "TESS",
+  "POINTS", "LINES",
+];
+
+const P5_CONSTANTS_PATTERN = P5_CONSTANTS.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
+
 export function highlightSyntax(code: string, colorScheme?: "light" | "dark"): { text: string; color: string }[] {
   const theme = getEditorTheme("p5-learn", colorScheme || "dark");
-  const KEYWORD_RE = /\b(function|if|else|for|while|return|let|const|var|new|this|class)\b/g;
-  const P5_RE = new RegExp(`\\b(${P5_FUNCTION_NAMES.join("|")})\\b(?=\\()`, "g");
-  const NUMBER_RE = /\b\d+(\.\d+)?\b/g;
-  const STRING_RE = /("[^"]*"|'[^']*'|`[^`]*`)/g;
-  const COMMENT_RE = /(\/\/.*)/g;
-  const OP_RE = /([{}[\]();,.]|=>|[-+*/%&|^!<>=]=?)/g;
+  const COMMENT_RE = /(\/\/[^\n]*|\/\*[\s\S]*?\*\/)/g;
+  const STRING_RE = /("[^"\\]*(?:\\.[^"\\]*)*"|'[^'\\]*(?:\\.[^'\\]*)*'|`[^`\\]*(?:\\.[^`\\]*)*`)/g;
+  const KEYWORD_RE = /\b(function|if|else|for|while|do|switch|case|break|continue|return|new|delete|typeof|instanceof|in|of|class|extends|super|try|catch|finally|throw)\b/g;
+  const DECL_RE = /\b(let|const|var|static)\b/g;
+  const LITERAL_RE = /\b(true|false|null|undefined|this|NaN|Infinity)\b/g;
+  const P5_RE = new RegExp(`\\b(${P5_FUNCTION_NAMES.join("|")})\\b(?=\\s*\\()`, "g");
+  const P5_DOT_RE = new RegExp(`(?<=\\.)(${P5_FUNCTION_NAMES.join("|")})\\b(?=\\s*\\()`, "g");
+  const CONST_RE = new RegExp(`\\b(${P5_CONSTANTS_PATTERN})\\b`, "g");
+  const NUMBER_RE = /\b0[xX][0-9a-fA-F]+\b|\b\d+(\.\d+)?(?:[eE][+-]?\d+)?\b/g;
+  const OP_RE = /(=>|<=|>=|===|!==|==|!=|&&|\|\||[-+*/%&|^!<>=]|[{[\]();,.])/g;
 
   const allMatches: { index: number; text: string; color: string }[] = [];
   const patterns: [RegExp, string][] = [
     [COMMENT_RE, theme.comment],
     [STRING_RE, theme.string],
+    [DECL_RE, theme.definitionKeyword || theme.keyword],
     [KEYWORD_RE, theme.keyword],
+    [LITERAL_RE, theme.constant || theme.number],
+    [CONST_RE, theme.constant || theme.number],
     [NUMBER_RE, theme.number],
     [P5_RE, theme.function],
+    [P5_DOT_RE, theme.function],
     [OP_RE, theme.operator],
   ];
   for (const [re, color] of patterns) {
@@ -48,6 +80,18 @@ export function highlightSyntax(code: string, colorScheme?: "light" | "dark"): {
     tokens.push({ text: code.slice(lastEnd), color: theme.fg });
   }
   return tokens.length > 0 ? tokens : [{ text: code, color: theme.fg }];
+}
+
+const DESCRIBE_RE = /describe\s*\(\s*(["'])((?:(?!\1).)*)\1\s*\)\s*;?\s*/g;
+
+export function extractDescribeCaption(code: string): string | null {
+  DESCRIBE_RE.lastIndex = 0;
+  const match = DESCRIBE_RE.exec(code);
+  return match ? match[2] : null;
+}
+
+export function stripDescribe(code: string): string {
+  return code.replace(DESCRIBE_RE, "").trim();
 }
 
 export function renderHighlightedCode(

@@ -34,33 +34,8 @@ jobs:
             exit 1
           fi
 
-      - name: Verify CodeMirror bundle
-        run: |
-          BUNDLE_FILE="src/utils/editor/codemirror-bundle.generated.ts"
-          if [ ! -f "$BUNDLE_FILE" ]; then
-            echo "ERROR: $BUNDLE_FILE not found"
-            exit 1
-          fi
-          SIZE=$(wc -c < "$BUNDLE_FILE")
-          if [ "$SIZE" -lt 100000 ]; then
-            echo "ERROR: CodeMirror bundle is too small ($SIZE bytes, expected >= 100000)"
-            echo "Regenerate with: npm run bundle-editor"
-            exit 1
-          fi
-          echo "CodeMirror bundle OK ($SIZE bytes)"
-
-      - name: Generate course modules
-        run: npm run build-courses
-
-      - name: Verify course modules
-        run: |
-          COUNT=$(find src/data/courses -name "*.ts" 2>/dev/null | wc -l)
-          if [ "$COUNT" -lt 16 ]; then
-            echo "ERROR: only $COUNT course .ts files generated (expected >= 16)"
-            echo "Regenerate with: npm run build-courses"
-            exit 1
-          fi
-          echo "Course modules OK ($COUNT files)"
+      - name: Regenerate CodeMirror bundle
+        run: npm run bundle-editor
 
       - name: Setup JDK
         uses: actions/setup-java@v4

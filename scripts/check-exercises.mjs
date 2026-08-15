@@ -68,36 +68,55 @@ function findCallsByName(code, name) {
   return calls;
 }
 
+function normalizeForCompare(src) {
+  return (src || "").replace(/\s+/g, " ").trim();
+}
+
 function checkExercise(ex) {
   if (!ex.tasks || ex.tasks.length === 0) return;
   const finalTask = ex.tasks[ex.tasks.length - 1];
   const solution = ex.solution ?? "";
+
+  // Invariant: when both a final-task solution and an exercise-level solution
+  // are present, they must describe the same final state.
+  if (finalTask.solution && solution && normalizeForCompare(finalTask.solution) !== normalizeForCompare(solution)) {
+    console.error(`  ✗ ${ex.id}/${finalTask.id}: final task solution differs from the exercise-level solution`);
+    failures++;
+  }
+
   for (let ti = 0; ti < ex.tasks.length; ti++) {
     const task = ex.tasks[ti];
+    const isFinal = ti === ex.tasks.length - 1;
+    // Per-task solutions: validate each task's rules against its own solution.
+    // Only the final task falls back to the exercise-level solution.
+    const taskSolution = task.solution ?? (isFinal ? solution : null);
+    if (taskSolution == null) continue;
+
     for (const rule of task.validation ?? []) {
       if (rule.type === "functionCall") {
-        const calls = findCallsByName(solution, rule.name);
+        const calls = findCallsByName(taskSolution, rule.name);
         if (calls.length === 0) {
-          // only a failure if this rule is on the final task (solution = final state)
-          if (ti === ex.tasks.length - 1) {
-            console.error(`  ✗ ${ex.id}/${task.id}: solution missing ${rule.name}() call`);
-            failures++;
-          }
+          console.error(`  ✗ ${ex.id}/${task.id}: solution missing ${rule.name}() call`);
+          failures++;
         } else if (rule.exactArgs !== undefined) {
           const ok = calls.some(a => a.length === rule.exactArgs);
-          if (!ok && ti === ex.tasks.length - 1) {
+          if (!ok) {
             console.error(`  ✗ ${ex.id}/${task.id}: solution ${rule.name}() has ${calls.map(c=>c.length).join(",")} args, expected ${rule.exactArgs}`);
+            failures++;
+          }
+        } else if (rule.minArgs !== undefined) {
+          const ok = calls.some(a => a.length >= rule.minArgs);
+          if (!ok) {
+            console.error(`  ✗ ${ex.id}/${task.id}: solution ${rule.name}() has ${calls.map(c=>c.length).join(",")} args, expected at least ${rule.minArgs}`);
             failures++;
           }
         }
       } else if (rule.type === "canvasSize") {
         const re = /createCanvas\s*\(\s*(\d+)\s*,\s*(\d+)\s*\)/;
-        const mm = re.exec(solution);
+        const mm = re.exec(taskSolution);
         if (mm && (parseInt(mm[1]) !== rule.width || parseInt(mm[2]) !== rule.height)) {
-          if (ti === ex.tasks.length - 1) {
-            console.error(`  ✗ ${ex.id}/${task.id}: solution canvas ${mm[1]}x${mm[2]}, expected ${rule.width}x${rule.height}`);
-            failures++;
-          }
+          console.error(`  ✗ ${ex.id}/${task.id}: solution canvas ${mm[1]}x${mm[2]}, expected ${rule.width}x${rule.height}`);
+          failures++;
         }
       } else if (rule.type === "expectedPixels") {
         if (!Array.isArray(rule.points) || rule.points.length === 0) {

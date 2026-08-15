@@ -15,7 +15,7 @@ export default function StatusBarAccent() {
   }, []);
 
   if (!showStatusBar) {
-    return <StatusBar style="hidden" hidden />;
+    return <StatusBar hidden />;
   }
 
   const r = parseInt(ctaColor.slice(1, 3), 16);

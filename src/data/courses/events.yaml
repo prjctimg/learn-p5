@@ -13,19 +13,17 @@ exercises:
     startingCode: |
       function setup() {
         createCanvas(400, 400);
-      }
-
-      function draw() {
         background(240);
       }
+
+      function draw() {}
     solution: |
       function setup() {
         createCanvas(400, 400);
-      }
-
-      function draw() {
         background(240);
       }
+
+      function draw() {}
 
       function mousePressed() {
         fill(255, 100, 150);

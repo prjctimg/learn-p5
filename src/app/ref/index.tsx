@@ -14,20 +14,7 @@ import { useShakeDetection } from "../../hooks/useShakeDetection";
 import ReportErrorModal from "../../components/ReportErrorModal";
 import SearchOverlay from "../../components/SearchOverlay";
 import { getExampleHtml } from "../../utils/editor/exampleHtml";
-import { highlightSyntax, parseDescription } from "../../utils/referenceRender";
-import { copyToClipboard } from "../../utils/clipboard";
-
-const DESCRIBE_RE = /describe\s*\(\s*(["'])((?:(?!\1).)*)\1\s*\)\s*;?\s*/g;
-
-function extractDescribeCaption(code: string): string | null {
-  DESCRIBE_RE.lastIndex = 0;
-  const match = DESCRIBE_RE.exec(code);
-  return match ? match[2] : null;
-}
-
-function stripDescribe(code: string): string {
-  return code.replace(DESCRIBE_RE, "").trim();
-}
+import { highlightSyntax, parseDescription, extractDescribeCaption, stripDescribe } from "../../utils/referenceRender";
 
 const MODULE_GROUPS = P5_SYMBOLS.reduce<{ module: string; symbols: P5Symbol[] }[]>((acc, sym) => {
   const existing = acc.find((g) => g.module === sym.module);
@@ -38,45 +25,6 @@ const MODULE_GROUPS = P5_SYMBOLS.reduce<{ module: string; symbols: P5Symbol[] }[
   }
   return acc;
 }, []);
-
- function CopyButton({ text }: { text: string }) {
-  const { derivedColors } = useThemeContext();
-  const [copied, setCopied] = useState(false);
-
-  const onPress = useCallback(async () => {
-    const ok = await copyToClipboard(text);
-    if (ok) {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    }
-  }, [text]);
-
-  return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => ({
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 4,
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 6,
-        backgroundColor: pressed ? derivedColors.primaryContainer : "transparent",
-      })}
-      accessibilityRole="button"
-      accessibilityLabel="Copy code"
-    >
-      <MaterialCommunityIcons
-        name={copied ? "check" : "content-copy"}
-        size={14}
-        color={copied ? "#22C55E" : derivedColors.primary}
-      />
-      <Text style={{ fontFamily: "JetBrainsMono", fontSize: 10, fontWeight: "700", color: copied ? "#22C55E" : derivedColors.primary }}>
-        {copied ? "Copied" : "Copy"}
-      </Text>
-    </Pressable>
-  );
- }
 
  function SymbolDetail({ symbol, onOpenSearch }: { symbol: string; onOpenSearch: () => void }) {
   const router = useRouter();
@@ -165,12 +113,9 @@ const MODULE_GROUPS = P5_SYMBOLS.reduce<{ module: string; symbols: P5Symbol[] }[
   {parseDescription(sym.description, handleSymbolPress, colors, derivedColors.primary)}
  </Text>
 
-  <View style={[styles.flexRow, { alignItems: "center", justifyContent: "space-between", marginBottom: 12 }]}>
-  <Text style={[styles.sectionTitle, { color: colors.onSurface }]}>
+  <Text style={[styles.sectionTitle, { color: colors.onSurface, marginBottom: 12 }]}>
   Usage
   </Text>
-  <CopyButton text={sym.syntax} />
-  </View>
    <View style={[styles.syntaxBox, { backgroundColor: colors.surfaceDim, marginBottom: 24, borderLeftColor: derivedColors.primary }]}>
   <Text style={{ fontFamily: "JetBrainsMono", fontSize: 16, lineHeight: 24 }}>
   {syntaxTokens.map((t, i) => (
@@ -191,12 +136,9 @@ const MODULE_GROUPS = P5_SYMBOLS.reduce<{ module: string; symbols: P5Symbol[] }[
     const code = stripDescribe(ex);
     return (
   <View key={i} style={{ marginBottom: 16 }}>
-  <View style={[styles.flexRow, { alignItems: "flex-start", justifyContent: "space-between", marginBottom: 6, gap: 8 }]}>
-  <Text style={[styles.exampleCaption, { color: colors.textSecondary, flex: 1 }]}>
+  <Text style={[styles.exampleCaption, { color: colors.textSecondary, marginBottom: 6 }]}>
     {caption || `Example ${i + 1}`}
   </Text>
-  <CopyButton text={code} />
-  </View>
   {sym.norender ? (
   <View style={[styles.codeBlock, { backgroundColor: colors.surfaceDim }]}>
   <Text style={{ fontFamily: "JetBrainsMono", fontSize: 13, lineHeight: 20 }}>
