@@ -1,7 +1,8 @@
 import { CODEMIRROR_BUNDLE } from "./codemirror-bundle.generated";
 import { p5Source } from "../p5Source";
-import { P5_FUNCTION_NAMES } from "../../data/p5Symbols";
+import { P5_FUNCTION_NAMES } from "../../data/reference";
 import { Colors } from "../../constants/Colors";
+import { getEditorTheme, EditorThemeColors } from "./themes";
 
 const SYMBOL_PATTERN = new RegExp(
   `\\b(${P5_FUNCTION_NAMES.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b(?=\\()`,
@@ -52,11 +53,12 @@ export function getExerciseHtml(params: {
   startingCode: string;
   solution: string;
   colorScheme: "light" | "dark";
-  codeBackground?: string;
+  editorTheme?: string;
   codeFontSize?: number;
 }): string {
   const colors = Colors[params.colorScheme === "dark" ? "dark" : "light"];
-  const editorBg = params.codeBackground && params.codeBackground !== "auto" ? params.codeBackground : colors.surfaceContainerLowest;
+  const themeColors = getEditorTheme(params.editorTheme || "p5-learn", params.colorScheme);
+  const editorBg = themeColors.bg;
   const fontSize = params.codeFontSize ?? 22;
   const instructionHtml = parseInstructionHtml(params.instruction);
 
@@ -211,13 +213,10 @@ export function getExerciseHtml(params: {
     padding: 3px 8px;
     border-radius: 4px;
     cursor: pointer;
+    transition: all 0.2s ease;
   }
   .editor-header-btn:active {
     background: ${colors.primaryContainer}44;
-  }
-  .editor-header-btn.copied {
-    color: #22C55E;
-    border-color: #22C55E;
   }
   .cm-editor { height: 100%; font-size: ${fontSize}px; background: ${editorBg}; }
   .cm-editor .cm-scroller { font-family: 'JetBrains Mono', monospace; overflow: auto; }
@@ -333,7 +332,6 @@ ${
 <div class="editor-section">
   <div class="editor-header">
     <div class="editor-header-left">
-      <span class="code-label">Code</span>
       <span class="lang-tag">JS</span>
     </div>
     <div class="editor-header-right">
@@ -348,7 +346,7 @@ ${
 <script>${p5Source}</script>
 <script>${CODEMIRROR_BUNDLE}</script>
 <script>
-${getBridgeScript(params.startingCode, params.solution, editorBg, params.colorScheme, params.exerciseNumber)}
+${getBridgeScript(params.startingCode, params.solution, themeColors, params.colorScheme, params.exerciseNumber)}
 </script>
 
 ${params.exerciseNumber === 1 ? `
@@ -366,24 +364,28 @@ ${params.exerciseNumber === 1 ? `
 </html>`;
 }
 
-function getBridgeScript(startingCode: string, solution: string, editorBg: string, colorScheme: "light" | "dark", exerciseNumber?: number): string {
+function getBridgeScript(startingCode: string, solution: string, theme: EditorThemeColors, colorScheme: "light" | "dark", exerciseNumber?: number): string {
   const isDark = colorScheme === "dark";
   const codeArg = jsString(startingCode);
   const solutionArg = jsString(solution);
 
-    const fg = isDark ? '#E3E2E7' : '#1F2937';
-  const gutterFg = isDark ? '#6B7280' : '#9CA3AF';
-  const gutterBorder = isDark ? '#292A2E' : '#E5E7EB';
-  const activeBg = isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)';
-  const selBg = isDark ? 'rgba(237,34,93,0.2)' : 'rgba(237,34,93,0.15)';
-  const fnColor = isDark ? '#FFB2BB' : '#BE185D';
-  const commentColor = isDark ? '#6B7280' : '#6B7280';
-  const numColor = isDark ? '#FF4F75' : '#D31D4E';
-  const strColor = isDark ? '#22C55E' : '#16A34A';
-  const opColor = isDark ? '#E3E2E7' : '#374151';
-  const kwColor = isDark ? '#ED225D' : '#ED225D';
-  const typeColor = isDark ? '#FFB2BB' : '#BE185D';
-  const constColor = isDark ? '#FF4F75' : '#D31D4E';
+  const {
+    bg: editorBg,
+    fg,
+    gutterFg,
+    gutterBorder,
+    activeBg,
+    selBg,
+    keyword: kwColor,
+    definitionKeyword: defKwColor,
+    string: strColor,
+    number: numColor,
+    comment: commentColor,
+    type: typeColor,
+    function: fnColor,
+    operator: opColor,
+    constant: constColor,
+  } = theme;
 
   return `
 var _CM = typeof CM !== 'undefined' ? CM : null;
@@ -414,10 +416,22 @@ function p5CompletionSource(context) {
   var options = [];
   var prefix = word.text.toLowerCase();
   for (var i = 0; i < P5_COMPLETIONS.length; i++) {
-    var name = P5_COMPLETIONS[i];
-    if (name.toLowerCase().startsWith(prefix)) {
-      options.push({ label: name + '()', type: 'function', detail: 'p5.js' });
-    }
+    (function() {
+      var name = P5_COMPLETIONS[i];
+      if (name.toLowerCase().startsWith(prefix)) {
+        options.push({
+          label: name + '()',
+          type: 'function',
+          detail: 'p5.js',
+          apply: function(view, completion, from, to) {
+            view.dispatch({
+              changes: { from: from, to: to, insert: name + '()' },
+              selection: { anchor: from + name.length + 1 }
+            });
+          }
+        });
+      }
+    })();
   }
   return { from: word.from, options: options };
 }
@@ -538,11 +552,32 @@ function initEditor() {
         }
       }
     });
+    var touchStartY = 0;
+    var touchStartX = 0;
+    var isScrolling = false;
     view.dom.addEventListener('touchstart', function(e) {
       if (!window.__systemKeyboardEnabled) {
+        var touch = e.touches[0];
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+        isScrolling = false;
+      }
+    }, { passive: true });
+    view.dom.addEventListener('touchmove', function(e) {
+      if (!window.__systemKeyboardEnabled && !isScrolling) {
+        var touch = e.touches[0];
+        var dx = Math.abs(touch.clientX - touchStartX);
+        var dy = Math.abs(touch.clientY - touchStartY);
+        if (dy > 10 || dx > 10) {
+          isScrolling = true;
+        }
+      }
+    }, { passive: true });
+    view.dom.addEventListener('touchend', function(e) {
+      if (!window.__systemKeyboardEnabled && !isScrolling) {
         e.preventDefault();
         e.stopPropagation();
-        var touch = e.touches[0];
+        var touch = e.changedTouches[0];
         var coords = { x: touch.clientX, y: touch.clientY };
         var pos = view.posAtCoords(coords);
         if (pos !== null) {
@@ -651,11 +686,21 @@ function handleMessage(data) {
         break;
       case 'insert':
         if (view) {
-          var cursor = view.state.selection.main.head;
-          view.dispatch({
-            changes: { from: cursor, insert: msg.text },
-            selection: { anchor: cursor + (msg.cursorOffset !== undefined ? msg.cursorOffset : msg.text.length) },
-          });
+          var sel = view.state.selection.main;
+          var cursor = sel.head;
+          var insertText = msg.text;
+          var offset = msg.cursorOffset !== undefined ? msg.cursorOffset : insertText.length;
+          if (sel.from !== sel.to) {
+            view.dispatch({
+              changes: { from: sel.from, to: sel.to, insert: insertText },
+              selection: { anchor: sel.from + offset },
+            });
+          } else {
+            view.dispatch({
+              changes: { from: cursor, insert: insertText },
+              selection: { anchor: cursor + offset },
+            });
+          }
           view.focus();
         } else {
           postEditorReady();
@@ -664,9 +709,23 @@ function handleMessage(data) {
       case 'focus':
         if (view) {
           window.__systemKeyboardEnabled = true;
+          window.__handleEnter = function(e) {
+            if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+              e.preventDefault();
+              e.stopPropagation();
+              var cursor = view.state.selection.main.head;
+              view.dispatch({
+                changes: { from: cursor, insert: '\\n' },
+                selection: { anchor: cursor + 1 },
+              });
+              return false;
+            }
+          };
+          view.dom.addEventListener('keydown', window.__handleEnter);
           var cmContent = view.dom.querySelector('.cm-content');
           if (cmContent) {
             cmContent.setAttribute('inputmode', 'text');
+            cmContent.contentEditable = 'true';
             cmContent.focus();
           }
           view.dom.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -675,8 +734,15 @@ function handleMessage(data) {
       case 'useCustomKeyboard':
         window.__systemKeyboardEnabled = false;
         if (view) {
+          if (window.__handleEnter) {
+            view.dom.removeEventListener('keydown', window.__handleEnter);
+            window.__handleEnter = null;
+          }
           var cmContent = view.dom.querySelector('.cm-content');
-          if (cmContent) cmContent.setAttribute('inputmode', 'none');
+          if (cmContent) {
+            cmContent.setAttribute('inputmode', 'none');
+            cmContent.contentEditable = 'false';
+          }
         }
         break;
       case 'setFontSize':
@@ -780,19 +846,48 @@ if (solutionToggle) {
   });
 }
 
+function copyToClipboard(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    return navigator.clipboard.writeText(text);
+  }
+  return new Promise(function(resolve, reject) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    ta.style.top = '-9999px';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try {
+      document.execCommand('copy');
+      resolve();
+    } catch(e) {
+      reject(e);
+    }
+    document.body.removeChild(ta);
+  });
+}
+
 var copyBtn = document.getElementById('copyBtn');
 if (copyBtn) {
   copyBtn.addEventListener('click', function() {
     if (view) {
       var code = view.state.doc.toString();
-      navigator.clipboard.writeText(code).then(function() {
-        copyBtn.innerHTML = '&#10003; Copied';
-        copyBtn.classList.add('copied');
+      copyToClipboard(code).then(function() {
+        copyBtn.innerHTML = '<span style="color:#22C55E">&#10003;</span> Copied';
+        copyBtn.style.backgroundColor = '#22C55E22';
+        copyBtn.style.borderColor = '#22C55E';
+        copyBtn.style.color = '#22C55E';
         if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
           window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'codeCopied' }));
         }
         setTimeout(function() {
           copyBtn.innerHTML = 'Copy';
+          copyBtn.style.backgroundColor = '';
+          copyBtn.style.borderColor = '';
+          copyBtn.style.color = '';
           copyBtn.classList.remove('copied');
         }, 2000);
       });
@@ -808,7 +903,7 @@ if (solRunBtn) {
       renderSketch('solution-sketch', SOLUTION_CODE);
       if (!solutionHasRun) {
         solutionHasRun = true;
-        solRunBtn.innerHTML = '&#x21bb; Replay';
+        solRunBtn.innerHTML = '<span style="font-size:1.3em">&#x21bb;</span> Replay';
       }
       if (typeof window.__tutRun === 'function') window.__tutRun();
       setTimeout(function() {

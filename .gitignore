@@ -154,3 +154,6 @@ vite.config.ts.timestamp-*
 
 expo-env.d.ts
 # @end expo-cli
+
+# Auto-generated reference data (CI-generated, never committed)
+src/data/reference.generated.json

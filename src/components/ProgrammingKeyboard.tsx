@@ -5,7 +5,7 @@ import { useThemeContext } from "./ThemeProvider";
 import { Colors } from "../constants/Colors";
 import { Spacing } from "../constants/Spacing";
 import { Typography } from "../constants/Typography";
-import { P5_SYMBOLS } from "../data/p5Symbols";
+import { P5_SYMBOLS } from "../data/reference";
 import { p5Functions, p5FunctionLabels, pairedSymbols, singleSymbols, P5FunctionDef, PairedSymbol } from "../data/keyboardLayout";
 
 interface ProgrammingKeyboardProps {
@@ -104,7 +104,7 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
 
   const handleExercisePress = useCallback((sym: string) => {
     setHintType(null);
-    onInsert(sym + "()", 1);
+    onInsert(sym + "()", sym.length + 1);
   }, [onInsert]);
 
   const handleExerciseLongPress = useCallback((sym: string) => {
@@ -116,17 +116,6 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
       <View style={styles.toolbarRow}>
         <View style={styles.toolbarFixed}>
           <Pressable
-            onPress={onToggleKeyboard}
-            style={({ pressed }) => [
-              styles.keyboardIcon,
-              { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel="Hide keyboard"
-          >
-            <MaterialCommunityIcons name="chevron-down" size={20} color={colors.onSurfaceVariant} />
-          </Pressable>
-          <Pressable
             onPress={onRequestSystemKeyboard}
             style={({ pressed }) => [
               styles.keyboardIcon,
@@ -136,17 +125,6 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
             accessibilityLabel="Toggle system keyboard"
           >
             <MaterialCommunityIcons name="keyboard-outline" size={20} color={colors.primary} />
-          </Pressable>
-          <Pressable
-            onPress={onFormat}
-            style={({ pressed }) => [
-              styles.keyboardIcon,
-              { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel="Format code"
-          >
-            <MaterialCommunityIcons name="code-tags" size={18} color={colors.onSurfaceVariant} />
           </Pressable>
           <Pressable
             onPressIn={startBackspaceRepeat}
@@ -338,20 +316,14 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
               const ref = P5_SYMBOLS.find(s => s.name === popupSymbol);
               return ref ? (
                 <>
-                  <Text style={[popupTextStyles.popupTitle, { color: colors.onSurface, backgroundColor: colors.surfaceContainer, borderColor: colors.outlineVariant }]}>{ref.syntax}</Text>
+                  <Text style={[popupTextStyles.popupTitle, { color: colors.onSurface, backgroundColor: colors.surfaceContainer, borderColor: colors.outlineVariant, fontFamily: "JetBrainsMono" }]}>{ref.syntax}</Text>
                   <Text style={[popupTextStyles.popupDesc, { color: colors.onSurfaceVariant }]}>{ref.description}</Text>
                   {ref.parameters.map(p => (
                     <Text key={p.name} style={[popupTextStyles.popupParam, { color: colors.onSurfaceVariant }]}>
-                      <Text style={{ color: colors.primary }}>{p.name}</Text>
-                      {' '}({p.type}): {p.description}
+                      <Text style={{ color: colors.primary, fontFamily: "JetBrainsMono", fontWeight: "700" }}>{p.name}</Text>
+                      {' '}<Text style={{ fontFamily: "JetBrainsMono", fontSize: 11, color: colors.primary }}>({p.type})</Text>: {p.description}
                     </Text>
                   ))}
-                  <Pressable
-                    onPress={() => { setPopupSymbol(null); onOpenReference?.(popupSymbol); }}
-                    style={({ pressed }) => [popupTextStyles.refButton, { backgroundColor: pressed ? colors.primaryContainer : colors.primary }]}
-                  >
-                    <Text style={popupTextStyles.refButtonText}>View in Reference</Text>
-                  </Pressable>
                 </>
               ) : (
                 <Text style={[popupTextStyles.popupTitle, { color: colors.onSurface }]}>{popupSymbol}</Text>

@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useThemeContext } from "./ThemeProvider";
 import { Colors } from "../constants/Colors";
-import { P5_FUNCTION_NAMES, P5_SYMBOLS_BY_NAME } from "../data/p5Symbols";
+import { P5_FUNCTION_NAMES, P5_SYMBOLS_BY_NAME } from "../data/reference";
 import { useModuleProgress } from "../hooks/useModuleProgress";
 
 const SYMBOL_PATTERN = new RegExp(

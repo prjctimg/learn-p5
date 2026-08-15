@@ -10,11 +10,15 @@ import { useThemeContext } from "../../../components/ThemeProvider";
 import { Colors } from "../../../constants/Colors";
 import { DEFAULTS } from "../../../constants/Defaults";
 import ProgrammingKeyboard from "../../../components/ProgrammingKeyboard";
+import SystemKeyboardToolbar from "../../../components/SystemKeyboardToolbar";
 import Toast from "../../../components/Toast";
+import StreakToast from "../../../components/StreakToast";
 import { loadExercise, loadCourse } from "../../../utils/courseLoader";
 import { Lesson } from "../../../data/types";
-import { P5_FUNCTION_NAMES, ONCE_ONLY_P5_FUNCTIONS } from "../../../data/p5Symbols";
+import { P5_FUNCTION_NAMES, ONCE_ONLY_P5_FUNCTIONS } from "../../../data/reference";
 import { getExerciseHtml } from "../../../utils/editor/exerciseHtml";
+import { EDITOR_THEMES } from "../../../utils/editor/themes";
+import { useStreak } from "../../../hooks/useStreak";
 
 interface ExerciseState {
   exercise: Lesson | null;
@@ -90,7 +94,7 @@ export default function Exercise() {
   const [codeSyncKey, setCodeSyncKey] = useState(0);
   const codeRef = useRef(state.code);
   codeRef.current = state.code;
-  const [codeBackground, setCodeBackground] = useState<string | undefined>(undefined);
+  const [editorTheme, setEditorTheme] = useState<string>("p5-learn");
   const [codeFontSize, setCodeFontSize] = useState<number>(DEFAULTS.codeFontSize);
   const [keyboardHeight, setKeyboardHeight] = useState<string>(DEFAULTS.keyboardHeight);
   const [settingsMenuVisible, setSettingsMenuVisible] = useState(false);
@@ -99,6 +103,8 @@ export default function Exercise() {
   const [toastMessage, setToastMessage] = useState("");
   const [toastActionLabel, setToastActionLabel] = useState<string | undefined>(undefined);
   const toastActionRef = useRef<(() => void) | undefined>(undefined);
+  const streak = useStreak();
+  const [streakToastVisible, setStreakToastVisible] = useState(false);
 
   const showToast = useCallback((message: string, actionLabel?: string, onAction?: () => void) => {
     setToastMessage(message);
@@ -118,10 +124,10 @@ export default function Exercise() {
       startingCode: state.exercise.startingCode ?? "",
       solution: state.exercise.solution ?? "",
       colorScheme: colorScheme === "dark" ? "dark" : "light",
-      codeBackground,
+      editorTheme,
       codeFontSize,
     });
-  }, [state.exercise, colorScheme, id, codeBackground, codeFontSize]);
+  }, [state.exercise, colorScheme, id, editorTheme, codeFontSize]);
 
   const styles = useMemo(
     () =>
@@ -204,10 +210,9 @@ export default function Exercise() {
         webview: {
           flex: 1,
         },
-        showKeyboardFab: {
+        keyboardFab: {
           position: "absolute",
-          left: 24,
-          bottom: 32,
+          right: 16,
           width: 48,
           height: 48,
           borderRadius: 9999,
@@ -222,8 +227,15 @@ export default function Exercise() {
           borderWidth: 1,
           borderColor: colors.outlineVariant,
         },
-        showKeyboardFabPressed: {
+        keyboardFabPressed: {
           transform: [{ scale: 0.9 }],
+        },
+        fabWrapper: {
+          position: "absolute",
+          right: 16,
+          zIndex: 100,
+          alignItems: "center",
+          justifyContent: "center",
         },
         runButtonContainer: {
           position: "absolute",
@@ -383,6 +395,7 @@ export default function Exercise() {
 
   const handleToggleKeyboard = useCallback(() => {
     setKeyboardVisible((prev) => !prev);
+    setSystemKeyboardVisible(false);
     if (webViewRef.current && editorViewReady) {
       webViewRef.current.postMessage(JSON.stringify({ type: "useCustomKeyboard" }));
     }
@@ -452,10 +465,18 @@ export default function Exercise() {
     };
   }, []);
 
+  useEffect(() => {
+    streak.consumePendingToast().then((data) => {
+      if (data) {
+        setStreakToastVisible(true);
+      }
+    });
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
-      AsyncStorage.getItem("setting_codeBackground").then((val) => {
-        setCodeBackground(val || undefined);
+      AsyncStorage.getItem("setting_editorTheme").then((val) => {
+        setEditorTheme(val || "p5-learn");
       });
       AsyncStorage.getItem("setting_codeFontSize").then((val) => {
         setCodeFontSize(val ? parseInt(val, 10) : DEFAULTS.codeFontSize);
@@ -477,11 +498,11 @@ export default function Exercise() {
     });
   }, [editorViewReady]);
 
-  const changeCodeBackground = useCallback((value: string) => {
-    setCodeBackground(value === "auto" ? undefined : value);
-    AsyncStorage.setItem("setting_codeBackground", value);
+  const changeEditorTheme = useCallback((value: string) => {
+    setEditorTheme(value);
+    AsyncStorage.setItem("setting_editorTheme", value);
     setToastKey((k) => k + 1);
-    setToastMessage("Code background updated");
+    setToastMessage("Editor theme updated");
     setToastVisible(true);
   }, []);
 
@@ -553,15 +574,21 @@ export default function Exercise() {
     });
   }, [state.code]);
 
+  const TOOLBAR_HEIGHT = 44;
+
   const runButtonBottom = useMemo(() => {
     if (keyboardVisible) {
       return (DEFAULTS.keyboardHeightPixels[keyboardHeight] ?? DEFAULTS.keyboardHeightPixels.medium) + 16;
     }
     if (systemKeyboardVisible) {
-      return systemKeyboardHeight + 16;
+      return (systemKeyboardHeight || 300) + TOOLBAR_HEIGHT + 16;
     }
     return 16;
   }, [keyboardVisible, keyboardHeight, systemKeyboardVisible, systemKeyboardHeight]);
+
+  const keyboardFabBottom = useMemo(() => {
+    return runButtonBottom + 60;
+  }, [runButtonBottom]);
 
   if (state.loading) {
     return (
@@ -646,7 +673,7 @@ export default function Exercise() {
 
       <View
         style={[
-          styles.runButtonContainer,
+          styles.fabWrapper,
           { bottom: runButtonBottom },
         ]}
         pointerEvents="box-none"
@@ -671,6 +698,14 @@ export default function Exercise() {
         </Pressable>
       </View>
 
+      <StreakToast
+        visible={streakToastVisible}
+        streakCount={streak.count}
+        tierProgress={streak.tierProgress}
+        nextTier={streak.nextTier}
+        onDismiss={() => setStreakToastVisible(false)}
+      />
+
       <Toast
         key={toastKey}
         visible={toastVisible}
@@ -679,6 +714,26 @@ export default function Exercise() {
         onAction={toastActionRef.current}
         onDismiss={() => setToastVisible(false)}
       />
+
+      {systemKeyboardVisible && (
+        <View
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            bottom: systemKeyboardHeight,
+            zIndex: 100,
+          }}
+        >
+          <SystemKeyboardToolbar
+            onInsert={handleInsert}
+            onCursorMove={handleCursorMove}
+            onBackspace={handleBackspace}
+            onNewline={handleNewline}
+            height={TOOLBAR_HEIGHT}
+          />
+        </View>
+      )}
 
       {keyboardVisible && (
         <ProgrammingKeyboard
@@ -701,8 +756,9 @@ export default function Exercise() {
         <Pressable
           onPress={handleToggleKeyboard}
           style={({ pressed }) => [
-            styles.showKeyboardFab,
-            pressed && styles.showKeyboardFabPressed,
+            styles.keyboardFab,
+            { bottom: keyboardFabBottom },
+            pressed && styles.keyboardFabPressed,
           ]}
           accessibilityRole="button"
           accessibilityLabel="Show custom keyboard"
@@ -787,18 +843,18 @@ export default function Exercise() {
             </View>
 
             <View style={styles.modalSection}>
-              <Text style={[styles.modalSectionTitle, { color: colors.textSecondary }]}>Code Background</Text>
-              <View style={styles.modalRow}>
-                {["auto", "#FFFFFF", "#0D0E12"].map((opt) => (
+              <Text style={[styles.modalSectionTitle, { color: colors.textSecondary }]}>Editor Theme</Text>
+              <View style={[styles.modalRow, { flexWrap: "wrap" }]}>
+                {Object.entries(EDITOR_THEMES).map(([key, theme]) => (
                   <Pressable
-                    key={opt}
-                    onPress={() => changeCodeBackground(opt)}
+                    key={key}
+                    onPress={() => changeEditorTheme(key)}
                     style={({ pressed }) => ({
-                      paddingHorizontal: 12,
-                      paddingVertical: 6,
+                      paddingHorizontal: 10,
+                      paddingVertical: 5,
                       borderRadius: 6,
                       backgroundColor:
-                        codeBackground === opt
+                        editorTheme === key
                           ? colors.primary
                           : pressed
                             ? colors.primaryContainer + "33"
@@ -807,13 +863,13 @@ export default function Exercise() {
                   >
                     <Text style={{
                       fontFamily: "JetBrainsMono",
-                      fontSize: 11,
+                      fontSize: 10,
                       fontWeight: "700",
                       textTransform: "uppercase",
                       letterSpacing: 0.5,
-                      color: codeBackground === opt ? colors.onPrimary : colors.onSurfaceVariant,
+                      color: editorTheme === key ? colors.onPrimary : colors.onSurfaceVariant,
                     }}>
-                      {opt === "auto" ? "Auto" : opt === "#FFFFFF" ? "Light" : "Dark"}
+                      {theme.label}
                     </Text>
                   </Pressable>
                 ))}
@@ -823,7 +879,7 @@ export default function Exercise() {
             <View style={styles.modalSection}>
               <Text style={[styles.modalSectionTitle, { color: colors.textSecondary }]}>Keyboard Height</Text>
               <View style={styles.modalRow}>
-                {["medium", "tall"].map((opt) => (
+                {["small", "medium", "tall"].map((opt) => (
                   <Pressable
                     key={opt}
                     onPress={() => changeKeyboardHeight(opt)}
@@ -831,7 +887,7 @@ export default function Exercise() {
                       paddingHorizontal: 12,
                       paddingVertical: 6,
                       borderRadius: 6,
-                      minWidth: 56,
+                      minWidth: 42,
                       alignItems: "center",
                       backgroundColor:
                         keyboardHeight === opt
@@ -849,7 +905,7 @@ export default function Exercise() {
                       letterSpacing: 0.5,
                       color: keyboardHeight === opt ? colors.onPrimary : colors.onSurfaceVariant,
                     }}>
-                      {opt === "medium" ? "M" : "T"}
+                      {opt === "small" ? "S" : opt === "medium" ? "M" : "T"}
                     </Text>
                   </Pressable>
                 ))}

@@ -5,8 +5,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useThemeContext } from "../components/ThemeProvider";
 import { Colors } from "../constants/Colors";
 import Header from "../components/Header";
+import StreakToast from "../components/StreakToast";
 import { loadAllCourses } from "../utils/courseLoader";
 import { Lesson, Course } from "../data/types";
+import { getStreakFromStorage, useStreak } from "../hooks/useStreak";
 
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -21,6 +23,11 @@ export default function Dashboard() {
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
+  const [streakCount, setStreakCount] = useState(0);
+  const [streakLongest, setStreakLongest] = useState(0);
+  const [displayName, setDisplayName] = useState("");
+  const streak = useStreak();
+  const [streakToastVisible, setStreakToastVisible] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -34,8 +41,31 @@ export default function Dashboard() {
         }
       });
       loadAllCourses().then(setCourses);
+      getStreakFromStorage().then(({ count, longest }) => {
+        setStreakCount(count);
+        setStreakLongest(longest);
+      });
     }, [])
   );
+
+  useEffect(() => {
+    AsyncStorage.getItem("onboardingData").then((val) => {
+      if (val) {
+        try {
+          const data = JSON.parse(val);
+          setDisplayName(data.displayName || "");
+        } catch {}
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    streak.consumePendingToast().then((data) => {
+      if (data) {
+        setStreakToastVisible(true);
+      }
+    });
+  }, []);
 
   const nextExercise: (Lesson & { courseSlug: string; courseTitle: string }) | null = useMemo(() => {
     if (courses.length === 0) return null;
@@ -260,7 +290,7 @@ export default function Dashboard() {
         contentContainerStyle={{ paddingBottom: 32 }}
       >
         <Text style={styles.greeting}>
-          {greeting}, Coder!
+          {greeting}{displayName ? `, ${displayName}` : "!"}
         </Text>
         <Text style={styles.subtitle}>
           {Math.round(progress * 100)}% complete
@@ -272,21 +302,21 @@ export default function Dashboard() {
 
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
-            <Text style={styles.statValue}>3</Text>
+            <Text style={styles.statValue}>{Math.min(10, Math.max(1, Math.floor(progress * 10) + 1))}</Text>
             <Text style={styles.statLabel}>
               Level
             </Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statValue}>
-              2.4k
+              {completedLessons.length}
             </Text>
             <Text style={styles.statLabel}>
-              XP
+              Completed
             </Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statValue}>7</Text>
+            <Text style={styles.statValue}>{streakCount}</Text>
             <Text style={styles.statLabel}>
               Streak
             </Text>
@@ -376,6 +406,14 @@ export default function Dashboard() {
           )}
         </View>
       </ScrollView>
+
+      <StreakToast
+        visible={streakToastVisible}
+        streakCount={streak.count}
+        tierProgress={streak.tierProgress}
+        nextTier={streak.nextTier}
+        onDismiss={() => setStreakToastVisible(false)}
+      />
     </View>
   );
 }

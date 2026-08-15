@@ -1,19 +1,23 @@
-export function getBridgeScript(colorScheme: 'light' | 'dark'): string {
-  const isDark = colorScheme === 'dark';
-  const bg = isDark ? '#0D0E12' : '#FFFFFF';
-  const fg = isDark ? '#E3E2E7' : '#1F2937';
-  const gutterFg = isDark ? '#6B7280' : '#9CA3AF';
-  const gutterBorder = isDark ? '#292A2E' : '#E5E7EB';
-  const activeBg = isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)';
-  const selBg = isDark ? 'rgba(237,34,93,0.2)' : 'rgba(237,34,93,0.15)';
-  const fnColor = isDark ? '#FFB2BB' : '#BE185D';
-  const commentColor = '#6B7280';
-  const numColor = isDark ? '#FF4F75' : '#D31D4E';
-  const strColor = isDark ? '#22C55E' : '#16A34A';
-  const opColor = isDark ? '#E3E2E7' : '#374151';
-  const kwColor = '#ED225D';
-  const typeColor = isDark ? '#FFB2BB' : '#BE185D';
-  const constColor = isDark ? '#FF4F75' : '#D31D4E';
+import { getEditorTheme } from './themes';
+
+export function getBridgeScript(colorScheme: 'light' | 'dark', themeId?: string): string {
+  const theme = getEditorTheme(themeId || 'p5-learn', colorScheme);
+  const {
+    bg,
+    fg,
+    gutterFg,
+    gutterBorder,
+    activeBg,
+    selBg,
+    keyword: kwColor,
+    string: strColor,
+    number: numColor,
+    comment: commentColor,
+    type: typeColor,
+    function: fnColor,
+    operator: opColor,
+    constant: constColor,
+  } = theme;
 
   return `
 var _CM = typeof CM !== 'undefined' ? CM : null;
@@ -38,10 +42,22 @@ function p5CompletionSource(context) {
   var options = [];
   var prefix = word.text.toLowerCase();
   for (var i = 0; i < P5_COMPLETIONS.length; i++) {
-    var name = P5_COMPLETIONS[i];
-    if (name.toLowerCase().startsWith(prefix)) {
-      options.push({ label: name + '()', type: 'function', detail: 'p5.js' });
-    }
+    (function() {
+      var name = P5_COMPLETIONS[i];
+      if (name.toLowerCase().startsWith(prefix)) {
+        options.push({
+          label: name + '()',
+          type: 'function',
+          detail: 'p5.js',
+          apply: function(view, completion, from, to) {
+            view.dispatch({
+              changes: { from: from, to: to, insert: name + '()' },
+              selection: { anchor: from + name.length + 1 }
+            });
+          }
+        });
+      }
+    })();
   }
   return { from: word.from, options: options };
 }

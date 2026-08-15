@@ -4,7 +4,6 @@ import ThemeProvider from "../components/ThemeProvider";
 import DrawerProvider from "../contexts/DrawerContext";
 import SideDrawer from "../components/SideDrawer";
 import DrawerFab from "../components/DrawerFab";
-
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
