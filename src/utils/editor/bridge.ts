@@ -1,10 +1,15 @@
 export const bridgeScript = `
-import { basicSetup, EditorView, EditorState, keymap } from 'codemirror';
-import { javascript } from '@codemirror/lang-javascript';
-import { indentSelection } from '@codemirror/commands';
-import { syntaxHighlighting, defaultHighlightStyle } from '@codemirror/language';
-import { HighlightStyle } from '@codemirror/highlight';
-import { tags } from '@lezer/highlight';
+var _CM = typeof CM !== 'undefined' ? CM : null;
+
+var basicSetup = _CM.basicSetup;
+var EditorView = _CM.EditorView;
+var EditorState = _CM.EditorState;
+var keymap = _CM.keymap;
+var javascript = _CM.javascript;
+var syntaxHighlighting = _CM.syntaxHighlighting;
+var HighlightStyle = _CM.HighlightStyle;
+var tags = _CM.tags;
+var indentSelection = _CM.indentSelection;
 
 const p5Theme = EditorView.theme({
   '&': { backgroundColor: '#0D0E12', color: '#E3E2E7' },
@@ -105,6 +110,12 @@ function postReady() {
   }
 }
 
+function postEditorReady() {
+  if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'editorReady', ready: !!view }));
+  }
+}
+
 function handleMessage(data) {
   try {
     var msg = typeof data === 'string' ? JSON.parse(data) : data;
@@ -122,6 +133,8 @@ function handleMessage(data) {
           selection: { anchor: cursor + (msg.cursorOffset !== undefined ? msg.cursorOffset : msg.text.length) },
         });
         view.focus();
+      } else {
+        postEditorReady();
       }
     } else if (msg.type === 'focus') {
       if (view) {
@@ -131,6 +144,33 @@ function handleMessage(data) {
       var scroller = view?.dom.querySelector('.cm-scroller');
       if (scroller) {
         scroller.style.fontSize = msg.fontSize + 'px';
+      }
+    } else if (msg.type === 'copyCode') {
+      if (view) {
+        var code = view.state.doc.toString();
+        navigator.clipboard.writeText(code).then(function() {
+          if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+            window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'codeCopied' }));
+          }
+        });
+      }
+    } else if (msg.type === 'backspace') {
+      if (view) {
+        var cursor = view.state.selection.main.head;
+        if (cursor > 0) {
+          view.dispatch({
+            changes: { from: cursor - 1, to: cursor },
+            selection: { anchor: cursor - 1 },
+          });
+          view.focus();
+        }
+      }
+    } else if (msg.type === 'format') {
+      if (view) {
+        view.dispatch({ selection: { anchor: 0, head: view.state.doc.length } });
+        indentSelection({ state: view.state, dispatch: view.dispatch });
+        view.dispatch({ selection: { anchor: view.state.doc.length } });
+        view.focus();
       }
     }
   } catch(e) {}

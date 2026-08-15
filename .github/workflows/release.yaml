@@ -25,7 +25,7 @@ jobs:
           NPM_INSTALLED=false
           for i in 1 2 3; do
             echo "Attempt $i to install npm dependencies..."
-            npm ci && NPM_INSTALLED=true && echo "npm install succeeded" && break
+            npm install && NPM_INSTALLED=true && echo "npm install succeeded" && break
             echo "npm install failed (attempt $i)"
             if [ $i -lt 3 ]; then sleep 10; fi
           done

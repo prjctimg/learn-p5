@@ -1,4 +1,4 @@
-import { importMap } from "./importmap";
+import { CODEMIRROR_BUNDLE } from "./codemirror-bundle.generated";
 import { styles } from "./styles";
 import { bridgeScript } from "./bridge";
 
@@ -19,11 +19,8 @@ export function getEditorHtml(): string {
   <div id="editor"></div>
 </div>
 
-<script type="importmap">
-${JSON.stringify({ imports: importMap }, null, 2)}
-<\/script>
-
-<script type="module">${bridgeScript}<\/script>
+<script>${CODEMIRROR_BUNDLE}<\/script>
+<script>${bridgeScript}<\/script>
 </body>
 </html>`;
 }

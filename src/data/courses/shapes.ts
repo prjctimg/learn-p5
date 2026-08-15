@@ -8,10 +8,10 @@ export const shapesCourse = {
       id: "exercise-1",
       title: "The First Circle",
       module: "Shapes",
-      description: "Learn how to draw circles and use math to create motion with trigonometric functions.",
+      description: "Draw your first shape — a pink ball on a white canvas.",
       instruction: "Modify the circle() function parameters to draw a circle at the exact center of the canvas. The canvas is 400x400 pixels. Use fill() to give it a color and stroke() to outline the circle.",
-      startingCode: "function setup() {\n  createCanvas(400, 400);\n}\n\nfunction draw() {\n  background(20);\n  fill(255, 178, 187);\n  circle(mouseX, mouseY, 50);\n}",
-      solution: "function setup() {\n  createCanvas(400, 400);\n}\n\nfunction draw() {\n  background(20);\n  fill(255, 178, 187);\n  circle(200, 200, 50);\n}"
+      startingCode: "function setup() {\n  createCanvas(400, 400);\n}\n\nfunction draw() {\n  background(255);\n  fill(255, 105, 180);\n  circle(200, 200, 100);\n}",
+      solution: "function setup() {\n  createCanvas(400, 400);\n}\n\nfunction draw() {\n  background(255);\n  fill(255, 105, 180);\n  circle(200, 200, 100);\n}"
     },
     {
       id: "exercise-2",

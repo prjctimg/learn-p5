@@ -10,3 +10,8 @@ Use React Native's `StyleSheet.create()` API — **no Tailwind/NativeWind**.
 - For theme-aware colors, use `useThemeContext()` from `src/components/ThemeProvider.tsx` and import `Colors` from `src/constants/Colors.ts`. Resolve colors at render time: `const colors = Colors[colorScheme === "dark" ? "dark" : "light"]`.
 - For Pressable press-state styles, use the `({ pressed }) => [styles.base, pressed && styles.active]` pattern.
 - Font families: `"SpaceGrotesk"` (headings), `"Inter"` (body/label), `"JetBrainsMono"` (code).
+
+## Package Management
+
+- **Never run `npm install` on the dev machine.** Only edit `package.json` to add/change dependencies. The user handles installation separately.
+- After editing `package.json`, update `AGENTS.md` if the change introduces new conventions or build steps.

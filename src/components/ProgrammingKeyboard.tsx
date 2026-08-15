@@ -49,11 +49,15 @@ interface ProgrammingKeyboardProps {
   onInsert: (text: string, cursorOffset?: number) => void;
   exerciseSymbols?: string[];
   onToggleKeyboard?: () => void;
+  onRequestSystemKeyboard?: () => void;
+  onBackspace?: () => void;
+  onNewline?: () => void;
+  onFormat?: () => void;
   keyboardVisible?: boolean;
   usedFunctions?: string[];
 }
 
-export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], onToggleKeyboard, keyboardVisible = true, usedFunctions = [] }: ProgrammingKeyboardProps) {
+export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], onToggleKeyboard, onRequestSystemKeyboard, onBackspace, onNewline, onFormat, keyboardVisible = true, usedFunctions = [] }: ProgrammingKeyboardProps) {
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
   const [hintType, setHintType] = useState<"string" | "array" | null>(null);
@@ -97,15 +101,48 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
         contentContainerStyle={styles.symbolsContent}
       >
         <Pressable
-          onPress={onToggleKeyboard}
+          onPress={keyboardVisible ? onRequestSystemKeyboard : onToggleKeyboard}
           style={({ pressed }) => [
             styles.keyboardIcon,
             { backgroundColor: pressed ? colors.primaryContainer : colors.primaryContainer + "33" },
           ]}
           accessibilityRole="button"
-          accessibilityLabel="Toggle system keyboard"
+          accessibilityLabel={keyboardVisible ? "Show system keyboard" : "Show in-app keyboard"}
         >
           <MaterialCommunityIcons name={keyboardVisible ? "keyboard-outline" : "keyboard-variant"} size={20} color="#ED225D" />
+        </Pressable>
+        <Pressable
+          onPress={onBackspace}
+          style={({ pressed }) => [
+            styles.editorBtn,
+            { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
+          ]}
+          accessibilityRole="button"
+          accessibilityLabel="Backspace"
+        >
+          <MaterialCommunityIcons name="backspace" size={18} color={colors.onSurfaceVariant} />
+        </Pressable>
+        <Pressable
+          onPress={onNewline}
+          style={({ pressed }) => [
+            styles.editorBtn,
+            { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
+          ]}
+          accessibilityRole="button"
+          accessibilityLabel="New line"
+        >
+          <MaterialCommunityIcons name="keyboard-return" size={18} color={colors.onSurfaceVariant} />
+        </Pressable>
+        <Pressable
+          onPress={onFormat}
+          style={({ pressed }) => [
+            styles.editorBtn,
+            { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
+          ]}
+          accessibilityRole="button"
+          accessibilityLabel="Format code"
+        >
+          <MaterialCommunityIcons name="code-tags" size={18} color={colors.onSurfaceVariant} />
         </Pressable>
         {pairedSymbols.map((pair) => {
           const hinted = pair.hintTrigger && pair.hintTrigger === hintType;
@@ -219,6 +256,14 @@ const styles = StyleSheet.create({
     flexShrink: 0,
     paddingHorizontal: 12,
     paddingVertical: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 4,
+  },
+  editorBtn: {
+    flexShrink: 0,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 4,

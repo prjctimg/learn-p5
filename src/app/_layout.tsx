@@ -10,7 +10,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <DrawerProvider>
         <ThemeProvider>
-          <Stack screenOptions={{ headerShown: false }} />
+          <Stack screenOptions={{ headerShown: false, animation: "slide_from_right", animationDuration: 500 }} />
           <SideDrawer />
           <DrawerFab />
         </ThemeProvider>

@@ -9,6 +9,7 @@ import { useDrawerContext } from "../../../contexts/DrawerContext";
 import { useThemeContext } from "../../../components/ThemeProvider";
 import { Colors } from "../../../constants/Colors";
 import ProgrammingKeyboard from "../../../components/ProgrammingKeyboard";
+import Toast from "../../../components/Toast";
 import { loadExercise, loadCourse } from "../../../utils/courseLoader";
 import { Lesson } from "../../../data/types";
 import { P5_FUNCTION_NAMES, ONCE_ONLY_P5_FUNCTIONS } from "../../../data/p5Symbols";
@@ -81,9 +82,11 @@ export default function Exercise() {
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
   const webViewRef = useRef<WebView>(null);
   const [webViewReady, setWebViewReady] = useState(false);
+  const [editorViewReady, setEditorViewReady] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(true);
   const [systemKeyboardVisible, setSystemKeyboardVisible] = useState(false);
   const [codeBackground, setCodeBackground] = useState<string | undefined>(undefined);
+  const [toastVisible, setToastVisible] = useState(false);
 
   const exerciseHtml = useMemo(() => {
     if (!state.exercise) return null;
@@ -235,12 +238,12 @@ export default function Exercise() {
   }, [course, id]);
 
   useEffect(() => {
-    if (webViewReady && webViewRef.current) {
+    if (editorViewReady && webViewRef.current) {
       webViewRef.current.postMessage(
         JSON.stringify({ type: "setCode", code: state.code })
       );
     }
-  }, [state.code, webViewReady]);
+  }, [state.code, editorViewReady]);
 
   const handleMessage = useCallback(
     (event: { nativeEvent: { data: string } }) => {
@@ -252,6 +255,9 @@ export default function Exercise() {
             break;
           case "ready":
             setWebViewReady(true);
+            break;
+          case "editorReady":
+            setEditorViewReady(msg.ready);
             break;
           case "openRef":
             router.push(`/ref?symbol=${msg.symbol}`);
@@ -277,26 +283,17 @@ export default function Exercise() {
     [router, course, id]
   );
 
-  const handleRun = () => {
-    if (!state.exercise) return;
-
-    dispatch({ type: "RUN_START" });
-
-    if (webViewRef.current && webViewReady) {
-      webViewRef.current.postMessage(
-        JSON.stringify({ type: "runSketch" })
-      );
-    }
-
-    dispatch({ type: "RUN_DONE" });
-  };
-
   const pendingInserts = useRef<Array<{ text: string; cursorOffset?: number }>>([]);
 
   const handleInsert = (text: string, cursorOffset?: number) => {
-    if (webViewRef.current && webViewReady) {
+    if (webViewRef.current && editorViewReady) {
       webViewRef.current.postMessage(
         JSON.stringify({ type: "insert", text, cursorOffset })
+      );
+    } else if (webViewRef.current && webViewReady) {
+      pendingInserts.current.push({ text, cursorOffset });
+      webViewRef.current.postMessage(
+        JSON.stringify({ type: "editorReady" })
       );
     } else {
       pendingInserts.current.push({ text, cursorOffset });
@@ -304,7 +301,7 @@ export default function Exercise() {
   };
 
   useEffect(() => {
-    if (webViewReady && pendingInserts.current.length > 0) {
+    if (editorViewReady && pendingInserts.current.length > 0) {
       for (const item of pendingInserts.current) {
         if (webViewRef.current) {
           webViewRef.current.postMessage(
@@ -314,17 +311,45 @@ export default function Exercise() {
       }
       pendingInserts.current = [];
     }
-  }, [webViewReady]);
+  }, [editorViewReady]);
 
   const handleToggleKeyboard = useCallback(() => {
     setKeyboardVisible((prev) => !prev);
   }, []);
 
-  useEffect(() => {
-    if (!keyboardVisible && webViewRef.current && webViewReady) {
+  const handleRequestSystemKeyboard = useCallback(() => {
+    setKeyboardVisible(false);
+    if (webViewRef.current) {
       webViewRef.current.postMessage(JSON.stringify({ type: "focus" }));
     }
-  }, [keyboardVisible, webViewReady]);
+  }, []);
+
+  const handleBackspace = useCallback(() => {
+    if (webViewRef.current && editorViewReady) {
+      webViewRef.current.postMessage(JSON.stringify({ type: "backspace" }));
+    }
+  }, [editorViewReady]);
+
+  const handleNewline = useCallback(() => {
+    if (webViewRef.current && editorViewReady) {
+      webViewRef.current.postMessage(JSON.stringify({ type: "insert", text: "\n" }));
+    }
+  }, [editorViewReady]);
+
+  const handleRun = useCallback(() => {
+    if (!state.exercise) return;
+    dispatch({ type: "RUN_START" });
+    if (webViewRef.current && editorViewReady) {
+      webViewRef.current.postMessage(JSON.stringify({ type: "runSketch" }));
+    }
+    setTimeout(() => dispatch({ type: "RUN_DONE" }), 500);
+  }, [state.exercise, editorViewReady]);
+
+  const handleFormat = useCallback(() => {
+    if (webViewRef.current && editorViewReady) {
+      webViewRef.current.postMessage(JSON.stringify({ type: "format" }));
+    }
+  }, [editorViewReady]);
 
   useEffect(() => {
     const showSub = Keyboard.addListener("keyboardDidShow", () => {
@@ -358,11 +383,7 @@ export default function Exercise() {
       }
     });
 
-    if (webViewRef.current && webViewReady) {
-      webViewRef.current.postMessage(
-        JSON.stringify({ type: "showCompletion" })
-      );
-    }
+    setToastVisible(true);
 
     loadCourse(course).then((courseData) => {
       if (!courseData) return;
@@ -383,6 +404,21 @@ export default function Exercise() {
       });
     });
   }, [state.completed, state.exercise, course, webViewReady]);
+
+  const handleToastNext = useCallback(() => {
+    setToastVisible(false);
+    if (!state.exercise) return;
+    loadCourse(course).then((courseData) => {
+      if (!courseData) return;
+      const currentIndex = courseData.lessons.findIndex((l) => l.id === id);
+      if (currentIndex >= 0 && currentIndex < courseData.lessons.length - 1) {
+        const nextLesson = courseData.lessons[currentIndex + 1];
+        router.replace(`/learn/${course}/${nextLesson.id}`);
+      } else {
+        router.replace(`/learn/${course}`);
+      }
+    });
+  }, [state.exercise, course, id, router]);
 
   const exerciseSymbols = useMemo(() => {
     if (!state.exercise) return [];
@@ -466,6 +502,7 @@ export default function Exercise() {
           originWhitelist={["*"]}
           scrollEnabled={true}
           bounces={false}
+          keyboardDisplayRequiresUserAction={false}
         />
       )}
 
@@ -487,11 +524,23 @@ export default function Exercise() {
         />
       </Pressable>
 
+      <Toast
+        visible={toastVisible}
+        message="✓ Exercise completed!"
+        actionLabel="Next →"
+        onAction={handleToastNext}
+        onDismiss={() => setToastVisible(false)}
+      />
+
       {keyboardVisible && (
         <ProgrammingKeyboard
           onInsert={handleInsert}
           exerciseSymbols={exerciseSymbols}
           onToggleKeyboard={handleToggleKeyboard}
+          onRequestSystemKeyboard={handleRequestSystemKeyboard}
+          onBackspace={handleBackspace}
+          onNewline={handleNewline}
+          onFormat={handleFormat}
           keyboardVisible={keyboardVisible}
           usedFunctions={usedFunctions}
         />
