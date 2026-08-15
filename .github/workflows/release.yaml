@@ -1,0 +1,47 @@
+name: Build & Publish Release APK
+
+on:
+  push:
+    tags:
+      - "*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Prebuild native project
+        run: npx expo prebuild --platform android --clean
+
+      - name: Build release APK
+        run: npx expo run:android --variant release --no-install --no-bundler
+
+      - name: Find APK
+        run: find android -name "*.apk" -type f
+
+      - name: Upload APK to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: android/**/*.apk

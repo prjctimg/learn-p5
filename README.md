@@ -1,56 +1,58 @@
-# Welcome to your Expo app 👋
+> # Learn P5
+>
+> An offline first mobile app to learn p5.js through small (bite sized 🍣) exercises.
+---
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+> [!WARNING]
+> This app is still in development and this document is just a long rant to try and clarify stuff. Take it with a grain of salt
 
-## Get started
+## What is this ?
 
-1. Install dependencies
+Through a gamified approach to learning, we can help new users discover features of the library quicker by using a "visual REPL" approach.
+Since `p5.js` is mostly for graphics, it makes a lot of sense to be able to play with the library and see the results immediately.
 
-   ```bash
-   npm install
-   ```
+However, the library has a lot of symbols and understanding all the use cases and quirks of all them is a chore if you're starting out.
+By designing exercises around its (publicly exported) modules, we can ensure that users understand the capabilities of the symbol.
+If we look at how certain functions that have a variable length of parameters (where the omitted ones are passed defaults internally) such as `rect()`, they present the perfect scenario where the user may want to see the differences of calling with all the parameters or relying on default behaviour.
 
-2. Start the app
+Besides that, there's a lot of preamble behind every `sketch` and sometimes it's not immediately obvious how the shown effects are achieved so giving references to sources of the applied concepts is a good way to guide users to learn further.
 
-   ```bash
-   npx expo start
-   ```
+For example, links to math tutorials, Wikipedia and community blogs. See [this draft on dealing with references](./docs/references.md)
 
-In the output, you'll find options to open the app in a
+The expected outcome is a standalone app that can be installed on mobile smartphones starting with support for Android. Support for iOS would be nice after stability is achieved.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+This is a [GSoC 2026]()  for the [Processing Foundation.]()
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### Features (planned)
 
-## Get a fresh project
+Here's some of the features we hope to have by the end. The list is subject to change as development reveals flaws.
 
-When you're ready, run:
+- Offline reference for all the publicly exported symbols in the p5.js library.
+- Support for alternative code snippets in other languages from other related projects (L5)
+- A mini playground for creating lightweight sketches. Not a replacement for the web editor.
+- Courses based on the library's modules
+- Minigames!
+- Points to unlock in-app features like alternative themes or app icon variants.
 
-```bash
-npm run reset-project
-```
+### Roadmap
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+This roadmap does not highlight the features directly but shows the stuff that would be nice to get out of the way ASAP
 
-### Other setup steps
+- [ ] Create a demo course using any p5.js module
+- [ ] Extract symbol data for the reference (refer to [data.json]())
+- [ ] Design the splash page
+- [ ] Design the level/exercises overview
+- [ ] Run a sketch in the app.
+- [ ] Install and launch a build
+- [ ] Design dashboard view and figure out the metrics to show
+- [ ] Add support for (scheduled) notifications
+- [ ] Design the logo. Can we have a mascot ?
+- [ ] Port the existing design system from the (new) p5.js website
+- [ ] Run the first mini game
+- [ ] Compile a collection of minigames to implement with p5.js and community libraries
+- [ ] Implement support for exporting gists from playground (user needs to link with GitHub)
+- [ ] Support for login to help keep user progress
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+> ### License
+>
+> This is free software released under the [GPL-3.0 license](./LICENSE)
