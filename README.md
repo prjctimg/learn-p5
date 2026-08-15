@@ -1,4 +1,12 @@
 > # Learn P5
+
+- [What is this ?](#what-is-this)
+- [Who is this for ?](#who-is-this-for)
+- [How can I try it out ?](#how-can-i-try-it-out)
+- [Where can I see and share suggestions ?](#where-can-i-see-and-share-suggestions)
+  - [Roadmap](#roadmap)
+  - [License](#license)
+
 >
 > An offline first mobile app to learn p5.js through small (bite sized 🍣) exercises.
 ---
@@ -8,38 +16,33 @@
 
 ## What is this ?
 
-Through a gamified approach to learning, we can help new users discover features of the library quicker by using a "visual REPL" approach.
-Since `p5.js` is mostly for graphics, it makes a lot of sense to be able to play with the library and see the results immediately.
+Learn P5 is a mobile app to help users learn how p5.js symbols (functions, classes, built-in variables) work by showing users their sketch preview during the exercise. It is not a replacement for the p5 web editor which has far more comprehensive editing features.
 
-However, the library has a lot of symbols and understanding all the use cases and quirks of all them is a chore if you're starting out.
-By designing exercises around its (publicly exported) modules, we can ensure that users understand the capabilities of the symbol.
-If we look at how certain functions that have a variable length of parameters (where the omitted ones are passed defaults internally) such as `rect()`, they present the perfect scenario where the user may want to see the differences of calling with all the parameters or relying on default behaviour.
+This is a [GSoC 2026](https://summerofcode.withgoogle.com/programs/2026/projects/wmrV9qBT) project for the [Processing Foundation](https://processingfoundation.org).
 
-Besides that, there's a lot of preamble behind every `sketch` and sometimes it's not immediately obvious how the shown effects are achieved so giving references to sources of the applied concepts is a good way to guide users to learn further.
+## Who is this for ?
 
-For example, links to math tutorials, Wikipedia and community blogs. See [this draft on dealing with references](./docs/references.md)
+This app is intended for anyone who wants to learn p5.js at a relaxed pace that covers how each symbol works on the go, even without an internet connection to load resources such as the reference or web editor.
 
-The expected outcome is a standalone app that can be installed on mobile smartphones starting with support for Android. Support for iOS would be nice after stability is achieved.
+## How can I try it out ?
 
-This is a [GSoC 2026]()  for the [Processing Foundation.]()
+The app is currently available on Android only and ChromeOS if you are on the `dev` branch.
 
-### Features (planned)
+You can [grab the releases here](https://github.com/skchr/learn-p5/releases)
 
-Here's some of the features we hope to have by the end. The list is subject to change as development reveals flaws.
+## Where can I see and share suggestions ?
 
-- Offline reference for all the publicly exported symbols in the p5.js library.
-- Support for alternative code snippets in other languages from other related projects (L5)
-- A mini playground for creating lightweight sketches. Not a replacement for the web editor.
-- Courses based on the library's modules
-- Minigames!
-- Points to unlock in-app features like alternative themes or app icon variants.
+There's a few GitHub Discussions that are open to suggestions and where we post feature previews (screenshots and the like).
+
+More threads will be created as the project progresses:
+
+- [Accessibility](https://github.com/skchr/learn-p5/discussions/1)
 
 ### Roadmap
 
-This roadmap does not highlight the features directly but shows the stuff that would be nice to get out of the way ASAP
+This is an almost exhaustive list of the things we wish to complete during the program (they are not listed in any order of priority)
 
 - [ ] Create a demo course using any p5.js module
-- [ ] Extract symbol data for the reference (refer to [data.json]())
 - [ ] Design the splash page
 - [ ] Design the level/exercises overview
 - [ ] Run a sketch in the app.
@@ -51,7 +54,18 @@ This roadmap does not highlight the features directly but shows the stuff that w
 - [ ] Run the first mini game
 - [ ] Compile a collection of minigames to implement with p5.js and community libraries
 - [ ] Implement support for exporting gists from playground (user needs to link with GitHub)
-- [ ] Support for login to help keep user progress
+- [ ] Allow users to preview sketches in full screen mode
+- [ ] Support for the Friendly Error System (FES)
+- [ ] Comply with basic accessibility requirements
+- [ ] Add support for accessibility edge cases
+- [ ] Save and store user state
+- [ ] Track login streak and point system for certain actions such as completing  multiple exercises or module completion
+- [ ] Create the first minigame
+- [ ] Run the first minigame module
+- [ ] Allow the user to sync progress between devices
+- [ ] Improve the dashboard design
+- [ ] Support for scheduled notifications
+- [ ] Add support for sharing in-app links with rich OG data
 
 > ### License
 >

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useImperativeHandle, forwardRef, useRef } from "react";
+import { useState, useEffect, useCallback, useImperativeHandle, forwardRef, useRef, useMemo } from "react";
 import { StyleSheet, View, Pressable } from "react-native";
 import { WebView } from "react-native-webview";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -21,8 +21,6 @@ export interface CodeEditorHandle {
 
 const CODE_FONT_SIZE_KEY = "setting_codeFontSize";
 
-const editorHtml = getEditorHtml();
-
 const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
   function CodeEditor({ code, onChange, onRun, isRunning }, ref) {
     const [webViewReady, setWebViewReady] = useState(false);
@@ -30,6 +28,7 @@ const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     const webViewRef = useRef<WebView>(null);
     const { colorScheme } = useThemeContext();
     const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+    const editorHtml = useMemo(() => getEditorHtml(colorScheme === "dark" ? "dark" : "light"), [colorScheme]);
 
     useEffect(() => {
       AsyncStorage.getItem(CODE_FONT_SIZE_KEY).then((val) => {

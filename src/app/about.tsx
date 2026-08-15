@@ -58,19 +58,6 @@ export default function About() {
           bounces={false}
           pointerEvents="none"
         />
-        <Svg width={120} height={55} viewBox="0 0 250 114">
-          {logoPaths.map((d, i) => (
-            <Path key={`about-path-${i}`} d={d} fill={colors.primary} />
-          ))}
-        </Svg>
-        <Text style={[styles.title, { color: colors.onSurface }]}>
-          Learn p5
-        </Text>
-        <View style={[styles.versionBadge, { backgroundColor: colors.surfaceDim }]}>
-          <Text style={[styles.versionText, { color: colors.textSecondary }]}>
-            {APP_VERSION}
-          </Text>
-        </View>
         <Text style={[styles.description, { color: colors.textSecondary }]}>
 
           Learn P5 is a GSoC 2026 project that aims to provide an offline first,ELI5 learning experience on with the hope to improve the quality of learning for users who may not have unlimited bandwidth or reliable internet.
@@ -78,6 +65,16 @@ export default function About() {
 
 
         </Text>
+        <Svg width={120} height={55} viewBox="0 0 250 114">
+          {logoPaths.map((d, i) => (
+            <Path key={`about-path-${i}`} d={d} fill={colors.primary} />
+          ))}
+        </Svg>
+        <View style={[styles.versionBadge, { backgroundColor: colors.surfaceDim }]}>
+          <Text style={[styles.versionText, { color: colors.textSecondary }]}>
+            {APP_VERSION}
+          </Text>
+        </View>
         <View style={styles.footer}>
           <Pressable onPress={() => Linking.openURL("https://processing.org")}>
             <Text style={[styles.footerMono, { color: colors.primary }]}>
@@ -105,10 +102,6 @@ const styles = StyleSheet.create({
     height: 200,
     marginBottom: Spacing.md,
     backgroundColor: "transparent",
-  },
-  title: {
-    ...Typography.display,
-    marginTop: Spacing.lg,
   },
   versionBadge: {
     borderRadius: 9999,

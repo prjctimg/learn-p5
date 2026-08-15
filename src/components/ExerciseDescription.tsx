@@ -113,7 +113,7 @@ export default function ExerciseDescription({
           <MaterialCommunityIcons
             name={expanded ? "chevron-up" : "chevron-down"}
             size={20}
-            color="#E4BDC0"
+            color={colors.onSurfaceVariant}
           />
         </Pressable>
       </View>

@@ -143,7 +143,7 @@ function SymbolDetail({ symbol }: { symbol: string }) {
       <View style={[styles.flex1, { backgroundColor: colors.surface }]}>
         <Header title="Reference" />
         <View style={[styles.flex1, { alignItems: "center", justifyContent: "center", paddingHorizontal: 24 }]}>
-          <MaterialCommunityIcons name="book-search-outline" size={48} color="#ED225D" />
+          <MaterialCommunityIcons name="book-search-outline" size={48} color={colors.primary} />
           <Text style={[styles.headlineXl, { color: colors.onSurface, marginTop: 16 }]}>
             Symbol not found
           </Text>
@@ -293,7 +293,7 @@ export default function Reference() {
                 <MaterialCommunityIcons
                   name="chevron-right"
                   size={18}
-                  color="#E4BDC0"
+                  color={colors.onSurfaceVariant}
                 />
               </Pressable>
             ))}

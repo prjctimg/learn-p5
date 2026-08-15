@@ -1,8 +1,7 @@
-import { p5Source } from "../p5Source";
-import { P5_FUNCTION_NAMES, P5_SYMBOLS } from "../../data/p5Symbols";
-import { Colors } from "../../constants/Colors";
-// CM is loaded via the embedded IIFE bundle
 import { CODEMIRROR_BUNDLE } from "./codemirror-bundle.generated";
+import { p5Source } from "../p5Source";
+import { P5_FUNCTION_NAMES } from "../../data/p5Symbols";
+import { Colors } from "../../constants/Colors";
 
 const SYMBOL_PATTERN = new RegExp(
   `\\b(${P5_FUNCTION_NAMES.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b(?=\\()`,
@@ -220,7 +219,7 @@ export function getExerciseHtml(params: {
     color: #22C55E;
     border-color: #22C55E;
   }
-  .cm-editor { height: 100%; font-size: 22px; background: ${editorBg}; }
+  .cm-editor { height: 100%; font-size: ${fontSize}px; background: ${editorBg}; }
   .cm-editor .cm-scroller { font-family: 'JetBrains Mono', monospace; overflow: auto; }
   .cm-editor.cm-focused { outline: none; }
   .cm-editor .cm-gutters { background: ${editorBg}; border-right: 1px solid ${params.colorScheme === 'dark' ? '#292A2E' : '#E5E7EB'}; color: ${params.colorScheme === 'dark' ? '#6B7280' : '#9CA3AF'}; }
@@ -233,9 +232,6 @@ export function getExerciseHtml(params: {
     background: rgba(237, 34, 93, 0.3);
     outline: 1px solid #ED225D;
   }
-  .cm-editor .cm-tooltip-autocomplete { background: ${colors.surfaceContainer}; border: 1px solid ${colors.outlineVariant}; border-radius: 6px; }
-  .cm-editor .cm-tooltip-autocomplete ul li[aria-selected] { background: ${colors.primaryContainer}; color: ${colors.onPrimaryContainer}; }
-  .cm-editor .cm-tooltip-autocomplete .cm-completionDetail { color: ${colors.onSurfaceVariant}; }
   .scroll-whitespace {
     height: 700px;
   }
@@ -351,7 +347,7 @@ ${
 <script>${p5Source}</script>
 <script>${CODEMIRROR_BUNDLE}</script>
 <script>
-${getBridgeScript(params.startingCode, params.solution, editorBg, params.colorScheme, params.exerciseNumber, fontSize)}
+${getBridgeScript(params.startingCode, params.solution, editorBg, params.colorScheme, params.exerciseNumber)}
 </script>
 
 ${params.exerciseNumber === 1 ? `
@@ -369,7 +365,7 @@ ${params.exerciseNumber === 1 ? `
 </html>`;
 }
 
-function getBridgeScript(startingCode: string, solution: string, editorBg: string, colorScheme: "light" | "dark", exerciseNumber?: number, codeFontSize?: number): string {
+function getBridgeScript(startingCode: string, solution: string, editorBg: string, colorScheme: "light" | "dark", exerciseNumber?: number): string {
   const isDark = colorScheme === "dark";
   const codeArg = jsString(startingCode);
   const solutionArg = jsString(solution);
@@ -389,79 +385,57 @@ function getBridgeScript(startingCode: string, solution: string, editorBg: strin
   const constColor = isDark ? '#FF4F75' : '#D31D4E';
 
   return `
-let view;
-const INITIAL_CODE = ${codeArg};
-const SOLUTION_CODE = ${solutionArg};
-const CODE_FONT_SIZE = ${codeFontSize ?? 22};
-const EDITOR_BG = '${editorBg}';
-
 var _CM = typeof CM !== 'undefined' ? CM : null;
-if (!_CM) {
-  var editorEl = document.getElementById('editor');
-  if (editorEl) {
-    editorEl.innerHTML = '<div style="color:#6B7280;padding:20px;font-family:sans-serif;text-align:center">Code editor bundle unavailable. Type code below.</div><textarea id="cm-fallback" style="width:100%;height:400px;background:' + EDITOR_BG + ';color:${fg};font-family:JetBrains Mono,monospace;font-size:' + CODE_FONT_SIZE + 'px;border:none;outline:none;resize:none;padding:12px">' + INITIAL_CODE + '</textarea>';
-  }
-  postReady();
-  postEditorReady();
-  throw new Error('CM bundle not loaded');
-}
-
 var basicSetup = _CM.basicSetup;
 var EditorView = _CM.EditorView;
+var EditorState = _CM.EditorState;
 var keymap = _CM.keymap;
+var syntaxHighlighting = _CM.syntaxHighlighting;
+var HighlightStyle = _CM.HighlightStyle;
+var javascript = _CM.javascript;
+var tags = _CM.tags;
+var indentSelection = _CM.indentSelection;
+var syntaxTree = _CM.syntaxTree;
 var ViewPlugin = _CM.ViewPlugin;
 var Decoration = _CM.Decoration;
 var DecorationSet = _CM.DecorationSet;
-var EditorState = _CM.EditorState;
-var syntaxHighlighting = _CM.syntaxHighlighting;
-var HighlightStyle = _CM.HighlightStyle;
-var syntaxTree = _CM.syntaxTree;
-var javascript = _CM.javascript;
-var indentSelection = _CM.indentSelection;
-var autocompletion = _CM.autocompletion;
-var tags = _CM.tags;
 
-try {
-    var p5FnMark = Decoration.mark({ class: 'cm-p5-fn' });
-    function computeP5Decos(v) {
-      var decos = [];
-      syntaxTree(v.state).iterate({
-        enter: function(n) {
-          if (n.name === 'CallExpression' || n.name === 'NewExpression') {
-            var callee = n.node.firstChild;
-            if (callee && callee.name === 'Identifier') {
-              var name = v.state.sliceDoc(callee.from, callee.to);
-              if (${JSON.stringify(P5_FUNCTION_NAMES)}.indexOf(name) >= 0) {
-                decos.push(p5FnMark.range(callee.from, callee.to));
-              }
-            }
+let view;
+const INITIAL_CODE = ${codeArg};
+const SOLUTION_CODE = ${solutionArg};
+
+const p5FnMark = Decoration.mark({ class: 'cm-p5-fn' });
+
+function computeP5Decos(v) {
+  var decos = [];
+  syntaxTree(v.state).iterate({
+    enter: function(n) {
+      if (n.name === 'CallExpression' || n.name === 'NewExpression') {
+        var callee = n.node.firstChild;
+        if (callee && callee.name === 'Identifier') {
+          var name = v.state.sliceDoc(callee.from, callee.to);
+          if (${JSON.stringify(P5_FUNCTION_NAMES)}.indexOf(name) >= 0) {
+            decos.push(p5FnMark.range(callee.from, callee.to));
           }
         }
-      });
-      return DecorationSet.create(v.state, decos);
-    }
-    function P5FnPlugin(view) { this.decorations = computeP5Decos(view); }
-    P5FnPlugin.prototype.update = function(update) {
-      if (update.docChanged || update.viewportChanged) {
-        this.decorations = computeP5Decos(update.view);
       }
-    };
-    var p5FnPlugin = ViewPlugin.fromClass(P5FnPlugin, {
-      decorations: function(v) { return v.decorations; }
-    });
+    }
+  });
+  return DecorationSet.create(v.state, decos);
+}
 
-    var p5Completions = ${JSON.stringify(P5_SYMBOLS.map(s => ({ label: s.name + '()', type: 'function', detail: s.syntax, info: s.description })))}.map(function(c) { return { label: c.label, type: c.type, detail: c.detail, info: c.info }; });
+function P5FnPlugin(view) { this.decorations = computeP5Decos(view); }
+P5FnPlugin.prototype.update = function(update) {
+  if (update.docChanged || update.viewportChanged) {
+    this.decorations = computeP5Decos(update.view);
+  }
+};
+var p5FnPlugin = ViewPlugin.fromClass(P5FnPlugin, {
+  decorations: function(v) { return v.decorations; }
+});
 
-    var p5CompletionSource = function(context) {
-      var word = context.matchBefore(/\\b[p5\\.]?[a-zA-Z]\\w*/);
-      if (!word && !context.explicit) return null;
-      if (word && word.from === word.to && !context.explicit) return null;
-      var matches = p5Completions.filter(function(c) {
-        return c.label.indexOf(word ? word.text : '') === 0;
-      });
-      return { from: word ? word.from : context.pos, options: matches, validFor: /^[\\w.]+$/ };
-    };
-
+function initEditor() {
+  try {
     const p5Theme = EditorView.theme({
       '&': { backgroundColor: '${editorBg}', color: '${fg}' },
       '.cm-content': { caretColor: '#ED225D', fontFamily: "'JetBrains Mono', monospace" },
@@ -516,7 +490,6 @@ try {
       extensions: [
         basicSetup,
         javascript(),
-        autocompletion({ override: [p5CompletionSource] }),
         p5Theme,
         syntaxHighlighting(p5Highlight),
         p5FnPlugin,
@@ -530,12 +503,16 @@ try {
       ],
     });
     view = new EditorView({ state, parent: document.getElementById('editor') });
-    if (CODE_FONT_SIZE) {
-      var scroller = view.dom.querySelector('.cm-scroller');
-      if (scroller) scroller.style.fontSize = CODE_FONT_SIZE + 'px';
-    }
-    var cmContent = view.dom.querySelector('.cm-content');
-    if (cmContent) cmContent.setAttribute('inputmode', 'none');
+    window.__systemKeyboardEnabled = false;
+    view.dom.addEventListener('mousedown', function(e) {
+      if (!window.__systemKeyboardEnabled) {
+        e.preventDefault();
+        view.focus();
+        if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+          window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'editorTapped' }));
+        }
+      }
+    });
     postReady();
     postEditorReady();
     setTimeout(function() {
@@ -550,6 +527,7 @@ try {
     postReady();
     postEditorReady();
   }
+}
 
 function postCodeChange(code) {
   if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
@@ -575,13 +553,6 @@ function postOpenRef(symbol) {
   }
 }
 
-function wrapInstanceCode(code) {
-  return code.replace(
-    /\\bfunction\\s+(setup|draw|preload|mousePressed|mouseReleased|mouseClicked|mouseMoved|mouseDragged|mouseWheel|keyPressed|keyReleased|keyTyped|touchStarted|touchMoved|touchEnded|windowResized|doubleClicked|deviceMoved|deviceTurned|deviceShaken)\\s*\\(/g,
-    'p.$1 = function('
-  );
-}
-
 function renderSketch(containerId, code) {
   var container = document.getElementById(containerId);
   if (!container) return;
@@ -594,13 +565,15 @@ function renderSketch(containerId, code) {
 
   if (!code) return;
 
+  delete window.setup;
+  delete window.draw;
+
+  var script = document.createElement('script');
+  script.textContent = code;
+  document.body.appendChild(script);
+
   try {
-    var wrapped = wrapInstanceCode(code);
-    container.__p5 = new p5(function(p) {
-      with(p) {
-        eval(wrapped);
-      }
-    }, container);
+    container.__p5 = new p5(undefined, container);
   } catch(e) {
     console.error('Sketch render error:', e);
     container.innerHTML = '<div style="color:#ED225D;padding:16px;font-family:sans-serif">\\u26A0 ' + e.message + '</div>';
@@ -624,15 +597,6 @@ function smoothScrollTo(el, duration) {
   requestAnimationFrame(step);
 }
 
-function normalizeCode(code) {
-  return code
-    .replace(/\/\/.*$/gm, '')
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/\/\*[\s\S]*$/, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
 function handleMessage(data) {
   try {
     var msg = typeof data === 'string' ? JSON.parse(data) : data;
@@ -646,10 +610,10 @@ function handleMessage(data) {
         break;
       case 'insert':
         if (view) {
-          var sel = view.state.selection.main;
+          var cursor = view.state.selection.main.head;
           view.dispatch({
-            changes: { from: sel.from, to: sel.to, insert: msg.text },
-            selection: { anchor: sel.from + (msg.cursorOffset !== undefined ? msg.cursorOffset : msg.text.length) },
+            changes: { from: cursor, insert: msg.text },
+            selection: { anchor: cursor + (msg.cursorOffset !== undefined ? msg.cursorOffset : msg.text.length) },
           });
           view.focus();
         } else {
@@ -658,11 +622,13 @@ function handleMessage(data) {
         break;
       case 'focus':
         if (view) {
-          var cont = view.dom.querySelector('.cm-content');
-          if (cont) cont.removeAttribute('inputmode');
+          window.__systemKeyboardEnabled = true;
           view.dom.scrollIntoView({ behavior: 'smooth', block: 'center' });
           setTimeout(function() { view.focus(); }, 200);
         }
+        break;
+      case 'useCustomKeyboard':
+        window.__systemKeyboardEnabled = false;
         break;
       case 'setFontSize':
         var scroller = view && view.dom && view.dom.querySelector('.cm-scroller');
@@ -670,51 +636,14 @@ function handleMessage(data) {
         break;
       case 'backspace':
         if (view) {
-          var sel = view.state.selection.main;
-          var bsFrom = sel.from;
-          var bsTo = sel.to;
-          if (bsFrom < bsTo) {
+          var cur = view.state.selection.main.head;
+          if (cur > 0) {
             view.dispatch({
-              changes: { from: bsFrom, to: bsTo },
-              selection: { anchor: bsFrom },
+              changes: { from: cur - 1, to: cur },
+              selection: { anchor: cur - 1 },
             });
-          } else if (bsFrom > 0) {
-            view.dispatch({
-              changes: { from: bsFrom - 1, to: bsFrom },
-              selection: { anchor: bsFrom - 1 },
-            });
+            view.focus();
           }
-          view.focus();
-        }
-        break;
-      case 'cursorMove':
-        if (view) {
-          var curPos = view.state.selection.main.head;
-          switch (msg.direction) {
-            case 'left':
-              if (curPos > 0) view.dispatch({ selection: { anchor: curPos - 1 } });
-              break;
-            case 'right':
-              if (curPos < view.state.doc.length) view.dispatch({ selection: { anchor: curPos + 1 } });
-              break;
-            case 'up':
-              var curLine = view.state.doc.lineAt(curPos);
-              if (curLine.number > 1) {
-                var prevLine = view.state.doc.line(curLine.number - 1);
-                var col = curPos - curLine.from;
-                view.dispatch({ selection: { anchor: Math.min(prevLine.from + col, prevLine.to) } });
-              }
-              break;
-            case 'down':
-              var curLine2 = view.state.doc.lineAt(curPos);
-              if (curLine2.number < view.state.doc.lines) {
-                var nextLine = view.state.doc.line(curLine2.number + 1);
-                var col2 = curPos - curLine2.from;
-                view.dispatch({ selection: { anchor: Math.min(nextLine.from + col2, nextLine.to) } });
-              }
-              break;
-          }
-          view.focus();
         }
         break;
       case 'format':
@@ -726,17 +655,11 @@ function handleMessage(data) {
         }
         break;
       case 'runSketch':
-        var userCode;
-        if (view) {
-          userCode = view.state.doc.toString();
-        } else {
-          var ta = document.getElementById('cm-fallback');
-          userCode = ta ? ta.value : '';
-        }
-        if (!userCode) break;
+        if (!view) { console.error('Editor not initialized'); break; }
+        var userCode = view.state.doc.toString();
         renderSketch('user-sketch', userCode);
         if (typeof window.__tutRun === 'function') window.__tutRun();
-        if (SOLUTION_CODE && normalizeCode(userCode) === normalizeCode(SOLUTION_CODE)) {
+        if (SOLUTION_CODE && userCode.trim() === SOLUTION_CODE.trim()) {
           if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
             window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'exerciseComplete' }));
           }
@@ -778,8 +701,8 @@ if (solutionToggle) {
 var copyBtn = document.getElementById('copyBtn');
 if (copyBtn) {
   copyBtn.addEventListener('click', function() {
-    var code = view ? view.state.doc.toString() : (document.getElementById('cm-fallback') ? document.getElementById('cm-fallback').value : '');
-    if (code) {
+    if (view) {
+      var code = view.state.doc.toString();
       navigator.clipboard.writeText(code).then(function() {
         copyBtn.textContent = 'Copied!';
         copyBtn.classList.add('copied');
@@ -796,7 +719,7 @@ var solRunBtn = document.getElementById('solution-run-btn');
 var solutionHasRun = false;
 if (solRunBtn) {
   solRunBtn.addEventListener('click', function() {
-    if (SOLUTION_CODE) {
+    if (view && SOLUTION_CODE) {
       renderSketch('solution-sketch', SOLUTION_CODE);
       if (!solutionHasRun) {
         solutionHasRun = true;
@@ -811,6 +734,7 @@ if (solRunBtn) {
   });
 }
 
+initEditor();
 renderSketch('user-sketch', INITIAL_CODE);
 if (typeof window.__tutPreview === 'function') window.__tutPreview();
 

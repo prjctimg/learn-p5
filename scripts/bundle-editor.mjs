@@ -5,14 +5,11 @@ import path from "path";
 function main() {
   const outFile = path.resolve("src/utils/editor/codemirror-bundle.generated.ts");
   const entry = path.resolve("src/utils/editor/bundleEntry.ts");
-  const localEsbuild = path.resolve("node_modules/.bin/esbuild");
-  const esbuildBin = fs.existsSync(localEsbuild)
-    ? `"${localEsbuild}"`
-    : "npx --package esbuild esbuild";
+  const esbuild = path.resolve("node_modules/.bin/esbuild");
 
   try {
     const result = execSync(
-      `${esbuildBin} "${entry}" --bundle --format=iife --global-name=CM --minify --platform=browser --target=es2020`,
+      `"${esbuild}" "${entry}" --bundle --format=iife --global-name=CM --minify --platform=browser --target=es2020`,
       { encoding: "utf-8", maxBuffer: 50 * 1024 * 1024 }
     );
 

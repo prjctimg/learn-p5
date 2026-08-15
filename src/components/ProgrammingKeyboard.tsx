@@ -16,15 +16,13 @@ interface ProgrammingKeyboardProps {
   onBackspace?: () => void;
   onNewline?: () => void;
   onFormat?: () => void;
-  onRun?: () => void;
-  isRunning?: boolean;
   onCursorMove?: (direction: 'left' | 'right' | 'up' | 'down') => void;
   keyboardVisible?: boolean;
   usedFunctions?: string[];
   height?: number;
 }
 
-export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], onToggleKeyboard, onRequestSystemKeyboard, onBackspace, onNewline, onFormat, onRun, isRunning, onCursorMove, keyboardVisible = true, usedFunctions = [], height = 280 }: ProgrammingKeyboardProps) {
+export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], onToggleKeyboard, onRequestSystemKeyboard, onBackspace, onNewline, onFormat, onCursorMove, keyboardVisible = true, usedFunctions = [], height = 280 }: ProgrammingKeyboardProps) {
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
   const [hintType, setHintType] = useState<"string" | "array" | null>(null);
@@ -86,15 +84,26 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
           contentContainerStyle={styles.symbolsContent}
         >
           <Pressable
-            onPress={keyboardVisible ? onRequestSystemKeyboard : onToggleKeyboard}
+            onPress={onToggleKeyboard}
+            style={({ pressed }) => [
+              styles.keyboardIcon,
+              { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Hide keyboard"
+          >
+            <MaterialCommunityIcons name="chevron-down" size={20} color={colors.onSurfaceVariant} />
+          </Pressable>
+          <Pressable
+            onPress={onRequestSystemKeyboard}
             style={({ pressed }) => [
               styles.keyboardIcon,
               { backgroundColor: pressed ? colors.primaryContainer : colors.primaryContainer + "33" },
             ]}
             accessibilityRole="button"
-            accessibilityLabel={keyboardVisible ? "Show system keyboard" : "Show in-app keyboard"}
+            accessibilityLabel="Toggle system keyboard"
           >
-            <MaterialCommunityIcons name={keyboardVisible ? "keyboard-outline" : "keyboard-variant"} size={20} color="#ED225D" />
+            <MaterialCommunityIcons name="keyboard-outline" size={20} color={colors.primary} />
           </Pressable>
           <Pressable
             onPress={onFormat}
@@ -169,20 +178,6 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
             </Pressable>
           ))}
         </ScrollView>
-        <Pressable
-          onPress={onRun}
-          disabled={isRunning}
-          style={[styles.toolbarRunBtn, { backgroundColor: colors.primary }]}
-          accessibilityRole="button"
-          accessibilityLabel="Run sketch"
-          accessibilityState={{ disabled: isRunning }}
-        >
-          <MaterialCommunityIcons
-            name={isRunning ? "reload" : "play"}
-            size={20}
-            color="#FFFFFF"
-          />
-        </Pressable>
       </View>
 
       {exerciseSymbols.length > 0 && (
@@ -353,23 +348,12 @@ const styles = StyleSheet.create({
   symbolsRow: {
     maxHeight: 44,
     flex: 1,
-    paddingRight: 48,
   },
   symbolsContent: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: Spacing.sm,
     gap: Spacing.xs,
-  },
-  toolbarRunBtn: {
-    position: "absolute",
-    right: 6,
-    top: 6,
-    bottom: 6,
-    width: 40,
-    borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
   },
   keyboardIcon: {
     flexShrink: 0,

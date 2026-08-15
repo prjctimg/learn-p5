@@ -86,6 +86,7 @@ export default function Exercise() {
   const [editorViewReady, setEditorViewReady] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(true);
   const [systemKeyboardVisible, setSystemKeyboardVisible] = useState(false);
+  const [systemKeyboardHeight, setSystemKeyboardHeight] = useState(0);
   const [codeBackground, setCodeBackground] = useState<string | undefined>(undefined);
   const [codeFontSize, setCodeFontSize] = useState<number>(DEFAULTS.codeFontSize);
   const [keyboardHeight, setKeyboardHeight] = useState<string>(DEFAULTS.keyboardHeight);
@@ -220,6 +221,28 @@ export default function Exercise() {
         showKeyboardFabPressed: {
           transform: [{ scale: 0.9 }],
         },
+        runButtonContainer: {
+          position: "absolute",
+          right: 16,
+          zIndex: 100,
+          alignItems: "center",
+          justifyContent: "center",
+        },
+        runButton: {
+          width: 68,
+          height: 68,
+          borderRadius: 9999,
+          alignItems: "center",
+          justifyContent: "center",
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 12 },
+          shadowOpacity: 0.3,
+          shadowRadius: 25,
+          elevation: 16,
+        },
+        runButtonPressed: {
+          transform: [{ scale: 0.9 }],
+        },
       }),
     [colorScheme]
   );
@@ -256,6 +279,9 @@ export default function Exercise() {
           case "editorReady":
             setEditorViewReady(msg.ready);
             break;
+          case "editorTapped":
+            setKeyboardVisible(true);
+            break;
           case "openRef":
             router.push(`/ref?symbol=${msg.symbol}`);
             break;
@@ -280,7 +306,7 @@ export default function Exercise() {
     [router, course, id]
   );
 
-  const pendingInserts = useRef<Array<{ text: string; cursorOffset?: number }>>([]);
+  const pendingInserts = useRef<{ text: string; cursorOffset?: number }[]>([]);
 
   const handleInsert = (text: string, cursorOffset?: number) => {
     if (webViewRef.current && editorViewReady) {
@@ -312,14 +338,25 @@ export default function Exercise() {
 
   const handleToggleKeyboard = useCallback(() => {
     setKeyboardVisible((prev) => !prev);
-  }, []);
+    if (webViewRef.current && editorViewReady) {
+      webViewRef.current.postMessage(JSON.stringify({ type: "useCustomKeyboard" }));
+    }
+  }, [editorViewReady]);
 
   const handleRequestSystemKeyboard = useCallback(() => {
-    setKeyboardVisible(false);
-    if (webViewRef.current) {
-      webViewRef.current.postMessage(JSON.stringify({ type: "focus" }));
+    if (systemKeyboardVisible) {
+      setKeyboardVisible(true);
+      setSystemKeyboardVisible(false);
+      if (webViewRef.current && editorViewReady) {
+        webViewRef.current.postMessage(JSON.stringify({ type: "useCustomKeyboard" }));
+      }
+    } else {
+      setKeyboardVisible(false);
+      if (webViewRef.current) {
+        webViewRef.current.postMessage(JSON.stringify({ type: "focus" }));
+      }
     }
-  }, []);
+  }, [systemKeyboardVisible, editorViewReady]);
 
   const handleBackspace = useCallback(() => {
     if (webViewRef.current && editorViewReady) {
@@ -355,11 +392,13 @@ export default function Exercise() {
   }, [editorViewReady]);
 
   useEffect(() => {
-    const showSub = Keyboard.addListener("keyboardDidShow", () => {
+    const showSub = Keyboard.addListener("keyboardDidShow", (e) => {
       setSystemKeyboardVisible(true);
+      setSystemKeyboardHeight(e.endCoordinates.height);
     });
     const hideSub = Keyboard.addListener("keyboardDidHide", () => {
       setSystemKeyboardVisible(false);
+      setSystemKeyboardHeight(0);
     });
     return () => {
       showSub.remove();
@@ -444,10 +483,20 @@ export default function Exercise() {
     });
   }, [state.code]);
 
+  const runButtonBottom = useMemo(() => {
+    if (keyboardVisible) {
+      return (DEFAULTS.keyboardHeightPixels[keyboardHeight] ?? DEFAULTS.keyboardHeightPixels.medium) + 16;
+    }
+    if (systemKeyboardVisible) {
+      return systemKeyboardHeight + 16;
+    }
+    return 16;
+  }, [keyboardVisible, keyboardHeight, systemKeyboardVisible, systemKeyboardHeight]);
+
   if (state.loading) {
     return (
       <View style={styles.loadingContainer}>
-        <MaterialCommunityIcons name="loading" size={32} color="#ED225D" />
+        <MaterialCommunityIcons name="loading" size={32} color={colors.primary} />
       </View>
     );
   }
@@ -456,7 +505,7 @@ export default function Exercise() {
     return (
       <View style={styles.notFoundContainer}>
         <View style={styles.notFoundInner}>
-          <MaterialCommunityIcons name="alert-circle-outline" size={48} color="#ED225D" />
+          <MaterialCommunityIcons name="alert-circle-outline" size={48} color={colors.primary} />
           <Text style={styles.notFoundTitle}>
             Exercise not found
           </Text>
@@ -494,7 +543,7 @@ export default function Exercise() {
           accessibilityRole="button"
           accessibilityLabel="Open navigation menu"
         >
-          <MaterialCommunityIcons name="menu" size={24} color="#FFB2BB" />
+          <MaterialCommunityIcons name="menu" size={24} color={colors.onSurfaceVariant} />
         </Pressable>
         <Text style={styles.logoText}>
           P5.LEARN
@@ -516,6 +565,33 @@ export default function Exercise() {
         />
       )}
 
+      <View
+        style={[
+          styles.runButtonContainer,
+          { bottom: runButtonBottom },
+        ]}
+        pointerEvents="box-none"
+      >
+        <Pressable
+          onPress={handleRun}
+          disabled={state.isRunning}
+          style={({ pressed }) => [
+            styles.runButton,
+            { backgroundColor: colors.primary },
+            pressed && styles.runButtonPressed,
+          ]}
+          accessibilityRole="button"
+          accessibilityLabel="Run sketch"
+          accessibilityState={{ disabled: state.isRunning }}
+        >
+          <MaterialCommunityIcons
+            name={state.isRunning ? "reload" : "play"}
+            size={36}
+            color="#FFFFFF"
+          />
+        </Pressable>
+      </View>
+
       <Toast
         key={toastKey}
         visible={toastVisible}
@@ -535,8 +611,6 @@ export default function Exercise() {
           onNewline={handleNewline}
           onFormat={handleFormat}
           onCursorMove={handleCursorMove}
-          onRun={handleRun}
-          isRunning={state.isRunning}
           keyboardVisible={keyboardVisible}
           usedFunctions={usedFunctions}
           height={DEFAULTS.keyboardHeightPixels[keyboardHeight] ?? DEFAULTS.keyboardHeightPixels.medium}
@@ -553,7 +627,7 @@ export default function Exercise() {
           accessibilityRole="button"
           accessibilityLabel="Show custom keyboard"
         >
-          <MaterialCommunityIcons name="keyboard-variant" size={24} color="#FFFFFF" />
+          <MaterialCommunityIcons name="keyboard-variant" size={24} color={colors.onSurface} />
         </Pressable>
       )}
     </View>
