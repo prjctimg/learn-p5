@@ -1,4 +1,4 @@
-import { useRef, useMemo, useState, useCallback } from "react";
+import { useRef, useMemo, useState, useCallback, useEffect } from "react";
 import { View, Text, FlatList, Pressable, StyleSheet, TextInput, Modal, Keyboard } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useThemeContext } from "./ThemeProvider";
@@ -43,6 +43,20 @@ export default function SearchOverlay({ visible, onClose, onSelectSymbol }: Sear
     onClose();
   }, [onClose]);
 
+  // The Modal is always mounted (only its 'visible' flag flips), so the
+  // static 'autoFocus' prop on the TextInput only fires on first render. To
+  // make the system keyboard appear reliably on EVERY open — including the
+  // Run-button long-press path from [id].tsx — focus the input imperatively
+  // whenever the overlay becomes visible. A short delay lets the Modal's
+  // fade-in animation start before we focus (focusing on a not-yet-attached
+  // node is a no-op on Android).
+  useEffect(() => {
+    if (!visible) return;
+    setQuery("");
+    const t = setTimeout(() => inputRef.current?.focus(), 60);
+    return () => clearTimeout(t);
+  }, [visible]);
+
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
       <Pressable style={styles.overlay} onPress={handleClose}>
@@ -59,7 +73,8 @@ export default function SearchOverlay({ visible, onClose, onSelectSymbol }: Sear
                 style={[styles.searchInput, { color: colors.onSurface }]}
                 autoCapitalize="none"
                 autoCorrect={false}
-                autoFocus
+                accessibilityRole="search"
+                accessibilityLabel="Search p5 reference"
               />
               {query.length > 0 && (
                 <Pressable onPress={() => setQuery("")} accessibilityRole="button" accessibilityLabel="Clear search">

@@ -3,6 +3,7 @@ import { View, Text, Pressable, StyleSheet, Modal, Switch, ScrollView } from "re
 import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { WebView } from "react-native-webview";
 import { useThemeContext } from "../../../components/ThemeProvider";
@@ -566,11 +567,18 @@ export default function Exercise() {
 
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Per user choice (v0.6.114): the Run-button long-press → reference search
+  // already existed at a 2-second threshold, but that felt sluggish. Lowered to
+  // 600ms so holding the Run button reveals the SearchOverlay responsively,
+  // while a quick press still runs the sketch. Fire a light haptic the moment
+  // the search overlay opens so the user gets feedback that the long-press was
+  // recognized even before the focus effect (v0.6.110) raises the keyboard.
   const handleRunPressIn = useCallback(() => {
     longPressTimerRef.current = setTimeout(() => {
       longPressTimerRef.current = null;
       setSearchVisible(true);
-    }, 2000);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    }, 600);
   }, []);
 
   const handleRunPressOut = useCallback(() => {
