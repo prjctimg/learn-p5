@@ -14,7 +14,7 @@ interface CodeEditorProps {
   isRunning: boolean;
 }
 
-export interface CodeEditorHandle {
+interface CodeEditorHandle {
   insertText: (text: string, cursorOffset?: number) => void;
   focus: () => void;
 }
@@ -26,9 +26,9 @@ const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     const [webViewReady, setWebViewReady] = useState(false);
     const [fontSize, setFontSize] = useState(22);
     const webViewRef = useRef<WebView>(null);
-    const { colorScheme } = useThemeContext();
+    const { colorScheme, ctaColor } = useThemeContext();
     const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
-    const editorHtml = useMemo(() => getEditorHtml(colorScheme === "dark" ? "dark" : "light"), [colorScheme]);
+    const editorHtml = useMemo(() => getEditorHtml(colorScheme === "dark" ? "dark" : "light", ctaColor), [colorScheme, ctaColor]);
 
     useEffect(() => {
       AsyncStorage.getItem(CODE_FONT_SIZE_KEY).then((val) => {

@@ -10,4 +10,5 @@ export const DEFAULTS = {
     tall: 360,
   } as Record<string, number>,
   codeBackground: "auto",
+  ctaColor: "#FF69B4",
 };

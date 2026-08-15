@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "Learn P5",
+    "name": "p5.js",
     "slug": "learn-p5",
-    "version": "0.6.56",
+    "version": "0.6.62",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "learnp5",

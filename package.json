@@ -1,7 +1,7 @@
 {
   "name": "learn-p5",
   "main": "expo-router/entry",
-  "version": "0.6.56",
+  "version": "0.6.64",
   "scripts": {
     "postinstall": "npm run gen-version && npm run gen-reference && npm run bundle-editor",
     "start": "npm run gen-version && npm run gen-reference && npm run bundle-editor && expo start",
@@ -21,7 +21,6 @@
     "expo-build-properties": "~55.0.14",
     "expo-constants": "~55.0.16",
     "expo-font": "~55.0.8",
-    "expo-linking": "~55.0.15",
     "expo-notifications": "~55.0.23",
     "expo-router": "~55.0.16",
     "expo-web-browser": "~55.0.16",
@@ -43,15 +42,7 @@
     "@codemirror/commands": "6.8.1",
     "@codemirror/lang-javascript": "6.2.3",
     "@codemirror/autocomplete": "6.18.6",
-    "@codemirror/lint": "6.8.5",
-    "@codemirror/search": "6.5.10",
-    "@lezer/common": "1.2.3",
-    "@lezer/lr": "1.4.2",
     "@lezer/highlight": "1.2.1",
-    "@lezer/javascript": "1.5.4",
-    "style-mod": "4.1.2",
-    "w3c-keyname": "2.2.8",
-    "crelt": "1.0.1",
     "fuse.js": "7.1.0",
     "@replit/codemirror-vim": "6.2.0"
   },

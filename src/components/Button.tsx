@@ -19,7 +19,7 @@ export default function Button({
   disabled = false,
   accessibilityLabel,
 }: ButtonProps) {
-  const { colorScheme } = useThemeContext();
+  const { colorScheme, ctaColor } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
   return (
@@ -33,7 +33,7 @@ export default function Button({
         styles.base,
         variant === "primary"
           ? {
-              backgroundColor: colors.cta,
+              backgroundColor: ctaColor,
             }
           : {
               backgroundColor: colorScheme === "dark" ? colors.surfaceContainerHigh : "#FFFFFF",

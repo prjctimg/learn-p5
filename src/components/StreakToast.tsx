@@ -48,7 +48,7 @@ export default function StreakToast({
  const countAnim = useRef(new Animated.Value(0)).current;
  const [displayCount, setDisplayCount] = useState(streakCount - 1);
  const insets = useSafeAreaInsets();
- const { colorScheme } = useThemeContext();
+ const { colorScheme, derivedColors } = useThemeContext();
  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
  const animateIn = useCallback(() => {
@@ -159,11 +159,11 @@ export default function StreakToast({
  </Text>
  <Text style={[styles.subtitle, { color: colors.onSurfaceVariant }]}>
  {prevTier > 0 ? `${prevTier}+ days` : "Getting started"} ·{" "}
- <Text style={[styles.count, { color: colors.primary }]}>
+ <Text style={[styles.count, { color: derivedColors.primary }]}>
  {displayCount}
  </Text>
  {isMilestone && (
- <Text style={{ color: colors.primary, fontWeight: "700" }}>
+ <Text style={{ color: derivedColors.primary, fontWeight: "700" }}>
  {" "}✓
  </Text>
 )}
@@ -174,7 +174,7 @@ export default function StreakToast({
  <Animated.View
  style={[
  styles.progressInner,
- { backgroundColor: colors.primary, width: progressWidth },
+ { backgroundColor: derivedColors.primary, width: progressWidth },
  ]}
  />
  </View>

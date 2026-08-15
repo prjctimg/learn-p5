@@ -14,7 +14,7 @@ interface ErrorLogEntry {
 }
 
 export default function ErrorLogs() {
-  const { colorScheme } = useThemeContext();
+  const { colorScheme, derivedColors } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
   const [logs, setLogs] = useState<ErrorLogEntry[]>([]);
   const [selectedLog, setSelectedLog] = useState<ErrorLogEntry | null>(null);
@@ -64,9 +64,9 @@ export default function ErrorLogs() {
                 </Text>
                 <Pressable
                   onPress={() => setShowStack(!showStack)}
-                  style={[styles.stackToggle, { backgroundColor: colors.primary + "1A" }]}
+                  style={[styles.stackToggle, { backgroundColor: derivedColors.primary + "1A" }]}
                 >
-                  <Text style={[styles.stackToggleText, { color: colors.primary }]}>
+                  <Text style={[styles.stackToggleText, { color: derivedColors.primary }]}>
                     {showStack ? "Hide" : "Show"} Stack
                   </Text>
                 </Pressable>
@@ -77,7 +77,7 @@ export default function ErrorLogs() {
                     </Text>
                     <Pressable
                       onPress={handleCopyStack}
-                      style={[styles.copyButton, { backgroundColor: colors.primary }]}
+                      style={[styles.copyButton, { backgroundColor: derivedColors.primary }]}
                     >
                       <Text style={styles.copyButtonText}>Copy Stack Trace</Text>
                     </Pressable>
@@ -114,7 +114,7 @@ export default function ErrorLogs() {
                 {new Date(item.timestamp).toLocaleString()}
               </Text>
             </View>
-            <Text style={[styles.logRoute, { color: colors.primary }]}>
+            <Text style={[styles.logRoute, { color: derivedColors.primary }]}>
               {item.route}
             </Text>
           </Pressable>
@@ -124,14 +124,14 @@ export default function ErrorLogs() {
         )}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <MaterialCommunityIcons name="check-circle-outline" size={48} color={colors.primary} />
+            <MaterialCommunityIcons name="check-circle-outline" size={48} color={derivedColors.primary} />
             <Text style={[styles.emptyText, { color: colors.textSecondary, marginTop: 16 }]}>
               No errors logged
             </Text>
           </View>
         }
         ListFooterComponent={
-          logs.length > 0 && (
+          logs.length > 0 ? (
             <Pressable
               onPress={handleClearLogs}
               style={({ pressed }) => [
@@ -141,7 +141,7 @@ export default function ErrorLogs() {
             >
               <Text style={styles.clearButtonText}>Clear All Logs</Text>
             </Pressable>
-          )
+          ) : null
         }
       />
     </View>

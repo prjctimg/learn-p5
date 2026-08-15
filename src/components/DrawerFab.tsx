@@ -10,7 +10,7 @@ const SETTING_KEY = "setting_showDrawerFab";
 
 export default function DrawerFab() {
   const { openDrawer } = useDrawerContext();
-  const { colorScheme } = useThemeContext();
+  const { colorScheme, derivedColors } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
   const [visible, setVisible] = useState(false);
 
@@ -27,7 +27,7 @@ export default function DrawerFab() {
       onPress={openDrawer}
       style={({ pressed }) => [
         styles.fab,
-        { backgroundColor: pressed ? colors.primaryContainer : colors.primary },
+        { backgroundColor: pressed ? derivedColors.primaryContainer : derivedColors.primary },
         pressed && { opacity: 0.8 },
       ]}
       accessibilityRole="button"

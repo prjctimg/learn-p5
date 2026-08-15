@@ -73,7 +73,8 @@ function highlightSyntax(code: string, colorScheme?: "light" | "dark"): { text: 
 function parseDescription(
  text: string,
  onSymbolPress: (name: string) => void,
- colors: Record<string, string>
+ colors: Record<string, string>,
+ accentColor?: string,
 ): React.ReactNode[] {
  if (!text) return [<Text key="empty" style={{ color: colors.textSecondary }} />];
 
@@ -99,7 +100,7 @@ function parseDescription(
  parts.push(
  <Text
  key={`sym-${match.index}`}
- style={{ color: colors.primary, fontWeight: "700", textDecorationLine: "underline" }}
+  style={{ color: accentColor || colors.textSecondary, fontWeight: "700", textDecorationLine: "underline" }}
  onPress={() => onSymbolPress(symbolName)}
  >
  {symbolName}
@@ -129,7 +130,7 @@ function parseDescription(
 function SymbolDetail({ symbol }: { symbol: string }) {
  const router = useRouter();
  const sym = P5_SYMBOLS_BY_NAME[symbol];
- const { colorScheme } = useThemeContext();
+ const { colorScheme, derivedColors } = useThemeContext();
  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
  const { getLockedCourseName } = useModuleProgress();
  const currentIndex = sym ? P5_SYMBOLS.indexOf(sym) : -1;
@@ -153,7 +154,7 @@ function SymbolDetail({ symbol }: { symbol: string }) {
  <View style={[styles.flex1, { backgroundColor: colors.surface }]}>
  <Header title="Reference" />
  <View style={[styles.flex1, { alignItems: "center", justifyContent: "center", paddingHorizontal: 24 }]}>
- <MaterialCommunityIcons name="book-search-outline" size={48} color={colors.primary} />
+ <MaterialCommunityIcons name="book-search-outline" size={48} color={derivedColors.primary} />
  <Text style={[styles.headlineXl, { color: colors.onSurface, marginTop: 16 }]}>
  Symbol not found
  </Text>
@@ -164,7 +165,7 @@ function SymbolDetail({ symbol }: { symbol: string }) {
  onPress={() => router.push("/ref")}
  style={({ pressed }) => [
  styles.browseButton,
- { backgroundColor: colors.primary, marginTop: 24 },
+ { backgroundColor: derivedColors.primary, marginTop: 24 },
  pressed && { transform: [{ translateY: 2 }] },
  ]}
  accessibilityRole="button"
@@ -194,25 +195,25 @@ function SymbolDetail({ symbol }: { symbol: string }) {
  <>
  <View style={[styles.flexRow, { alignItems: "center", gap: 8, marginBottom: 8 }]}>
  <View style={[styles.symbolNameCode, { backgroundColor: colors.surfaceDim }]}>
- <Text style={[styles.symbolNameText, { color: colors.primary }]}>
+ <Text style={[styles.symbolNameText, { color: derivedColors.primary }]}>
  {sym.name}()
  </Text>
  </View>
- <View style={[styles.moduleBadge, { backgroundColor: colors.primary + "33" }]}>
- <Text style={[styles.moduleBadgeText, { color: colors.primary }]}>
+ <View style={[styles.moduleBadge, { backgroundColor: derivedColors.primary + "33" }]}>
+ <Text style={[styles.moduleBadgeText, { color: derivedColors.primary }]}>
  {sym.module}
  </Text>
  </View>
  </View>
 
  <Text style={[styles.bodyBase, { lineHeight: 24, marginBottom: 24 }]}>
- {parseDescription(sym.description, handleSymbolPress, colors)}
+  {parseDescription(sym.description, handleSymbolPress, colors, derivedColors.primary)}
  </Text>
 
  <Text style={[styles.sectionTitle, { color: colors.onSurface, marginBottom: 12 }]}>
  Usage
  </Text>
- <View style={[styles.syntaxBox, { backgroundColor: colors.surfaceDim, marginBottom: 24 }]}>
+  <View style={[styles.syntaxBox, { backgroundColor: colors.surfaceDim, marginBottom: 24, borderLeftColor: derivedColors.primary }]}>
  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 16, lineHeight: 24 }}>
  {syntaxTokens.map((t, i) => (
  <Text key={i} style={{ color: t.color, fontFamily: "JetBrainsMono", fontSize: 16 }}>
@@ -280,7 +281,7 @@ function SymbolDetail({ symbol }: { symbol: string }) {
   <Text style={[styles.paramDescText, { color: colors.textSecondary, lineHeight: 24 }]}>
   {item.description || "No description"}
   </Text>
-  <Text style={[styles.paramTypeText, { color: colors.primary, marginTop: 2 }]}>
+  <Text style={[styles.paramTypeText, { color: derivedColors.primary, marginTop: 2 }]}>
   {item.type}
   </Text>
   </View>
@@ -294,13 +295,13 @@ function SymbolDetail({ symbol }: { symbol: string }) {
  onPress={() => router.push(`/ref?symbol=${prevSym.name}`)}
  style={({ pressed }) => [
  styles.navButton,
- { backgroundColor: pressed ? colors.primaryContainer : colors.surfaceDim },
+ { backgroundColor: pressed ? derivedColors.primaryContainer : colors.surfaceDim },
  ]}
  accessibilityRole="button"
  accessibilityLabel={`Previous: ${prevSym.name}`}
  >
- <MaterialCommunityIcons name="chevron-left" size={18} color={colors.primary} />
- <Text style={[styles.navButtonText, { color: colors.primary }]} numberOfLines={1}>
+ <MaterialCommunityIcons name="chevron-left" size={18} color={derivedColors.primary} />
+ <Text style={[styles.navButtonText, { color: derivedColors.primary }]} numberOfLines={1}>
  {prevSym.name}
  </Text>
  </Pressable>
@@ -310,15 +311,15 @@ function SymbolDetail({ symbol }: { symbol: string }) {
  onPress={() => router.push(`/ref?symbol=${nextSym.name}`)}
  style={({ pressed }) => [
  styles.navButton,
- { backgroundColor: pressed ? colors.primaryContainer : colors.surfaceDim },
+ { backgroundColor: pressed ? derivedColors.primaryContainer : colors.surfaceDim },
  ]}
  accessibilityRole="button"
  accessibilityLabel={`Next: ${nextSym.name}`}
  >
- <Text style={[styles.navButtonText, { color: colors.primary }]} numberOfLines={1}>
+ <Text style={[styles.navButtonText, { color: derivedColors.primary }]} numberOfLines={1}>
  {nextSym.name}
  </Text>
- <MaterialCommunityIcons name="chevron-right" size={18} color={colors.primary} />
+ <MaterialCommunityIcons name="chevron-right" size={18} color={derivedColors.primary} />
  </Pressable>
 ) : <View style={{ flex: 1 }} />}
  </View>
@@ -327,13 +328,13 @@ function SymbolDetail({ symbol }: { symbol: string }) {
  onPress={() => Linking.openURL(refUrl)}
  style={({ pressed }) => [
  styles.officialDocsLink,
- { backgroundColor: pressed ? colors.primaryContainer + "33" : colors.surfaceDim },
+ { backgroundColor: pressed ? derivedColors.primaryContainer + "33" : colors.surfaceDim },
  ]}
  accessibilityRole="button"
  accessibilityLabel="Open official p5.js documentation"
  >
- <MaterialCommunityIcons name="open-in-new" size={16} color={colors.primary} />
- <Text style={[styles.officialDocsText, { color: colors.primary }]}>
+ <MaterialCommunityIcons name="open-in-new" size={16} color={derivedColors.primary} />
+ <Text style={[styles.officialDocsText, { color: derivedColors.primary }]}>
  View on p5js.org
  </Text>
  </Pressable>
@@ -347,7 +348,7 @@ function SymbolDetail({ symbol }: { symbol: string }) {
 export default function Reference() {
  const { symbol } = useLocalSearchParams<{ symbol?: string }>();
  const router = useRouter();
- const { colorScheme } = useThemeContext();
+ const { colorScheme, derivedColors } = useThemeContext();
  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
  const [searchQuery, setSearchQuery] = useState("");
  const inputRef = useRef<TextInput>(null);
@@ -432,7 +433,7 @@ export default function Reference() {
  accessibilityRole="button"
  accessibilityLabel={`View reference for ${sym.name}`}
  >
-  <Text style={[styles.monoSm, { color: colors.primary, flex: 1 }]}>
+  <Text style={[styles.monoSm, { color: derivedColors.primary, flex: 1 }]}>
   {sym.name}()
   </Text>
   <MaterialCommunityIcons
@@ -459,7 +460,7 @@ export default function Reference() {
  accessibilityRole="button"
  accessibilityLabel={`View reference for ${sym.name}`}
  >
-  <Text style={[styles.monoSm, { color: colors.primary, flex: 1 }]}>
+  <Text style={[styles.monoSm, { color: derivedColors.primary, flex: 1 }]}>
   {sym.name}()
   </Text>
   <MaterialCommunityIcons
@@ -561,7 +562,6 @@ const styles = StyleSheet.create({
   paddingHorizontal: 16,
   paddingVertical: 12,
   borderLeftWidth: 3,
-  borderLeftColor: "#FF69B4",
   },
  syntaxText: {
  fontFamily: "JetBrainsMono",

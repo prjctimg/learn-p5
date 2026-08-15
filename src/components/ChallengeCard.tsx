@@ -23,28 +23,28 @@ export default function ChallengeCard({
  locked = false,
  onContinue,
 }: ChallengeCardProps) {
- const { colorScheme } = useThemeContext();
- const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const { colorScheme, derivedColors } = useThemeContext();
+  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
  return (
  <View style={[styles.card, { backgroundColor: colors.surfaceDim, opacity: locked ? 0.5 : 1 }]}>
- <View style={[styles.iconContainer, { backgroundColor: colors.primary + "1A" }]}>
- {locked ? (
- <MaterialCommunityIcons name="lock" size={28} color={colors.textSecondary} />
-) : (
- <Svg width={48} height={48} viewBox="0 0 28 28" fill="none">
- <Path d={asteriskPath} fill={colors.primary} />
- </Svg>
-)}
- </View>
+  <View style={[styles.iconContainer, { backgroundColor: derivedColors.primary + "1A" }]}>
+  {locked ? (
+  <MaterialCommunityIcons name="lock" size={28} color={colors.textSecondary} />
+  ) : (
+  <Svg width={48} height={48} viewBox="0 0 28 28" fill="none">
+  <Path d={asteriskPath} fill={derivedColors.primary} />
+  </Svg>
+  )}
+  </View>
 
- <View style={styles.content}>
- <Text style={[styles.title, { color: locked ? colors.textSecondary : colors.onSurface }]}>
- {title}
- </Text>
- <Text style={[styles.moduleName, { color: colors.primary }]}>
- {moduleName}
- </Text>
+  <View style={styles.content}>
+  <Text style={[styles.title, { color: locked ? colors.textSecondary : colors.onSurface }]}>
+  {title}
+  </Text>
+  <Text style={[styles.moduleName, { color: derivedColors.primary }]}>
+  {moduleName}
+  </Text>
  <Text style={[styles.description, { color: colors.textSecondary }]}>
  {locked ? "Complete the previous lesson to unlock this one." : description}
  </Text>

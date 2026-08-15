@@ -1,7 +1,10 @@
 import { getEditorTheme } from './themes';
 
-export function getBridgeScript(colorScheme: 'light' | 'dark', themeId?: string): string {
-  const theme = getEditorTheme(themeId || 'p5-learn', colorScheme);
+export function getBridgeScript(colorScheme: 'light' | 'dark', themeId?: string, ctaColor?: string): string {
+  const theme = getEditorTheme(themeId || 'p5-learn', colorScheme, ctaColor);
+  const cta = ctaColor || '#ED225D';
+  const ctaH = cta.replace('#', '');
+  const ctaRgb = `${parseInt(ctaH.substring(0,2),16)},${parseInt(ctaH.substring(2,4),16)},${parseInt(ctaH.substring(4,6),16)}`;
   const {
     bg,
     fg,
@@ -66,18 +69,18 @@ function p5CompletionSource(context) {
 
 const p5Theme = EditorView.theme({
   '&': { backgroundColor: '${bg}', color: '${fg}' },
-  '.cm-content': { caretColor: '#ED225D', fontFamily: "'JetBrains Mono', monospace" },
+  '.cm-content': { caretColor: '${cta}', fontFamily: "'JetBrains Mono', monospace" },
   '.cm-gutters': { backgroundColor: '${bg}', color: '${gutterFg}', borderRight: '1px solid ${gutterBorder}' },
   '.cm-activeLineGutter': { backgroundColor: '${activeBg}' },
   '.cm-activeLine': { backgroundColor: '${activeBg}' },
-  '.cm-cursor': { borderLeft: '2px solid #ED225D', animation: 'cm-blink 1s step-end infinite' },
+  '.cm-cursor': { borderLeft: '2px solid ${cta}', animation: 'cm-blink 1s step-end infinite' },
   '@keyframes cm-blink': { '50%': { borderLeftColor: 'transparent' } },
 
   '.cm-selectionBackground': { backgroundColor: '${selBg}' },
-  '.cm-matchingBracket': { backgroundColor: 'rgba(237, 34, 93, 0.3)', outline: '1px solid #ED225D' },
+  '.cm-matchingBracket': { backgroundColor: 'rgba(${ctaRgb}, 0.3)', outline: '1px solid ${cta}' },
   '.cm-foldPlaceholder': { backgroundColor: 'transparent', color: '${gutterFg}', border: '1px solid ${gutterFg}' },
   '.cm-foldGutter .cm-gutterElement': { color: '${gutterFg}', cursor: 'pointer' },
-  '.cm-foldGutter .cm-gutterElement.cm-activeLineGutter': { color: '#ED225D' },
+  '.cm-foldGutter .cm-gutterElement.cm-activeLineGutter': { color: '${cta}' },
 });
 
 const p5Highlight = HighlightStyle.define([

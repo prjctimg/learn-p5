@@ -13,7 +13,7 @@ interface HeaderProps {
 export default function Header({ title, subtitle, right }: HeaderProps) {
  const insets = useSafeAreaInsets();
  const { openDrawer } = useDrawerContext();
- const { colorScheme } = useThemeContext();
+ const { colorScheme, derivedColors } = useThemeContext();
  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
  return (

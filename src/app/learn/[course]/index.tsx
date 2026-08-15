@@ -16,7 +16,7 @@ export default function CourseDetail() {
  const [loading, setLoading] = useState(true);
  const [completedLessons, setCompletedLessons] = useState<string[]>([]);
  const [error, setError] = useState<string | null>(null);
- const { colorScheme } = useThemeContext();
+ const { colorScheme, derivedColors } = useThemeContext();
  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
  const loadData = useCallback(async () => {
@@ -92,13 +92,13 @@ if (loading) {
  ]}
  >
  <View style={{ width: 40 }} />
- <Text style={[styles.headerTitle, { color: colors.primary }]}>
+ <Text style={[styles.headerTitle, { color: derivedColors.primary }]}>
  Course
  </Text>
  <View style={{ width: 40 }} />
  </View>
  <View style={styles.centeredContainer}>
- <ActivityIndicator size="large" color={colors.primary} />
+ <ActivityIndicator size="large" color={derivedColors.primary} />
  </View>
  </View>
  );
@@ -117,10 +117,10 @@ if (loading) {
  <MaterialCommunityIcons
  name="arrow-left"
  size={24}
- color={colors.primary}
+ color={derivedColors.primary}
  />
  </Pressable>
- <Text style={[styles.headerTitle, { color: colors.primary }]}>
+ <Text style={[styles.headerTitle, { color: derivedColors.primary }]}>
  Course
  </Text>
  <View style={{ width: 40 }} />
@@ -167,10 +167,10 @@ if (loading) {
  <MaterialCommunityIcons
  name="arrow-left"
  size={24}
- color={colors.primary}
+ color={derivedColors.primary}
  />
  </Pressable>
- <Text style={[styles.headerTitle, { color: colors.primary }]}>
+ <Text style={[styles.headerTitle, { color: derivedColors.primary }]}>
  Course
  </Text>
  <View style={{ width: 40 }} />
@@ -201,7 +201,7 @@ if (loading) {
   <MaterialCommunityIcons
     name="arrow-left"
     size={24}
-    color={colors.primary}
+    color={derivedColors.primary}
   />
   </Pressable>
   <View style={{ flex: 1 }} />
@@ -218,7 +218,7 @@ if (loading) {
  { backgroundColor: colors.surfaceContainerLow },
  ]}
  >
- <Text style={[styles.heroLabel, { color: colors.primary }]}>
+ <Text style={[styles.heroLabel, { color: derivedColors.primary }]}>
  NEXT EXERCISE
  </Text>
  <Text style={[styles.heroTitle, { color: colors.onSurface }]}>
@@ -228,7 +228,7 @@ if (loading) {
  <View
  style={[
  styles.heroAccent,
- { backgroundColor: colors.primary },
+ { backgroundColor: derivedColors.primary },
  ]}
  />
  <Text
@@ -256,7 +256,7 @@ if (loading) {
  <View
  style={{
  flex: progress,
- backgroundColor: colors.primary,
+ backgroundColor: derivedColors.primary,
  }}
  />
  <View style={{ flex: 1 - progress }} />
@@ -267,7 +267,7 @@ if (loading) {
  {upNextLessons.length > 0 && (
  <View style={styles.section}>
  <View style={styles.sectionHeader}>
- <Text style={[styles.sectionTitle, { color: colors.primary }]}>
+ <Text style={[styles.sectionTitle, { color: derivedColors.primary }]}>
  Up Next
  </Text>
  <Text
@@ -311,13 +311,13 @@ if (loading) {
  <MaterialCommunityIcons
  name={isLast ? "trophy" : "lock"}
  size={20}
- color={isLast ? colors.primary : colors.textSecondary}
+ color={isLast ? derivedColors.primary : colors.textSecondary}
  />
 ) : (
  <MaterialCommunityIcons
  name="play-circle-outline"
  size={20}
- color={colors.primary}
+ color={derivedColors.primary}
  />
 )}
  </View>
@@ -374,7 +374,7 @@ if (loading) {
  <MaterialCommunityIcons
  name="check-circle"
  size={18}
- color={colors.primary}
+ color={derivedColors.primary}
  />
  <Text
  style={[
@@ -442,6 +442,13 @@ const styles = StyleSheet.create({
  alignItems: "center",
  justifyContent: "center",
  },
+ backButtonPressed: {
+ opacity: 0.5,
+ },
+ backButtonText: {
+ fontFamily: "JetBrainsMono",
+ fontSize: 14,
+ },
  headerTitle: {
  fontFamily: "JetBrainsMono",
  fontSize: 24,
@@ -481,10 +488,10 @@ const styles = StyleSheet.create({
  },
  heroTitle: {
  fontFamily: "JetBrainsMono",
- fontSize: 40,
+ fontSize: 28,
  fontWeight: "700",
- letterSpacing: -0.5,
- lineHeight: 44,
+ letterSpacing: -0.3,
+ lineHeight: 34,
  },
  heroDescriptionRow: {
  flexDirection: "row",

@@ -17,7 +17,7 @@ export interface EditorThemeColors {
   constant: string;
 }
 
-export interface ThemeDefinition {
+interface ThemeDefinition {
   id: string;
   label: string;
   light: EditorThemeColors;
@@ -187,13 +187,56 @@ export const EDITOR_THEMES: Record<string, ThemeDefinition> = {
   },
 };
 
+function hexToRgb(hex: string): string {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `${r},${g},${b}`;
+}
+
+function lightenHex(hex: string, factor: number): string {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  const lr = Math.round(r + (255 - r) * factor);
+  const lg = Math.round(g + (255 - g) * factor);
+  const lb = Math.round(b + (255 - b) * factor);
+  return `#${lr.toString(16).padStart(2, "0")}${lg.toString(16).padStart(2, "0")}${lb.toString(16).padStart(2, "0")}`;
+}
+
+function darkenHex(hex: string, factor: number): string {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  const dr = Math.round(r * (1 - factor));
+  const dg = Math.round(g * (1 - factor));
+  const db = Math.round(b * (1 - factor));
+  return `#${dr.toString(16).padStart(2, "0")}${dg.toString(16).padStart(2, "0")}${db.toString(16).padStart(2, "0")}`;
+}
+
 export function getThemeSwatches(themeId: string, colorScheme: "light" | "dark"): string[] {
   const themeDef = EDITOR_THEMES[themeId] || EDITOR_THEMES["p5-learn"];
   const colors = colorScheme === "dark" ? themeDef.dark : themeDef.light;
   return [colors.keyword, colors.string, colors.number, colors.type];
 }
 
-export function getEditorTheme(themeId: string, colorScheme: "light" | "dark"): EditorThemeColors {
+export function getEditorTheme(themeId: string, colorScheme: "light" | "dark", ctaColor?: string): EditorThemeColors {
   const themeDef = EDITOR_THEMES[themeId] || EDITOR_THEMES["p5-learn"];
-  return colorScheme === "dark" ? themeDef.dark : themeDef.light;
+  const base = colorScheme === "dark" ? { ...themeDef.dark } : { ...themeDef.light };
+
+  if (!ctaColor || themeId !== "p5-learn") return base;
+
+  const isDark = colorScheme === "dark";
+  base.keyword = ctaColor;
+  base.definitionKeyword = ctaColor;
+  base.number = isDark ? lightenHex(ctaColor, 0.15) : darkenHex(ctaColor, 0.15);
+  base.type = isDark ? lightenHex(ctaColor, 0.35) : darkenHex(ctaColor, 0.25);
+  base.function = base.type;
+  base.constant = base.number;
+  base.selBg = `rgba(${hexToRgb(ctaColor)},0.2)`;
+
+  return base;
 }

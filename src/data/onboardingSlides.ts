@@ -1,24 +1,18 @@
-export interface ExperienceOption {
+interface ExperienceOption {
   label: string;
   description: string;
   value: string;
 }
 
-export interface PathOption {
+interface PathOption {
   title: string;
   description: string;
   value: string;
 }
 
-export interface OnboardingSlide {
+interface OnboardingSlide {
   id: string;
   type: "welcome" | "experience" | "path" | "name" | "ready";
-}
-
-export interface OnboardingData {
-  experience: string | null;
-  path: string | null;
-  displayName: string;
 }
 
 const slides: OnboardingSlide[] = [

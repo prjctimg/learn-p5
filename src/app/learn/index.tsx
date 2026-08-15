@@ -13,7 +13,7 @@ export default function Learn() {
  const [courses, setCourses] = useState<Course[]>([]);
  const [loading, setLoading] = useState(true);
  const [error, setError] = useState<string | null>(null);
- const { colorScheme } = useThemeContext();
+ const { colorScheme, derivedColors } = useThemeContext();
  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
  useEffect(() => {
@@ -25,20 +25,17 @@ export default function Learn() {
 
  return (
  <View style={[styles.container, { backgroundColor: colors.surface }]}>
- <Header title="p5.js Learn" />
+  <Header title="Learn" />
  <FlatList
  style={styles.flatList}
  contentContainerStyle={{ paddingBottom: 32 }}
- ListHeaderComponent={
- <>
- <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
- Choose a course to begin your creative coding journey.
- </Text>
- <Text style={[styles.sectionTitle, { color: colors.onSurface }]}>
- Available Courses
- </Text>
- </>
- }
+  ListHeaderComponent={
+  <>
+   <Text style={[styles.sectionTitle, { color: derivedColors.primary }]}>
+  Courses
+  </Text>
+  </>
+  }
  data={loading ? [] : courses}
  keyExtractor={(item) => item.slug}
  renderItem={({ item }) => (
@@ -72,46 +69,42 @@ export default function Learn() {
 }
 
 const styles = StyleSheet.create({
- container: {
- flex: 1,
- },
- flatList: {
- flex: 1,
- paddingHorizontal: 16,
- paddingTop: 24,
- },
- subtitle: {
-  fontFamily: "JetBrainsMono",
-  fontSize: 16,
-  marginTop: 8,
- },
- sectionTitle: {
+  container: {
+  flex: 1,
+  },
+  flatList: {
+  flex: 1,
+  paddingHorizontal: 16,
+  paddingTop: 24,
+  },
+  sectionTitle: {
   fontFamily: "JetBrainsMono",
   fontSize: 24,
- fontWeight: "700",
- marginTop: 32,
- marginBottom: 16,
- },
- cardWrapper: {
- marginBottom: 16,
- },
- emptyContainer: {
- alignItems: "center",
- paddingVertical: 48,
- },
+  fontWeight: "700",
+  fontStyle: "italic",
+  textTransform: "uppercase",
+  marginBottom: 16,
+  },
+  cardWrapper: {
+  marginBottom: 16,
+  },
+  emptyContainer: {
+  alignItems: "center",
+  paddingVertical: 48,
+  },
   emptyText: {
-    fontFamily: "JetBrainsMono",
-    fontSize: 16,
- },
- errorContainer: {
- borderRadius: 12,
- paddingHorizontal: 16,
- paddingVertical: 24,
- alignItems: "center",
- },
+  fontFamily: "JetBrainsMono",
+  fontSize: 16,
+  },
+  errorContainer: {
+  borderRadius: 12,
+  paddingHorizontal: 16,
+  paddingVertical: 24,
+  alignItems: "center",
+  },
   errorText: {
-    fontFamily: "JetBrainsMono",
-    fontSize: 16,
- textAlign: "center",
- },
+  fontFamily: "JetBrainsMono",
+  fontSize: 16,
+  textAlign: "center",
+  },
 });

@@ -1,3 +1,10 @@
+export interface ValidationRule {
+  type: "functionCall";
+  name: string;
+  exactArgs?: number;
+  minArgs?: number;
+}
+
 export interface Lesson {
   id: string;
   title: string;
@@ -6,6 +13,7 @@ export interface Lesson {
   instruction: string;
   startingCode?: string;
   solution?: string;
+  validation?: ValidationRule[];
 }
 
 export interface Course {
@@ -16,25 +24,4 @@ export interface Course {
   lessons: Lesson[];
 }
 
-export interface P5Symbol {
-  name: string;
-  module: string;
-  description: string;
-  syntax: string;
-  parameters: { name: string; type: string; description: string }[];
-  url: string;
-}
 
-export interface CourseManifest {
-  slug: string;
-  title: string;
-  moduleName: string;
-  description: string;
-  lessons: string[];
-}
-
-export interface LessonFrontmatter {
-  id: string;
-  title: string;
-  symbols: string[];
-}

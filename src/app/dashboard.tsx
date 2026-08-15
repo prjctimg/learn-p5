@@ -30,7 +30,7 @@ function getGreeting(): string {
 
 export default function Dashboard() {
  const router = useRouter();
- const { colorScheme } = useThemeContext();
+ const { colorScheme, ctaColor, derivedColors } = useThemeContext();
  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
  const [completedLessons, setCompletedLessons] = useState<string[]>([]);
  const [courses, setCourses] = useState<Course[]>([]);
@@ -218,7 +218,7 @@ export default function Dashboard() {
  },
  progressBarInner: {
  height: "100%",
- backgroundColor: colors.primary,
+ backgroundColor: derivedColors.primary,
  borderRadius: 9999,
  },
  statsRow: {
@@ -228,7 +228,7 @@ export default function Dashboard() {
  },
   statCard: {
   flex: 1,
-  backgroundColor: colors.primary + "1A",
+  backgroundColor: derivedColors.primary + "1A",
   borderRadius: 16,
   paddingHorizontal: 16,
   paddingVertical: 16,
@@ -238,7 +238,7 @@ export default function Dashboard() {
  fontFamily: "JetBrainsMono",
  fontSize: 24,
  fontWeight: "700",
- color: colors.primary,
+ color: derivedColors.primary,
  },
  statLabel: {
  fontFamily: "JetBrainsMono",
@@ -275,7 +275,7 @@ export default function Dashboard() {
  nextCardModule: {
  fontFamily: "JetBrainsMono",
  fontSize: 11,
- color: colors.primary,
+ color: derivedColors.primary,
  textTransform: "uppercase",
  letterSpacing: 1,
  marginTop: 4,
@@ -287,7 +287,6 @@ export default function Dashboard() {
  marginTop: 8,
  },
   nextCardButton: {
-  backgroundColor: colors.primary,
   borderRadius: 12,
   paddingHorizontal: 20,
   paddingVertical: 10,
@@ -422,6 +421,7 @@ export default function Dashboard() {
  }
  style={({ pressed }) => [
  styles.nextCardButton,
+ { backgroundColor: ctaColor },
  pressed && styles.nextCardButtonPressed,
  ]}
  accessibilityRole="button"
