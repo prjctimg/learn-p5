@@ -397,6 +397,23 @@ export default function QwertyKeyboard({
     >
       {renderPopup()}
       <View style={styles.toolbarRow}>
+        <View style={styles.toolbarFixed}>
+          <Pressable
+            onPress={onToggleProgramming}
+            style={({ pressed }) => [
+              styles.toolbarBtn,
+              { backgroundColor: pressed ? derivedColors.primaryContainer : derivedColors.primaryContainer + "33" },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Switch to programming keyboard"
+          >
+            <MaterialCommunityIcons
+              name="code-tags"
+              size={20}
+              color={derivedColors.primary}
+            />
+          </Pressable>
+        </View>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -450,29 +467,7 @@ export default function QwertyKeyboard({
         </View>
 
         <View style={[styles.bottomRow, { gap: KEY_GAP }]}>
-          <Pressable
-            onPress={onToggleProgramming}
-            style={({ pressed }) => [
-              {
-                width: dims.keySize + 8,
-                height: dims.keyHeight,
-                borderRadius: 8,
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: pressed
-                  ? derivedColors.primaryContainer
-                  : derivedColors.primaryContainer + "33",
-              },
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel="Switch to programming keyboard"
-          >
-            <MaterialCommunityIcons
-              name="code-tags"
-              size={20}
-              color={derivedColors.primary}
-            />
-          </Pressable>
+          <View style={{ width: dims.keySize + 8 }} />
 
           <Pressable
             onPress={() => onInsert(" ")}

@@ -1,12 +1,14 @@
 {
   "name": "learn-p5",
   "main": "expo-router/entry",
-  "version": "0.6.114",
+  "version": "0.8.0",
   "scripts": {
-    "postinstall": "npm run gen-reference",
-    "start": "npm run gen-reference && npm run bundle-editor && expo start",
+    "postinstall": "npm run bundle-p5 && npm run gen-reference && npm run build-courses",
+    "start": "npm run bundle-p5 && npm run gen-reference && npm run build-courses && npm run bundle-editor && expo start",
     "gen-reference": "node scripts/generate-reference.mjs",
+    "bundle-p5": "node scripts/bundle-p5.mjs",
     "bundle-editor": "node scripts/bundle-editor.mjs",
+    "build-courses": "node scripts/build-courses.mjs",
     "check-exercises": "node scripts/check-exercises.mjs",
     "version": "sh scripts/bump-version.sh",
     "android": "expo start --android",
@@ -55,6 +57,7 @@
     "esbuild": "^0.25.3",
     "eslint": "^9.0.0",
     "eslint-config-expo": "~55.0.1",
+    "js-yaml": "^4.1.0",
     "typescript": "~5.9.2"
   },
   "private": true

@@ -1,0 +1,242 @@
+slug: random-noise
+title: Random & Noise
+moduleName: Math & Logic
+description: "Explore randomness and noise functions to create organic, unpredictable visuals."
+
+exercises:
+  - id: exercise-1
+    title: "Lucky Draw"
+    module: Math & Logic
+    description: "Use random() to place a circle at a random position on the canvas."
+    instruction: |
+      Draw a circle at a random position using random(low, high).
+      Set a randomSeed() in setup() so the result is reproducible.
+      Use randomSeed(42) then random(50, 350) for both x and y.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+        randomSeed(42);
+      }
+
+      function draw() {
+        background(30);
+        fill(255, 200, 50);
+        noStroke();
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+        randomSeed(42);
+      }
+
+      function draw() {
+        background(30);
+        fill(255, 200, 50);
+        noStroke();
+        let x = random(50, 350);
+        let y = random(50, 350);
+        circle(x, y, 80);
+      }
+    tasks:
+      - id: task-1
+        title: "Random Position"
+        instruction: |
+          Use random(50, 350) to generate x and y values.
+          Draw a circle at those coordinates with diameter 80.
+        validation:
+          - type: functionCall
+            name: random
+            minArgs: 2
+          - type: functionCall
+            name: circle
+            exactArgs: 3
+      - id: task-2
+        title: "Reproducible Random"
+        instruction: |
+          Add randomSeed(42) inside setup() before any random calls.
+          This ensures the same "random" position every time the sketch runs.
+        validation:
+          - type: functionCall
+            name: randomSeed
+            exactArgs: 1
+          - type: functionCall
+            name: random
+            minArgs: 2
+          - type: pixelMatch
+            x: 200
+            y: 200
+            expected: [30, 30, 30]
+            tolerance: 120
+
+  - id: exercise-2
+    title: "Gaussian Guy"
+    module: Math & Logic
+    description: "Use randomGaussian() to create a bell-curve distribution of shapes."
+    instruction: |
+      Draw 200 small circles whose x-positions follow a Gaussian distribution.
+      Use randomGaussian(mean, sd) with mean=200 and sd=50.
+      Use randomSeed(7) for reproducibility.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+        randomSeed(7);
+        background(20);
+        fill(100, 200, 255, 150);
+        noStroke();
+      }
+
+      function draw() {
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+        randomSeed(7);
+        background(20);
+        fill(100, 200, 255, 150);
+        noStroke();
+        for (let i = 0; i < 200; i++) {
+          let x = randomGaussian(200, 50);
+          let y = random(50, 350);
+          circle(x, y, 10);
+        }
+      }
+
+      function draw() {
+      }
+    tasks:
+      - id: task-1
+        title: "Gaussian X Position"
+        instruction: |
+          Inside setup(), draw 200 circles in a for loop.
+          For each circle, set x = randomGaussian(200, 50) and y = random(50, 350).
+          Use circle(x, y, 10) for each dot.
+        validation:
+          - type: functionCall
+            name: randomGaussian
+            minArgs: 2
+          - type: functionCall
+            name: circle
+            exactArgs: 3
+
+  - id: exercise-3
+    title: "Noise Terrain"
+    module: Math & Logic
+    description: "Use noise() and noiseDetail() to generate an organic terrain grid."
+    instruction: |
+      Create a grid of rectangles colored by Perlin noise.
+      Use noise(x * 0.1, y * 0.1) to get a value between 0 and 1,
+      then multiply by 255 for brightness. Use noiseDetail(4, 0.5) for texture.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+        noiseDetail(4, 0.5);
+        noStroke();
+      }
+
+      function draw() {
+        background(20);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+        noiseDetail(4, 0.5);
+        noStroke();
+      }
+
+      function draw() {
+        background(20);
+        let size = 20;
+        for (let x = 0; x < width; x += size) {
+          for (let y = 0; y < height; y += size) {
+            let n = noise(x * 0.1, y * 0.1);
+            let c = n * 255;
+            fill(c, c * 0.8, 100);
+            rect(x, y, size, size);
+          }
+        }
+      }
+    tasks:
+      - id: task-1
+        title: "Noise Grid"
+        instruction: |
+          Create a nested for loop that steps through the canvas in increments of 20.
+          For each cell, call noise(x * 0.1, y * 0.1) and map it to a fill color.
+          Draw a rect(x, y, 20, 20) for each cell.
+        validation:
+          - type: functionCall
+            name: noise
+            minArgs: 2
+          - type: functionCall
+            name: rect
+            exactArgs: 4
+      - id: task-2
+        title: "Noise Detail"
+        instruction: |
+          Add noiseDetail(4, 0.5) in setup() to control the noise quality.
+          The first parameter is octaves, the second is falloff.
+        validation:
+          - type: functionCall
+            name: noiseDetail
+            exactArgs: 2
+          - type: functionCall
+            name: noise
+            minArgs: 2
+
+  - id: exercise-4
+    title: "Noise Flow"
+    module: Math & Logic
+    description: "Animate a circle's position over time using noise and frameCount."
+    instruction: |
+      Move a circle across the canvas using noise() driven by frameCount.
+      Use noise(frameCount * 0.01) * width for x and noise(frameCount * 0.01 + 100) * height for y.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(20, 20, 40);
+        fill(255, 100, 200);
+        noStroke();
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(20, 20, 40);
+        fill(255, 100, 200);
+        noStroke();
+        let x = noise(frameCount * 0.01) * width;
+        let y = noise(frameCount * 0.01 + 100) * height;
+        circle(x, y, 40);
+      }
+    tasks:
+      - id: task-1
+        title: "Noise-Driven Position"
+        instruction: |
+          Generate x and y using noise() with frameCount as input.
+          Multiply noise output by width/height to map to canvas coordinates.
+          Draw a circle at those positions with diameter 40.
+        validation:
+          - type: functionCall
+            name: noise
+            minArgs: 1
+          - type: functionCall
+            name: circle
+            exactArgs: 3
+          - type: functionCall
+            name: frameCount
+      - id: task-2
+        title: "Offset the Noise"
+        instruction: |
+          Add an offset of 100 to the y noise input so x and y move independently.
+          Use noise(frameCount * 0.01 + 100) for the y coordinate.
+        validation:
+          - type: functionCall
+            name: noise
+            minArgs: 2
+          - type: functionCall
+            name: circle
+            exactArgs: 3

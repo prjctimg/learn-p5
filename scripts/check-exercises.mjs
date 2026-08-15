@@ -3,15 +3,14 @@
 // and that the exercise's `solution` (final task state) is internally consistent.
 // Run via: npm run check-exercises
 import fs from "fs";
-import os from "os";
 import path from "path";
+import jsyaml from "js-yaml";
 
-// shapes.ts is pure JSON-ish data (no TS types at runtime); load by stripping `export`.
-const srcPath = path.resolve("src/data/courses/shapes.ts");
-const src = fs.readFileSync(srcPath, "utf8").replace(/^export const shapesCourse =/m, "const shapesCourse =");
-const tmp = path.join(os.tmpdir(), `shapes-${Date.now()}.mjs`);
-fs.writeFileSync(tmp, src + "\nexport { shapesCourse };\n");
-const { shapesCourse } = await import(tmp);
+const COURSES_DIR = path.resolve("src/data/courses");
+
+const yamlFiles = fs
+  .readdirSync(COURSES_DIR)
+  .filter((f) => f.endsWith(".yaml") || f.endsWith(".yml"));
 
 let failures = 0;
 
@@ -125,10 +124,12 @@ function checkExercise(ex) {
   }
 }
 
-const courses = [shapesCourse];
-for (const course of courses) {
+for (const file of yamlFiles) {
+  const yamlPath = path.join(COURSES_DIR, file);
+  const raw = fs.readFileSync(yamlPath, "utf8");
+  const course = jsyaml.load(raw);
   console.log(`Checking course: ${course.slug}`);
-  for (const ex of course.exercises) {
+  for (const ex of course.exercises ?? []) {
     checkExercise(ex);
   }
 }

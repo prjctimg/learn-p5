@@ -252,7 +252,7 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
   <Modal transparent visible={popupSymbol !== null} onRequestClose={() => setPopupSymbol(null)}>
   <Pressable style={styles.popupOverlay} onPress={() => setPopupSymbol(null)}>
   <Animated.View style={[styles.popupCard, { backgroundColor: colors.surfaceContainerHigh, opacity: popupAnim, transform: [{ scale: popupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) }] }]} onStartShouldSetResponder={() => true}>
-  <ScrollView showsVerticalScrollIndicator={false}>
+  <ScrollView showsVerticalScrollIndicator={false} style={{ flexShrink: 1 }} contentContainerStyle={{ flexGrow: 0 }}>
   {popupSymbol && (() => {
   const ref = P5_SYMBOLS.find(s => s.name === popupSymbol);
   return ref ? (
@@ -416,11 +416,11 @@ const styles = StyleSheet.create({
  alignItems: "center",
  backgroundColor: "rgba(0,0,0,0.5)",
  },
- popupCard: {
- marginHorizontal: Spacing.lg,
- padding: 20,
- borderRadius: 12,
- maxHeight: "60%",
- width: "85%",
- },
+popupCard: {
+    marginHorizontal: Spacing.lg,
+    padding: 20,
+    borderRadius: 12,
+    maxHeight: "70%",
+    width: "85%",
+  },
 });

@@ -13,8 +13,7 @@ import { Exercise, Course } from "../data/types";
 import { isExerciseLocked as checkExerciseLocked } from "../utils/isExerciseLocked";
 import { getStreakFromStorage, useStreak } from "../hooks/useStreak";
 import { useAchievements, ACHIEVEMENTS } from "../hooks/useAchievements";
-import { useActivityLog } from "../hooks/useActivityLog";
-import ActivityHeatmap from "../components/ActivityHeatmap";
+import AchievementBadgeModal from "../components/AchievementBadgeModal";
 
 const LAST_GREETING_KEY = "last_greeting_period";
 
@@ -42,8 +41,9 @@ export default function Dashboard() {
  const [streakLongest, setStreakLongest] = useState(0);
  const streak = useStreak();
  const [streakToastVisible, setStreakToastVisible] = useState(false);
-const { unlocked: unlockedAchievements, refresh: refreshAchievements } = useAchievements();
-const { activity, refresh: refreshActivity } = useActivityLog();
+const { unlocked: unlockedAchievements, unlockedAt, refresh: refreshAchievements } = useAchievements();
+ const [badgeModalVisible, setBadgeModalVisible] = useState(false);
+ const [badgeModalIndex, setBadgeModalIndex] = useState(0);
  const [greetingToastVisible, setGreetingToastVisible] = useState(false);
  const [greetingMessage, setGreetingMessage] = useState("");
  const levelAnim = useRef(new Animated.Value(0)).current;
@@ -70,7 +70,6 @@ const { activity, refresh: refreshActivity } = useActivityLog();
  setStreakLongest(longest);
  });
 refreshAchievements();
- refreshActivity();
  }, [])
 );
 
@@ -80,9 +79,8 @@ refreshAchievements();
  setStreakToastVisible(true);
  }
  });
- refreshAchievements();
- refreshActivity();
- }, []);
+refreshAchievements();
+  }, []);
 
  useEffect(() => {
  const timer = setTimeout(async () => {
@@ -212,18 +210,38 @@ refreshAchievements();
  color: colors.textSecondary,
  marginTop: 4,
  },
- progressBarOuter: {
- height: 8,
- backgroundColor: colors.surfaceDim,
- borderRadius: 9999,
- marginTop: 16,
- overflow: "hidden",
- },
- progressBarInner: {
- height: "100%",
- backgroundColor: derivedColors.primary,
- borderRadius: 9999,
- },
+progressBarOuter: {
+    height: 8,
+    backgroundColor: colors.surfaceDim,
+    borderRadius: 9999,
+    marginTop: 16,
+    overflow: "hidden",
+  },
+  progressBarInner: {
+    height: "100%",
+    backgroundColor: derivedColors.primary,
+    borderRadius: 9999,
+  },
+  achievementsStack: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 14,
+  },
+  achievementCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 9999,
+    borderWidth: 2,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: -6,
+  },
+  achievementsStackHint: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 11,
+    color: colors.textSecondary,
+    marginLeft: 12,
+  },
  statsRow: {
  flexDirection: "row",
  gap: 12,
@@ -258,35 +276,6 @@ refreshAchievements();
  fontWeight: "700",
  color: colors.onSurface,
  marginBottom: 16,
- },
- achievementsRow: {
- flexDirection: "row",
- flexWrap: "wrap",
- gap: 10,
- marginTop: 8,
- justifyContent: "space-between",
- },
- badgeCard: {
- width: "31%",
- borderRadius: 12,
- padding: 12,
- alignItems: "center",
- justifyContent: "center",
- minHeight: 96,
- },
- badgeLabel: {
- fontFamily: "JetBrainsMono",
- fontSize: 12,
- fontWeight: "700",
- marginTop: 6,
- lineHeight: 14,
- },
- badgeSub: {
- fontFamily: "JetBrainsMono",
- fontSize: 10,
- marginTop: 2,
- textAlign: "center",
- lineHeight: 12,
  },
   nextCard: {
   backgroundColor: colors.surfaceDim,
@@ -398,6 +387,40 @@ refreshAchievements();
  <Animated.View style={[styles.progressBarInner, { width: progressWidth }]} />
  </View>
 
+ <View style={styles.achievementsStack}>
+ {unlockedAchievements.length === 0 ? (
+ <Text style={styles.achievementsStackHint}>No achievements yet</Text>
+ ) : (
+ unlockedAchievements
+ .map((id) => ACHIEVEMENTS.find((a) => a.id === id))
+ .filter((a): a is typeof ACHIEVEMENTS[number] => Boolean(a))
+ .map((a, index) => (
+ <Pressable
+ key={a.id}
+ onPress={() => {
+ setBadgeModalIndex(index);
+ setBadgeModalVisible(true);
+ }}
+ style={[
+ styles.achievementCircle,
+ {
+ backgroundColor: derivedColors.primary,
+ borderColor: colors.surface,
+ },
+ ]}
+ accessibilityLabel={`${a.title} — tap for details`}
+ accessibilityRole="button"
+ >
+ <MaterialCommunityIcons
+ name={a.icon as any}
+ size={16}
+ color={colors.onPrimary}
+ />
+ </Pressable>
+ ))
+ )}
+ </View>
+
  <View style={styles.statsRow}>
  <View style={styles.statCard}>
  <Text style={styles.statValue}>{animatedLevel}</Text>
@@ -420,48 +443,6 @@ refreshAchievements();
  </Text>
  </View>
  </View>
-
- <Text style={styles.sectionTitle}>Achievements</Text>
- <View style={styles.achievementsRow}>
- {ACHIEVEMENTS.map((a) => {
- const isUnlocked = unlockedAchievements.includes(a.id);
- return (
- <View
- key={a.id}
- style={[
- styles.badgeCard,
- { backgroundColor: isUnlocked ? colors.successContainer : colors.surfaceContainerHigh },
- ]}
- >
- <MaterialCommunityIcons
- name={a.icon as any}
- size={22}
- color={isUnlocked ? colors.success : colors.outlineVariant}
- />
- <Text
- style={[
- styles.badgeLabel,
- { color: isUnlocked ? colors.onSuccessContainer : colors.onSurfaceVariant },
- ]}
- numberOfLines={1}
- >
- {a.title}
- </Text>
- <Text
- style={[
- styles.badgeSub,
- { color: isUnlocked ? colors.onSuccessContainer : colors.outline },
- ]}
- numberOfLines={2}
- >
- {isUnlocked ? a.subtitle : "Locked"}
- </Text>
- </View>
- );
- })}
- </View>
-
- <ActivityHeatmap activity={activity} />
 
  <View style={styles.continueSection}>
  <Text style={styles.sectionTitle}>
@@ -561,8 +542,8 @@ refreshAchievements();
  })}
  </>
 )}
- </View>
- </ScrollView>
+</View>
+  </ScrollView>
 
  <Toast
  visible={greetingToastVisible}
@@ -577,6 +558,13 @@ refreshAchievements();
  tierProgress={streak.tierProgress}
  nextTier={streak.nextTier}
  onDismiss={() => setStreakToastVisible(false)}
+ />
+ <AchievementBadgeModal
+ visible={badgeModalVisible}
+ startIndex={badgeModalIndex}
+ unlocked={unlockedAchievements}
+ unlockedAt={unlockedAt}
+ onDismiss={() => setBadgeModalVisible(false)}
  />
  </View>
 );

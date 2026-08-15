@@ -1,0 +1,155 @@
+slug: data
+title: Data Storage
+moduleName: Utility
+description: "Save and retrieve data with localStorage to persist state across sessions."
+exercises:
+  - id: exercise-1
+    title: "Store It"
+    module: Data Storage
+    description: "Save a value to localStorage using storeItem()."
+    instruction: |
+      Use storeItem("myColor", "blue") to save a color string.
+      Then use getItem("myColor") to retrieve it and display with text().
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        fill(0);
+        textSize(20);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+        storeItem("myColor", "blue");
+      }
+
+      function draw() {
+        background(240);
+        fill(0);
+        textSize(20);
+        let saved = getItem("myColor");
+        text("Saved color: " + saved, 50, 200);
+      }
+    tasks:
+      - id: task-1
+        title: "Store and Retrieve"
+        instruction: |
+          In setup(), add storeItem("myColor", "blue").
+          In draw(), use let saved = getItem("myColor") and display it with text().
+        validation:
+          - type: functionCall
+            name: storeItem
+            exactArgs: 2
+          - type: functionCall
+            name: getItem
+            exactArgs: 1
+  - id: exercise-2
+    title: "Click Counter"
+    module: Data Storage
+    description: "Count clicks and persist the count across page reloads."
+    instruction: |
+      Use a variable count initialized from getItem("count") || 0.
+      In mousePressed(), increment count and storeItem("count", count).
+      Display the count on screen.
+    startingCode: |
+      let count = 0;
+
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        fill(0);
+        textSize(48);
+        textAlign(CENTER, CENTER);
+        text(count, 200, 200);
+      }
+    solution: |
+      let count = 0;
+
+      function setup() {
+        createCanvas(400, 400);
+        count = getItem("count") || 0;
+      }
+
+      function draw() {
+        background(240);
+        fill(0);
+        textSize(48);
+        textAlign(CENTER, CENTER);
+        text(count, 200, 200);
+      }
+
+      function mousePressed() {
+        count++;
+        storeItem("count", count);
+      }
+    tasks:
+      - id: task-1
+        title: "Persist Click Count"
+        instruction: |
+          In setup(), load count from getItem("count") || 0.
+          Create mousePressed() to increment and storeItem("count", count).
+        validation:
+          - type: functionCall
+            name: getItem
+            exactArgs: 1
+          - type: functionCall
+            name: storeItem
+            exactArgs: 2
+          - type: functionExists
+            name: mousePressed
+  - id: exercise-3
+    title: "Clear It All"
+    module: Data Storage
+    description: "Clear all stored data with clearStorage()."
+    instruction: |
+      Store a value with storeItem(), display it, then call clearStorage() in mousePressed().
+      After clearing, getItem() should return null.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+        storeItem("tempData", "hello");
+      }
+
+      function draw() {
+        background(240);
+        fill(0);
+        textSize(20);
+        let val = getItem("tempData");
+        text("Value: " + val, 50, 200);
+        text("Click to clear", 50, 250);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+        storeItem("tempData", "hello");
+      }
+
+      function draw() {
+        background(240);
+        fill(0);
+        textSize(20);
+        let val = getItem("tempData");
+        text("Value: " + val, 50, 200);
+        text("Click to clear", 50, 250);
+      }
+
+      function mousePressed() {
+        clearStorage();
+      }
+    tasks:
+      - id: task-1
+        title: "Clear Storage on Click"
+        instruction: |
+          Create mousePressed() that calls clearStorage() to remove all stored items.
+        validation:
+          - type: functionCall
+            name: clearStorage
+            exactArgs: 0
+          - type: functionExists
+            name: mousePressed

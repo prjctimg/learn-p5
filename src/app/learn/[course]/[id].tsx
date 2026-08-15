@@ -24,7 +24,7 @@ import { getExerciseHtml } from "../../../utils/editor/exerciseHtml";
 import { EDITOR_THEMES, getThemeSwatches } from "../../../utils/editor/themes";
 import { useStreak } from "../../../hooks/useStreak";
 import { recordCompletion, ACHIEVEMENTS } from "../../../hooks/useAchievements";
-import { recordActivity } from "../../../hooks/useActivityLog";
+
 import { useShakeDetection } from "../../../hooks/useShakeDetection";
 
 const EXERCISE_CODE_PREFIX = "exerciseCode_";
@@ -374,17 +374,6 @@ export default function Exercise() {
  }
  } catch (e: unknown) {
  const errMsg = e instanceof Error ? e.message : String(e);
- const errStack = e instanceof Error ? e.stack : "";
- const logEntry = {
- timestamp: new Date().toISOString(),
- route: `/learn/${course}/${id}`,
- error: errMsg,
- stack: errStack,
- };
- const existing = await AsyncStorage.getItem("error_log");
- const logs = existing ? JSON.parse(existing) : [];
- logs.push(logEntry);
- await AsyncStorage.setItem("error_log", JSON.stringify(logs.slice(-20)));
  dispatch({ type: "LOAD_ERROR", error: errMsg });
  }
  };
@@ -463,23 +452,9 @@ export default function Exercise() {
       dispatch({ type: "RUN_DONE" });
       showToast(msg.reason || "Not quite right — check the instructions", undefined, undefined, "failure");
       break;
-    case "sketchError":
-      if (msg.error) {
-        (async () => {
-          const logEntry = {
-            timestamp: new Date().toISOString(),
-            route: `/learn/${course}/${id}`,
-            error: `[Sketch] ${msg.error}`,
-            context: msg.container || "unknown",
-          };
-          const existing = await AsyncStorage.getItem("error_log");
-          const logs = existing ? JSON.parse(existing) : [];
-          logs.push(logEntry);
-          await AsyncStorage.setItem("error_log", JSON.stringify(logs.slice(-20)));
-        })();
-      }
+case "sketchError":
       break;
-  case "goToNextLesson":
+   case "goToNextLesson":
   loadCourse(course).then((courseData) => {
   if (!courseData) return;
   const currentIndex = courseData.exercises.findIndex((l) => l.id === id);
@@ -718,7 +693,6 @@ export default function Exercise() {
   (async () => {
   const durationMs = runStartTimeRef.current ? Date.now() - runStartTimeRef.current : undefined;
   const newlyUnlocked = await recordCompletion(`${course}/${ex.id}`, durationMs);
-  await recordActivity();
   if (newlyUnlocked.length > 0) {
     const first = ACHIEVEMENTS.find((a) => a.id === newlyUnlocked[0]);
     if (first) {
@@ -989,10 +963,8 @@ return (
   />
   <SearchOverlay
     visible={searchVisible}
+    inline
     onClose={() => setSearchVisible(false)}
-    onSelectSymbol={(name) => {
-      router.push(`/ref?symbol=${name}`);
-    }}
   />
 
   <Toast

@@ -1,0 +1,300 @@
+slug: math
+title: Math
+moduleName: Math & Logic
+description: "Harness p5.js math functions to create dynamic, interactive visuals driven by numbers."
+
+exercises:
+  - id: exercise-1
+    title: "Map Master"
+    module: Math & Logic
+    description: "Map values from one range to another with map()."
+    instruction: |
+      Use map() to translate mouseX (0–400) into a circle diameter (20–200).
+      Draw the circle at the center of the canvas.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(30);
+        fill(0, 200, 255);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(30);
+        fill(0, 200, 255);
+        let d = map(mouseX, 0, 400, 20, 200);
+        circle(200, 200, d);
+      }
+    tasks:
+      - id: task-1
+        title: "Use map() for Diameter"
+        instruction: |
+          Use map() to map mouseX from the range 0–400 to a diameter range of 20–200.
+          Store the result in a variable called `d`.
+        validation:
+          - type: functionCall
+            name: map
+            exactArgs: 5
+          - type: functionCall
+            name: circle
+            exactArgs: 3
+      - id: task-2
+        title: "Visual Output"
+        instruction: |
+          Move your finger across the screen. The circle should grow and shrink
+          based on the horizontal position.
+        validation:
+          - type: pixelMatch
+            x: 200
+            y: 200
+            expected: [0, 200, 255]
+            tolerance: 120
+
+  - id: exercise-2
+    title: "Constrain King"
+    module: Math & Logic
+    description: "Keep values within bounds using constrain()."
+    instruction: |
+      Draw a circle that follows mouseX but never leaves the canvas.
+      Use constrain() to clamp the x position between 50 and 350.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(40);
+        fill(255, 180, 50);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(40);
+        fill(255, 180, 50);
+        let x = constrain(mouseX, 50, 350);
+        circle(x, 200, 60);
+      }
+    tasks:
+      - id: task-1
+        title: "Use constrain()"
+        instruction: |
+          Use constrain() to clamp mouseX between 50 and 350.
+          Store the result in a variable called `x`.
+        validation:
+          - type: functionCall
+            name: constrain
+            exactArgs: 3
+          - type: functionCall
+            name: circle
+            exactArgs: 3
+      - id: task-2
+        title: "Bounded Circle"
+        instruction: |
+          The circle should follow your finger horizontally but stop
+          50 pixels from each edge of the canvas.
+        validation:
+          - type: pixelMatch
+            x: 50
+            y: 200
+            expected: [255, 180, 50]
+            tolerance: 120
+
+  - id: exercise-3
+    title: "Lerp Lab"
+    module: Math & Logic
+    description: "Smoothly interpolate between values with lerp()."
+    instruction: |
+      Use lerp() to smoothly move a circle from x=50 toward mouseX each frame.
+      The circle will trail behind the cursor with easing.
+    startingCode: |
+      let x = 200;
+
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(35);
+        fill(180, 100, 255);
+      }
+    solution: |
+      let x = 200;
+
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(35);
+        fill(180, 100, 255);
+        x = lerp(x, mouseX, 0.08);
+        circle(x, 200, 50);
+      }
+    tasks:
+      - id: task-1
+        title: "Lerp the Position"
+        instruction: |
+          Use lerp() to smoothly interpolate `x` toward mouseX each frame.
+          Use an amount of 0.08 for gentle easing.
+          Reassign the result back to `x`.
+        validation:
+          - type: functionCall
+            name: lerp
+            exactArgs: 3
+          - type: functionCall
+            name: circle
+            exactArgs: 3
+      - id: task-2
+        title: "Smooth Motion"
+        instruction: |
+          The circle should glide smoothly toward your finger position,
+          never jumping directly to it.
+        validation:
+          - type: pixelMatch
+            x: 200
+            y: 200
+            expected: [180, 100, 255]
+            tolerance: 120
+
+  - id: exercise-4
+    title: "Distance Demo"
+    module: Math & Logic
+    description: "Measure the distance between two points with dist()."
+    instruction: |
+      Draw a fixed circle at (200, 200) and a moving circle that follows mouseX.
+      Use dist() to measure the distance between them and change color based on proximity.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(30);
+        fill(100, 255, 180);
+        circle(200, 200, 40);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(30);
+        let d = dist(mouseX, 200, 200, 200);
+        let c = map(d, 0, 200, 255, 0);
+        fill(c, 100, 255);
+        circle(mouseX, 200, 40);
+        fill(100, 255, 180);
+        circle(200, 200, 40);
+      }
+    tasks:
+      - id: task-1
+        title: "Use dist()"
+        instruction: |
+          Use dist() to calculate the distance between mouseX, 200 and the fixed point 200, 200.
+          Store the result in a variable called `d`.
+        validation:
+          - type: functionCall
+            name: dist
+            exactArgs: 4
+          - type: functionCall
+            name: circle
+            minArgs: 1
+      - id: task-2
+        title: "Color by Distance"
+        instruction: |
+          Use map() to map the distance `d` from 0–200 to a red value from 255–0.
+          Apply it as the red channel in fill() for the moving circle.
+        validation:
+          - type: functionCall
+            name: map
+            exactArgs: 5
+          - type: functionCall
+            name: dist
+            exactArgs: 4
+          - type: pixelMatch
+            x: 200
+            y: 200
+            expected: [100, 255, 180]
+            tolerance: 120
+
+  - id: exercise-5
+    title: "Angle Dance"
+    module: Math & Logic
+    description: "Use sin() and cos() to create circular motion."
+    instruction: |
+      Use sin() and cos() with frameCount to move a circle in a circular orbit.
+      The circle should orbit around the center of the canvas.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(30);
+        fill(255, 100, 150);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(30);
+        fill(255, 100, 150);
+        let angle = frameCount * 0.05;
+        let x = 200 + cos(angle) * 100;
+        let y = 200 + sin(angle) * 100;
+        circle(x, y, 40);
+      }
+    tasks:
+      - id: task-1
+        title: "Circular Orbit"
+        instruction: |
+          Create an `angle` variable using frameCount * 0.05.
+          Use cos(angle) and sin(angle) to compute x and y positions
+          that orbit around (200, 200) with a radius of 100.
+        validation:
+          - type: functionCall
+            name: cos
+            minArgs: 1
+          - type: functionCall
+            name: sin
+            minArgs: 1
+          - type: functionCall
+            name: circle
+            exactArgs: 3
+      - id: task-2
+        title: "Orbiting Circle"
+        instruction: |
+          The circle should continuously orbit around the center of the canvas
+          in a smooth circular path as frames advance.
+        validation:
+          - type: expectedPixels
+            minPassFraction: 0.9
+            points:
+              - x: 300
+                y: 200
+                expected: [255, 100, 150]
+                tolerance: 120
+              - x: 200
+                y: 300
+                expected: [255, 100, 150]
+                tolerance: 120
+              - x: 100
+                y: 200
+                expected: [255, 100, 150]
+                tolerance: 120
+              - x: 200
+                y: 100
+                expected: [255, 100, 150]
+                tolerance: 120

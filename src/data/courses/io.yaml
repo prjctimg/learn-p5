@@ -1,0 +1,175 @@
+slug: io
+title: Loading Data
+moduleName: Utility
+description: "Load and display external data like JSON and images in your sketches."
+exercises:
+  - id: exercise-1
+    title: "JSON Display"
+    module: Loading Data
+    description: "Load a JSON resource and display its values on canvas."
+    instruction: |
+      Use loadJSON() with a callback to load data.
+      In the callback, use text() to display data values on canvas.
+    startingCode: |
+      let data;
+
+      function setup() {
+        createCanvas(400, 400);
+        loadJSON("https://jsonplaceholder.typicode.com/todos/1", function(result) {
+          data = result;
+        });
+      }
+
+      function draw() {
+        background(240);
+        fill(0);
+        textSize(20);
+        if (data) {
+          text("Title: " + data.title, 50, 180);
+          text("Completed: " + data.completed, 50, 220);
+        } else {
+          text("Loading...", 50, 200);
+        }
+      }
+    solution: |
+      let data;
+
+      function setup() {
+        createCanvas(400, 400);
+        loadJSON("https://jsonplaceholder.typicode.com/todos/1", function(result) {
+          data = result;
+        });
+      }
+
+      function draw() {
+        background(240);
+        fill(0);
+        textSize(20);
+        if (data) {
+          text("Title: " + data.title, 50, 180);
+          text("Completed: " + data.completed, 50, 220);
+        } else {
+          text("Loading...", 50, 200);
+        }
+      }
+    tasks:
+      - id: task-1
+        title: "Load and Display JSON"
+        instruction: |
+          Use loadJSON() with a URL and callback to load data.
+          In draw(), check if data exists and display it with text().
+        validation:
+          - type: functionCall
+            name: loadJSON
+            minArgs: 1
+          - type: functionCall
+            name: text
+            minArgs: 3
+  - id: exercise-2
+    title: "Image Loader"
+    module: Loading Data
+    description: "Load an image and display it on canvas."
+    instruction: |
+      Use loadImage() to load an image into a variable.
+      In draw(), use image() to draw it on canvas.
+    startingCode: |
+      let img;
+
+      function setup() {
+        createCanvas(400, 400);
+        img = loadImage("https://picsum.photos/200/200");
+      }
+
+      function draw() {
+        background(240);
+        if (img) {
+          image(img, 100, 100, 200, 200);
+        }
+      }
+    solution: |
+      let img;
+
+      function setup() {
+        createCanvas(400, 400);
+        img = loadImage("https://picsum.photos/200/200");
+      }
+
+      function draw() {
+        background(240);
+        if (img) {
+          image(img, 100, 100, 200, 200);
+        }
+      }
+    tasks:
+      - id: task-1
+        title: "Load and Draw Image"
+        instruction: |
+          Declare a variable img. In setup(), use loadImage() to load a URL.
+          In draw(), check if img exists and display with image(img, 100, 100, 200, 200).
+        validation:
+          - type: functionCall
+            name: loadImage
+            exactArgs: 1
+          - type: functionCall
+            name: image
+            minArgs: 3
+  - id: exercise-3
+    title: "String Loader"
+    module: Loading Data
+    description: "Load text data and display it on canvas."
+    instruction: |
+      Use loadStrings() to load a text file.
+      In the callback, join the array and display with text().
+    startingCode: |
+      let lines;
+
+      function setup() {
+        createCanvas(400, 400);
+        loadStrings("https://raw.githubusercontent.com/nicholasjackson.io/toptal-json/master/data.json", function(result) {
+          lines = result;
+        });
+      }
+
+      function draw() {
+        background(240);
+        fill(0);
+        textSize(16);
+        if (lines) {
+          text(lines.join("\n"), 50, 50, 300, 300);
+        } else {
+          text("Loading...", 50, 200);
+        }
+      }
+    solution: |
+      let lines;
+
+      function setup() {
+        createCanvas(400, 400);
+        loadStrings("https://raw.githubusercontent.com/nicholasjackson.io/toptal-json/master/data.json", function(result) {
+          lines = result;
+        });
+      }
+
+      function draw() {
+        background(240);
+        fill(0);
+        textSize(16);
+        if (lines) {
+          text(lines.join("\n"), 50, 50, 300, 300);
+        } else {
+          text("Loading...", 50, 200);
+        }
+      }
+    tasks:
+      - id: task-1
+        title: "Display Loaded Text"
+        instruction: |
+          Use loadStrings() with a URL and callback to store lines.
+          In draw(), check if lines exists and display with text(lines.join("\n"), 50, 50, 300, 300).
+        validation:
+          - type: functionCall
+            name: loadStrings
+            exactArgs: 2
+          - type: functionCall
+            name: text
+            minArgs: 3

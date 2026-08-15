@@ -185,6 +185,25 @@ export function getExerciseHtml(params: {
     border-radius: 0;
   }
    .sketch-box canvas { display: block; touch-action: pan-y !important; }
+  /* Fullscreen: cover the entire OS viewport when the sketch box is the
+     active fullscreen element (HTML Fullscreen API). */
+  .sketch-box:fullscreen {
+    width: 100vw;
+    height: 100vh;
+    background: #000000;
+    border-radius: 0;
+  }
+  .sketch-box:-webkit-full-screen {
+    width: 100vw;
+    height: 100vh;
+    background: #000000;
+    border-radius: 0;
+  }
+  .sketch-box:fullscreen canvas,
+  .sketch-box:-webkit-full-screen canvas {
+    max-width: 100%;
+    max-height: 100%;
+  }
   .run-btn {
     position: absolute;
     bottom: 8px;
@@ -227,11 +246,14 @@ export function getExerciseHtml(params: {
     margin-top: 20px;
     margin-left: 20px;
     margin-right: 20px;
+    margin-bottom: 16px;
     border-radius: 8px;
     overflow: hidden;
     background: ${editorBg};
-    min-height: 400px;
+    min-height: 120px;
     position: relative;
+    display: flex;
+    flex-direction: column;
   }
   .editor-header {
     display: flex;
@@ -285,7 +307,8 @@ export function getExerciseHtml(params: {
     background: ${colors.primaryContainer}44;
   }
   .cm-editor { height: 100%; font-size: ${fontSize}px; background: ${editorBg}; }
-  .cm-editor .cm-scroller { font-family: 'JetBrains Mono', monospace; overflow: auto; }
+  .cm-editor .cm-scroller { font-family: 'JetBrains Mono', monospace; overflow: auto; max-height: ${Math.round(fontSize * 1.6 * 20)}px; }
+  #editor { display: flex; flex-direction: column; max-height: ${Math.round(fontSize * 1.6 * 20)}px; }
   .cm-editor.cm-focused { outline: none; }
   .cm-editor .cm-cursor { display: block !important; }
   .cm-editor .cm-gutters { background: ${editorBg}; border-right: 1px solid ${params.colorScheme === 'dark' ? '#292A2E' : '#E5E7EB'}; color: ${params.colorScheme === 'dark' ? '#6B7280' : '#9CA3AF'}; }
@@ -296,7 +319,7 @@ export function getExerciseHtml(params: {
   .cm-editor .cm-matchingBracket {
     background: rgba(255, 105, 180, 0.3);
   }
-  body { padding-bottom: 80px; }
+  body { padding-bottom: 16px; }
 
   ${params.exerciseNumber === 1 ? `
   .tut-overlay {
@@ -407,7 +430,7 @@ ${
       <button class="editor-header-btn" id="copyBtn">Copy</button>
     </div>
   </div>
-  <div id="editor" style="min-height:400px"></div>
+  <div id="editor"></div>
 </div>
 
 
@@ -624,12 +647,23 @@ function getExtensions() {
   return exts;
 }
 
+function applyEditorMaxHeight() {
+  if (!view || !view.defaultLineHeight) return;
+  var lh = view.defaultLineHeight;
+  var maxH = Math.round(lh * 20) + 'px';
+  var editorEl = document.getElementById('editor');
+  if (editorEl) editorEl.style.maxHeight = maxH;
+  var scroller = document.querySelector('.cm-scroller');
+  if (scroller) scroller.style.maxHeight = maxH;
+}
+
 function initEditorView(code) {
   const state = EditorState.create({
     doc: code || '',
     extensions: getExtensions(),
   });
   view = new EditorView({ state, parent: document.getElementById('editor') });
+  applyEditorMaxHeight();
   view.dom.addEventListener('mousedown', function(e) {
     e.preventDefault();
     e.stopPropagation();
@@ -683,6 +717,15 @@ function initEditorView(code) {
 function initEditor() {
   try {
     initEditorView(INITIAL_CODE);
+    var cmContent = document.querySelector('.cm-content');
+    if (cmContent && view && view.defaultLineHeight) {
+      var lh = view.defaultLineHeight;
+      var maxH = Math.round(lh * 20) + 'px';
+      var editorEl = document.getElementById('editor');
+      if (editorEl) editorEl.style.maxHeight = maxH;
+      var scroller = document.querySelector('.cm-scroller');
+      if (scroller) scroller.style.maxHeight = maxH;
+    }
     if (${disableSystemKeyboard ? 'true' : 'false'}) {
       var cmContent = document.querySelector('.cm-content');
       if (cmContent) cmContent.setAttribute('inputmode', 'none');
@@ -884,6 +927,7 @@ function handleMessage(data) {
       case 'setFontSize':
         var scroller = view && view.dom && view.dom.querySelector('.cm-scroller');
         if (scroller) scroller.style.fontSize = msg.fontSize + 'px';
+        applyEditorMaxHeight();
         break;
       case 'setWordWrap':
         if (view && msg.wordWrap !== WORD_WRAP) {
@@ -901,6 +945,7 @@ function handleMessage(data) {
             });
             view.dispatch({ selection: { anchor: savedSel, head: savedSel } });
             view.focus();
+            applyEditorMaxHeight();
           } catch (err) {
             // A plugin failure during reconstruction must not wedge the
             // WebView permanently. Roll back the flag and attempt a bare
@@ -1321,20 +1366,49 @@ if (solutionToggle) {
 }
 
 var maximizeBtn = document.getElementById('maximize-btn');
+function setMaximizeIcon(isExpanded) {
+  var icon = document.getElementById('maximize-icon');
+  if (icon) icon.innerHTML = isExpanded ? '&#x2715;' : '&#x26F6;';
+}
 if (maximizeBtn) {
   maximizeBtn.addEventListener('click', function() {
     var sketch = document.getElementById('user-sketch');
-    var icon = document.getElementById('maximize-icon');
-    if (sketch) {
-      var isExpanded = sketch.classList.contains('expanded');
-      sketch.classList.toggle('expanded');
-      if (icon) icon.innerHTML = isExpanded ? '&#x26F6;' : '&#x2715;';
-      if (!isExpanded) {
-        setTimeout(function() { smoothScrollTo(sketch, 300); }, 350);
+    var el = sketch;
+    var fsElement = document.fullscreenElement || document.webkitFullscreenElement || document.webkitCurrentFullScreenElement;
+    var isExpanded = !!fsElement || (sketch && sketch.classList.contains('expanded'));
+    if (isExpanded) {
+      if (document.exitFullscreen) { document.exitFullscreen().catch(function(){}); }
+      else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); }
+      if (sketch) sketch.classList.remove('expanded');
+      setMaximizeIcon(false);
+    } else if (el) {
+      var req = el.requestFullscreen || el.webkitRequestFullscreen || el.webkitRequestFullScreen;
+      if (req) {
+        var p = req.call(el);
+        if (p && p.catch) p.catch(function(){});
+        el.classList.add('expanded');
+      } else {
+        // Fullscreen API unavailable (older WebView) — fall back to the
+        // inline expanded box so the control still does something useful.
+        el.classList.add('expanded');
+        setTimeout(function() { smoothScrollTo(el, 300); }, 350);
       }
+      setMaximizeIcon(true);
     }
   });
 }
+// Keep the toggle icon in sync if the user exits fullscreen via Esc/back.
+function onFsChange() {
+  var fsElement = document.fullscreenElement || document.webkitFullscreenElement || document.webkitCurrentFullScreenElement;
+  var sketch = document.getElementById('user-sketch');
+  if (sketch) {
+    if (fsElement) { sketch.classList.add('expanded'); setMaximizeIcon(true); }
+    else { sketch.classList.remove('expanded'); setMaximizeIcon(false); }
+  }
+}
+document.addEventListener('fullscreenchange', onFsChange);
+document.addEventListener('webkitfullscreenchange', onFsChange);
+document.addEventListener('webkitcurrentfullscreenchange', onFsChange);
 
 function copyToClipboard(text) {
   if (navigator.clipboard && navigator.clipboard.writeText) {

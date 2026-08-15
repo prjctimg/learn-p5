@@ -1,0 +1,249 @@
+slug: vectors
+title: Vectors
+moduleName: Math & Logic
+description: "Use p5.Vector to store positions, directions, and perform math on movement."
+
+exercises:
+  - id: exercise-1
+    title: "Vector Basics"
+    module: Math & Logic
+    description: "Create and use vectors to position shapes on the canvas."
+    instruction: |
+      Use createVector() to store the position of a circle.
+      Access .x and .y to draw it at (200, 300).
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(35);
+        fill(100, 220, 255);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(35);
+        fill(100, 220, 255);
+        let pos = createVector(200, 300);
+        circle(pos.x, pos.y, 60);
+      }
+    tasks:
+      - id: task-1
+        title: "Create a Vector"
+        instruction: |
+          Use createVector() to create a vector with x=200 and y=300.
+          Store it in a variable called `pos`.
+        validation:
+          - type: functionCall
+            name: createVector
+            exactArgs: 2
+          - type: functionCall
+            name: circle
+            exactArgs: 3
+      - id: task-2
+        title: "Access Properties"
+        instruction: |
+          Use pos.x and pos.y as the first two arguments to circle().
+          The circle should appear at (200, 300).
+        validation:
+          - type: functionCall
+            name: createVector
+            exactArgs: 2
+          - type: pixelMatch
+            x: 200
+            y: 300
+            expected: [100, 220, 255]
+            tolerance: 120
+
+  - id: exercise-2
+    title: "Vector Math"
+    module: Math & Logic
+    description: "Combine vectors with add, sub, and mult to move shapes."
+    instruction: |
+      Create two vectors and use v.add(), v.sub(), and v.mult()
+      to compute a final position. Draw the result.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(35);
+        fill(255, 200, 80);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(35);
+        fill(255, 200, 80);
+        let a = createVector(300, 100);
+        let b = createVector(100, 200);
+        a.sub(b);
+        a.mult(1.5);
+        circle(a.x, a.y, 50);
+      }
+    tasks:
+      - id: task-1
+        title: "Use Vector Math"
+        instruction: |
+          Create vector `a` at (300, 100) and vector `b` at (100, 200).
+          Call a.sub(b) to subtract b from a, then a.mult(1.5).
+        validation:
+          - type: functionCall
+            name: createVector
+            minArgs: 2
+          - type: functionCall
+            name: sub
+            minArgs: 1
+          - type: functionCall
+            name: mult
+            minArgs: 1
+      - id: task-2
+        title: "Draw the Result"
+        instruction: |
+          Draw a circle at the resulting vector position using a.x and a.y.
+          After subtracting (100, 200) from (300, 100) and multiplying by 1.5,
+          the circle should be at (300, -150) — partially above the canvas.
+        validation:
+          - type: functionCall
+            name: circle
+            exactArgs: 3
+          - type: functionCall
+            name: createVector
+            minArgs: 2
+
+  - id: exercise-3
+    title: "Magnitude Check"
+    module: Math & Logic
+    description: "Control movement speed with mag(), normalize(), and setMag()."
+    instruction: |
+      Create a velocity vector and use normalize() and setMag()
+      to control its speed. Move a circle across the canvas.
+    startingCode: |
+      let pos;
+      let vel;
+
+      function setup() {
+        createCanvas(400, 400);
+        pos = createVector(50, 200);
+        vel = createVector(3, 4);
+      }
+
+      function draw() {
+        background(30);
+        fill(255, 150, 100);
+      }
+    solution: |
+      let pos;
+      let vel;
+
+      function setup() {
+        createCanvas(400, 400);
+        pos = createVector(50, 200);
+        vel = createVector(3, 4);
+      }
+
+      function draw() {
+        background(30);
+        fill(255, 150, 100);
+        vel.normalize();
+        vel.setMag(3);
+        pos.add(vel);
+        if (pos.x > 400) pos.x = 0;
+        circle(pos.x, pos.y, 40);
+      }
+    tasks:
+      - id: task-1
+        title: "Normalize and SetMag"
+        instruction: |
+          Call vel.normalize() to reduce the velocity to unit length,
+          then vel.setMag(3) to set a consistent speed of 3 pixels per frame.
+        validation:
+          - type: functionCall
+            name: normalize
+            minArgs: 0
+          - type: functionCall
+            name: setMag
+            exactArgs: 1
+      - id: task-2
+        title: "Move and Draw"
+        instruction: |
+          Call pos.add(vel) each frame to update position, then draw the circle.
+          Wrap back to the left edge when pos.x exceeds 400.
+        validation:
+          - type: functionCall
+            name: add
+            minArgs: 1
+          - type: functionCall
+            name: circle
+            exactArgs: 3
+
+  - id: exercise-4
+    title: "Heading Home"
+    module: Math & Logic
+    description: "Orient shapes with heading() and rotate() using vector angles."
+    instruction: |
+      Use heading() to find the angle toward the mouse and rotate() a shape to face it.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(35);
+        fill(200, 130, 255);
+        noStroke();
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(35);
+        fill(200, 130, 255);
+        noStroke();
+        let dir = createVector(mouseX - 200, mouseY - 200);
+        let angle = dir.heading();
+        translate(200, 200);
+        rotate(angle);
+        triangle(0, -30, -20, 20, 20, 20);
+      }
+    tasks:
+      - id: task-1
+        title: "Calculate Heading"
+        instruction: |
+          Create a direction vector from the canvas center (200, 200) to the mouse.
+          Call heading() on it to get the angle. Store it in `angle`.
+        validation:
+          - type: functionCall
+            name: createVector
+            exactArgs: 2
+          - type: functionCall
+            name: heading
+            minArgs: 0
+      - id: task-2
+        title: "Rotate and Draw"
+        instruction: |
+          Use translate(200, 200) and rotate(angle) before drawing.
+          Draw a triangle pointing upward that rotates to face the mouse.
+        validation:
+          - type: functionCall
+            name: translate
+            exactArgs: 2
+          - type: functionCall
+            name: rotate
+            exactArgs: 1
+          - type: functionCall
+            name: triangle
+            exactArgs: 6
+          - type: functionCall
+            name: heading
+            minArgs: 0

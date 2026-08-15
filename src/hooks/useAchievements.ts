@@ -54,6 +54,7 @@ interface CompletionEvent {
 }
 
 const UNLOCKED_KEY = "achievements_unlocked";
+const UNLOCKED_AT_KEY = "achievements_unlocked_at";
 const EVENTS_KEY = "completion_events";
 
 function dateKey(ts: number): string {
@@ -84,12 +85,15 @@ export async function recordCompletion(
 
   const unlockedRaw = await AsyncStorage.getItem(UNLOCKED_KEY);
   const unlocked: string[] = unlockedRaw ? JSON.parse(unlockedRaw) : [];
+  const unlockedAtRaw = await AsyncStorage.getItem(UNLOCKED_AT_KEY);
+  const unlockedAt: Record<string, string> = unlockedAtRaw ? JSON.parse(unlockedAtRaw) : {};
   const newlyUnlocked: string[] = [];
 
   function grant(id: string, predicate: () => boolean) {
     if (!unlocked.includes(id) && !newlyUnlocked.includes(id) && predicate()) {
       newlyUnlocked.push(id);
       unlocked.push(id);
+      if (!unlockedAt[id]) unlockedAt[id] = new Date().toISOString();
     }
   }
 
@@ -115,8 +119,19 @@ export async function recordCompletion(
   const streakCount = streakCountStr ? parseInt(streakCountStr, 10) : 0;
   grant("weekender", () => streakCount >= 7);
 
-  if (newlyUnlocked.length > 0) {
+  // Backfill: any achievement unlocked before timestamps were tracked gets
+// today's date so its badge modal can still show an "earned" date.
+  let backfilled = false;
+  for (const id of unlocked) {
+    if (!unlockedAt[id]) {
+      unlockedAt[id] = new Date().toISOString();
+      backfilled = true;
+    }
+  }
+
+  if (newlyUnlocked.length > 0 || backfilled) {
     await AsyncStorage.setItem(UNLOCKED_KEY, JSON.stringify(unlocked));
+    await AsyncStorage.setItem(UNLOCKED_AT_KEY, JSON.stringify(unlockedAt));
   }
 
   return newlyUnlocked;
@@ -127,16 +142,23 @@ export async function getUnlockedAchievements(): Promise<string[]> {
   return raw ? JSON.parse(raw) : [];
 }
 
+export async function getUnlockedAchievementsAt(): Promise<Record<string, string>> {
+  const raw = await AsyncStorage.getItem(UNLOCKED_AT_KEY);
+  return raw ? JSON.parse(raw) : {};
+}
+
 export function useAchievements() {
   const [unlocked, setUnlocked] = useState<string[]>([]);
+  const [unlockedAt, setUnlockedAt] = useState<Record<string, string>>({});
 
   const refresh = useCallback(async () => {
     setUnlocked(await getUnlockedAchievements());
+    setUnlockedAt(await getUnlockedAchievementsAt());
   }, []);
 
   useEffect(() => {
     refresh();
   }, [refresh]);
 
-  return { unlocked, refresh };
+  return { unlocked, unlockedAt, refresh };
 }
