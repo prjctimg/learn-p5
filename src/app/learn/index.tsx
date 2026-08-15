@@ -81,11 +81,13 @@ const styles = StyleSheet.create({
  paddingTop: 24,
  },
  subtitle: {
- fontSize: 16,
- marginTop: 8,
+  fontFamily: "JetBrainsMono",
+  fontSize: 16,
+  marginTop: 8,
  },
  sectionTitle: {
- fontSize: 24,
+  fontFamily: "JetBrainsMono",
+  fontSize: 24,
  fontWeight: "700",
  marginTop: 32,
  marginBottom: 16,
@@ -97,8 +99,9 @@ const styles = StyleSheet.create({
  alignItems: "center",
  paddingVertical: 48,
  },
- emptyText: {
- fontSize: 16,
+  emptyText: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 16,
  },
  errorContainer: {
  borderRadius: 12,
@@ -106,8 +109,9 @@ const styles = StyleSheet.create({
  paddingVertical: 24,
  alignItems: "center",
  },
- errorText: {
- fontSize: 16,
+  errorText: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 16,
  textAlign: "center",
  },
 });

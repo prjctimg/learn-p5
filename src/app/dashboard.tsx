@@ -204,6 +204,7 @@ export default function Dashboard() {
  paddingTop: 32,
  },
  subtitle: {
+ fontFamily: "JetBrainsMono",
  fontSize: 16,
  color: colors.textSecondary,
  marginTop: 4,
@@ -225,20 +226,22 @@ export default function Dashboard() {
  gap: 12,
  marginTop: 24,
  },
- statCard: {
- flex: 1,
- backgroundColor: colors.primary + "1A",
- borderRadius: 12,
- paddingHorizontal: 16,
- paddingVertical: 16,
- alignItems: "center",
- },
+  statCard: {
+  flex: 1,
+  backgroundColor: colors.primary + "1A",
+  borderRadius: 16,
+  paddingHorizontal: 16,
+  paddingVertical: 16,
+  alignItems: "center",
+  },
  statValue: {
+ fontFamily: "JetBrainsMono",
  fontSize: 24,
  fontWeight: "700",
  color: colors.primary,
  },
  statLabel: {
+ fontFamily: "JetBrainsMono",
  fontSize: 11,
  color: colors.textSecondary,
  marginTop: 4,
@@ -247,27 +250,30 @@ export default function Dashboard() {
  marginTop: 40,
  },
  sectionTitle: {
+ fontFamily: "JetBrainsMono",
  fontSize: 24,
  fontWeight: "700",
  color: colors.onSurface,
  marginBottom: 16,
  },
- nextCard: {
- backgroundColor: colors.surfaceDim,
- borderRadius: 12,
- paddingHorizontal: 20,
- paddingVertical: 20,
- marginBottom: 12,
- },
+  nextCard: {
+  backgroundColor: colors.surfaceDim,
+  borderRadius: 16,
+  paddingHorizontal: 20,
+  paddingVertical: 20,
+  marginBottom: 12,
+  },
  nextCardPressed: {
  opacity: 0.8,
  },
  nextCardTitle: {
+ fontFamily: "JetBrainsMono",
  fontSize: 20,
  fontWeight: "700",
  color: colors.onSurface,
  },
  nextCardModule: {
+ fontFamily: "JetBrainsMono",
  fontSize: 11,
  color: colors.primary,
  textTransform: "uppercase",
@@ -275,22 +281,24 @@ export default function Dashboard() {
  marginTop: 4,
  },
  nextCardDescription: {
+ fontFamily: "JetBrainsMono",
  fontSize: 16,
  color: colors.textSecondary,
  marginTop: 8,
  },
- nextCardButton: {
- backgroundColor: colors.primary,
- borderRadius: 8,
- paddingHorizontal: 20,
- paddingVertical: 10,
- alignSelf: "flex-start",
- marginTop: 16,
- },
+  nextCardButton: {
+  backgroundColor: colors.primary,
+  borderRadius: 12,
+  paddingHorizontal: 20,
+  paddingVertical: 10,
+  alignSelf: "flex-start",
+  marginTop: 16,
+  },
  nextCardButtonPressed: {
  transform: [{ translateY: 2 }],
  },
  nextCardButtonText: {
+ fontFamily: "JetBrainsMono",
  fontWeight: "900",
  fontSize: 13,
  textTransform: "uppercase",
@@ -298,30 +306,33 @@ export default function Dashboard() {
  color: colors.onPrimary,
  },
  listTitle: {
+ fontFamily: "JetBrainsMono",
  fontSize: 16,
  fontWeight: "700",
  color: colors.onSurface,
  marginBottom: 12,
  },
- listItem: {
- flexDirection: "row",
- alignItems: "center",
- paddingVertical: 12,
- paddingHorizontal: 16,
- backgroundColor: colors.surfaceDim,
- borderRadius: 8,
- marginBottom: 8,
- },
+  listItem: {
+  flexDirection: "row",
+  alignItems: "center",
+  paddingVertical: 12,
+  paddingHorizontal: 16,
+  backgroundColor: colors.surfaceDim,
+  borderRadius: 12,
+  marginBottom: 8,
+  },
  listItemPressed: {
  opacity: 0.8,
  },
  listItemNumber: {
+ fontFamily: "JetBrainsMono",
  fontSize: 13,
  fontWeight: "700",
  color: colors.textSecondary,
  width: 28,
  },
  listItemTitle: {
+ fontFamily: "JetBrainsMono",
  fontSize: 16,
  fontWeight: "700",
  color: colors.onSurface,
@@ -332,6 +343,7 @@ export default function Dashboard() {
  paddingVertical: 32,
  },
  allCompleteText: {
+ fontFamily: "JetBrainsMono",
  fontSize: 16,
  color: colors.textSecondary,
  textAlign: "center",
@@ -399,7 +411,7 @@ export default function Dashboard() {
  {nextExercise.title}
  </Text>
  <Text style={styles.nextCardModule}>
- {nextExercise.courseTitle} · {nextExercise.module}
+  {nextExercise.courseTitle}
  </Text>
  <Text style={styles.nextCardDescription} numberOfLines={2}>
  {nextExercise.description}

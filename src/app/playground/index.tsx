@@ -37,12 +37,14 @@ const styles = StyleSheet.create({
  fontSize: 36,
  marginBottom: 16,
  },
- heading: {
- fontSize: 24,
- fontWeight: "700",
- },
- description: {
- fontSize: 16,
+  heading: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 24,
+    fontWeight: "700",
+  },
+  description: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 16,
  marginTop: 8,
  textAlign: "center",
  },

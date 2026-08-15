@@ -33,11 +33,13 @@ interface ExerciseState {
  startingCode: string;
  isRunning: boolean;
  completed: boolean;
+ error: string | null;
 }
 
 type ExerciseAction =
  | { type: "LOAD_START" }
  | { type: "LOAD_DONE"; exercise: Lesson | null; course: string; id: string }
+ | { type: "LOAD_ERROR"; error: string }
  | { type: "SET_CODE"; code: string }
  | { type: "RESET_CODE"; course: string; id: string }
  | { type: "APPEND_CODE"; text: string; cursorOffset?: number }
@@ -48,7 +50,7 @@ type ExerciseAction =
 function exerciseReducer(state: ExerciseState, action: ExerciseAction): ExerciseState {
  switch (action.type) {
  case "LOAD_START":
- return { ...state, loading: true };
+ return { ...state, loading: true, error: null };
  case "LOAD_DONE": {
  const ex = action.exercise;
  const baseCode = ex?.startingCode ?? "";
@@ -63,8 +65,11 @@ function exerciseReducer(state: ExerciseState, action: ExerciseAction): Exercise
  exercise: ex ? { ...ex, startingCode } : null,
  startingCode,
  code: startingCode,
+ error: null,
  };
  }
+ case "LOAD_ERROR":
+ return { ...state, loading: false, error: action.error };
  case "SET_CODE":
  return { ...state, code: action.code };
  case "RESET_CODE":
@@ -87,14 +92,15 @@ export default function Exercise() {
  const router = useRouter();
  const insets = useSafeAreaInsets();
  const { openDrawer } = useDrawerContext();
- const [state, dispatch] = useReducer(exerciseReducer, {
+const [state, dispatch] = useReducer(exerciseReducer, {
  exercise: null,
  loading: true,
  code: "",
  startingCode: "",
  isRunning: false,
  completed: false,
- });
+ error: null,
+});
  const { colorScheme, toggleTheme } = useThemeContext();
  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
  const webViewRef = useRef<WebView>(null);
@@ -160,12 +166,14 @@ export default function Exercise() {
  paddingHorizontal: 24,
  },
  notFoundTitle: {
+ fontFamily: "JetBrainsMono",
  fontSize: 20,
  fontWeight: "700",
  color: colors.onSurface,
  marginTop: 16,
  },
  notFoundSubtitle: {
+ fontFamily: "JetBrainsMono",
  fontSize: 16,
  color: colors.textSecondary,
  marginTop: 8,
@@ -183,6 +191,7 @@ export default function Exercise() {
  transform: [{ translateY: 2 }],
  },
  backButtonText: {
+ fontFamily: "JetBrainsMono",
  fontWeight: "900",
  fontSize: 13,
  textTransform: "uppercase",
@@ -204,6 +213,7 @@ export default function Exercise() {
  padding: 8,
  },
  logoText: {
+ fontFamily: "JetBrainsMono",
  fontSize: 20,
  fontWeight: "700",
  color: colors.primary,
@@ -286,6 +296,7 @@ export default function Exercise() {
  marginBottom: 20,
  },
  modalTitle: {
+ fontFamily: "JetBrainsMono",
  fontSize: 18,
  fontWeight: "700",
  },
@@ -293,6 +304,7 @@ export default function Exercise() {
  marginBottom: 16,
  },
  modalSectionTitle: {
+ fontFamily: "JetBrainsMono",
  fontSize: 11,
  textTransform: "uppercase",
  letterSpacing: 1,
@@ -312,11 +324,27 @@ export default function Exercise() {
  const load = async () => {
  if (!course || !id) return;
  dispatch({ type: "LOAD_START" });
+ try {
  const ex = await loadExercise(course, id);
  dispatch({ type: "LOAD_DONE", exercise: ex, course, id });
  const saved = await AsyncStorage.getItem(getExerciseCodeKey(course, id));
  if (saved) {
  dispatch({ type: "SET_CODE", code: saved });
+ }
+ } catch (e: unknown) {
+ const errMsg = e instanceof Error ? e.message : String(e);
+ const errStack = e instanceof Error ? e.stack : "";
+ const logEntry = {
+ timestamp: new Date().toISOString(),
+ route: `/learn/${course}/${id}`,
+ error: errMsg,
+ stack: errStack,
+ };
+ const existing = await AsyncStorage.getItem("error_log");
+ const logs = existing ? JSON.parse(existing) : [];
+ logs.push(logEntry);
+ await AsyncStorage.setItem("error_log", JSON.stringify(logs.slice(-20)));
+ dispatch({ type: "LOAD_ERROR", error: errMsg });
  }
  };
  load();
@@ -596,12 +624,43 @@ export default function Exercise() {
  return runButtonBottom + 60;
  }, [runButtonBottom]);
 
- if (state.loading) {
+if (state.loading) {
  return (
  <View style={styles.loadingContainer}>
  <MaterialCommunityIcons name="loading" size={32} color={colors.primary} />
  </View>
-);
+ );
+ }
+
+ if (state.error) {
+ return (
+ <View style={styles.notFoundContainer}>
+ <View style={styles.notFoundInner}>
+ <MaterialCommunityIcons name="alert-circle-outline" size={48} color={colors.error} />
+ <Text style={styles.notFoundTitle}>
+ Load Error
+ </Text>
+ <Text style={styles.notFoundSubtitle}>
+ {state.error}
+ </Text>
+ <View style={styles.notFoundButtonWrapper}>
+ <Pressable
+ onPress={() => router.push(`/learn/${course}`)}
+ style={({ pressed }) => [
+ styles.backButton,
+ pressed && styles.backButtonPressed,
+ ]}
+ accessibilityRole="button"
+ accessibilityLabel="Back to course"
+ >
+ <Text style={styles.backButtonText}>
+ Back to course
+ </Text>
+ </Pressable>
+ </View>
+ </View>
+ </View>
+ );
  }
 
  if (!state.exercise) {
@@ -673,7 +732,10 @@ export default function Exercise() {
  originWhitelist={["*"]}
  scrollEnabled={true}
  bounces={false}
- {...({ keyboardDisplayRequiresUserAction: false } as Record<string, boolean>)}
+  {...({
+    hideKeyboardAccessoryView: true,
+    keyboardDisplayRequiresUserAction: true,
+  } as Record<string, boolean>)}
  />
 )}
 
@@ -687,11 +749,11 @@ export default function Exercise() {
  <Pressable
  onPress={handleRun}
  disabled={state.isRunning}
- style={({ pressed }) => [
- styles.runButton,
- { backgroundColor: colors.primary },
- pressed && styles.runButtonPressed,
- ]}
+  style={({ pressed }) => [
+  styles.runButton,
+  { backgroundColor: colors.cta },
+  pressed && styles.runButtonPressed,
+  ]}
  accessibilityRole="button"
  accessibilityLabel="Run sketch"
  accessibilityState={{ disabled: state.isRunning }}
@@ -805,7 +867,7 @@ export default function Exercise() {
  >
  <Text style={{ fontSize: 18, fontWeight: "700", color: colors.onSurface }}>−</Text>
  </Pressable>
- <Text style={{ fontSize: 16, fontWeight: "700", color: colors.onSurface, minWidth: 32, textAlign: "center" }}>
+ <Text style={{ fontFamily: "JetBrainsMono", fontSize: 16, fontWeight: "700", color: colors.onSurface, minWidth: 32, textAlign: "center" }}>
  {codeFontSize}
  </Text>
  <Pressable
@@ -827,13 +889,13 @@ export default function Exercise() {
  <View style={styles.modalSection}>
  <Text style={[styles.modalSectionTitle, { color: colors.textSecondary }]}>Theme</Text>
  <View style={styles.modalRow}>
- <Text style={{ fontSize: 14, color: colors.onSurface }}>
+ <Text style={{ fontFamily: "JetBrainsMono", fontSize: 14, color: colors.onSurface }}>
  {colorScheme === "dark" ? "Dark Mode" : "Light Mode"}
  </Text>
  <Switch
  value={colorScheme === "dark"}
  onValueChange={toggleTheme}
- trackColor={{ false: "#767577", true: "#ED225D" }}
+  trackColor={{ false: "#767577", true: colors.cta }}
  thumbColor="#ffffff"
  />
  </View>
@@ -848,7 +910,7 @@ export default function Exercise() {
  <Switch
  value={vimEnabled}
  onValueChange={handleToggleVim}
- trackColor={{ false: "#767577", true: "#ED225D" }}
+  trackColor={{ false: "#767577", true: colors.cta }}
  thumbColor="#ffffff"
  />
  </View>
@@ -884,6 +946,7 @@ export default function Exercise() {
 ))}
  </View>
  <Text style={{
+ fontFamily: "JetBrainsMono",
  fontSize: 11,
  fontWeight: "700",
  textTransform: "uppercase",
@@ -920,6 +983,7 @@ export default function Exercise() {
  })}
  >
  <Text style={{
+ fontFamily: "JetBrainsMono",
  fontSize: 11,
  fontWeight: "700",
  textTransform: "uppercase",

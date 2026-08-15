@@ -42,18 +42,21 @@ const createStyles = (colors: Record<string, string>) =>
  paddingHorizontal: 16,
  paddingTop: 24,
  },
- heading: {
- fontSize: 18,
+  heading: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 18,
  fontWeight: "700",
  color: colors.onSurface,
  },
- subtitle: {
- fontSize: 16,
+  subtitle: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 16,
  color: colors.textSecondary,
  marginTop: 4,
  },
- sectionLabel: {
- fontSize: 11,
+  sectionLabel: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 11,
  textTransform: "uppercase",
  letterSpacing: 1,
  color: colors.textSecondary,
@@ -78,13 +81,15 @@ const createStyles = (colors: Record<string, string>) =>
  flex1: {
  flex: 1,
  },
- cardTitle: {
- fontSize: 16,
+  cardTitle: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 16,
  fontWeight: "700",
  color: colors.onSurface,
  },
- cardSubtitle: {
- fontSize: 11,
+  cardSubtitle: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 11,
  color: colors.textSecondary,
  marginTop: 2,
  },
@@ -102,15 +107,17 @@ const createStyles = (colors: Record<string, string>) =>
  alignItems: "center",
  justifyContent: "space-between",
  },
- faqQuestion: {
- fontSize: 16,
+  faqQuestion: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 16,
  fontWeight: "700",
  color: colors.onSurface,
  flex: 1,
  paddingRight: 8,
  },
- faqAnswer: {
- fontSize: 16,
+  faqAnswer: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 16,
  color: colors.textSecondary,
  marginTop: 12,
  lineHeight: 20,
@@ -119,8 +126,9 @@ const createStyles = (colors: Record<string, string>) =>
  marginTop: 40,
  alignItems: "center",
  },
- footerInfo: {
- fontSize: 11,
+  footerInfo: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 11,
  color: colors.textSecondary,
  marginTop: 4,
  },
@@ -162,7 +170,7 @@ export default function Support() {
  <MaterialCommunityIcons
  name="bug-outline"
  size={28}
- color="#ED225D"
+  color={colors.cta}
  />
  <View style={styles.flex1}>
  <Text style={styles.cardTitle}>

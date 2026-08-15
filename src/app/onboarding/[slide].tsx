@@ -127,6 +127,7 @@ export default function OnboardingSlide() {
  justifyCenter: { justifyContent: "center" },
  contentPadding: { paddingHorizontal: 24 },
  nameInput: {
+ fontFamily: "JetBrainsMono",
  fontSize: 24,
  fontWeight: "700",
  borderBottomWidth: 2,
@@ -148,6 +149,7 @@ export default function OnboardingSlide() {
  justifyContent: "center",
  },
  headerTitle: {
+ fontFamily: "JetBrainsMono",
  fontSize: 20,
  fontWeight: "700",
  textTransform: "uppercase",
@@ -155,6 +157,7 @@ export default function OnboardingSlide() {
  color: colors.primary,
  },
  welcomeTitle: {
+ fontFamily: "JetBrainsMono",
  fontSize: 32,
  fontWeight: "700",
  lineHeight: 45,
@@ -162,6 +165,7 @@ export default function OnboardingSlide() {
  color: colors.onSurface,
  },
  welcomeSubtitle: {
+ fontFamily: "JetBrainsMono",
  fontSize: 16,
  lineHeight: 24,
  color: colors.onSurfaceVariant,
@@ -182,6 +186,7 @@ export default function OnboardingSlide() {
  marginRight: 8,
  },
  tagLabel: {
+ fontFamily: "JetBrainsMono",
  fontSize: 12,
  textTransform: "uppercase",
  letterSpacing: 0.5,
@@ -205,25 +210,30 @@ export default function OnboardingSlide() {
  textTransform: "uppercase",
  },
  codeTextPink: {
+ fontFamily: "JetBrainsMono",
  fontSize: 12,
  color: colors.primary,
  },
  codeTextWhite: {
+ fontFamily: "JetBrainsMono",
  fontSize: 12,
  color: colors.onSurface,
  paddingLeft: 16,
  },
  codeTextPink2: {
+ fontFamily: "JetBrainsMono",
  fontSize: 12,
  color: colors.primary,
  paddingLeft: 16,
  },
  slideTitle: {
+ fontFamily: "JetBrainsMono",
  fontSize: 24,
  fontWeight: "700",
  color: colors.onSurface,
  },
  slideSubtitle: {
+ fontFamily: "JetBrainsMono",
  fontSize: 16,
  color: colors.onSurfaceVariant,
  marginTop: 8,
@@ -233,22 +243,27 @@ export default function OnboardingSlide() {
  borderRadius: 20,
  },
  optionTitle: {
+ fontFamily: "JetBrainsMono",
  fontSize: 20,
  fontWeight: "700",
  },
  optionDesc: {
+ fontFamily: "JetBrainsMono",
  fontSize: 16,
  marginTop: 4,
  },
  pathTitle: {
+ fontFamily: "JetBrainsMono",
  fontSize: 20,
  fontWeight: "700",
  },
  pathDesc: {
+ fontFamily: "JetBrainsMono",
  fontSize: 16,
  marginTop: 4,
  },
  readyTitle: {
+ fontFamily: "JetBrainsMono",
  fontSize: 32,
  fontWeight: "700",
  color: colors.onSurface,
@@ -267,20 +282,24 @@ export default function OnboardingSlide() {
  justifyContent: "center",
  },
  moduleNumberText: {
+ fontFamily: "JetBrainsMono",
  fontWeight: "700",
  color: colors.onPrimary,
  },
  moduleName: {
+ fontFamily: "JetBrainsMono",
  fontSize: 20,
  fontWeight: "700",
  color: colors.onSurface,
  },
  moduleDesc: {
+ fontFamily: "JetBrainsMono",
  fontSize: 16,
  color: colors.onSurfaceVariant,
  marginTop: 2,
  },
  readyCta: {
+ fontFamily: "JetBrainsMono",
  fontSize: 20,
  fontWeight: "700",
  textAlign: "center",
@@ -308,6 +327,7 @@ export default function OnboardingSlide() {
  borderRadius: 12,
  },
  ctaButtonText: {
+ fontFamily: "JetBrainsMono",
  fontWeight: "700",
  fontSize: 20,
  textTransform: "uppercase",
@@ -315,6 +335,7 @@ export default function OnboardingSlide() {
  color: colors.onPrimary,
  },
  headlineXl: {
+ fontFamily: "JetBrainsMono",
  fontSize: 20,
  fontWeight: "700",
  },
@@ -410,14 +431,14 @@ export default function OnboardingSlide() {
  <Pressable
  key={opt.value}
  onPress={() => updateData({ experience: opt.value })}
- style={[styles.optionCard, selected ? { backgroundColor: "#FF69B4" } : { backgroundColor: colors.surfaceContainer }]}
+ style={[styles.optionCard, selected ? { backgroundColor: colors.cta } : { backgroundColor: colors.surfaceContainer }]}
  accessibilityRole="button"
  accessibilityLabel={opt.label}
  >
- <Text style={[styles.optionTitle, { color: selected ? "#000000" : colors.onSurface }]}>
+ <Text style={[styles.optionTitle, { color: selected ? colors.onPrimary : colors.onSurface }]}>
  {opt.label}
  </Text>
- <Text style={[styles.optionDesc, { color: selected ? "rgba(0,0,0,0.7)" : colors.onSurfaceVariant }]}>
+ <Text style={[styles.optionDesc, { color: selected ? colors.onPrimary : colors.onSurfaceVariant }]}>
  {opt.description}
  </Text>
  </Pressable>
@@ -439,14 +460,14 @@ export default function OnboardingSlide() {
  <Pressable
  key={opt.value}
  onPress={() => updateData({ path: opt.value })}
- style={[styles.optionCard, selected ? { backgroundColor: "#FF69B4" } : { backgroundColor: colors.surfaceContainer }]}
+ style={[styles.optionCard, selected ? { backgroundColor: colors.cta } : { backgroundColor: colors.surfaceContainer }]}
  accessibilityRole="button"
  accessibilityLabel={opt.title}
  >
- <Text style={[styles.pathTitle, { color: selected ? "#000000" : colors.onSurface }]}>
+ <Text style={[styles.pathTitle, { color: selected ? colors.onPrimary : colors.onSurface }]}>
  {opt.title}
  </Text>
- <Text style={[styles.pathDesc, { color: selected ? "rgba(0,0,0,0.7)" : colors.onSurfaceVariant }]}>
+ <Text style={[styles.pathDesc, { color: selected ? colors.onPrimary : colors.onSurfaceVariant }]}>
  {opt.description}
  </Text>
  </Pressable>

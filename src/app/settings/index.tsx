@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { View, Text, TextInput, Switch, Pressable, ScrollView, StyleSheet } from "react-native";
+import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
 import Header from "../../components/Header";
@@ -39,6 +40,7 @@ const createStyles = (colors: Record<string, string>) =>
  container: { flex: 1 },
  scrollContent: { flex: 1, paddingHorizontal: 16, paddingTop: 24 },
  sectionTitle: {
+ fontFamily: "JetBrainsMono",
  fontSize: 11,
  textTransform: "uppercase",
  letterSpacing: 1,
@@ -54,9 +56,10 @@ const createStyles = (colors: Record<string, string>) =>
  paddingVertical: 16,
  },
  flexChild: { flex: 1 },
- settingTitle: { fontSize: 16, fontWeight: "700", color: colors.onSurface },
- settingDescription: { fontSize: 11, marginTop: 2, color: colors.textSecondary },
+ settingTitle: { fontFamily: "JetBrainsMono", fontSize: 16, fontWeight: "700", color: colors.onSurface },
+ settingDescription: { fontFamily: "JetBrainsMono", fontSize: 11, marginTop: 2, color: colors.textSecondary },
  nameInput: {
+ fontFamily: "JetBrainsMono",
  fontSize: 16,
  borderBottomWidth: 1,
  paddingVertical: 8,
@@ -67,6 +70,7 @@ const createStyles = (colors: Record<string, string>) =>
 
 export default function Settings() {
  const { colorScheme, toggleTheme } = useThemeContext();
+ const router = useRouter();
  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
  const styles = createStyles(colors);
  const [dailyReminder, setDailyReminder] = useState(false);
@@ -277,7 +281,7 @@ export default function Settings() {
  <Switch
  value={colorScheme === "dark"}
  onValueChange={toggleTheme}
- trackColor={{ false: "#767577", true: "#ED225D" }}
+  trackColor={{ false: "#767577", true: colors.cta }}
  thumbColor="#ffffff"
  />
  </View>
@@ -296,7 +300,7 @@ export default function Settings() {
  <Switch
  value={dailyReminder}
  onValueChange={toggleDailyReminder}
- trackColor={{ false: "#767577", true: "#ED225D" }}
+  trackColor={{ false: "#767577", true: colors.cta }}
  thumbColor="#ffffff"
  />
  </View>
@@ -319,7 +323,7 @@ export default function Settings() {
  <Switch
  value={snippetAlternatives}
  onValueChange={toggleSnippetAlternatives}
- trackColor={{ false: "#767577", true: "#ED225D" }}
+  trackColor={{ false: "#767577", true: colors.cta }}
  thumbColor="#ffffff"
  />
  </View>
@@ -351,7 +355,7 @@ export default function Settings() {
  >
  <Text style={{ fontSize: 18, fontWeight: "700", color: colors.onSurface }}>−</Text>
  </Pressable>
- <Text style={{ fontSize: 16, fontWeight: "700", color: colors.onSurface, minWidth: 32, textAlign: "center" }}>
+ <Text style={{ fontFamily: "JetBrainsMono", fontSize: 16, fontWeight: "700", color: colors.onSurface, minWidth: 32, textAlign: "center" }}>
  {codeFontSize}
  </Text>
  <Pressable
@@ -406,6 +410,7 @@ export default function Settings() {
  >
  <Text
  style={{
+ fontFamily: "JetBrainsMono",
  fontSize: 11,
  fontWeight: "700",
  textTransform: "uppercase",
@@ -455,6 +460,7 @@ export default function Settings() {
  </View>
  <Text
  style={{
+ fontFamily: "JetBrainsMono",
  fontSize: 11,
  fontWeight: "700",
  textTransform: "uppercase",
@@ -505,6 +511,7 @@ export default function Settings() {
  >
  <Text
  style={{
+ fontFamily: "JetBrainsMono",
  fontSize: 11,
  fontWeight: "700",
  textTransform: "uppercase",
@@ -533,7 +540,7 @@ export default function Settings() {
  <Switch
  value={showDrawerFab}
  onValueChange={toggleShowDrawerFab}
- trackColor={{ false: "#767577", true: "#ED225D" }}
+  trackColor={{ false: "#767577", true: colors.cta }}
  thumbColor="#ffffff"
  />
  </View>
@@ -544,25 +551,49 @@ export default function Settings() {
  <View style={styles.card}>
  <View style={styles.cardRow}>
  <View style={styles.flexChild}>
- <Text style={styles.settingTitle}>Dev Mode</Text>
- <Text style={styles.settingDescription}>
- Enable debug controls for testing
- </Text>
- </View>
- <Switch
- value={devMode}
- onValueChange={toggleDevMode}
- trackColor={{ false: "#767577", true: "#ED225D" }}
- thumbColor="#ffffff"
- />
- </View>
- </View>
+<Text style={styles.settingTitle}>Dev Mode</Text>
+  <Text style={styles.settingDescription}>
+    Enable debug controls for testing
+  </Text>
+  </View>
+  <Switch
+  value={devMode}
+  onValueChange={toggleDevMode}
+   trackColor={{ false: "#767577", true: colors.cta }}
+  thumbColor="#ffffff"
+  />
+</View>
+  </View>
 
- {devMode && (
- <>
- <Text style={[styles.sectionTitle, styles.sectionMargin]}>
- Component Triggers
- </Text>
+  {devMode && (
+  <>
+  <View style={styles.card}>
+  <View style={styles.cardRow}>
+  <View style={styles.flexChild}>
+  <Text style={styles.settingTitle}>View Error Logs</Text>
+  <Text style={styles.settingDescription}>
+  Open stored error logs for debugging
+  </Text>
+  </View>
+  <Pressable
+  onPress={() => router.push("/settings/error-logs")}
+  style={({ pressed }) => ({
+  paddingHorizontal: 14,
+  paddingVertical: 8,
+  borderRadius: 8,
+  backgroundColor: pressed ? colors.primaryContainer : colors.primary,
+  })}
+  >
+  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 11, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
+  Open
+  </Text>
+  </Pressable>
+  </View>
+  </View>
+
+  <Text style={[styles.sectionTitle, styles.sectionMargin]}>
+  Component Triggers
+  </Text>
  <View style={styles.card}>
  <View style={styles.cardRow}>
  <Text style={styles.settingTitle}>Show Toast</Text>
@@ -575,7 +606,7 @@ export default function Settings() {
  backgroundColor: pressed ? colors.primaryContainer : colors.primary,
  })}
  >
- <Text style={{ fontSize: 11, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
+ <Text style={{ fontFamily: "JetBrainsMono", fontSize: 11, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
  Trigger
  </Text>
  </Pressable>
@@ -591,7 +622,7 @@ export default function Settings() {
  backgroundColor: pressed ? colors.primaryContainer : colors.primary,
  })}
  >
- <Text style={{ fontSize: 11, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
+ <Text style={{ fontFamily: "JetBrainsMono", fontSize: 11, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
  Trigger
  </Text>
  </Pressable>
@@ -618,7 +649,7 @@ export default function Settings() {
  backgroundColor: pressed ? colors.primaryContainer : colors.primary,
  })}
  >
- <Text style={{ fontSize: 11, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
+ <Text style={{ fontFamily: "JetBrainsMono", fontSize: 11, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
  Run
  </Text>
  </Pressable>
@@ -639,7 +670,7 @@ export default function Settings() {
  backgroundColor: pressed ? colors.errorContainer : colors.error,
  })}
  >
- <Text style={{ fontSize: 11, fontWeight: "700", color: colors.onError, textTransform: "uppercase" }}>
+ <Text style={{ fontFamily: "JetBrainsMono", fontSize: 11, fontWeight: "700", color: colors.onError, textTransform: "uppercase" }}>
  Reset
  </Text>
  </Pressable>
@@ -664,14 +695,35 @@ export default function Settings() {
  backgroundColor: pressed ? colors.primaryContainer : colors.primary,
  })}
  >
- <Text style={{ fontSize: 11, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
+ <Text style={{ fontFamily: "JetBrainsMono", fontSize: 11, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
  Set
  </Text>
  </Pressable>
  </View>
+
+ <View style={[styles.cardRow, { borderTopWidth: 1, borderTopColor: colors.surfaceContainerHighest, flexWrap: "wrap", gap: 8 }]}>
+ <View style={{ width: "100%", marginBottom: 4 }}>
+ <Text style={styles.settingTitle}>Error Logs</Text>
+ <Text style={styles.settingDescription}>
+ View recent error logs from the app
+ </Text>
+ </View>
+ <Pressable
+ onPress={() => router.push("/settings/error-logs")}
+ style={({ pressed }) => ({
+ paddingHorizontal: 14,
+ paddingVertical: 8,
+ borderRadius: 8,
+ backgroundColor: pressed ? colors.primaryContainer : colors.primary,
+ })}
+ >
+ <Text style={{ fontFamily: "JetBrainsMono", fontSize: 11, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
+ View Logs
+ </Text>
+ </Pressable>
  </View>
  </>
-)}
+ )}
  </ScrollView>
 
  <Toast

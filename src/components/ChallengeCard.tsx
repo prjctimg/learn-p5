@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet } from "react-native";
-import Svg, { Path } from "react-native-svg";
+import { Svg, Path } from "react-native-svg";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useThemeContext } from "./ThemeProvider";
 import { Colors } from "../constants/Colors";
@@ -74,17 +74,20 @@ const styles = StyleSheet.create({
  paddingVertical: 16,
  gap: 8,
  },
- title: {
- fontSize: 24,
- fontWeight: "700",
- },
- moduleName: {
- fontSize: 11,
+  title: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 24,
+    fontWeight: "700",
+  },
+  moduleName: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 11,
  textTransform: "uppercase",
  letterSpacing: 0.5,
  },
- description: {
- fontSize: 16,
+  description: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 16,
  lineHeight: 20,
  },
  buttonContainer: {

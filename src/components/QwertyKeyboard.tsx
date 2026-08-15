@@ -70,10 +70,12 @@ const ROW3: QwertyKey[] = [
 
 const LONG_PRESS_DELAY = 200;
 const CONTAINER_PADDING = 8;
-const KEY_GAP = 4;
+const KEY_GAP = 6;
 const ACTION_KEY_RATIO = 1.5;
 const ROW1_LETTER_COUNT = 10;
 const ROW1_UNITS = ROW1_LETTER_COUNT + ACTION_KEY_RATIO;
+const TOOLBAR_HEIGHT = 40;
+const BOTTOM_EXTRA = 4;
 
 export default function QwertyKeyboard({
   onInsert,
@@ -92,13 +94,15 @@ export default function QwertyKeyboard({
 
   const dims = useMemo(() => {
     const availWidth = screenWidth - CONTAINER_PADDING * 2;
-    const KEY_SIZE = Math.floor((availWidth - ROW1_LETTER_COUNT * KEY_GAP) / ROW1_UNITS);
+    const keySize = Math.floor((availWidth - (ROW1_LETTER_COUNT + 1) * KEY_GAP) / ROW1_UNITS * 1.003);
+    const rowsArea = height - TOOLBAR_HEIGHT - BOTTOM_EXTRA;
+    const keyHeight = Math.max(40, Math.floor((rowsArea - KEY_GAP * 3) / 4 * 1.003));
     return {
-      keySize: KEY_SIZE,
-      actionKeyWidth: Math.floor(KEY_SIZE * ACTION_KEY_RATIO),
-      keyHeight: 44,
+      keySize,
+      actionKeyWidth: Math.floor(keySize * ACTION_KEY_RATIO),
+      keyHeight,
     };
-  }, [screenWidth]);
+  }, [screenWidth, height]);
 
   const handlePressIn = useCallback((key: QwertyLetterKey) => {
     longPressKey.current = key.primary;
@@ -139,7 +143,7 @@ export default function QwertyKeyboard({
             {
               width: dims.keySize,
               height: dims.keyHeight,
-              borderRadius: 8,
+              borderRadius: 12,
               alignItems: "center",
               justifyContent: "center",
               backgroundColor: pressed || isActive
@@ -178,7 +182,7 @@ export default function QwertyKeyboard({
             {
               width: dims.actionKeyWidth,
               height: dims.keyHeight,
-              borderRadius: 8,
+              borderRadius: 12,
               alignItems: "center",
               justifyContent: "center",
               backgroundColor: pressed
@@ -191,7 +195,7 @@ export default function QwertyKeyboard({
         >
           <MaterialCommunityIcons
             name={iconName}
-            size={20}
+            size={22}
             color={colors.onSurfaceVariant}
           />
         </Pressable>
@@ -291,12 +295,12 @@ export default function QwertyKeyboard({
 
         <View style={[styles.bottomRow, { gap: KEY_GAP }]}>
           <Pressable
-            onPress={onToggleProgramming}
+            onPress={() => onCursorMove?.("left")}
             style={({ pressed }) => [
               {
                 width: dims.keySize + 8,
                 height: dims.keyHeight,
-                borderRadius: 8,
+                borderRadius: 12,
                 alignItems: "center",
                 justifyContent: "center",
                 backgroundColor: pressed
@@ -305,12 +309,12 @@ export default function QwertyKeyboard({
               },
             ]}
             accessibilityRole="button"
-            accessibilityLabel="Switch to programming keyboard"
+            accessibilityLabel="Move cursor left"
           >
             <MaterialCommunityIcons
-              name="code-tags"
+              name="chevron-left"
               size={22}
-              color={colors.primary}
+              color={colors.onSurfaceVariant}
             />
           </Pressable>
 
@@ -333,50 +337,29 @@ export default function QwertyKeyboard({
             </Text>
           </Pressable>
 
-          <View style={styles.dpadGroup}>
-            <Pressable
-              onPress={() => onCursorMove?.("left")}
-              style={({ pressed }) => [
-                {
-                  width: dims.keySize + 8,
-                  height: dims.keyHeight,
-                  borderRadius: 8,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: pressed
-                    ? colors.primaryContainer
-                    : colors.surfaceContainer,
-                },
-              ]}
-            >
-              <MaterialCommunityIcons
-                name="chevron-left"
-                size={20}
-                color={colors.onSurfaceVariant}
-              />
-            </Pressable>
-            <Pressable
-              onPress={() => onCursorMove?.("right")}
-              style={({ pressed }) => [
-                {
-                  width: dims.keySize + 8,
-                  height: dims.keyHeight,
-                  borderRadius: 8,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: pressed
-                    ? colors.primaryContainer
-                    : colors.surfaceContainer,
-                },
-              ]}
-            >
-              <MaterialCommunityIcons
-                name="chevron-right"
-                size={20}
-                color={colors.onSurfaceVariant}
-              />
-            </Pressable>
-          </View>
+          <Pressable
+            onPress={() => onCursorMove?.("right")}
+            style={({ pressed }) => [
+              {
+                width: dims.keySize + 8,
+                height: dims.keyHeight,
+                borderRadius: 12,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: pressed
+                  ? colors.primaryContainer
+                  : colors.surfaceContainer,
+              },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Move cursor right"
+          >
+            <MaterialCommunityIcons
+              name="chevron-right"
+              size={22}
+              color={colors.onSurfaceVariant}
+            />
+          </Pressable>
         </View>
       </View>
     </View>
@@ -401,33 +384,33 @@ const styles = StyleSheet.create({
   },
   toolbarBtn: {
     flexShrink: 0,
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     paddingVertical: 8,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 6,
+    borderRadius: 12,
   },
   symbolsScroll: {
-    maxHeight: 36,
+    maxHeight: 44,
     flex: 1,
   },
   symbolsContent: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 4,
-    gap: 4,
+    gap: 6,
   },
   symbolButton: {
     flexShrink: 0,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 6,
+    borderRadius: 10,
   },
   symbolText: {
     ...Typography.mono,
-    fontSize: 16,
+    fontSize: 18,
   },
   keysContainer: {
     alignItems: "center",
@@ -445,27 +428,23 @@ const styles = StyleSheet.create({
   },
   keyPrimary: {
     ...Typography.mono,
-    fontSize: 16,
+    fontSize: 18,
   },
   keySecondary: {
     ...Typography.mono,
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "700",
   },
   spaceBar: {
     flex: 1,
-    borderRadius: 8,
+    borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
   },
   spaceText: {
     ...Typography.mono,
-    fontSize: 13,
+    fontSize: 14,
     textTransform: "uppercase",
     letterSpacing: 0.5,
-  },
-  dpadGroup: {
-    flexDirection: "row",
-    gap: KEY_GAP,
   },
 });

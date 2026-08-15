@@ -136,6 +136,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   title: {
+    fontFamily: "JetBrainsMono",
     fontWeight: "700",
     fontSize: 11,
     textTransform: "uppercase",
@@ -143,6 +144,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   instruction: {
+    fontFamily: "JetBrainsMono",
     fontSize: 16,
     lineHeight: 24,
   },

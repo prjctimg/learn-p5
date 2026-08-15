@@ -82,12 +82,14 @@ const styles = StyleSheet.create({
  paddingVertical: 10,
  borderRadius: 8,
  },
- timeText: {
- fontSize: 20,
- fontWeight: "700",
- },
- changeLabel: {
- fontSize: 11,
+  timeText: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 20,
+    fontWeight: "700",
+  },
+  changeLabel: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 11,
  fontWeight: "700",
  textTransform: "uppercase",
  letterSpacing: 0.5,

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { View, Text, Pressable, Linking, StyleSheet, ScrollView } from "react-native";
 import { WebView } from "react-native-webview";
-import Svg, { Path } from "react-native-svg";
+import { Svg, Path } from "react-native-svg";
 import { Colors } from "../constants/Colors";
 import { Spacing } from "../constants/Spacing";
 import { Typography } from "../constants/Typography";
@@ -151,8 +151,9 @@ const styles = StyleSheet.create({
  alignItems: "flex-start",
  marginBottom: Spacing.lg,
  },
- sectionHeading: {
- fontSize: 20,
+  sectionHeading: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 20,
  fontWeight: "700",
  marginBottom: Spacing.md,
  textAlign: "left",
@@ -160,13 +161,15 @@ const styles = StyleSheet.create({
  logo: {
  marginBottom: Spacing.md,
  },
- definitionText: {
- ...Typography.body,
- textAlign: "left",
+  definitionText: {
+    ...Typography.body,
+    fontFamily: "JetBrainsMono",
+    textAlign: "left",
  lineHeight: 22,
  },
- link: {
- fontSize: 13,
+  link: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 13,
  fontWeight: "700",
  textDecorationLine: "underline",
  marginTop: Spacing.md,

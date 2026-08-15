@@ -213,9 +213,9 @@ function SymbolDetail({ symbol }: { symbol: string }) {
  Usage
  </Text>
  <View style={[styles.syntaxBox, { backgroundColor: colors.surfaceDim, marginBottom: 24 }]}>
- <Text style={{ fontSize: 16, lineHeight: 24 }}>
+ <Text style={{ fontFamily: "JetBrainsMono", fontSize: 16, lineHeight: 24 }}>
  {syntaxTokens.map((t, i) => (
- <Text key={i} style={{ color: t.color, fontSize: 16 }}>
+ <Text key={i} style={{ color: t.color, fontFamily: "JetBrainsMono", fontSize: 16 }}>
  {t.text}
  </Text>
 ))}
@@ -231,7 +231,7 @@ function SymbolDetail({ symbol }: { symbol: string }) {
  <View key={i} style={{ marginBottom: 16 }}>
  {sym.norender ? (
  <View style={[styles.codeBlock, { backgroundColor: colors.surfaceDim }]}>
- <Text style={{ fontSize: 13, lineHeight: 20, color: colors.onSurface }}>
+ <Text style={{ fontFamily: "JetBrainsMono", fontSize: 13, lineHeight: 20, color: colors.onSurface }}>
  {ex}
  </Text>
  </View>
@@ -246,7 +246,7 @@ function SymbolDetail({ symbol }: { symbol: string }) {
  bounces={false}
  />
  <View style={[styles.codeBlock, { backgroundColor: colors.surfaceDim, marginTop: 8 }]}>
- <Text style={{ fontSize: 13, lineHeight: 20, color: colors.onSurface }}>
+ <Text style={{ fontFamily: "JetBrainsMono", fontSize: 13, lineHeight: 20, color: colors.onSurface }}>
  {ex}
  </Text>
  </View>
@@ -269,23 +269,23 @@ function SymbolDetail({ symbol }: { symbol: string }) {
  ItemSeparatorComponent={() => (
  <View style={{ height: 1, backgroundColor: colors.outlineVariant + "30" }} />
 )}
- renderItem={({ item }) => (
- <View style={[styles.flexRow, styles.paramRow]}>
- <View style={styles.flex1}>
- <Text style={[styles.paramNameText, { color: colors.onSurface }]}>
- {item.name}
- </Text>
- </View>
- <View style={{ flex: 2 }}>
- <Text style={[styles.paramDescText, { color: colors.textSecondary, lineHeight: 24 }]}>
- {item.description}
- </Text>
- <Text style={[styles.paramTypeText, { color: colors.primary, marginTop: 2 }]}>
- {item.type}
- </Text>
- </View>
- </View>
-)}
+  renderItem={({ item }) => (
+  <View style={[styles.flexRow, styles.paramRow]}>
+  <View style={styles.flex1}>
+  <Text style={[styles.paramNameText, { color: colors.onSurface }]}>
+  {item.name}
+  </Text>
+  </View>
+  <View style={{ flex: 2 }}>
+  <Text style={[styles.paramDescText, { color: colors.textSecondary, lineHeight: 24 }]}>
+  {item.description || "No description"}
+  </Text>
+  <Text style={[styles.paramTypeText, { color: colors.primary, marginTop: 2 }]}>
+  {item.type}
+  </Text>
+  </View>
+  </View>
+  )}
  ListFooterComponent={
  <>
  <View style={[styles.flexRow, { alignItems: "center", gap: 12, marginTop: 24, justifyContent: "space-between" }]}>
@@ -432,23 +432,17 @@ export default function Reference() {
  accessibilityRole="button"
  accessibilityLabel={`View reference for ${sym.name}`}
  >
- <Text style={[styles.monoSm, { color: colors.primary, flex: 1 }]}>
- {sym.name}()
- </Text>
- <Text
- style={[styles.bodyXs, { color: colors.textSecondary, flex: 2 }]}
- numberOfLines={1}
- >
- {sym.description}
- </Text>
- <MaterialCommunityIcons
- name="chevron-right"
- size={18}
- color={colors.onSurfaceVariant}
- />
- </Pressable>
+  <Text style={[styles.monoSm, { color: colors.primary, flex: 1 }]}>
+  {sym.name}()
+  </Text>
+  <MaterialCommunityIcons
+  name="chevron-right"
+  size={18}
+  color={colors.onSurfaceVariant}
+  />
+  </Pressable>
 )
- : ({ item: group }) => (
+  : ({ item: group }) => (
  <View style={{ marginBottom: 24 }}>
  <Text style={[styles.moduleGroupTitle, { color: colors.onSurface, marginBottom: 12 }]}>
  {group.module}
@@ -465,23 +459,17 @@ export default function Reference() {
  accessibilityRole="button"
  accessibilityLabel={`View reference for ${sym.name}`}
  >
- <Text style={[styles.monoSm, { color: colors.primary, flex: 1 }]}>
- {sym.name}()
- </Text>
- <Text
- style={[styles.bodyXs, { color: colors.textSecondary, flex: 2 }]}
- numberOfLines={1}
- >
- {sym.description}
- </Text>
- <MaterialCommunityIcons
- name="chevron-right"
- size={18}
- color={colors.onSurfaceVariant}
- />
- </Pressable>
+  <Text style={[styles.monoSm, { color: colors.primary, flex: 1 }]}>
+  {sym.name}()
+  </Text>
+  <MaterialCommunityIcons
+  name="chevron-right"
+  size={18}
+  color={colors.onSurfaceVariant}
+  />
+  </Pressable>
 ))}
- </View>
+  </View>
 )
  }
  />
@@ -510,27 +498,34 @@ const styles = StyleSheet.create({
  padding: 0,
  },
  headlineXl: {
+ fontFamily: "JetBrainsMono",
  fontSize: 20,
  fontWeight: "700",
  },
  bodySm: {
+ fontFamily: "JetBrainsMono",
  fontSize: 16,
  },
  bodyBase: {
+ fontFamily: "JetBrainsMono",
  fontSize: 16,
  },
  bodyXs: {
+ fontFamily: "JetBrainsMono",
  fontSize: 12,
  },
  monoSm: {
+ fontFamily: "JetBrainsMono",
  fontSize: 13,
  fontWeight: "700",
  },
- browseButton: {
- paddingHorizontal: 24,
- paddingVertical: 12,
- },
- browseButtonText: {
+  browseButton: {
+  paddingHorizontal: 24,
+  paddingVertical: 12,
+  borderRadius: 12,
+  },
+  browseButtonText: {
+ fontFamily: "JetBrainsMono",
  fontWeight: "900",
  fontSize: 13,
  textTransform: "uppercase",
@@ -542,6 +537,7 @@ const styles = StyleSheet.create({
  borderRadius: 6,
  },
  symbolNameText: {
+ fontFamily: "JetBrainsMono",
  fontSize: 30,
  fontWeight: "900",
  },
@@ -551,21 +547,24 @@ const styles = StyleSheet.create({
  borderRadius: 4,
  },
  moduleBadgeText: {
+ fontFamily: "JetBrainsMono",
  fontSize: 12,
  textTransform: "uppercase",
  letterSpacing: 0.5,
  },
  sectionTitle: {
+ fontFamily: "JetBrainsMono",
  fontSize: 18,
  fontWeight: "700",
  },
- syntaxBox: {
- paddingHorizontal: 16,
- paddingVertical: 12,
- borderLeftWidth: 3,
- borderLeftColor: "#ED225D",
- },
+  syntaxBox: {
+  paddingHorizontal: 16,
+  paddingVertical: 12,
+  borderLeftWidth: 3,
+  borderLeftColor: "#FF69B4",
+  },
  syntaxText: {
+ fontFamily: "JetBrainsMono",
  fontSize: 16,
  },
  codeBlock: {
@@ -582,22 +581,27 @@ const styles = StyleSheet.create({
  paddingVertical: 12,
  },
  paramNameText: {
+ fontFamily: "JetBrainsMono",
  fontSize: 16,
  fontWeight: "700",
  },
  paramDescText: {
+ fontFamily: "JetBrainsMono",
  fontSize: 16,
  },
  paramTypeText: {
+ fontFamily: "JetBrainsMono",
  fontSize: 12,
  textTransform: "uppercase",
  letterSpacing: 0.5,
  },
  refListTitle: {
+ fontFamily: "JetBrainsMono",
  fontSize: 24,
  fontWeight: "700",
  },
  moduleGroupTitle: {
+ fontFamily: "JetBrainsMono",
  fontSize: 18,
  fontWeight: "700",
  textTransform: "uppercase",
@@ -618,6 +622,7 @@ const styles = StyleSheet.create({
  maxWidth: "45%",
  },
  navButtonText: {
+ fontFamily: "JetBrainsMono",
  fontSize: 12,
  fontWeight: "700",
  },
@@ -632,6 +637,7 @@ const styles = StyleSheet.create({
  borderRadius: 8,
  },
  officialDocsText: {
+ fontFamily: "JetBrainsMono",
  fontSize: 13,
  fontWeight: "700",
  },

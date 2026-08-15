@@ -320,8 +320,8 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
  <Text style={[popupTextStyles.popupDesc, { color: colors.onSurfaceVariant }]}>{ref.description}</Text>
  {ref.parameters.map(p => (
  <Text key={p.name} style={[popupTextStyles.popupParam, { color: colors.onSurfaceVariant }]}>
- <Text style={{ color: colors.primary, fontWeight: "700" }}>{p.name}</Text>
- {' '}<Text style={{ fontSize: 11, color: colors.primary }}>({p.type})</Text>: {p.description}
+  <Text style={{ fontFamily: "JetBrainsMono", color: colors.primary, fontWeight: "700" }}>{p.name}</Text>
+  {' '}<Text style={{ fontFamily: "JetBrainsMono", fontSize: 11, color: colors.primary }}>({p.type})</Text>: {p.description}
  </Text>
 ))}
  </>
@@ -337,35 +337,39 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
 }
 
 const popupTextStyles = StyleSheet.create({
- popupTitle: {
- fontSize: 16,
- fontWeight: "700",
- marginBottom: 8,
- padding: 8,
- borderRadius: 6,
- borderWidth: 1,
- overflow: "hidden",
- },
- popupDesc: {
- fontSize: 14,
- lineHeight: 20,
- marginBottom: 12,
- },
- popupParam: {
- fontSize: 13,
- lineHeight: 18,
- marginBottom: 4,
- paddingLeft: 8,
- },
- refButton: {
- marginTop: 16,
- paddingHorizontal: 16,
- paddingVertical: 10,
- borderRadius: 8,
- alignItems: "center",
- },
- refButtonText: {
- fontSize: 12,
+  popupTitle: {
+   fontFamily: "JetBrainsMono",
+   fontSize: 16,
+   fontWeight: "700",
+   marginBottom: 8,
+   padding: 8,
+   borderRadius: 6,
+   borderWidth: 1,
+   overflow: "hidden",
+  },
+  popupDesc: {
+   fontFamily: "JetBrainsMono",
+   fontSize: 14,
+   lineHeight: 20,
+   marginBottom: 12,
+  },
+  popupParam: {
+   fontFamily: "JetBrainsMono",
+   fontSize: 13,
+   lineHeight: 18,
+   marginBottom: 4,
+   paddingLeft: 8,
+  },
+  refButton: {
+   marginTop: 16,
+   paddingHorizontal: 16,
+   paddingVertical: 10,
+   borderRadius: 8,
+   alignItems: "center",
+  },
+  refButtonText: {
+   fontFamily: "JetBrainsMono",
+   fontSize: 12,
  fontWeight: "700",
  textTransform: "uppercase",
  letterSpacing: 0.5,
@@ -398,14 +402,14 @@ const styles = StyleSheet.create({
  paddingHorizontal: Spacing.xs,
  gap: Spacing.xs,
  },
- keyboardIcon: {
- flexShrink: 0,
- paddingHorizontal: Spacing.sm + 4,
- paddingVertical: Spacing.sm,
- alignItems: "center",
- justifyContent: "center",
- borderRadius: Spacing.xs,
- },
+  keyboardIcon: {
+  flexShrink: 0,
+  paddingHorizontal: Spacing.sm + 4,
+  paddingVertical: Spacing.sm,
+  alignItems: "center",
+  justifyContent: "center",
+  borderRadius: Spacing.sm,
+  },
  bottomCluster: {
  position: "absolute",
  left: 12,
@@ -423,25 +427,25 @@ const styles = StyleSheet.create({
  justifyContent: "center",
  gap: 3,
  },
- dpadBtn: {
- width: 44,
- height: 44,
- alignItems: "center",
- justifyContent: "center",
- borderRadius: 8,
- },
+  dpadBtn: {
+  width: 44,
+  height: 44,
+  alignItems: "center",
+  justifyContent: "center",
+  borderRadius: 12,
+  },
  dpadCenter: {
  width: 44,
  height: 44,
  },
- symbolButton: {
- flexShrink: 0,
- paddingHorizontal: Spacing.sm + 4,
- paddingVertical: 6,
- alignItems: "center",
- justifyContent: "center",
- borderRadius: Spacing.xs,
- },
+  symbolButton: {
+  flexShrink: 0,
+  paddingHorizontal: Spacing.sm + 4,
+  paddingVertical: 6,
+  alignItems: "center",
+  justifyContent: "center",
+  borderRadius: Spacing.sm,
+  },
  symbolText: {
  ...Typography.mono,
  fontSize: 18,
@@ -453,11 +457,11 @@ const styles = StyleSheet.create({
  paddingVertical: Spacing.xs,
  gap: 6,
  },
- exerciseKey: {
- paddingHorizontal: 14,
- paddingVertical: 6,
- borderRadius: Spacing.xs,
- },
+  exerciseKey: {
+  paddingHorizontal: 14,
+  paddingVertical: 6,
+  borderRadius: Spacing.sm,
+  },
  exerciseKeyText: {
  ...Typography.monoLabel,
  },
@@ -468,11 +472,11 @@ const styles = StyleSheet.create({
  paddingVertical: Spacing.xs,
  gap: 6,
  },
- functionKey: {
- paddingHorizontal: Spacing.sm + 4,
- paddingVertical: 6,
- borderRadius: Spacing.xs,
- },
+  functionKey: {
+  paddingHorizontal: Spacing.sm + 4,
+  paddingVertical: 6,
+  borderRadius: Spacing.sm,
+  },
  functionKeyText: {
  ...Typography.mono,
  fontSize: 15,

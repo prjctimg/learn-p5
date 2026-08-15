@@ -1,5 +1,5 @@
 import { View, Text, Pressable, StyleSheet } from "react-native";
-import Svg, { Path } from "react-native-svg";
+import { Svg, Path } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { usePathname, useRouter } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -115,13 +115,15 @@ const styles = StyleSheet.create({
  paddingHorizontal: 24,
  paddingBottom: 24,
  },
- logoText: {
- fontSize: 24,
- fontWeight: "700",
- marginTop: 12,
- },
- tagline: {
- fontSize: 16,
+  logoText: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 24,
+    fontWeight: "700",
+    marginTop: 12,
+  },
+  tagline: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 16,
  },
  statsRow: {
  flexDirection: "row",
@@ -135,12 +137,14 @@ const styles = StyleSheet.create({
  paddingVertical: 12,
  alignItems: "center",
  },
- statValue: {
- fontSize: 20,
- fontWeight: "700",
- },
- statLabel: {
- fontSize: 11,
+  statValue: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 20,
+    fontWeight: "700",
+  },
+  statLabel: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 11,
  marginTop: 2,
  },
  navList: {
@@ -159,16 +163,18 @@ const styles = StyleSheet.create({
  width: 32,
  alignItems: "center",
  },
- navLabel: {
- fontSize: 16,
- marginLeft: 12,
- },
- footer: {
- paddingHorizontal: 24,
- paddingVertical: 16,
- },
- versionLabel: {
- fontSize: 11,
+  navLabel: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 16,
+    marginLeft: 12,
+  },
+  footer: {
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+  },
+  versionLabel: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 11,
  textAlign: "center",
  },
 });

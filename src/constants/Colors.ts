@@ -1,6 +1,7 @@
 export const Colors = {
   light: {
     primary: "#ED225D",
+    cta: "#FF69B4",
     onPrimary: "#FFFFFF",
     primaryContainer: "#FFD9E4",
     onPrimaryContainer: "#5A001C",
@@ -37,6 +38,7 @@ export const Colors = {
   },
   dark: {
     primary: "#ED225D",
+    cta: "#FF69B4",
     onPrimary: "#FFFFFF",
     primaryContainer: "#FF4F75",
     onPrimaryContainer: "#5A001C",

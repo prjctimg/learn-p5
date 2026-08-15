@@ -15,18 +15,25 @@ export default function CourseDetail() {
  const [courseData, setCourseData] = useState<Course | null>(null);
  const [loading, setLoading] = useState(true);
  const [completedLessons, setCompletedLessons] = useState<string[]>([]);
+ const [error, setError] = useState<string | null>(null);
  const { colorScheme } = useThemeContext();
  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
  const loadData = useCallback(async () => {
  if (!course) return;
+ setError(null);
+ try {
  const data = await loadCourse(course);
  setCourseData(data);
  try {
  const val = await AsyncStorage.getItem("completedLessons");
  if (val) setCompletedLessons(JSON.parse(val));
  } catch {}
+ } catch (e) {
+ setError(e instanceof Error ? e.message : "Failed to load course");
+ } finally {
  setLoading(false);
+ }
  }, [course]);
 
  useEffect(() => {
@@ -75,7 +82,7 @@ export default function CourseDetail() {
  return false;
  }
 
- if (loading) {
+if (loading) {
  return (
  <View style={[styles.container, { backgroundColor: colors.surface }]}>
  <View
@@ -94,7 +101,57 @@ export default function CourseDetail() {
  <ActivityIndicator size="large" color={colors.primary} />
  </View>
  </View>
-);
+ );
+ }
+
+ if (error) {
+ return (
+ <View style={[styles.container, { backgroundColor: colors.surface }]}>
+ <View
+ style={[
+ styles.header,
+ { backgroundColor: colors.surface },
+ ]}
+ >
+ <Pressable onPress={() => router.back()} style={styles.backButton}>
+ <MaterialCommunityIcons
+ name="arrow-left"
+ size={24}
+ color={colors.primary}
+ />
+ </Pressable>
+ <Text style={[styles.headerTitle, { color: colors.primary }]}>
+ Course
+ </Text>
+ <View style={{ width: 40 }} />
+ </View>
+ <View style={styles.notFoundContainer}>
+ <Text style={[styles.notFoundTitle, { color: colors.onSurface }]}>
+ Load Error
+ </Text>
+ <Text
+ style={[styles.notFoundSubtitle, { color: colors.textSecondary }]}
+ >
+ {error}
+ </Text>
+ <View style={styles.notFoundButtonWrapper}>
+ <Pressable
+ onPress={() => router.back()}
+ style={({ pressed }) => [
+ styles.backButton,
+ pressed && styles.backButtonPressed,
+ ]}
+ accessibilityRole="button"
+ accessibilityLabel="Back to courses"
+ >
+ <Text style={styles.backButtonText}>
+ Back to courses
+ </Text>
+ </Pressable>
+ </View>
+ </View>
+ </View>
+ );
  }
 
  if (!courseData) {
@@ -139,26 +196,16 @@ export default function CourseDetail() {
  styles.header,
  { backgroundColor: colors.surface },
  ]}
- >
- <Pressable onPress={() => router.back()} style={styles.backButton}>
- <MaterialCommunityIcons
- name="arrow-left"
- size={24}
- color={colors.primary}
- />
- </Pressable>
- <View style={{ width: 40 }} />
- <View style={styles.headerRight}>
- <Text style={[styles.lessonCount, { color: colors.primary }]}>
- {courseData.lessons.length}
- </Text>
- <MaterialCommunityIcons
- name="trophy"
- size={22}
- color={colors.primary}
- />
- </View>
- </View>
+  >
+  <Pressable onPress={() => router.back()} style={styles.backButton}>
+  <MaterialCommunityIcons
+    name="arrow-left"
+    size={24}
+    color={colors.primary}
+  />
+  </Pressable>
+  <View style={{ flex: 1 }} />
+  </View>
 
  <ScrollView
  style={styles.scrollView}
@@ -361,14 +408,25 @@ const styles = StyleSheet.create({
  justifyContent: "center",
  paddingHorizontal: 24,
  },
+ notFoundInner: {
+ flex: 1,
+ alignItems: "center",
+ justifyContent: "center",
+ paddingHorizontal: 24,
+ },
  notFoundTitle: {
+ fontFamily: "JetBrainsMono",
  fontSize: 20,
  fontWeight: "700",
  },
  notFoundSubtitle: {
+ fontFamily: "JetBrainsMono",
  fontSize: 16,
  marginTop: 8,
  textAlign: "center",
+ },
+ notFoundButtonWrapper: {
+ marginTop: 24,
  },
  header: {
  flexDirection: "row",
@@ -385,6 +443,7 @@ const styles = StyleSheet.create({
  justifyContent: "center",
  },
  headerTitle: {
+ fontFamily: "JetBrainsMono",
  fontSize: 24,
  fontWeight: "900",
  fontStyle: "italic",
@@ -398,6 +457,7 @@ const styles = StyleSheet.create({
  justifyContent: "flex-end",
  },
  lessonCount: {
+ fontFamily: "JetBrainsMono",
  fontSize: 18,
  fontWeight: "700",
  },
@@ -413,12 +473,14 @@ const styles = StyleSheet.create({
  gap: 16,
  },
  heroLabel: {
+ fontFamily: "JetBrainsMono",
  fontSize: 14,
  fontWeight: "700",
  letterSpacing: 1,
  textTransform: "uppercase",
  },
  heroTitle: {
+ fontFamily: "JetBrainsMono",
  fontSize: 40,
  fontWeight: "700",
  letterSpacing: -0.5,
@@ -434,6 +496,7 @@ const styles = StyleSheet.create({
  alignSelf: "stretch",
  },
  heroDescription: {
+ fontFamily: "JetBrainsMono",
  fontSize: 16,
  fontWeight: "400",
  lineHeight: 24,
@@ -456,12 +519,14 @@ const styles = StyleSheet.create({
  marginBottom: 24,
  },
  sectionTitle: {
+ fontFamily: "JetBrainsMono",
  fontSize: 24,
  fontWeight: "700",
  fontStyle: "italic",
  textTransform: "uppercase",
  },
  sectionSubtitle: {
+ fontFamily: "JetBrainsMono",
  fontSize: 13,
  fontWeight: "400",
  textTransform: "uppercase",
@@ -493,10 +558,12 @@ const styles = StyleSheet.create({
  flex: 1,
  },
  lessonTitle: {
+ fontFamily: "JetBrainsMono",
  fontSize: 18,
  fontWeight: "700",
  },
  lessonModule: {
+ fontFamily: "JetBrainsMono",
  fontSize: 11,
  fontWeight: "700",
  marginTop: 4,
@@ -510,6 +577,7 @@ const styles = StyleSheet.create({
  opacity: 0.3,
  },
  completedLabel: {
+ fontFamily: "JetBrainsMono",
  fontSize: 11,
  fontWeight: "700",
  letterSpacing: 2,
@@ -523,6 +591,7 @@ const styles = StyleSheet.create({
  paddingVertical: 8,
  },
  completedTitle: {
+ fontFamily: "JetBrainsMono",
  fontSize: 16,
  fontWeight: "400",
  textDecorationLine: "line-through",

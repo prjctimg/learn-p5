@@ -74,12 +74,14 @@ const styles = StyleSheet.create({
  fontSize: 20,
  fontWeight: "700",
  },
- title: {
- fontSize: 20,
- fontWeight: "700",
- },
- subtitle: {
- fontSize: 11,
+  title: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 20,
+    fontWeight: "700",
+  },
+  subtitle: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 11,
  marginTop: -2,
  },
 });

@@ -117,16 +117,18 @@ const styles = StyleSheet.create({
  gap: 8,
  flex: 1,
  },
- message: {
- fontSize: 15,
- fontWeight: "600",
- flex: 1,
- },
- actionBtn: {
- paddingLeft: 12,
- },
- actionLabel: {
- fontSize: 13,
+  message: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 15,
+    fontWeight: "600",
+    flex: 1,
+  },
+  actionBtn: {
+    paddingLeft: 12,
+  },
+  actionLabel: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 13,
  fontWeight: "700",
  textTransform: "uppercase",
  letterSpacing: 0.5,

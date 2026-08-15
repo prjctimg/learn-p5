@@ -85,25 +85,26 @@ export function getExerciseHtml(params: {
     src: url(data:font/truetype;charset=utf-8;base64,${JETBRAINS_MONO_BOLD_BASE64}) format('truetype');
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { min-height: 100%; background: ${colors.surface}; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  html, body { min-height: 100%; background: ${colors.surface}; font-family: "JetBrains Mono", monospace; }
 
   .description {
-    padding: 12px 16px;
+    padding: 16px;
     background: ${colors.surfaceContainer};
   }
   .description-title {
-    font-family: "SpaceGrotesk", sans-serif;
+    font-family: "JetBrains Mono", monospace;
     font-weight: 700;
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: ${colors.primary};
-    margin-bottom: 4px;
+    margin-bottom: 8px;
   }
   .description-text {
-    font-size: 16px;
-    line-height: 24px;
+    font-size: 15px;
+    line-height: 22px;
     color: ${colors.onSurfaceVariant};
+    white-space: pre-line;
   }
   .symbol {
     font-weight: 700;
@@ -115,6 +116,7 @@ export function getExerciseHtml(params: {
   .preview-section {
     margin-top: 16px;
     padding: 0 16px;
+    position: relative;
   }
   .preview-label {
     font-family: "JetBrains Mono", monospace;
@@ -125,6 +127,24 @@ export function getExerciseHtml(params: {
     color: ${colors.onSurfaceVariant};
     margin-bottom: 8px;
   }
+  .preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .maximize-btn {
+    background: ${colors.surfaceContainerHigh};
+    border: 1px solid ${colors.outlineVariant};
+    border-radius: 6px;
+    padding: 4px 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
+  .maximize-btn:active { opacity: 0.7; }
   .sketch-box {
     height: 180px;
     background: #000000;
@@ -134,13 +154,17 @@ export function getExerciseHtml(params: {
     align-items: center;
     justify-content: center;
     position: relative;
+    transition: height 0.3s ease;
+  }
+  .sketch-box.expanded {
+    height: 400px;
   }
   .sketch-box canvas { display: block; }
   .run-btn {
     position: absolute;
     bottom: 8px;
     right: 8px;
-    background: #ED225D;
+    background: ${colors.cta};
     color: #fff;
     border: none;
     border-radius: 20px;
@@ -163,12 +187,14 @@ export function getExerciseHtml(params: {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
     cursor: pointer;
     background: none;
     border: none;
     width: 100%;
-    padding: 0;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: ${colors.surfaceContainerHigh};
   }
   .solution-header:active { opacity: 0.7; }
 
@@ -239,13 +265,13 @@ export function getExerciseHtml(params: {
   .cm-editor .cm-gutters { background: ${editorBg}; border-right: 1px solid ${params.colorScheme === 'dark' ? '#292A2E' : '#E5E7EB'}; color: ${params.colorScheme === 'dark' ? '#6B7280' : '#9CA3AF'}; }
   .cm-editor .cm-activeLineGutter { background: ${params.colorScheme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}; }
   .cm-editor .cm-activeLine { background: ${params.colorScheme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}; }
-  .cm-editor .cm-cursor { border-left-color: #ED225D; animation: cm-blink 1s step-end infinite; }
+  .cm-editor .cm-cursor { border-left-color: ${colors.cta}; animation: cm-blink 1s step-end infinite; }
   @keyframes cm-blink { 50% { border-left-color: transparent; } }
   .cm-editor .cm-selectionBackground,
-  .cm-editor.cm-focused .cm-selectionBackground { background: ${params.colorScheme === 'dark' ? 'rgba(237, 34, 93, 0.2)' : 'rgba(237, 34, 93, 0.15)'} !important; }
+  .cm-editor.cm-focused .cm-selectionBackground { background: ${params.colorScheme === 'dark' ? 'rgba(255, 105, 180, 0.2)' : 'rgba(255, 105, 180, 0.15)'} !important; }
   .cm-editor .cm-matchingBracket {
-    background: rgba(237, 34, 93, 0.3);
-    outline: 1px solid #ED225D;
+    background: rgba(255, 105, 180, 0.3);
+    outline: 1px solid ${colors.cta};
   }
   body { padding-bottom: 80px; }
 
@@ -268,23 +294,23 @@ export function getExerciseHtml(params: {
     position: absolute;
     background: ${colors.surfaceContainerHighest};
     color: ${colors.onSurface};
-    border-radius: 12px;
-    padding: 16px 20px;
-    max-width: 300px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    border-radius: 14px;
+    padding: 20px 24px;
+    max-width: 320px;
+    font-family: "JetBrains Mono", monospace;
     font-size: 14px;
-    line-height: 20px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    line-height: 22px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.25);
     z-index: 10000;
   }
   .tut-card-title {
-    font-family: "SpaceGrotesk", sans-serif;
+    font-family: "JetBrains Mono", monospace;
     font-weight: 700;
-    font-size: 13px;
+    font-size: 14px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: ${colors.primary};
-    margin-bottom: 6px;
+    margin-bottom: 8px;
   }
   .tut-card-body {
     color: ${colors.onSurfaceVariant};
@@ -300,14 +326,14 @@ export function getExerciseHtml(params: {
   .tut-arrow-right { border-left-color: ${colors.surfaceContainerHighest}; left: 100%; top: 50%; margin-top: -8px; }
   .tut-dismiss {
     display: inline-block;
-    margin-top: 10px;
-    background: ${colors.primary};
+    margin-top: 12px;
+    background: ${colors.cta};
     color: ${colors.onPrimary};
     border: none;
-    border-radius: 6px;
-    padding: 6px 16px;
+    border-radius: 8px;
+    padding: 8px 20px;
     font-family: "JetBrains Mono", monospace;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
     text-transform: uppercase;
     cursor: pointer;
@@ -326,19 +352,26 @@ ${
   params.solution
     ? `<div class="solution-section" id="solution-section">
   <button class="solution-header" id="solution-toggle">
-    <span class="preview-label" style="margin-bottom:0">Target Solution</span>
-    <span class="solution-chevron" id="solution-chevron">&#9660;</span>
+    <span class="preview-label" style="margin-bottom:0; font-size:13px; letter-spacing:0.8px; color:${colors.onSurface}">Target Solution</span>
+    <span class="solution-chevron" id="solution-chevron" style="font-size:14px; color:${colors.onSurfaceVariant}">&#9650;</span>
   </button>
-  <div style="position:relative">
-    <div id="solution-sketch" class="sketch-box"></div>
-    <button id="solution-run-btn" class="run-btn">&#9654; Run</button>
+  <div id="solution-content">
+    <div style="position:relative">
+      <div id="solution-sketch" class="sketch-box"></div>
+      <button id="solution-run-btn" class="run-btn">&#9654; Run</button>
+    </div>
   </div>
 </div>`
     : ""
 }
 
 <div class="preview-section">
-  <div class="preview-label">Your Output</div>
+  <div class="preview-header">
+    <div class="preview-label">Your Output</div>
+    <button class="maximize-btn" id="maximize-btn" title="Toggle fullscreen preview">
+      <span id="maximize-icon" style="font-size:16px; color:${colors.onSurfaceVariant}">&#x26F6;</span>
+    </button>
+  </div>
   <div id="user-sketch" class="sketch-box"></div>
 </div>
 
@@ -483,6 +516,55 @@ var p5FnPlugin = ViewPlugin.fromClass(P5FnPlugin, {
 
 var vimEnabled = false;
 
+var p5Theme = EditorView.theme({
+  '&': { backgroundColor: '${editorBg}', color: '${fg}' },
+  '.cm-content': { caretColor: '${colors.cta}', fontFamily: "'JetBrains Mono', monospace" },
+  '.cm-gutters': { backgroundColor: '${editorBg}', color: '${gutterFg}', borderRight: '1px solid ${gutterBorder}' },
+  '.cm-activeLineGutter': { backgroundColor: '${activeBg}' },
+  '.cm-activeLine': { backgroundColor: '${activeBg}' },
+  '.cm-cursor': { borderLeft: '2px solid ${colors.cta}' },
+  '.cm-selectionBackground': { backgroundColor: '${selBg}' },
+  '.cm-matchingBracket': { backgroundColor: 'rgba(255, 105, 180, 0.3)', outline: '1px solid ${colors.cta}' },
+  '.cm-p5-fn': { fontWeight: '600' },
+});
+
+var p5Highlight = HighlightStyle.define([
+  { tag: tags.keyword, color: '${kwColor}' },
+  { tag: tags.definitionKeyword, color: '${kwColor}', fontWeight: 'bold' },
+  { tag: tags.moduleKeyword, color: '${kwColor}' },
+  { tag: tags.controlKeyword, color: '${kwColor}' },
+  { tag: tags.operator, color: '${opColor}' },
+  { tag: tags.arithmeticOperator, color: '${opColor}' },
+  { tag: tags.logicOperator, color: '${opColor}' },
+  { tag: tags.compareOperator, color: '${opColor}' },
+  { tag: tags.punctuation, color: '${opColor}' },
+  { tag: tags.separator, color: '${opColor}' },
+  { tag: tags.brace, color: '${opColor}' },
+  { tag: tags.bracket, color: '${opColor}' },
+  { tag: tags.paren, color: '${opColor}' },
+  { tag: tags.number, color: '${numColor}' },
+  { tag: tags.string, color: '${strColor}' },
+  { tag: tags.bool, color: '${numColor}' },
+  { tag: tags.null, color: '${numColor}' },
+  { tag: tags.variableName, color: '${fg}' },
+  { tag: tags.definition(tags.variableName), color: '${fnColor}' },
+  { tag: tags.function(tags.variableName), color: '${fnColor}' },
+  { tag: tags.definition(tags.function(tags.variableName)), color: '${fnColor}' },
+  { tag: tags.propertyName, color: '${fnColor}' },
+  { tag: tags.attributeName, color: '${fnColor}' },
+  { tag: tags.labelName, color: '${fnColor}' },
+  { tag: tags.comment, color: '${commentColor}', fontStyle: 'italic' },
+  { tag: tags.self, color: '${kwColor}' },
+  { tag: tags.typeName, color: '${typeColor}' },
+  { tag: tags.className, color: '${typeColor}' },
+  { tag: tags.standard(tags.tagName), color: '${kwColor}' },
+  { tag: tags.meta, color: '${fnColor}' },
+  { tag: tags.invalid, color: '${kwColor}' },
+  { tag: tags.modifier, color: '${kwColor}' },
+  { tag: tags.constant(tags.variableName), color: '${constColor}' },
+  { tag: tags.special(tags.variableName), color: '${constColor}' },
+]);
+
 function getExtensions() {
   var exts = [
     basicSetup,
@@ -567,55 +649,6 @@ function initEditorView(code) {
 
 function initEditor() {
   try {
-    const p5Theme = EditorView.theme({
-      '&': { backgroundColor: '${editorBg}', color: '${fg}' },
-      '.cm-content': { caretColor: '#ED225D', fontFamily: "'JetBrains Mono', monospace" },
-      '.cm-gutters': { backgroundColor: '${editorBg}', color: '${gutterFg}', borderRight: '1px solid ${gutterBorder}' },
-      '.cm-activeLineGutter': { backgroundColor: '${activeBg}' },
-      '.cm-activeLine': { backgroundColor: '${activeBg}' },
-      '.cm-cursor': { borderLeft: '2px solid #ED225D' },
-      '.cm-selectionBackground': { backgroundColor: '${selBg}' },
-      '.cm-matchingBracket': { backgroundColor: 'rgba(237, 34, 93, 0.3)', outline: '1px solid #ED225D' },
-      '.cm-p5-fn': { fontWeight: '600' },
-    });
-
-    const p5Highlight = HighlightStyle.define([
-      { tag: tags.keyword, color: '${kwColor}' },
-      { tag: tags.definitionKeyword, color: '${kwColor}', fontWeight: 'bold' },
-      { tag: tags.moduleKeyword, color: '${kwColor}' },
-      { tag: tags.controlKeyword, color: '${kwColor}' },
-      { tag: tags.operator, color: '${opColor}' },
-      { tag: tags.arithmeticOperator, color: '${opColor}' },
-      { tag: tags.logicOperator, color: '${opColor}' },
-      { tag: tags.compareOperator, color: '${opColor}' },
-      { tag: tags.punctuation, color: '${opColor}' },
-      { tag: tags.separator, color: '${opColor}' },
-      { tag: tags.brace, color: '${opColor}' },
-      { tag: tags.bracket, color: '${opColor}' },
-      { tag: tags.paren, color: '${opColor}' },
-      { tag: tags.number, color: '${numColor}' },
-      { tag: tags.string, color: '${strColor}' },
-      { tag: tags.bool, color: '${numColor}' },
-      { tag: tags.null, color: '${numColor}' },
-      { tag: tags.variableName, color: '${fg}' },
-      { tag: tags.definition(tags.variableName), color: '${fnColor}' },
-      { tag: tags.function(tags.variableName), color: '${fnColor}' },
-      { tag: tags.definition(tags.function(tags.variableName)), color: '${fnColor}' },
-      { tag: tags.propertyName, color: '${fnColor}' },
-      { tag: tags.attributeName, color: '${fnColor}' },
-      { tag: tags.labelName, color: '${fnColor}' },
-      { tag: tags.comment, color: '${commentColor}', fontStyle: 'italic' },
-      { tag: tags.self, color: '${kwColor}' },
-      { tag: tags.typeName, color: '${typeColor}' },
-      { tag: tags.className, color: '${typeColor}' },
-      { tag: tags.standard(tags.tagName), color: '${kwColor}' },
-      { tag: tags.meta, color: '${fnColor}' },
-      { tag: tags.invalid, color: '${kwColor}' },
-      { tag: tags.modifier, color: '${kwColor}' },
-      { tag: tags.constant(tags.variableName), color: '${constColor}' },
-      { tag: tags.special(tags.variableName), color: '${constColor}' },
-    ]);
-
     initEditorView(INITIAL_CODE);
     view.dom.addEventListener('mousedown', function(e) {
       e.preventDefault();
@@ -674,7 +707,7 @@ function initEditor() {
     console.error('Editor init failed:', e);
     var editorEl = document.getElementById('editor');
     if (editorEl) {
-      editorEl.innerHTML = '<div style="color:#ED225D;padding:16px;font-family:sans-serif">\\u26A0 Editor failed to load. Check your connection.</div>';
+      editorEl.innerHTML = '<div style="color:#ED225D;padding:16px;font-family:\\"JetBrains Mono\\",monospace">\\u26A0 Editor failed to load. Check your connection.</div>';
     }
     postReady();
     postEditorReady();
@@ -728,7 +761,7 @@ function renderSketch(containerId, code) {
     container.__p5 = new p5(undefined, container);
   } catch(e) {
     console.error('Sketch render error:', e);
-    container.innerHTML = '<div style="color:#ED225D;padding:16px;font-family:sans-serif">\\u26A0 ' + e.message + '</div>';
+    container.innerHTML = '<div style="color:#ED225D;padding:16px;font-family:\\"JetBrains Mono\\",monospace">\\u26A0 ' + e.message + '</div>';
   }
 }
 
@@ -887,12 +920,28 @@ document.querySelectorAll('.symbol').forEach(function(el) {
 var solutionToggle = document.getElementById('solution-toggle');
 if (solutionToggle) {
   solutionToggle.addEventListener('click', function() {
-    var section = document.getElementById('solution-section');
+    var content = document.getElementById('solution-content');
     var chevron = document.getElementById('solution-chevron');
-    if (section) {
-      var isVisible = section.style.display !== 'none';
-      section.style.display = isVisible ? 'none' : '';
+    if (content) {
+      var isVisible = content.style.display !== 'none';
+      content.style.display = isVisible ? 'none' : '';
       if (chevron) chevron.innerHTML = isVisible ? '&#9660;' : '&#9650;';
+    }
+  });
+}
+
+var maximizeBtn = document.getElementById('maximize-btn');
+if (maximizeBtn) {
+  maximizeBtn.addEventListener('click', function() {
+    var sketch = document.getElementById('user-sketch');
+    var icon = document.getElementById('maximize-icon');
+    if (sketch) {
+      var isExpanded = sketch.classList.contains('expanded');
+      sketch.classList.toggle('expanded');
+      if (icon) icon.innerHTML = isExpanded ? '&#x26F6;' : '&#x2715;';
+      if (!isExpanded) {
+        setTimeout(function() { smoothScrollTo(sketch, 300); }, 350);
+      }
     }
   });
 }
@@ -992,11 +1041,11 @@ ${exerciseNumber === 1 ? `
   var btn = document.getElementById('tut-btn');
 
   var steps = [
-    { title: 'Welcome!', body: "Let's draw your first shape \\u2014 a pink ball on a white canvas! Tap to begin.", trigger: 'tap' },
-    { title: 'Code Editor', body: 'Write your p5.js code here. Try typing or use the custom keyboard below.', trigger: 'edit', sel: '.editor-section', dir: 'above' },
-    { title: 'Run Button', body: 'Press the Run button above to see your sketch output.', trigger: 'run', sel: '.preview-section', dir: 'above' },
-    { title: 'Preview', body: 'Your sketch appears here. When it matches the solution, you complete the exercise!', trigger: 'preview', sel: '#user-sketch', dir: 'above' },
-    { title: "You're Ready!", body: 'Now complete the exercise to continue. Good luck!', trigger: 'tap' },
+    { title: 'Welcome!', body: "Let's draw your first shape \\u2014 a pink ball on a white canvas! This exercise will walk you through the interface.", trigger: 'tap', btnLabel: "Let's go!" },
+    { title: 'Code Editor', body: 'This is where you write your p5.js code. The code below already draws a circle — try running it first!', trigger: 'edit', sel: '.editor-section', dir: 'above' },
+    { title: 'Run Button', body: 'Tap the Run button to execute your code and see the result in the preview area.', trigger: 'run', sel: '.preview-section', dir: 'above' },
+    { title: 'Preview', body: 'Your sketch renders here. When your output matches the target solution, you complete the exercise!', trigger: 'preview', sel: '#user-sketch', dir: 'above' },
+    { title: "You're Ready!", body: 'The code already solves this exercise — tap Run to complete it. Try modifying the values to explore!', trigger: 'tap', btnLabel: 'Got it' },
   ];
 
   function show(i) {
@@ -1009,7 +1058,7 @@ ${exerciseNumber === 1 ? `
       card.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center';
       cut.style.display = 'none';
       btn.style.display = 'inline-block';
-      btn.textContent = i === 0 ? "Let's start!" : 'Got it';
+      btn.textContent = s.btnLabel || (i === 0 ? "Let's start!" : 'Got it');
     } else {
       var el = document.querySelector(s.sel);
       if (!el) return;

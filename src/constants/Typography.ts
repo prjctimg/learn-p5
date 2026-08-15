@@ -23,17 +23,17 @@ export const Typography = {
   },
   bodySmall: {
     fontFamily: Fonts.body,
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: "400" as const,
   },
   label: {
     fontFamily: Fonts.label,
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "600" as const,
   },
   labelSmall: {
     fontFamily: Fonts.label,
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "600" as const,
   },
   mono: {
@@ -43,12 +43,12 @@ export const Typography = {
   },
   monoSmall: {
     fontFamily: Fonts.mono,
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "400" as const,
   },
   monoLabel: {
     fontFamily: Fonts.mono,
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "700" as const,
   },
 } as const;

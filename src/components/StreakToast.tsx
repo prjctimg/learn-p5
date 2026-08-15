@@ -206,18 +206,21 @@ const styles = StyleSheet.create({
  textWrap: {
  flex: 1,
  },
- title: {
- fontSize: 15,
- fontWeight: "700",
- },
- subtitle: {
- fontSize: 12,
+  title: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 15,
+    fontWeight: "700",
+  },
+  subtitle: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 12,
  marginTop: 1,
  },
- count: {
- fontSize: 13,
- fontWeight: "700",
- },
+  count: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 13,
+    fontWeight: "700",
+  },
  progressOuter: {
  height: 8,
  borderRadius: 9999,
