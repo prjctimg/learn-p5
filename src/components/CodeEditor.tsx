@@ -58,7 +58,7 @@ const createStyles = (colors: Record<string, string>) =>
   StyleSheet.create({
     hiddenInput: {
       fontFamily: "JetBrainsMono, monospace",
-      fontSize: 13,
+      fontSize: 15,
       lineHeight: LINE_HEIGHT,
       color: "transparent",
       position: "absolute",
@@ -83,8 +83,6 @@ const createStyles = (colors: Record<string, string>) =>
     gutter: {
       paddingRight: 12,
       marginRight: 12,
-      borderRightWidth: 1,
-      borderColor: colors.outlineVariant,
     },
     gutterLine: {
       flexDirection: "row",
@@ -92,7 +90,7 @@ const createStyles = (colors: Record<string, string>) =>
       justifyContent: "flex-end",
     },
     gutterNumber: {
-      fontSize: 10,
+      fontSize: 11,
       fontFamily: "JetBrainsMono",
       color: colors.onSurfaceVariant,
       opacity: 0.4,
@@ -110,7 +108,7 @@ const createStyles = (colors: Record<string, string>) =>
     },
     codeText: {
       fontFamily: "JetBrainsMono",
-      fontSize: 13,
+      fontSize: 15,
       lineHeight: 13,
     },
     runButton: {

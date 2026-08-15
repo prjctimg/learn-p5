@@ -68,7 +68,7 @@ export default function Learn() {
               </Text>
             </View>
           ) : error ? (
-            <View style={[styles.errorContainer, { backgroundColor: colors.error + "1A", borderColor: colors.error + "4D" }]}>
+            <View style={[styles.errorContainer, { backgroundColor: colors.error + "1A" }]}>
               <Text style={[styles.errorText, { color: colors.error }]}>
                 Couldn&apos;t load courses: {error}
               </Text>
@@ -99,18 +99,18 @@ const styles = StyleSheet.create({
     paddingTop: 24,
   },
   heading: {
-    fontFamily: "SpaceGrotesk",
-    fontSize: 48,
+    fontFamily: "JetBrainsMono",
+    fontSize: 32,
     fontWeight: "900",
     letterSpacing: -0.5,
   },
   subtitle: {
-    fontFamily: "Inter",
+    fontFamily: "JetBrainsMono",
     fontSize: 16,
     marginTop: 8,
   },
   sectionTitle: {
-    fontFamily: "SpaceGrotesk",
+    fontFamily: "JetBrainsMono",
     fontSize: 24,
     fontWeight: "700",
     marginTop: 32,
@@ -124,19 +124,18 @@ const styles = StyleSheet.create({
     paddingVertical: 48,
   },
   emptyText: {
-    fontFamily: "Inter",
-    fontSize: 13,
+    fontFamily: "JetBrainsMono",
+    fontSize: 16,
   },
   errorContainer: {
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 24,
     alignItems: "center",
-    borderWidth: 1,
   },
   errorText: {
-    fontFamily: "Inter",
-    fontSize: 13,
+    fontFamily: "JetBrainsMono",
+    fontSize: 16,
     textAlign: "center",
   },
 });

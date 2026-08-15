@@ -24,3 +24,17 @@ export interface P5Symbol {
   parameters: { name: string; type: string; description: string }[];
   url: string;
 }
+
+export interface CourseManifest {
+  slug: string;
+  title: string;
+  moduleName: string;
+  description: string;
+  lessons: string[];
+}
+
+export interface LessonFrontmatter {
+  id: string;
+  title: string;
+  symbols: string[];
+}

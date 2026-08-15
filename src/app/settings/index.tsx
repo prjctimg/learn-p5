@@ -6,6 +6,7 @@ import * as Notifications from "expo-notifications";
 import Header from "../../components/Header";
 import { useThemeContext } from "../../components/ThemeProvider";
 import { Colors } from "../../constants/Colors";
+import { APP_VERSION } from "../../constants/Version";
 
 const SETTINGS_KEYS = {
   dailyReminder: "setting_dailyReminder",
@@ -77,7 +78,7 @@ export default function Settings() {
         <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
           Appearance
         </Text>
-        <View style={[styles.card, { backgroundColor: colors.surfaceDim, borderColor: colors.outline }]}>
+        <View style={[styles.card, { backgroundColor: colors.surfaceDim }]}>
           <View style={styles.cardRow}>
             <View style={styles.flexChild}>
               <Text style={[styles.settingTitle, { color: colors.onSurface }]}>
@@ -99,8 +100,8 @@ export default function Settings() {
         <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: 32 }]}>
           Learning
         </Text>
-        <View style={[styles.card, { backgroundColor: colors.surfaceDim, borderColor: colors.outline }]}>
-          <View style={[styles.cardRow, { borderBottomWidth: 1, borderColor: colors.outline + "33" }]}>
+        <View style={[styles.card, { backgroundColor: colors.surfaceDim }]}>
+          <View style={styles.cardRow}>
             <View style={styles.flexChild}>
               <Text style={[styles.settingTitle, { color: colors.onSurface }]}>
                 Daily Reminder
@@ -141,7 +142,7 @@ export default function Settings() {
           onPress={openFeedback}
           style={({ pressed }) => [
             styles.feedbackButton,
-            { backgroundColor: colors.surfaceDim, borderColor: colors.outline },
+            { backgroundColor: colors.surfaceDim },
             pressed && styles.feedbackButtonActive,
           ]}
           accessibilityRole="button"
@@ -158,13 +159,15 @@ export default function Settings() {
         <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: 32 }]}>
           About
         </Text>
-        <View style={[styles.card, { backgroundColor: colors.surfaceDim, borderColor: colors.outline, paddingHorizontal: 16, paddingVertical: 16 }]}>
-          <Text style={[styles.settingTitle, { color: colors.onSurface }]}>
-            Learn p5.js
-          </Text>
-          <Text style={[styles.versionText, { color: colors.textSecondary }]}>
-            Version 0.2.5
-          </Text>
+        <View style={[styles.card, { backgroundColor: colors.surfaceDim }]}>
+          <View style={{ paddingHorizontal: 16, paddingVertical: 16 }}>
+            <Text style={[styles.settingTitle, { color: colors.onSurface }]}>
+              Learn p5.js
+            </Text>
+            <Text style={[styles.versionText, { color: colors.textSecondary }]}>
+              Version {APP_VERSION}
+            </Text>
+          </View>
         </View>
       </ScrollView>
     </View>
@@ -181,7 +184,7 @@ const styles = StyleSheet.create({
     paddingTop: 24,
   },
   sectionTitle: {
-    fontFamily: "Inter",
+    fontFamily: "JetBrainsMono",
     fontSize: 11,
     textTransform: "uppercase",
     letterSpacing: 1,
@@ -190,7 +193,6 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 12,
     overflow: "hidden",
-    borderWidth: 2,
   },
   cardRow: {
     flexDirection: "row",
@@ -203,19 +205,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   settingTitle: {
-    fontFamily: "SpaceGrotesk",
+    fontFamily: "JetBrainsMono",
     fontSize: 16,
     fontWeight: "700",
   },
   settingDescription: {
-    fontFamily: "Inter",
+    fontFamily: "JetBrainsMono",
     fontSize: 11,
     marginTop: 2,
   },
   feedbackButton: {
     borderRadius: 12,
     overflow: "hidden",
-    borderWidth: 2,
     paddingHorizontal: 16,
     paddingVertical: 16,
   },

@@ -32,6 +32,21 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Install NDK
+        run: |
+          for i in 1 2 3; do
+            echo "Attempt $i to install NDK 27.1.12297006..."
+            yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
+              --install "ndk;27.1.12297006" || { echo "SDK manager failed"; sleep 10; continue; }
+            NDK_DIR="$ANDROID_SDK_ROOT/ndk/27.1.12297006"
+            if [ -d "$NDK_DIR" ]; then
+              echo "NDK installed successfully at $NDK_DIR"
+              break
+            fi
+            echo "NDK directory not found, retrying..."
+            sleep 10
+          done
+
       - name: Prebuild native project
         run: npx expo prebuild --platform android --clean
 

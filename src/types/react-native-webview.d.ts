@@ -11,6 +11,14 @@ declare module "react-native-webview" {
     headers?: Record<string, string>;
   }
 
+  interface WebViewErrorEvent {
+    nativeEvent: {
+      code: number;
+      description: string;
+      domain?: string;
+    };
+  }
+
   interface WebViewProps extends ViewProps {
     source: WebViewSourceHtml | WebViewSourceUri;
     javaScriptEnabled?: boolean;
@@ -19,6 +27,7 @@ declare module "react-native-webview" {
     scrollEnabled?: boolean;
     bounces?: boolean;
     allowFileAccess?: boolean;
+    onError?: (event: WebViewErrorEvent) => void;
   }
 
   export class WebView extends React.Component<WebViewProps> {}

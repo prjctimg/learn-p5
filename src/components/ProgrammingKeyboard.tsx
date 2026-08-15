@@ -1,65 +1,125 @@
+import { useState, useCallback } from "react";
 import { View, Text, Pressable, ScrollView, StyleSheet } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useThemeContext } from "./ThemeProvider";
 import { Colors } from "../constants/Colors";
 
-const symbols = [
-  "(", ")", "{", "}", "[", "]", ";", ",", "<", ">", "=", "+", "-", "*", "/", ".",
+interface P5FunctionDef {
+  label: string;
+  insert: string;
+  paramTypes: ("string" | "number" | "array" | "color" | "boolean")[];
+}
+
+const p5Functions: P5FunctionDef[] = [
+  { label: "setup", insert: "function setup() {\n  \n}", paramTypes: [] },
+  { label: "draw", insert: "function draw() {\n  \n}", paramTypes: [] },
+  { label: "createCanvas", insert: "createCanvas(400, 400)", paramTypes: ["number", "number"] },
+  { label: "background", insert: "background(220)", paramTypes: ["number", "string"] },
+  { label: "fill", insert: "fill(255, 255, 255)", paramTypes: ["number", "string"] },
+  { label: "circle", insert: "circle(200, 200, 50)", paramTypes: ["number", "number", "number"] },
+  { label: "stroke", insert: "stroke(0)", paramTypes: ["number", "string"] },
+  { label: "strokeWeight", insert: "strokeWeight(4)", paramTypes: ["number"] },
+  { label: "line", insert: "line(0, 0, 400, 400)", paramTypes: ["number", "number", "number", "number"] },
+  { label: "rect", insert: "rect(100, 100, 200, 200)", paramTypes: ["number", "number", "number", "number"] },
+  { label: "ellipse", insert: "ellipse(200, 200, 300, 150)", paramTypes: ["number", "number", "number", "number"] },
+  { label: "noStroke", insert: "noStroke()", paramTypes: [] },
 ];
 
-const p5Functions = [
-  "setup", "draw", "createCanvas", "background", "fill",
-  "circle", "stroke", "line", "rect", "ellipse",
+type PairedSymbol = {
+  open: string;
+  close: string;
+  display: string;
+  hintTrigger: "string" | "array" | null;
+};
+
+const pairedSymbols: PairedSymbol[] = [
+  { open: "(", close: ")", display: "( )", hintTrigger: null },
+  { open: "{", close: "}", display: "{ }", hintTrigger: null },
+  { open: "[", close: "]", display: "[ ]", hintTrigger: "array" },
+  { open: "<", close: ">", display: "< >", hintTrigger: null },
+  { open: '"', close: '"', display: '" "', hintTrigger: "string" },
+];
+
+const singleSymbols = [
+  ";", ",", "=", "+", "-", "*", "/", ".",
 ];
 
 interface ProgrammingKeyboardProps {
   onInsert: (text: string) => void;
+  exerciseSymbols?: string[];
 }
 
-function Key({ label, onPress }: { label: string; onPress: () => void }) {
+export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [] }: ProgrammingKeyboardProps) {
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const [hintType, setHintType] = useState<"string" | "array" | null>(null);
+
+  const handleFunctionPress = useCallback((fn: P5FunctionDef) => {
+    onInsert(fn.insert);
+    const hasString = fn.paramTypes.some((p) => p === "string");
+    const hasArray = fn.paramTypes.some((p) => p === "array");
+    if (hasString) {
+      setHintType("string");
+    } else if (hasArray) {
+      setHintType("array");
+    } else {
+      setHintType(null);
+    }
+  }, [onInsert]);
+
+  const handleSinglePress = useCallback((sym: string) => {
+    setHintType(null);
+    onInsert(sym);
+  }, [onInsert]);
+
+  const handlePairedPress = useCallback((pair: PairedSymbol) => {
+    setHintType(null);
+    onInsert(pair.open + pair.close);
+  }, [onInsert]);
+
+  const handleExercisePress = useCallback((sym: string) => {
+    setHintType(null);
+    onInsert(sym);
+  }, [onInsert]);
 
   return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.key,
-        { backgroundColor: pressed ? colors.primaryContainer : colors.surfaceContainerHigh, borderColor: colors.outlineVariant },
-      ]}
-      accessibilityRole="button"
-      accessibilityLabel={`Insert ${label}`}
-    >
-      <Text style={[styles.keyText, { color: colors.primaryFixedDim }]}>
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
-export default function ProgrammingKeyboard({ onInsert }: ProgrammingKeyboardProps) {
-  const { colorScheme } = useThemeContext();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
-
-  return (
-    <View style={[styles.container, { backgroundColor: colors.surfaceContainerLow, borderTopColor: colors.outlineVariant }]}>
+    <View style={[styles.container, { backgroundColor: colors.surfaceContainerLow }]}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        style={[styles.scrollView, { borderBottomColor: colors.outlineVariant }]}
+        style={styles.symbolsRow}
+        contentContainerStyle={styles.symbolsContent}
       >
-        <Pressable
-          onPress={() => {}}
-          style={[styles.keyboardIconButton, { backgroundColor: colors.primaryContainer + "33" }]}
-          accessibilityRole="button"
-          accessibilityLabel="Keyboard"
-        >
+        <View style={[styles.keyboardIcon, { backgroundColor: colors.primaryContainer + "33" }]}>
           <MaterialCommunityIcons name="keyboard-outline" size={20} color="#ED225D" />
-        </Pressable>
-        {symbols.map((sym) => (
+        </View>
+        {pairedSymbols.map((pair) => {
+          const hinted = pair.hintTrigger && pair.hintTrigger === hintType;
+          return (
+            <Pressable
+              key={pair.display}
+              onPress={() => handlePairedPress(pair)}
+              style={({ pressed }) => [
+                styles.symbolButton,
+                {
+                  backgroundColor: hinted
+                    ? pressed ? colors.primaryContainer : colors.primaryContainer + "4D"
+                    : pressed ? colors.outlineVariant : colors.surfaceContainer,
+                },
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel={pair.display}
+            >
+              <Text style={[styles.symbolText, { color: hinted ? colors.primary : colors.onSurfaceVariant }]}>
+                {pair.display}
+              </Text>
+            </Pressable>
+          );
+        })}
+        {singleSymbols.map((sym) => (
           <Pressable
             key={sym}
-            onPress={() => onInsert(sym)}
+            onPress={() => handleSinglePress(sym)}
             style={({ pressed }) => [
               styles.symbolButton,
               { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
@@ -74,9 +134,43 @@ export default function ProgrammingKeyboard({ onInsert }: ProgrammingKeyboardPro
         ))}
       </ScrollView>
 
+      {exerciseSymbols.length > 0 && (
+        <View style={styles.exerciseRow}>
+          {exerciseSymbols.map((sym) => (
+            <Pressable
+              key={sym}
+              onPress={() => handleExercisePress(sym)}
+              style={({ pressed }) => [
+                styles.exerciseKey,
+                { backgroundColor: pressed ? colors.primaryContainer : colors.surfaceContainer },
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel={sym}
+            >
+              <Text style={[styles.exerciseKeyText, { color: colors.primary }]}>
+                {sym}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      )}
+
       <View style={styles.functionsContainer}>
         {p5Functions.map((fn) => (
-          <Key key={fn} label={fn} onPress={() => onInsert(fn)} />
+          <Pressable
+            key={fn.label}
+            onPress={() => handleFunctionPress(fn)}
+            style={({ pressed }) => [
+              styles.functionKey,
+              { backgroundColor: pressed ? colors.primaryContainer : colors.surfaceContainerHigh },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel={fn.label}
+          >
+            <Text style={[styles.functionKeyText, { color: colors.primaryFixedDim }]}>
+              {fn.label}
+            </Text>
+          </Pressable>
         ))}
       </View>
     </View>
@@ -85,45 +179,68 @@ export default function ProgrammingKeyboard({ onInsert }: ProgrammingKeyboardPro
 
 const styles = StyleSheet.create({
   container: {
-    height: 256,
-    borderTopWidth: 1,
+    height: 240,
   },
-  scrollView: {
-    borderBottomWidth: 1,
+  symbolsRow: {
+    maxHeight: 44,
   },
-  keyboardIconButton: {
-    flexShrink: 0,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+  symbolsContent: {
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    paddingHorizontal: 8,
+    gap: 4,
   },
-  symbolButton: {
-    flexShrink: 0,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  symbolText: {
-    fontFamily: "JetBrainsMono",
-    fontSize: 16,
-  },
-  key: {
+  keyboardIcon: {
     flexShrink: 0,
     paddingHorizontal: 12,
     paddingVertical: 8,
+    alignItems: "center",
+    justifyContent: "center",
     borderRadius: 4,
-    borderWidth: 1,
   },
-  keyText: {
+  symbolButton: {
+    flexShrink: 0,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 4,
+  },
+  symbolText: {
     fontFamily: "JetBrainsMono",
-    fontSize: 13,
+    fontSize: 18,
   },
-  functionsContainer: {
-    padding: 8,
+  exerciseRow: {
     flexDirection: "row",
     flexWrap: "wrap",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     gap: 6,
+  },
+  exerciseKey: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 4,
+  },
+  exerciseKeyText: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 15,
+    fontWeight: "700",
+  },
+  functionsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    gap: 6,
+  },
+  functionKey: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 4,
+  },
+  functionKeyText: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 15,
   },
 });

@@ -24,7 +24,7 @@ export default function ChallengeCard({
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
   return (
-    <View style={[styles.card, { backgroundColor: colors.surfaceDim, borderColor: colors.outline }]}>
+    <View style={[styles.card, { backgroundColor: colors.surfaceDim }]}>
       <View style={[styles.iconContainer, { backgroundColor: colors.primary + "1A" }]}>
         <Svg width={48} height={48} viewBox="0 0 28 28" fill="none">
           <Path d={asteriskPath} fill={colors.primary} />
@@ -54,7 +54,6 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 12,
     overflow: "hidden",
-    borderWidth: 2,
   },
   iconContainer: {
     alignItems: "center",
@@ -67,19 +66,19 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   title: {
-    fontFamily: "SpaceGrotesk",
+    fontFamily: "JetBrainsMono",
     fontSize: 24,
     fontWeight: "700",
   },
   moduleName: {
-    fontFamily: "Inter",
+    fontFamily: "JetBrainsMono",
     fontSize: 11,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   description: {
-    fontFamily: "Inter",
-    fontSize: 13,
+    fontFamily: "JetBrainsMono",
+    fontSize: 16,
     lineHeight: 20,
   },
   buttonContainer: {

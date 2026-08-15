@@ -2,7 +2,7 @@
   "expo": {
     "name": "learn-p5",
     "slug": "learn-p5",
-    "version": "0.2.5",
+    "version": "0.3.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "learnp5",
@@ -26,25 +26,20 @@
     "plugins": [
       "expo-router",
       [
-        "expo-splash-screen",
-        {
-          "backgroundColor": "#FFFFFF",
-          "android": {
-            "image": "./assets/images/splash-icon.png",
-            "imageWidth": 76
-          }
-        }
-      ],
-      [
         "expo-build-properties",
         {
           "android": {
-            "abiFilters": ["arm64-v8a", "armeabi-v7a"],
+            "abiFilters": [
+              "arm64-v8a",
+              "armeabi-v7a"
+            ],
+            "ndkVersion": "27.1.12297006",
             "useLegacyPackaging": true,
             "enableProguardInReleaseBuilds": true
           }
         }
-      ]
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,
