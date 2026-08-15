@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "learn-p5",
+    "name": "Learn P5",
     "slug": "learn-p5",
-    "version": "0.3.0",
+    "version": "0.4.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "learnp5",
@@ -39,7 +39,8 @@
           }
         }
       ],
-      "expo-font"
+      "expo-font",
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true,
