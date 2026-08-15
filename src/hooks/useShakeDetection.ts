@@ -2,8 +2,8 @@ import { useEffect, useRef, useCallback } from "react";
 import { Accelerometer } from "expo-sensors";
 import * as Haptics from "expo-haptics";
 
-const SHAKE_THRESHOLD = 2.0;
-const SHAKE_COOLDOWN_MS = 800;
+const SHAKE_THRESHOLD = 3.5;
+const SHAKE_COOLDOWN_MS = 1200;
 const UPDATE_INTERVAL_MS = 50;
 const WINDOW_SIZE = 3;
 

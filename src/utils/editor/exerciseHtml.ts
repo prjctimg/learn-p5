@@ -75,6 +75,8 @@ export function getExerciseHtml(params: {
   const editorBg = themeColors.bg;
   const fontSize = params.codeFontSize ?? 22;
   const instructionHtml = parseInstructionHtml(params.instruction);
+  const tasksJson = JSON.stringify(params.tasks ?? []);
+  const activeTaskIdx = params.activeTaskIndex ?? 0;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -394,7 +396,7 @@ ${
 <script>${p5Source}</script>
 <script>${CODEMIRROR_BUNDLE}</script>
 <script>
-${getBridgeScript(params.startingCode, params.solution, themeColors, params.colorScheme, params.exerciseNumber, ctaColor, params.validation, params.wordWrap)}
+${getBridgeScript(params.startingCode, params.solution, themeColors, params.colorScheme, params.exerciseNumber, ctaColor, params.validation, params.wordWrap, tasksJson, activeTaskIdx)}
 </script>
 
 ${params.exerciseNumber === 1 ? `
@@ -412,7 +414,7 @@ ${params.exerciseNumber === 1 ? `
 </html>`;
 }
 
-function getBridgeScript(startingCode: string, solution: string, theme: EditorThemeColors, colorScheme: "light" | "dark", exerciseNumber?: number, ctaColor?: string, validation?: ValidationRule[], wordWrap?: boolean): string {
+function getBridgeScript(startingCode: string, solution: string, theme: EditorThemeColors, colorScheme: "light" | "dark", exerciseNumber?: number, ctaColor?: string, validation?: ValidationRule[], wordWrap?: boolean, tasksJson?: string, activeTaskIdx?: number): string {
   const codeArg = jsString(startingCode);
   const solutionArg = jsString(solution);
   const cta = ctaColor ?? '#FF69B4';
@@ -464,8 +466,8 @@ let view;
 const INITIAL_CODE = ${codeArg};
 const SOLUTION_CODE = ${solutionArg};
 const VALIDATION_RULES = ${JSON.stringify(validation ?? [])};
-const TASKS = ${JSON.stringify(params.tasks ?? [])};
-var ACTIVE_TASK_INDEX = ${params.activeTaskIndex ?? 0};
+const TASKS = ${tasksJson};
+var ACTIVE_TASK_INDEX = ${activeTaskIdx};
 var P5_COMPLETIONS = ${JSON.stringify(P5_FUNCTION_NAMES)};
 
 function p5CompletionSource(context) {

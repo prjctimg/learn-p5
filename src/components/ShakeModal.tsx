@@ -3,14 +3,34 @@ import { View, Text, Pressable, StyleSheet, Animated } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useThemeContext } from "./ThemeProvider";
 
+export interface ShakeAction {
+  icon: string;
+  label: string;
+  onPress: () => void;
+  variant?: "primary" | "secondary" | "ghost";
+}
+
 interface ShakeModalProps {
   visible: boolean;
   onDismiss: () => void;
-  onHint?: () => void;
-  onReset?: () => void;
+  title?: string;
+  subtitle?: string;
+  actions: ShakeAction[];
 }
 
-export default function ShakeModal({ visible, onDismiss, onHint, onReset }: ShakeModalProps) {
+const VARIANT_STYLES = {
+  primary: (bg: string) => ({ backgroundColor: bg }),
+  secondary: (bg: string) => ({ backgroundColor: bg + "33" }),
+  ghost: (_bg: string) => ({ backgroundColor: "transparent" }),
+} as const;
+
+export default function ShakeModal({
+  visible,
+  onDismiss,
+  title = "Quick Actions",
+  subtitle = "What would you like to do?",
+  actions,
+}: ShakeModalProps) {
   const { derivedColors } = useThemeContext();
   const scaleAnim = useRef(new Animated.Value(0.9)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -69,50 +89,40 @@ export default function ShakeModal({ visible, onDismiss, onHint, onReset }: Shak
           />
         </View>
         <Text style={[styles.title, { color: derivedColors.onPrimaryContainer }]}>
-          Shake to...
+          {title}
         </Text>
         <Text style={[styles.subtitle, { color: derivedColors.onPrimaryContainer + "CC" }]}>
-          What would you like to do?
+          {subtitle}
         </Text>
 
         <View style={styles.actions}>
-          {onHint && (
-            <Pressable
-              onPress={onHint}
-              style={({ pressed }) => [
-                styles.actionButton,
-                { backgroundColor: derivedColors.primary },
-                pressed && styles.actionButtonPressed,
-              ]}
-            >
-              <MaterialCommunityIcons name="lightbulb-outline" size={18} color={derivedColors.onPrimary} />
-              <Text style={[styles.actionText, { color: derivedColors.onPrimary }]}>Get Hint</Text>
-            </Pressable>
-          )}
-          {onReset && (
-            <Pressable
-              onPress={onReset}
-              style={({ pressed }) => [
-                styles.actionButton,
-                { backgroundColor: derivedColors.primary + "33" },
-                pressed && styles.actionButtonPressed,
-              ]}
-            >
-              <MaterialCommunityIcons name="restart" size={18} color={derivedColors.primary} />
-              <Text style={[styles.actionText, { color: derivedColors.primary }]}>Reset Code</Text>
-            </Pressable>
-          )}
-          <Pressable
-            onPress={onDismiss}
-            style={({ pressed }) => [
-              styles.actionButton,
-              { backgroundColor: derivedColors.primary + "1A" },
-              pressed && styles.actionButtonPressed,
-            ]}
-          >
-            <MaterialCommunityIcons name="close" size={18} color={derivedColors.onPrimaryContainer} />
-            <Text style={[styles.actionText, { color: derivedColors.onPrimaryContainer }]}>Dismiss</Text>
-          </Pressable>
+          {actions.map((action, i) => {
+            const variant = action.variant ?? (i === 0 ? "primary" : "secondary");
+            const bg = variant === "primary" ? derivedColors.primary : derivedColors.onPrimaryContainer;
+            const textColor = variant === "primary" ? derivedColors.onPrimary : derivedColors.onPrimaryContainer;
+            const variantStyle = VARIANT_STYLES[variant](bg);
+
+            return (
+              <Pressable
+                key={`${action.label}-${i}`}
+                onPress={action.onPress}
+                style={({ pressed }) => [
+                  styles.actionButton,
+                  variantStyle,
+                  pressed && styles.actionButtonPressed,
+                ]}
+              >
+                <MaterialCommunityIcons
+                  name={action.icon as any}
+                  size={18}
+                  color={textColor}
+                />
+                <Text style={[styles.actionText, { color: textColor }]}>
+                  {action.label}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
       </Animated.View>
     </View>
