@@ -1,18 +1,1 @@
-export const importMap: Record<string, string> = {
-  codemirror: "https://cdn.jsdelivr.net/npm/codemirror@6.0.1/+esm",
-  "@codemirror/state": "https://cdn.jsdelivr.net/npm/@codemirror/state@6.5.2/+esm",
-  "@codemirror/view": "https://cdn.jsdelivr.net/npm/@codemirror/view@6.36.5/+esm",
-  "@codemirror/language": "https://cdn.jsdelivr.net/npm/@codemirror/language@6.11.0/+esm",
-  "@codemirror/commands": "https://cdn.jsdelivr.net/npm/@codemirror/commands@6.8.1/+esm",
-  "@codemirror/lang-javascript": "https://cdn.jsdelivr.net/npm/@codemirror/lang-javascript@6.2.3/+esm",
-  "@codemirror/autocomplete": "https://cdn.jsdelivr.net/npm/@codemirror/autocomplete@6.18.6/+esm",
-  "@codemirror/lint": "https://cdn.jsdelivr.net/npm/@codemirror/lint@6.8.5/+esm",
-  "@codemirror/search": "https://cdn.jsdelivr.net/npm/@codemirror/search@6.5.10/+esm",
-  "@lezer/common": "https://cdn.jsdelivr.net/npm/@lezer/common@1.2.3/+esm",
-  "@lezer/lr": "https://cdn.jsdelivr.net/npm/@lezer/lr@1.4.2/+esm",
-  "@lezer/highlight": "https://cdn.jsdelivr.net/npm/@lezer/highlight@1.2.1/+esm",
-  "@lezer/javascript": "https://cdn.jsdelivr.net/npm/@lezer/javascript@1.5.4/+esm",
-  "style-mod": "https://cdn.jsdelivr.net/npm/style-mod@4.1.2/+esm",
-  "w3c-keyname": "https://cdn.jsdelivr.net/npm/w3c-keyname@2.2.8/+esm",
-  crelt: "https://cdn.jsdelivr.net/npm/crelt@1.0.1/+esm",
-};
+// CM is loaded via the embedded IIFE bundle — no import map needed.

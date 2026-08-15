@@ -21,23 +21,25 @@ const PROCESSING_SKETCH = `new p5(function(p) {
   p.setup = function() {
     p.createCanvas(250, 250);
   };
+  var t = 0;
   p.draw = function() {
     var u = p.width / 8;
     p.background(255);
     p.strokeCap(p.SQUARE);
     p.strokeWeight(1.5 * u);
     p.stroke(5, 100, 255);
-    p.bezier(4*u, 1*u, 7*u, 1*u, 7*u, 5*u, 4*u, 5*u);
+    var off = p.sin(t) * u * 0.3;
+    p.bezier(4*u, 1*u, 7*u + off, 1*u + off, 7*u, 5*u, 4*u, 5*u);
     p.stroke(30, 50, 170);
     p.line(1*u, 6*u, 4*u, 2*u);
     p.stroke(130, 175, 255);
     p.line(1*u, 3*u, 2*u, 5*u);
-    p.noLoop();
+    t += 0.03;
   };
 });`;
 
 function buildProcessingHtml(): string {
-  return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><style>*{margin:0;padding:0;box-sizing:border-box}html,body{width:100%;height:100%;overflow:hidden;background:transparent;display:flex;align-items:center;justify-content:center}canvas{display:block}</style></head><body><script>' + p5Source + '<\/script><script>' + PROCESSING_SKETCH.replace(/<\/script>/gi, '<\\/script>') + '<\/script></body></html>';
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><style>*{margin:0;padding:0;box-sizing:border-box}html,body{width:100%;height:100%;overflow:hidden;background:transparent;display:flex;align-items:center;justify-content:center}canvas{display:block}</style></head><body><script>' + p5Source.replace(/<\/script>/gi, '<\\/script>') + '<\/script><script>' + PROCESSING_SKETCH.replace(/<\/script>/gi, '<\\/script>') + '<\/script></body></html>';
 }
 
 export default function About() {

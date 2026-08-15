@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useReducer, useMemo, useCallback } from "react";
 import { View, Text, Pressable, StyleSheet, Keyboard } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -8,6 +8,7 @@ import { WebView } from "react-native-webview";
 import { useDrawerContext } from "../../../contexts/DrawerContext";
 import { useThemeContext } from "../../../components/ThemeProvider";
 import { Colors } from "../../../constants/Colors";
+import { DEFAULTS } from "../../../constants/Defaults";
 import ProgrammingKeyboard from "../../../components/ProgrammingKeyboard";
 import Toast from "../../../components/Toast";
 import { loadExercise, loadCourse } from "../../../utils/courseLoader";
@@ -86,9 +87,21 @@ export default function Exercise() {
   const [keyboardVisible, setKeyboardVisible] = useState(true);
   const [systemKeyboardVisible, setSystemKeyboardVisible] = useState(false);
   const [codeBackground, setCodeBackground] = useState<string | undefined>(undefined);
-  const [codeFontSize, setCodeFontSize] = useState<number>(22);
-  const [keyboardHeight, setKeyboardHeight] = useState<string>("medium");
+  const [codeFontSize, setCodeFontSize] = useState<number>(DEFAULTS.codeFontSize);
+  const [keyboardHeight, setKeyboardHeight] = useState<string>(DEFAULTS.keyboardHeight);
+  const [toastKey, setToastKey] = useState(0);
   const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastActionLabel, setToastActionLabel] = useState<string | undefined>(undefined);
+  const toastActionRef = useRef<(() => void) | undefined>(undefined);
+
+  const showToast = useCallback((message: string, actionLabel?: string, onAction?: () => void) => {
+    setToastMessage(message);
+    setToastActionLabel(actionLabel);
+    toastActionRef.current = onAction;
+    setToastKey((k) => k + 1);
+    setToastVisible(true);
+  }, []);
 
   const exerciseHtml = useMemo(() => {
     if (!state.exercise) return null;
@@ -354,17 +367,19 @@ export default function Exercise() {
     };
   }, []);
 
-  useEffect(() => {
-    AsyncStorage.getItem("setting_codeBackground").then((val) => {
-      if (val) setCodeBackground(val);
-    });
-    AsyncStorage.getItem("setting_codeFontSize").then((val) => {
-      if (val) setCodeFontSize(parseInt(val, 10));
-    });
-    AsyncStorage.getItem("setting_keyboardHeight").then((val) => {
-      if (val) setKeyboardHeight(val);
-    });
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      AsyncStorage.getItem("setting_codeBackground").then((val) => {
+        setCodeBackground(val || undefined);
+      });
+      AsyncStorage.getItem("setting_codeFontSize").then((val) => {
+        setCodeFontSize(val ? parseInt(val, 10) : DEFAULTS.codeFontSize);
+      });
+      AsyncStorage.getItem("setting_keyboardHeight").then((val) => {
+        setKeyboardHeight(val || "medium");
+      });
+    }, [])
+  );
 
   useEffect(() => {
     if (!state.completed || !state.exercise) return;
@@ -379,7 +394,7 @@ export default function Exercise() {
       }
     });
 
-    setToastVisible(true);
+    showToast("✓ Exercise completed!", "Next →", handleToastNext);
 
     loadCourse(course).then((courseData) => {
       if (!courseData) return;
@@ -502,10 +517,11 @@ export default function Exercise() {
       )}
 
       <Toast
+        key={toastKey}
         visible={toastVisible}
-        message="✓ Exercise completed!"
-        actionLabel="Next →"
-        onAction={handleToastNext}
+        message={toastMessage}
+        actionLabel={toastActionLabel}
+        onAction={toastActionRef.current}
         onDismiss={() => setToastVisible(false)}
       />
 
@@ -523,7 +539,7 @@ export default function Exercise() {
           isRunning={state.isRunning}
           keyboardVisible={keyboardVisible}
           usedFunctions={usedFunctions}
-          height={keyboardHeight === "small" ? 180 : keyboardHeight === "tall" ? 320 : 240}
+          height={DEFAULTS.keyboardHeightPixels[keyboardHeight] ?? DEFAULTS.keyboardHeightPixels.medium}
         />
       )}
 

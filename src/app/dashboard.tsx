@@ -1,5 +1,5 @@
-import { useMemo, useState, useCallback } from "react";
-import { View, Text, Pressable, ScrollView, StyleSheet } from "react-native";
+import { useMemo, useState, useCallback, useRef, useEffect } from "react";
+import { View, Text, Pressable, ScrollView, StyleSheet, Animated } from "react-native";
 import { useRouter, useFocusEffect } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useThemeContext } from "../components/ThemeProvider";
@@ -59,6 +59,27 @@ export default function Dashboard() {
 
   const greeting = useMemo(() => getGreeting(), []);
 
+  const progressAnim = useRef(new Animated.Value(0)).current;
+
+  const totalLessons = useMemo(() => {
+    return courses.reduce((sum, c) => sum + c.lessons.length, 0);
+  }, [courses]);
+
+  const progress = totalLessons > 0 ? completedLessons.length / totalLessons : 0;
+
+  useEffect(() => {
+    Animated.timing(progressAnim, {
+      toValue: progress,
+      duration: 800,
+      useNativeDriver: false,
+    }).start();
+  }, [progress, progressAnim]);
+
+  const progressWidth = progressAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0%", "100%"],
+  });
+
   const styles = useMemo(
     () =>
       StyleSheet.create({
@@ -92,7 +113,6 @@ export default function Dashboard() {
         },
         progressBarInner: {
           height: "100%",
-          width: "84%",
           backgroundColor: colors.primary,
           borderRadius: 9999,
         },
@@ -243,11 +263,11 @@ export default function Dashboard() {
           {greeting}, Coder!
         </Text>
         <Text style={styles.subtitle}>
-          Level 3 · 84% to next level
+          {Math.round(progress * 100)}% complete
         </Text>
 
         <View style={styles.progressBarOuter}>
-          <View style={styles.progressBarInner} />
+          <Animated.View style={[styles.progressBarInner, { width: progressWidth }]} />
         </View>
 
         <View style={styles.statsRow}>

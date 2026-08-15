@@ -6,6 +6,7 @@ import Header from "../../components/Header";
 import TimePicker from "../../components/TimePicker";
 import { useThemeContext } from "../../components/ThemeProvider";
 import { Colors } from "../../constants/Colors";
+import { DEFAULTS } from "../../constants/Defaults";
 
 const SETTINGS_KEYS = {
   dailyReminder: "setting_dailyReminder",
@@ -53,9 +54,9 @@ export default function Settings() {
   const [notificationHour, setNotificationHour] = useState(18);
   const [notificationMinute, setNotificationMinute] = useState(0);
   const [showDrawerFab, setShowDrawerFab] = useState(false);
-  const [codeFontSize, setCodeFontSize] = useState(33);
-  const [codeBackground, setCodeBackgroundState] = useState<string>("auto");
-  const [keyboardHeight, setKeyboardHeightState] = useState<string>("medium");
+  const [codeFontSize, setCodeFontSize] = useState(DEFAULTS.codeFontSize);
+  const [codeBackground, setCodeBackgroundState] = useState<string>(DEFAULTS.codeBackground);
+  const [keyboardHeight, setKeyboardHeightState] = useState<string>(DEFAULTS.keyboardHeight);
 
   useEffect(() => {
     AsyncStorage.multiGet([
@@ -128,7 +129,7 @@ export default function Settings() {
   };
 
   const changeCodeFontSize = async (delta: number) => {
-    const newSize = Math.min(48, Math.max(14, codeFontSize + delta));
+    const newSize = Math.min(DEFAULTS.codeFontSizeMax, Math.max(DEFAULTS.codeFontSizeMin, codeFontSize + delta));
     setCodeFontSize(newSize);
     await AsyncStorage.setItem(SETTINGS_KEYS.codeFontSize, newSize.toString());
   };
@@ -143,11 +144,7 @@ export default function Settings() {
     await AsyncStorage.setItem(SETTINGS_KEYS.keyboardHeight, value);
   };
 
-  const keyboardHeightPixels: Record<string, number> = {
-    small: 180,
-    medium: 240,
-    tall: 320,
-  };
+  const keyboardHeightPixels = DEFAULTS.keyboardHeightPixels;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.surface }]}>

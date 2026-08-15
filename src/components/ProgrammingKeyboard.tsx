@@ -6,47 +6,7 @@ import { Colors } from "../constants/Colors";
 import { Spacing } from "../constants/Spacing";
 import { Typography } from "../constants/Typography";
 import { P5_SYMBOLS } from "../data/p5Symbols";
-
-interface P5FunctionDef {
-  label: string;
-  insert: string;
-  paramTypes: ("string" | "number" | "array" | "color" | "boolean")[];
-  disabled?: boolean;
-}
-
-const p5Functions: P5FunctionDef[] = [
-  { label: "setup", insert: "function setup() {\n  \n}", paramTypes: [] },
-  { label: "draw", insert: "function draw() {\n  \n}", paramTypes: [] },
-  { label: "createCanvas", insert: "createCanvas()", paramTypes: ["number", "number"] },
-  { label: "background", insert: "background()", paramTypes: ["number", "string"] },
-  { label: "fill", insert: "fill()", paramTypes: ["number", "string"] },
-  { label: "circle", insert: "circle()", paramTypes: ["number", "number", "number"] },
-  { label: "stroke", insert: "stroke()", paramTypes: ["number", "string"] },
-  { label: "strokeWeight", insert: "strokeWeight()", paramTypes: ["number"] },
-  { label: "line", insert: "line()", paramTypes: ["number", "number", "number", "number"] },
-  { label: "rect", insert: "rect()", paramTypes: ["number", "number", "number", "number"] },
-  { label: "ellipse", insert: "ellipse()", paramTypes: ["number", "number", "number", "number"] },
-  { label: "noStroke", insert: "noStroke()", paramTypes: [] },
-];
-
-type PairedSymbol = {
-  open: string;
-  close: string;
-  display: string;
-  hintTrigger: "string" | "array" | null;
-};
-
-const pairedSymbols: PairedSymbol[] = [
-  { open: "(", close: ")", display: "( )", hintTrigger: null },
-  { open: "{", close: "}", display: "{ }", hintTrigger: null },
-  { open: "[", close: "]", display: "[ ]", hintTrigger: "array" },
-  { open: "<", close: ">", display: "< >", hintTrigger: null },
-  { open: '"', close: '"', display: '" "', hintTrigger: "string" },
-];
-
-const singleSymbols = [
-  ".", ";", ",", "=", "+", "-", "*", "/",
-];
+import { p5Functions, p5FunctionLabels, pairedSymbols, singleSymbols, P5FunctionDef, PairedSymbol } from "../data/keyboardLayout";
 
 interface ProgrammingKeyboardProps {
   onInsert: (text: string, cursorOffset?: number) => void;
@@ -64,24 +24,23 @@ interface ProgrammingKeyboardProps {
   height?: number;
 }
 
-export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], onToggleKeyboard, onRequestSystemKeyboard, onBackspace, onNewline, onFormat, onRun, isRunning, onCursorMove, keyboardVisible = true, usedFunctions = [], height = 240 }: ProgrammingKeyboardProps) {
+export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], onToggleKeyboard, onRequestSystemKeyboard, onBackspace, onNewline, onFormat, onRun, isRunning, onCursorMove, keyboardVisible = true, usedFunctions = [], height = 280 }: ProgrammingKeyboardProps) {
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
   const [hintType, setHintType] = useState<"string" | "array" | null>(null);
   const [popupSymbol, setPopupSymbol] = useState<string | null>(null);
-  const popupScale = useRef(new Animated.Value(0)).current;
+  const popupAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (popupSymbol) {
-      popupScale.setValue(0);
-      Animated.spring(popupScale, {
+      popupAnim.setValue(0);
+      Animated.timing(popupAnim, {
         toValue: 1,
-        damping: 8,
-        stiffness: 200,
+        duration: 120,
         useNativeDriver: true,
       }).start();
     }
-  }, [popupSymbol, popupScale]);
+  }, [popupSymbol, popupAnim]);
 
   const handleFunctionPress = useCallback((fn: P5FunctionDef) => {
     const parenIndex = fn.insert.indexOf("()");
@@ -113,6 +72,10 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
     onInsert(sym + "()", 1);
   }, [onInsert]);
 
+  const handleExerciseLongPress = useCallback((sym: string) => {
+    setPopupSymbol(sym);
+  }, []);
+
   return (
     <View style={[styles.container, { backgroundColor: colors.surfaceContainerLow, height }]}>
       <View style={styles.toolbarRow}>
@@ -143,6 +106,28 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
             accessibilityLabel="Format code"
           >
             <MaterialCommunityIcons name="code-tags" size={18} color={colors.onSurfaceVariant} />
+          </Pressable>
+          <Pressable
+            onPress={onBackspace}
+            style={({ pressed }) => [
+              styles.keyboardIcon,
+              { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Backspace"
+          >
+            <MaterialCommunityIcons name="backspace" size={18} color={colors.onSurfaceVariant} />
+          </Pressable>
+          <Pressable
+            onPress={onNewline}
+            style={({ pressed }) => [
+              styles.keyboardIcon,
+              { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="New line"
+          >
+            <MaterialCommunityIcons name="keyboard-return" size={18} color={colors.onSurfaceVariant} />
           </Pressable>
           {pairedSymbols.map((pair) => {
             const hinted = pair.hintTrigger && pair.hintTrigger === hintType;
@@ -202,10 +187,11 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
 
       {exerciseSymbols.length > 0 && (
         <View style={styles.exerciseRow}>
-          {exerciseSymbols.map((sym) => (
+          {exerciseSymbols.filter(sym => !p5FunctionLabels.has(sym)).map((sym) => (
             <Pressable
               key={sym}
               onPress={() => handleExercisePress(sym)}
+              onLongPress={() => handleExerciseLongPress(sym)}
               style={({ pressed }) => [
                 styles.exerciseKey,
                 { backgroundColor: pressed ? colors.primaryContainer : colors.surfaceContainer },
@@ -306,33 +292,11 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
             </Pressable>
           </View>
         </View>
-        <Pressable
-          onPress={onBackspace}
-          style={({ pressed }) => [
-            styles.actionBtn,
-            { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
-          ]}
-          accessibilityRole="button"
-          accessibilityLabel="Backspace"
-        >
-          <MaterialCommunityIcons name="backspace" size={22} color={colors.onSurfaceVariant} />
-        </Pressable>
-        <Pressable
-          onPress={onNewline}
-          style={({ pressed }) => [
-            styles.actionBtn,
-            { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
-          ]}
-          accessibilityRole="button"
-          accessibilityLabel="New line"
-        >
-          <MaterialCommunityIcons name="keyboard-return" size={22} color={colors.onSurfaceVariant} />
-        </Pressable>
       </View>
 
       <Modal transparent visible={popupSymbol !== null} onRequestClose={() => setPopupSymbol(null)}>
         <Pressable style={styles.popupOverlay} onPress={() => setPopupSymbol(null)}>
-          <Animated.View style={[styles.popupCard, { backgroundColor: colors.surfaceContainerHigh, transform: [{ scale: popupScale }] }]}>
+          <Animated.View style={[styles.popupCard, { backgroundColor: colors.surfaceContainerHigh, opacity: popupAnim, transform: [{ scale: popupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) }] }]}>
             {popupSymbol && (() => {
               const ref = P5_SYMBOLS.find(s => s.name === popupSymbol);
               return ref ? (
@@ -403,7 +367,7 @@ const styles = StyleSheet.create({
     top: 6,
     bottom: 6,
     width: 40,
-    borderRadius: 8,
+    borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -417,11 +381,12 @@ const styles = StyleSheet.create({
   },
   bottomCluster: {
     position: "absolute",
+    left: 12,
     right: 12,
-    bottom: 12,
+    bottom: 24,
     flexDirection: "row",
     alignItems: "flex-end",
-    gap: 12,
+    justifyContent: "flex-end",
   },
   dpad: {
     gap: 3,
@@ -441,13 +406,6 @@ const styles = StyleSheet.create({
   dpadCenter: {
     width: 44,
     height: 44,
-  },
-  actionBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
   },
   symbolButton: {
     flexShrink: 0,

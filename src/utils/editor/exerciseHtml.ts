@@ -1,7 +1,8 @@
-import { importMap } from "./importmap";
 import { p5Source } from "../p5Source";
-import { P5_FUNCTION_NAMES } from "../../data/p5Symbols";
+import { P5_FUNCTION_NAMES, P5_SYMBOLS } from "../../data/p5Symbols";
 import { Colors } from "../../constants/Colors";
+// CM is loaded via the embedded IIFE bundle
+import { CODEMIRROR_BUNDLE } from "./codemirror-bundle.generated";
 
 const SYMBOL_PATTERN = new RegExp(
   `\\b(${P5_FUNCTION_NAMES.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b(?=\\()`,
@@ -56,7 +57,7 @@ export function getExerciseHtml(params: {
   codeFontSize?: number;
 }): string {
   const colors = Colors[params.colorScheme === "dark" ? "dark" : "light"];
-  const editorBg = params.codeBackground || colors.surfaceContainerLowest;
+  const editorBg = params.codeBackground && params.codeBackground !== "auto" ? params.codeBackground : colors.surfaceContainerLowest;
   const fontSize = params.codeFontSize ?? 22;
   const instructionHtml = parseInstructionHtml(params.instruction);
 
@@ -232,6 +233,9 @@ export function getExerciseHtml(params: {
     background: rgba(237, 34, 93, 0.3);
     outline: 1px solid #ED225D;
   }
+  .cm-editor .cm-tooltip-autocomplete { background: ${colors.surfaceContainer}; border: 1px solid ${colors.outlineVariant}; border-radius: 6px; }
+  .cm-editor .cm-tooltip-autocomplete ul li[aria-selected] { background: ${colors.primaryContainer}; color: ${colors.onPrimaryContainer}; }
+  .cm-editor .cm-tooltip-autocomplete .cm-completionDetail { color: ${colors.onSurfaceVariant}; }
   .scroll-whitespace {
     height: 700px;
   }
@@ -345,10 +349,8 @@ ${
 <div class="scroll-whitespace"></div>
 
 <script>${p5Source}</script>
-<script type="importmap">
-${JSON.stringify({ imports: importMap }, null, 2)}
-</script>
-<script type="module">
+<script>${CODEMIRROR_BUNDLE}</script>
+<script>
 ${getBridgeScript(params.startingCode, params.solution, editorBg, params.colorScheme, params.exerciseNumber, fontSize)}
 </script>
 
@@ -392,47 +394,34 @@ const INITIAL_CODE = ${codeArg};
 const SOLUTION_CODE = ${solutionArg};
 const CODE_FONT_SIZE = ${codeFontSize ?? 22};
 const EDITOR_BG = '${editorBg}';
-let CM_READY = false;
 
-(async function() {
-  let basicSetup, EditorView, EditorState, keymap, syntaxHighlighting, HighlightStyle, javascript, tags, indentSelection, syntaxTree, ViewPlugin, Decoration, DecorationSet;
-  try {
-    const cm = await import('codemirror');
-    basicSetup = cm.basicSetup;
-    const viewMod = await import('@codemirror/view');
-    EditorView = viewMod.EditorView;
-    keymap = viewMod.keymap;
-    ViewPlugin = viewMod.ViewPlugin;
-    Decoration = viewMod.Decoration;
-    DecorationSet = viewMod.DecorationSet;
-    const stateMod = await import('@codemirror/state');
-    EditorState = stateMod.EditorState;
-    const langMod = await import('@codemirror/language');
-    syntaxHighlighting = langMod.syntaxHighlighting;
-    HighlightStyle = langMod.HighlightStyle;
-    syntaxTree = langMod.syntaxTree;
-    const jsMod = await import('@codemirror/lang-javascript');
-    javascript = jsMod.javascript;
-    const cmdMod = await import('@codemirror/commands');
-    indentSelection = cmdMod.indentSelection;
-    const hlMod = await import('@lezer/highlight');
-    tags = hlMod.tags;
-    CM_READY = true;
-  } catch(e) {
-    console.error('CM load failed:', e);
+var _CM = typeof CM !== 'undefined' ? CM : null;
+if (!_CM) {
+  var editorEl = document.getElementById('editor');
+  if (editorEl) {
+    editorEl.innerHTML = '<div style="color:#6B7280;padding:20px;font-family:sans-serif;text-align:center">Code editor bundle unavailable. Type code below.</div><textarea id="cm-fallback" style="width:100%;height:400px;background:' + EDITOR_BG + ';color:${fg};font-family:JetBrains Mono,monospace;font-size:' + CODE_FONT_SIZE + 'px;border:none;outline:none;resize:none;padding:12px">' + INITIAL_CODE + '</textarea>';
   }
+  postReady();
+  postEditorReady();
+  throw new Error('CM bundle not loaded');
+}
 
-  if (!CM_READY) {
-    var editorEl = document.getElementById('editor');
-    if (editorEl) {
-      editorEl.innerHTML = '<div style="color:#6B7280;padding:20px;font-family:sans-serif;text-align:center">Code editor bundle unavailable. Type code below.</div><textarea id="cm-fallback" style="width:100%;height:400px;background:' + EDITOR_BG + ';color:${fg};font-family:JetBrains Mono,monospace;font-size:' + CODE_FONT_SIZE + 'px;border:none;outline:none;resize:none;padding:12px">' + INITIAL_CODE + '</textarea>';
-    }
-    postReady();
-    postEditorReady();
-    return;
-  }
+var basicSetup = _CM.basicSetup;
+var EditorView = _CM.EditorView;
+var keymap = _CM.keymap;
+var ViewPlugin = _CM.ViewPlugin;
+var Decoration = _CM.Decoration;
+var DecorationSet = _CM.DecorationSet;
+var EditorState = _CM.EditorState;
+var syntaxHighlighting = _CM.syntaxHighlighting;
+var HighlightStyle = _CM.HighlightStyle;
+var syntaxTree = _CM.syntaxTree;
+var javascript = _CM.javascript;
+var indentSelection = _CM.indentSelection;
+var autocompletion = _CM.autocompletion;
+var tags = _CM.tags;
 
-  try {
+try {
     var p5FnMark = Decoration.mark({ class: 'cm-p5-fn' });
     function computeP5Decos(v) {
       var decos = [];
@@ -460,6 +449,18 @@ let CM_READY = false;
     var p5FnPlugin = ViewPlugin.fromClass(P5FnPlugin, {
       decorations: function(v) { return v.decorations; }
     });
+
+    var p5Completions = ${JSON.stringify(P5_SYMBOLS.map(s => ({ label: s.name + '()', type: 'function', detail: s.syntax, info: s.description })))}.map(function(c) { return { label: c.label, type: c.type, detail: c.detail, info: c.info }; });
+
+    var p5CompletionSource = function(context) {
+      var word = context.matchBefore(/\\b[p5\\.]?[a-zA-Z]\\w*/);
+      if (!word && !context.explicit) return null;
+      if (word && word.from === word.to && !context.explicit) return null;
+      var matches = p5Completions.filter(function(c) {
+        return c.label.indexOf(word ? word.text : '') === 0;
+      });
+      return { from: word ? word.from : context.pos, options: matches, validFor: /^[\\w.]+$/ };
+    };
 
     const p5Theme = EditorView.theme({
       '&': { backgroundColor: '${editorBg}', color: '${fg}' },
@@ -515,6 +516,7 @@ let CM_READY = false;
       extensions: [
         basicSetup,
         javascript(),
+        autocompletion({ override: [p5CompletionSource] }),
         p5Theme,
         syntaxHighlighting(p5Highlight),
         p5FnPlugin,
@@ -528,6 +530,12 @@ let CM_READY = false;
       ],
     });
     view = new EditorView({ state, parent: document.getElementById('editor') });
+    if (CODE_FONT_SIZE) {
+      var scroller = view.dom.querySelector('.cm-scroller');
+      if (scroller) scroller.style.fontSize = CODE_FONT_SIZE + 'px';
+    }
+    var cmContent = view.dom.querySelector('.cm-content');
+    if (cmContent) cmContent.setAttribute('inputmode', 'none');
     postReady();
     postEditorReady();
     setTimeout(function() {
@@ -542,7 +550,6 @@ let CM_READY = false;
     postReady();
     postEditorReady();
   }
-})();
 
 function postCodeChange(code) {
   if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
@@ -804,15 +811,6 @@ if (solRunBtn) {
   });
 }
 
-initEditor();
-if (CM_READY && view) {
-  if (CODE_FONT_SIZE) {
-    var scroller = view.dom.querySelector('.cm-scroller');
-    if (scroller) scroller.style.fontSize = CODE_FONT_SIZE + 'px';
-  }
-  var cmContent = view.dom.querySelector('.cm-content');
-  if (cmContent) cmContent.setAttribute('inputmode', 'none');
-}
 renderSketch('user-sketch', INITIAL_CODE);
 if (typeof window.__tutPreview === 'function') window.__tutPreview();
 
