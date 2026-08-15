@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { View, Text, FlatList, Pressable, Alert, StyleSheet } from "react-native";
+import { View, Text, FlatList, Pressable, Alert, StyleSheet, Linking } from "react-native";
 import Header from "../../components/Header";
 import { P5_SYMBOLS_BY_NAME, P5_SYMBOLS, P5_FUNCTION_NAMES } from "../../data/p5Symbols";
 import { P5Symbol } from "../../data/types";
@@ -27,16 +27,18 @@ function highlightSyntax(code: string): { text: string; color: string }[] {
   const KEYWORD_RE = /\b(function|if|else|for|while|return|let|const|var|new|this|class)\b/g;
   const P5_RE = new RegExp(`\\b(${P5_FUNCTION_NAMES.join("|")})\\b(?=\\()`, "g");
   const NUMBER_RE = /\b\d+(\.\d+)?\b/g;
-  const STRING_RE = /("[^"]*"|'[^']*'|`[^']*`)/g;
+  const STRING_RE = /("[^"]*"|'[^']*'|`[^`]*`)/g;
   const COMMENT_RE = /(\/\/.*)/g;
+  const OP_RE = /([{}[\]();,.]|=>|[-+*/%&|^!<>=]=?)/g;
 
   const allMatches: { index: number; text: string; colorKey: string }[] = [];
   const patterns: [RegExp, string][] = [
     [COMMENT_RE, "#6B7280"],
-    [KEYWORD_RE, "#ED225D"],
-    [P5_RE, "#FFB2BB"],
-    [NUMBER_RE, "#FF4F75"],
     [STRING_RE, "#22C55E"],
+    [KEYWORD_RE, "#ED225D"],
+    [NUMBER_RE, "#FF4F75"],
+    [P5_RE, "#FFB2BB"],
+    [OP_RE, "#9CA3AF"],
   ];
   for (const [re, colorKey] of patterns) {
     re.lastIndex = 0;
@@ -125,6 +127,9 @@ function SymbolDetail({ symbol }: { symbol: string }) {
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
   const { getLockedCourseName } = useModuleProgress();
+  const currentIndex = sym ? P5_SYMBOLS.indexOf(sym) : -1;
+  const prevSym = currentIndex > 0 ? P5_SYMBOLS[currentIndex - 1] : null;
+  const nextSym = currentIndex >= 0 && currentIndex < P5_SYMBOLS.length - 1 ? P5_SYMBOLS[currentIndex + 1] : null;
 
   const handleSymbolPress = (name: string) => {
     const lockedCourse = getLockedCourseName(P5_SYMBOLS_BY_NAME[name]?.module ?? "");
@@ -169,7 +174,8 @@ function SymbolDetail({ symbol }: { symbol: string }) {
     );
   }
 
-  const syntaxTokens = highlightSyntax(sym.syntax);
+  const syntaxTokens = highlightSyntax(sym.syntax.replace(/\n/g, " "));
+  const refUrl = `https://p5js.org/reference/p5/${sym.name.toLowerCase()}/`;
 
   return (
     <View style={[styles.flex1, { backgroundColor: colors.surface }]}>
@@ -182,9 +188,11 @@ function SymbolDetail({ symbol }: { symbol: string }) {
         ListHeaderComponent={
           <>
             <View style={[styles.flexRow, { alignItems: "center", gap: 8, marginBottom: 8 }]}>
-              <Text style={[styles.symbolNameText, { color: colors.onSurface }]}>
-                {sym.name}()
-              </Text>
+              <View style={[styles.symbolNameCode, { backgroundColor: colors.surfaceDim }]}>
+                <Text style={[styles.symbolNameText, { color: colors.primary }]}>
+                  {sym.name}()
+                </Text>
+              </View>
               <View style={[styles.moduleBadge, { backgroundColor: colors.primary + "33" }]}>
                 <Text style={[styles.moduleBadgeText, { color: colors.primary }]}>
                   {sym.module}
@@ -197,7 +205,7 @@ function SymbolDetail({ symbol }: { symbol: string }) {
             </Text>
 
             <Text style={[styles.sectionTitle, { color: colors.onSurface, marginBottom: 12 }]}>
-              Syntax
+              Usage
             </Text>
             <View style={[styles.syntaxBox, { backgroundColor: colors.surfaceDim, marginBottom: 24 }]}>
               <Text style={{ fontFamily: "JetBrainsMono", fontSize: 16, lineHeight: 24 }}>
@@ -209,11 +217,18 @@ function SymbolDetail({ symbol }: { symbol: string }) {
               </Text>
             </View>
 
-            <Text style={[styles.sectionTitle, { color: colors.onSurface, marginBottom: 12 }]}>
-              Parameters
-            </Text>
+            {sym.parameters.length > 0 && (
+              <>
+                <Text style={[styles.sectionTitle, { color: colors.onSurface, marginBottom: 12 }]}>
+                  Parameters
+                </Text>
+              </>
+            )}
           </>
         }
+        ItemSeparatorComponent={() => (
+          <View style={{ height: 1, backgroundColor: colors.outlineVariant + "30" }} />
+        )}
         renderItem={({ item }) => (
           <View style={[styles.flexRow, styles.paramRow]}>
             <View style={styles.flex1}>
@@ -231,6 +246,59 @@ function SymbolDetail({ symbol }: { symbol: string }) {
             </View>
           </View>
         )}
+        ListFooterComponent={
+          <>
+            <View style={[styles.flexRow, { alignItems: "center", gap: 12, marginTop: 24, justifyContent: "space-between" }]}>
+              {prevSym ? (
+                <Pressable
+                  onPress={() => router.push(`/ref?symbol=${prevSym.name}`)}
+                  style={({ pressed }) => [
+                    styles.navButton,
+                    { backgroundColor: pressed ? colors.primaryContainer : colors.surfaceDim },
+                  ]}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Previous: ${prevSym.name}`}
+                >
+                  <MaterialCommunityIcons name="chevron-left" size={18} color={colors.primary} />
+                  <Text style={[styles.navButtonText, { color: colors.primary }]} numberOfLines={1}>
+                    {prevSym.name}
+                  </Text>
+                </Pressable>
+              ) : <View style={{ flex: 1 }} />}
+              {nextSym ? (
+                <Pressable
+                  onPress={() => router.push(`/ref?symbol=${nextSym.name}`)}
+                  style={({ pressed }) => [
+                    styles.navButton,
+                    { backgroundColor: pressed ? colors.primaryContainer : colors.surfaceDim },
+                  ]}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Next: ${nextSym.name}`}
+                >
+                  <Text style={[styles.navButtonText, { color: colors.primary }]} numberOfLines={1}>
+                    {nextSym.name}
+                  </Text>
+                  <MaterialCommunityIcons name="chevron-right" size={18} color={colors.primary} />
+                </Pressable>
+              ) : <View style={{ flex: 1 }} />}
+            </View>
+
+            <Pressable
+              onPress={() => Linking.openURL(refUrl)}
+              style={({ pressed }) => [
+                styles.officialDocsLink,
+                { backgroundColor: pressed ? colors.primaryContainer + "33" : colors.surfaceDim },
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel="Open official p5.js documentation"
+            >
+              <MaterialCommunityIcons name="open-in-new" size={16} color={colors.primary} />
+              <Text style={[styles.officialDocsText, { color: colors.primary }]}>
+                View on p5js.org
+              </Text>
+            </Pressable>
+          </>
+        }
       />
     </View>
   );
@@ -340,6 +408,11 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
+  symbolNameCode: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
   symbolNameText: {
     fontFamily: "JetBrainsMono",
     fontSize: 30,
@@ -364,6 +437,8 @@ const styles = StyleSheet.create({
   syntaxBox: {
     paddingHorizontal: 16,
     paddingVertical: 12,
+    borderLeftWidth: 3,
+    borderLeftColor: "#ED225D",
   },
   syntaxText: {
     fontFamily: "JetBrainsMono",
@@ -402,5 +477,35 @@ const styles = StyleSheet.create({
   symbolRow: {
     alignItems: "center",
     paddingVertical: 12,
+  },
+  navButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 8,
+    maxWidth: "45%",
+  },
+  navButtonText: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  officialDocsLink: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    marginTop: 24,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  officialDocsText: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 13,
+    fontWeight: "700",
   },
 });

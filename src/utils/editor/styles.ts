@@ -27,7 +27,8 @@ export function getStyles(colorScheme: 'light' | 'dark'): string {
   }
   .cm-editor .cm-activeLineGutter { background: ${activeBg}; }
   .cm-editor .cm-activeLine { background: ${activeBg}; }
-  .cm-editor .cm-cursor { border-left-color: #ED225D; }
+  .cm-editor .cm-cursor { border-left-color: #ED225D; animation: cm-blink 1s step-end infinite; }
+  @keyframes cm-blink { 50% { border-left-color: transparent; } }
   .cm-editor .cm-selectionBackground,
   .cm-editor.cm-focused .cm-selectionBackground { background: ${selBg} !important; }
   .cm-editor .cm-matchingBracket {

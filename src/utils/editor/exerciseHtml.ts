@@ -225,7 +225,8 @@ export function getExerciseHtml(params: {
   .cm-editor .cm-gutters { background: ${editorBg}; border-right: 1px solid ${params.colorScheme === 'dark' ? '#292A2E' : '#E5E7EB'}; color: ${params.colorScheme === 'dark' ? '#6B7280' : '#9CA3AF'}; }
   .cm-editor .cm-activeLineGutter { background: ${params.colorScheme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}; }
   .cm-editor .cm-activeLine { background: ${params.colorScheme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}; }
-  .cm-editor .cm-cursor { border-left-color: #ED225D; }
+  .cm-editor .cm-cursor { border-left-color: #ED225D; animation: cm-blink 1s step-end infinite; }
+  @keyframes cm-blink { 50% { border-left-color: transparent; } }
   .cm-editor .cm-selectionBackground,
   .cm-editor.cm-focused .cm-selectionBackground { background: ${params.colorScheme === 'dark' ? 'rgba(237, 34, 93, 0.2)' : 'rgba(237, 34, 93, 0.15)'} !important; }
   .cm-editor .cm-matchingBracket {
@@ -399,10 +400,27 @@ var syntaxTree = _CM.syntaxTree;
 var ViewPlugin = _CM.ViewPlugin;
 var Decoration = _CM.Decoration;
 var DecorationSet = _CM.DecorationSet;
+var autocompletion = _CM.autocompletion;
+var CompletionContext = _CM.CompletionContext;
 
 let view;
 const INITIAL_CODE = ${codeArg};
 const SOLUTION_CODE = ${solutionArg};
+var P5_COMPLETIONS = ${JSON.stringify(P5_FUNCTION_NAMES)};
+
+function p5CompletionSource(context) {
+  var word = context.matchBefore(/\\w*/);
+  if (!word || (word.from === word.to && !context.explicit)) return null;
+  var options = [];
+  var prefix = word.text.toLowerCase();
+  for (var i = 0; i < P5_COMPLETIONS.length; i++) {
+    var name = P5_COMPLETIONS[i];
+    if (name.toLowerCase().startsWith(prefix)) {
+      options.push({ label: name + '()', type: 'function', detail: 'p5.js' });
+    }
+  }
+  return { from: word.from, options: options };
+}
 
 const p5FnMark = Decoration.mark({ class: 'cm-p5-fn' });
 
@@ -442,7 +460,7 @@ function initEditor() {
       '.cm-gutters': { backgroundColor: '${editorBg}', color: '${gutterFg}', borderRight: '1px solid ${gutterBorder}' },
       '.cm-activeLineGutter': { backgroundColor: '${activeBg}' },
       '.cm-activeLine': { backgroundColor: '${activeBg}' },
-      '.cm-cursor': { borderLeftColor: '#ED225D', borderLeftWidth: '2px' },
+      '.cm-cursor': { borderLeft: '2px solid #ED225D' },
       '.cm-selectionBackground': { backgroundColor: '${selBg}' },
       '.cm-matchingBracket': { backgroundColor: 'rgba(237, 34, 93, 0.3)', outline: '1px solid #ED225D' },
       '.cm-p5-fn': { fontWeight: '600' },
@@ -493,6 +511,7 @@ function initEditor() {
         p5Theme,
         syntaxHighlighting(p5Highlight),
         p5FnPlugin,
+        autocompletion({ override: [p5CompletionSource] }),
         keymap.of([{ key: 'Ctrl-s', run: function() { return true; } }, { key: 'Cmd-s', run: function() { return true; } }]),
         EditorView.updateListener.of(function(update) {
           if (update.docChanged) {
@@ -507,12 +526,34 @@ function initEditor() {
     view.dom.addEventListener('mousedown', function(e) {
       if (!window.__systemKeyboardEnabled) {
         e.preventDefault();
+        e.stopPropagation();
+        var coords = { x: e.clientX, y: e.clientY };
+        var pos = view.posAtCoords(coords);
+        if (pos !== null) {
+          view.dispatch({ selection: { anchor: pos, head: pos } });
+        }
         view.focus();
         if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
           window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'editorTapped' }));
         }
       }
     });
+    view.dom.addEventListener('touchstart', function(e) {
+      if (!window.__systemKeyboardEnabled) {
+        e.preventDefault();
+        e.stopPropagation();
+        var touch = e.touches[0];
+        var coords = { x: touch.clientX, y: touch.clientY };
+        var pos = view.posAtCoords(coords);
+        if (pos !== null) {
+          view.dispatch({ selection: { anchor: pos, head: pos } });
+        }
+        view.focus();
+        if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+          window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'editorTapped' }));
+        }
+      }
+    }, { passive: false });
     postReady();
     postEditorReady();
     setTimeout(function() {
@@ -623,12 +664,20 @@ function handleMessage(data) {
       case 'focus':
         if (view) {
           window.__systemKeyboardEnabled = true;
+          var cmContent = view.dom.querySelector('.cm-content');
+          if (cmContent) {
+            cmContent.setAttribute('inputmode', 'text');
+            cmContent.focus();
+          }
           view.dom.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          setTimeout(function() { view.focus(); }, 200);
         }
         break;
       case 'useCustomKeyboard':
         window.__systemKeyboardEnabled = false;
+        if (view) {
+          var cmContent = view.dom.querySelector('.cm-content');
+          if (cmContent) cmContent.setAttribute('inputmode', 'none');
+        }
         break;
       case 'setFontSize':
         var scroller = view && view.dom && view.dom.querySelector('.cm-scroller');
@@ -637,13 +686,46 @@ function handleMessage(data) {
       case 'backspace':
         if (view) {
           var cur = view.state.selection.main.head;
-          if (cur > 0) {
+          var sel = view.state.selection.main;
+          if (sel.from !== sel.to) {
+            view.dispatch({
+              changes: { from: sel.from, to: sel.to },
+              selection: { anchor: sel.from },
+            });
+          } else if (cur > 0) {
             view.dispatch({
               changes: { from: cur - 1, to: cur },
               selection: { anchor: cur - 1 },
             });
-            view.focus();
           }
+          view.focus();
+        }
+        break;
+      case 'cursorMove':
+        if (view) {
+          var dir = msg.direction;
+          var sel = view.state.selection.main;
+          var pos = sel.head;
+          var doc = view.state.doc;
+          if (dir === 'left' && pos > 0) {
+            pos = pos - 1;
+          } else if (dir === 'right' && pos < doc.length) {
+            pos = pos + 1;
+          } else if (dir === 'up' || dir === 'down') {
+            var line = doc.lineAt(pos);
+            var lineNum = line.number;
+            var col = pos - line.from;
+            var targetLineNum = dir === 'up' ? lineNum - 1 : lineNum + 1;
+            if (targetLineNum >= 1 && targetLineNum <= doc.lines) {
+              var targetLine = doc.line(targetLineNum);
+              pos = Math.min(targetLine.from + col, targetLine.to);
+            }
+          }
+          view.dispatch({
+            selection: { anchor: pos, head: pos },
+            scrollIntoView: true,
+          });
+          view.focus();
         }
         break;
       case 'format':
@@ -704,10 +786,13 @@ if (copyBtn) {
     if (view) {
       var code = view.state.doc.toString();
       navigator.clipboard.writeText(code).then(function() {
-        copyBtn.textContent = 'Copied!';
+        copyBtn.innerHTML = '&#10003; Copied';
         copyBtn.classList.add('copied');
+        if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+          window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'codeCopied' }));
+        }
         setTimeout(function() {
-          copyBtn.textContent = 'Copy';
+          copyBtn.innerHTML = 'Copy';
           copyBtn.classList.remove('copied');
         }, 2000);
       });

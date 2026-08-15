@@ -1,12 +1,10 @@
-import { useRef, useCallback, useEffect } from "react";
-import { View, Text, FlatList, StyleSheet } from "react-native";
+import { useState } from "react";
+import { View, Text, Pressable, StyleSheet, Platform } from "react-native";
+import DateTimePicker, {
+  DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
 import { useThemeContext } from "./ThemeProvider";
 import { Colors } from "../constants/Colors";
-
-const ITEM_HEIGHT = 36;
-const VISIBLE_ITEMS = 5;
-const HOURS = Array.from({ length: 24 }, (_, i) => i);
-const MINUTES = Array.from({ length: 12 }, (_, i) => i * 5);
 
 interface TimePickerProps {
   hour: number;
@@ -14,142 +12,59 @@ interface TimePickerProps {
   onTimeChange: (hour: number, minute: number) => void;
 }
 
-function SnapList({
-  data,
-  selectedValue,
-  onSelect,
-  formatValue,
-}: {
-  data: number[];
-  selectedValue: number;
-  onSelect: (value: number) => void;
-  formatValue: (v: number) => string;
-}) {
-  const listRef = useRef<FlatList>(null);
-  const { colorScheme } = useThemeContext();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
-
-  const selectedIndex = data.indexOf(selectedValue);
-
-  useEffect(() => {
-    if (selectedIndex >= 0 && listRef.current) {
-      listRef.current.scrollToIndex({
-        index: selectedIndex,
-        animated: true,
-        viewPosition: 0.5,
-      });
-    }
-  }, [selectedIndex]);
-
-  const handleMomentumEnd = useCallback(
-    (e: { nativeEvent: { contentOffset: { y: number } } }) => {
-      const offsetY = e.nativeEvent.contentOffset.y;
-      const index = Math.round(offsetY / ITEM_HEIGHT);
-      const clampedIndex = Math.max(0, Math.min(index, data.length - 1));
-      onSelect(data[clampedIndex]);
-    },
-    [data, onSelect]
-  );
-
-  const getItemLayout = (_: unknown, index: number) => ({
-    length: ITEM_HEIGHT,
-    offset: ITEM_HEIGHT * index,
-    index,
-  });
-
-  const topPadding = (VISIBLE_ITEMS - 1) * ITEM_HEIGHT / 2;
-
-  return (
-    <View style={pickerStyles.column}>
-      <View style={[pickerStyles.highlightBar, { backgroundColor: colors.primary + "20", borderColor: colors.primary }]} pointerEvents="none" />
-      <FlatList
-        ref={listRef}
-        data={data}
-        keyExtractor={(item) => item.toString()}
-        snapToInterval={ITEM_HEIGHT}
-        snapToAlignment="start"
-        decelerationRate="fast"
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: topPadding, paddingBottom: topPadding }}
-        getItemLayout={getItemLayout}
-        onMomentumScrollEnd={handleMomentumEnd}
-        initialScrollIndex={Math.max(0, selectedIndex)}
-        renderItem={({ item }) => {
-          const isSelected = item === selectedValue;
-          return (
-            <View style={pickerStyles.item}>
-              <Text
-                style={[
-                  pickerStyles.itemText,
-                  {
-                    color: isSelected ? colors.onSurface : colors.textSecondary,
-                    fontFamily: "JetBrainsMono",
-                    fontWeight: isSelected ? "700" : "400",
-                    fontSize: isSelected ? 20 : 16,
-                  },
-                ]}
-              >
-                {formatValue(item)}
-              </Text>
-            </View>
-          );
-        }}
-      />
-    </View>
-  );
-}
-
-const pickerStyles = StyleSheet.create({
-  column: {
-    flex: 1,
-    height: ITEM_HEIGHT * VISIBLE_ITEMS,
-    position: "relative",
-  },
-  highlightBar: {
-    position: "absolute",
-    top: (VISIBLE_ITEMS - 1) * ITEM_HEIGHT / 2,
-    left: 4,
-    right: 4,
-    height: ITEM_HEIGHT,
-    borderRadius: 8,
-    borderWidth: 1,
-    zIndex: 1,
-  },
-  item: {
-    height: ITEM_HEIGHT,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  itemText: {
-    fontFamily: "JetBrainsMono",
-  },
-});
-
 export default function TimePicker({ hour, minute, onTimeChange }: TimePickerProps) {
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const [show, setShow] = useState(false);
+
+  const date = new Date();
+  date.setHours(hour, minute, 0, 0);
+
+  const handleChange = (_: DateTimePickerEvent, selectedDate?: Date) => {
+    if (Platform.OS === "android") {
+      setShow(false);
+    }
+    if (selectedDate) {
+      onTimeChange(selectedDate.getHours(), selectedDate.getMinutes());
+    }
+  };
 
   return (
-    <View style={[styles.container, { borderTopColor: colors.outlineVariant + "40", borderTopWidth: 1 }]}>
-      <View style={styles.pickerRow}>
-        <View style={styles.snapContainer}>
-          <SnapList
-            data={HOURS}
-            selectedValue={hour}
-            onSelect={(h) => onTimeChange(h, minute)}
-            formatValue={(v) => v.toString().padStart(2, "0")}
+    <View
+      style={[
+        styles.container,
+        { borderTopColor: colors.outlineVariant + "40", borderTopWidth: 1 },
+      ]}
+    >
+      <Pressable
+        onPress={() => setShow(true)}
+        style={({ pressed }) => [
+          styles.timeButton,
+          { backgroundColor: pressed ? colors.primaryContainer : colors.surfaceContainerHigh },
+        ]}
+        accessibilityRole="button"
+        accessibilityLabel="Change reminder time"
+      >
+        <Text style={[styles.timeText, { color: colors.onSurface }]}>
+          {hour.toString().padStart(2, "0")}:
+          {minute.toString().padStart(2, "0")}
+        </Text>
+        <Text style={[styles.changeLabel, { color: colors.primary }]}>
+          Change
+        </Text>
+      </Pressable>
+
+      {(show || Platform.OS === "ios") && (
+        <View style={Platform.OS === "ios" ? styles.iosPicker : undefined}>
+          <DateTimePicker
+            value={date}
+            mode="time"
+            display={Platform.OS === "ios" ? "spinner" : "default"}
+            onChange={handleChange}
+            themeVariant={colorScheme === "dark" ? "dark" : "light"}
           />
         </View>
-        <Text style={[styles.separator, { color: colors.onSurface }]}>:</Text>
-        <View style={styles.snapContainer}>
-          <SnapList
-            data={MINUTES}
-            selectedValue={minute}
-            onSelect={(m) => onTimeChange(hour, m)}
-            formatValue={(v) => v.toString().padStart(2, "0")}
-          />
-        </View>
-      </View>
+      )}
     </View>
   );
 }
@@ -157,23 +72,29 @@ export default function TimePicker({ hour, minute, onTimeChange }: TimePickerPro
 const styles = StyleSheet.create({
   container: {
     paddingVertical: 8,
+    alignItems: "center",
   },
-  pickerRow: {
+  timeButton: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 40,
+    gap: 12,
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+    borderRadius: 8,
   },
-  snapContainer: {
-    flex: 1,
-    maxWidth: 100,
-    alignItems: "center",
-  },
-  separator: {
+  timeText: {
     fontFamily: "JetBrainsMono",
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "700",
-    marginHorizontal: 8,
-    marginTop: -ITEM_HEIGHT / 2,
+  },
+  changeLabel: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 11,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  iosPicker: {
+    marginTop: 8,
   },
 });
