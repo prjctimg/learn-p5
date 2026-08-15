@@ -2,7 +2,7 @@
   "expo": {
     "name": "learn-p5",
     "slug": "learn-p5",
-    "version": "1.0.0",
+    "version": "0.2.3",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "learnp5",
@@ -28,10 +28,20 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#FFFFFF",
           "android": {
             "image": "./assets/images/splash-icon.png",
             "imageWidth": 76
+          }
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "abiFilters": ["arm64-v8a", "armeabi-v7a"],
+            "useLegacyPackaging": true,
+            "enableProguardInReleaseBuilds": true
           }
         }
       ]
