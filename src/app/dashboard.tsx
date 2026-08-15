@@ -5,12 +5,13 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useThemeContext } from "../components/ThemeProvider";
 import { Colors } from "../constants/Colors";
+import { STORAGE_KEYS } from "../constants/StorageKeys";
 import Header from "../components/Header";
 import Toast from "../components/Toast";
 import StreakToast from "../components/StreakToast";
 import { loadAllCourses } from "../utils/courseLoader";
 import { Exercise, Course } from "../data/types";
-import { isExerciseLocked as checkExerciseLocked } from "../utils/isExerciseLocked";
+import { isExerciseLocked } from "../utils/isExerciseLocked";
 import { getStreakFromStorage, useStreak } from "../hooks/useStreak";
 import { useAchievements, ACHIEVEMENTS } from "../hooks/useAchievements";
 import AchievementBadgeModal from "../components/AchievementBadgeModal";
@@ -37,7 +38,7 @@ export default function Dashboard() {
  const router = useRouter();
  const { colorScheme, ctaColor, derivedColors } = useThemeContext();
  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
- const [completedLessons, setCompletedLessons] = useState<string[]>([]);
+ const [completedExercises, setCompletedExercises] = useState<string[]>([]);
  const [courses, setCourses] = useState<Course[]>([]);
  const [streakCount, setStreakCount] = useState(0);
  const [streakLongest, setStreakLongest] = useState(0);
@@ -64,12 +65,12 @@ const { unlocked: unlockedAchievements, unlockedAt, refresh: refreshAchievements
 
  useFocusEffect(
  useCallback(() => {
- AsyncStorage.getItem("completedLessons").then((val) => {
+ AsyncStorage.getItem(STORAGE_KEYS.completedLessons).then((val) => {
  if (val) {
  try {
- setCompletedLessons(JSON.parse(val));
+ setCompletedExercises(JSON.parse(val));
  } catch {
- setCompletedLessons([]);
+ setCompletedExercises([]);
  }
  }
  });
@@ -96,7 +97,7 @@ refreshAchievements();
  const period = getPeriodKey();
  const lastPeriod = await AsyncStorage.getItem(LAST_GREETING_KEY);
  if (lastPeriod === period) return;
- const onboardingRaw = await AsyncStorage.getItem("onboardingData");
+ const onboardingRaw = await AsyncStorage.getItem(STORAGE_KEYS.onboardingData);
  let name = "";
  if (onboardingRaw) {
  try {
@@ -116,8 +117,8 @@ refreshAchievements();
  const flat = courses.flatMap((c) =>
  c.exercises.map((l) => ({ ...l, courseSlug: c.slug, courseTitle: c.title }))
  );
- return flat.find((l) => !completedLessons.includes(`${l.courseSlug}/${l.id}`)) ?? null;
- }, [courses, completedLessons]);
+ return flat.find((l) => !completedExercises.includes(`${l.courseSlug}/${l.id}`)) ?? null;
+ }, [courses, completedExercises]);
 
  const upcomingExercises = useMemo(() => {
  if (courses.length === 0 || !nextExercise) return [];
@@ -131,19 +132,13 @@ refreshAchievements();
  return flat.slice(startIndex + 1, startIndex + 6);
  }, [courses, nextExercise]);
 
-  function isExerciseLocked(lessonId: string, courseSlug: string): boolean {
-    const course = courses.find((c) => c.slug === courseSlug);
-    if (!course) return true;
-    return checkExerciseLocked(completedLessons, courseSlug, lessonId, course.exercises);
-  }
+  const progressAnim = useRef(new Animated.Value(0)).current;
 
- const progressAnim = useRef(new Animated.Value(0)).current;
-
- const totalLessons = useMemo(() => {
+ const totalExercises = useMemo(() => {
  return courses.reduce((sum, c) => sum + c.exercises.length, 0);
  }, [courses]);
 
- const progress = totalLessons > 0 ? completedLessons.length / totalLessons : 0;
+ const progress = totalExercises > 0 ? completedExercises.length / totalExercises : 0;
 
  useEffect(() => {
  Animated.timing(progressAnim, {
@@ -159,7 +154,7 @@ refreshAchievements();
  });
 
  const level = Math.min(10, Math.max(1, Math.floor(progress * 10) + 1));
- const completedCount = completedLessons.length;
+ const completedCount = completedExercises.length;
 
  useEffect(() => {
  levelAnim.setValue(0);
@@ -509,8 +504,11 @@ progressBarOuter: {
  <Text style={[styles.listTitle, { marginTop: 24 }]}>
  Up Next
  </Text>
-  {upcomingExercises.map((ex, i) => {
-  const locked = isExerciseLocked(ex.id, ex.courseSlug) || (i === 0 && nextExercise !== null);
+   {upcomingExercises.map((ex, i) => {
+   const course = courses.find((c) => c.slug === ex.courseSlug);
+   const locked =
+     (course ? isExerciseLocked(completedExercises, ex.courseSlug, ex.id, course.exercises) : true) ||
+     (i === 0 && nextExercise !== null);
   return (
  <Pressable
  key={`${ex.courseSlug}/${ex.id}`}

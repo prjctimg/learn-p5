@@ -1,53 +1,50 @@
+# Building
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Expo SDK 55 project. Do not edit generated artifacts directly; regenerate them (see below).
 
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Setup
 
 ```bash
-npm run reset-project
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+`postinstall` runs the build generators (p5.js bundle, validation core, reference data, courses).
 
-### Other setup steps
+## Run
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+```bash
+npm start        # regenerates build artifacts, then starts Expo
+npm run android  # expo start --android
+npm run web      # expo start --web
+```
 
-## Learn more
+## Scripts
 
-To learn more about developing your project with Expo, look at the following resources:
+| Script | Purpose |
+|---|---|
+| `gen-reference` | Scrape p5js.org into `src/data/reference.generated.json` (`--stub` for offline) |
+| `bundle-p5` | Vendor p5.js into `src/utils/p5Source.ts` + `p5Version.ts` |
+| `bundle-editor` | Build the CodeMirror bundle into `codemirror-bundle.generated.ts` |
+| `bundle-validation` | Build the validation core into `validation-core.generated.ts` |
+| `build-courses` | Compile `src/data/courses/*.yaml` into `src/data/courses/*.ts` |
+| `check-exercises` | Validate exercise tasks against the shared validation core |
+| `check-symbols` | Ensure exercise code references known p5 symbols |
+| `lint` | `expo lint` |
+| `test` | Jest |
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Run `check-exercises` and `check-symbols` after editing course YAML.
 
-## Join the community
+## Generated artifacts
 
-Join our community of developers creating universal apps.
+The following are build outputs and are never edited by hand:
+`src/data/courses/*.ts`, `src/utils/p5Source.ts`, `src/utils/p5Version.ts`, `src/data/*.generated.json`, `src/utils/editor/*.generated.ts`, `src/constants/fontBase64.generated.ts`.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Validation core
+
+Shared validation lives in `src/utils/editor/validation.ts` — a dependency-free module that runs identically in the exercise WebView and in Node dev checks.
+
+Rule types: `functionCall`, `functionExists`, `canvasSize`, `pixelMatch`, `expectedPixels`. Rule schemas and `schemaErrors()` reject malformed task rules. `analyze()` walks a lezer parse tree (`@lezer/javascript`) for calls, function definitions, and `createCanvas`; `evaluateRules()` runs synchronous rules; pixel rules are sampled by the WebView bridge in `exerciseHtml.ts` using `pixelMatches` (default tolerance 30) and `effectiveMinPassFraction` (default 0.9).
+
+## Release
+
+A push to `main` must bump `version` in `package.json` and carry a matching `vX.Y.Z` tag (enforced by the pre-push hook). Use `sh scripts/bump-version.sh`, commit, then `git tag v<version>`. GitHub Actions builds and publishes the Android APK.

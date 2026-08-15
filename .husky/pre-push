@@ -1,15 +1,6 @@
 #!/usr/bin/env sh
-# Pre-push hook (Husky).
-# 1) Push Entire CLI session logs alongside the user's push.
-# 2) Enforce that a push to main includes a version bump in package.json
-#    AND a matching vX.Y.Z tag (see AGENTS.md "Release cadence").
-
-# 1) Entire CLI session-log hook (no-op if the CLI is unavailable).
-if command -v entire >/dev/null 2>&1; then
-  entire hooks git pre-push "$1" || true
-fi
-
-# 2) Version-bump enforcement.
+# Enforce that a push to main bumps the version in package.json and
+# carries a matching vX.Y.Z tag.
 while read -r local_ref local_sha remote_ref remote_sha; do
   [ "$local_ref" = "refs/heads/main" ] || continue
 

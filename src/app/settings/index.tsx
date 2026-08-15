@@ -9,6 +9,7 @@ import TimePicker from "../../components/TimePicker";
 import { useThemeContext } from "../../components/ThemeProvider";
 import { Colors } from "../../constants/Colors";
 import { DEFAULTS } from "../../constants/Defaults";
+import { STORAGE_KEYS } from "../../constants/StorageKeys";
 import { useShakeDetection } from "../../hooks/useShakeDetection";
 import ReportErrorModal from "../../components/ReportErrorModal";
 
@@ -16,17 +17,17 @@ import { EDITOR_THEMES, getThemeSwatches } from "../../utils/editor/themes";
 import { PROCESSING_COLOR_HEX } from "../../constants/ProcessingColors";
 
 const SETTINGS_KEYS = {
-  dailyReminder: "setting_dailyReminder",
-  notificationHour: "setting_notificationHour",
-  notificationMinute: "setting_notificationMinute",
-  codeFontSize: "setting_codeFontSize",
-  codeBackground: "setting_codeBackground",
-  keyboardHeight: "setting_keyboardHeight",
-  editorTheme: "setting_editorTheme",
-  wordWrap: "setting_wordWrap",
-  showDrawerFab: "setting_showDrawerFab",
-  showStatusBar: "setting_showStatusBar",
-  disableSystemKeyboard: "setting_disableSystemKeyboard",
+  dailyReminder: STORAGE_KEYS.settingDailyReminder,
+  notificationHour: STORAGE_KEYS.settingNotificationHour,
+  notificationMinute: STORAGE_KEYS.settingNotificationMinute,
+  codeFontSize: STORAGE_KEYS.settingCodeFontSize,
+  codeBackground: STORAGE_KEYS.settingCodeBackground,
+  keyboardHeight: STORAGE_KEYS.settingKeyboardHeight,
+  editorTheme: STORAGE_KEYS.settingEditorTheme,
+  wordWrap: STORAGE_KEYS.settingWordWrap,
+  showDrawerFab: STORAGE_KEYS.settingShowDrawerFab,
+  showStatusBar: STORAGE_KEYS.settingShowStatusBar,
+  disableSystemKeyboard: STORAGE_KEYS.settingDisableSystemKeyboard,
 };
 
 const createStyles = (colors: Record<string, string>) =>
@@ -87,8 +88,8 @@ export default function Settings() {
   const [notificationHour, setNotificationHour] = useState(18);
   const [notificationMinute, setNotificationMinute] = useState(0);
   const [codeFontSize, setCodeFontSize] = useState(DEFAULTS.codeFontSize);
-  const [codeBackground, setCodeBackgroundState] = useState<string>(DEFAULTS.codeBackground);
-  const [keyboardHeight, setKeyboardHeightState] = useState<string>(DEFAULTS.keyboardHeight);
+  const [codeBackground, setCodeBackground] = useState<string>(DEFAULTS.codeBackground);
+  const [keyboardHeight, setKeyboardHeight] = useState<string>(DEFAULTS.keyboardHeight);
   const [editorTheme, setEditorTheme] = useState<string>("p5-learn");
   const [wordWrap, setWordWrap] = useState(false);
   const [displayName, setDisplayName] = useState("");
@@ -121,15 +122,15 @@ export default function Settings() {
       if (hour[1]) setNotificationHour(parseInt(hour[1], 10));
       if (minute[1]) setNotificationMinute(parseInt(minute[1], 10));
       if (fontSize[1]) setCodeFontSize(parseInt(fontSize[1], 10));
-      if (bg[1]) setCodeBackgroundState(bg[1]);
-      if (kb[1]) setKeyboardHeightState(kb[1]);
+      if (bg[1]) setCodeBackground(bg[1]);
+      if (kb[1]) setKeyboardHeight(kb[1]);
       if (theme[1]) setEditorTheme(theme[1]);
       setWordWrap(wrap[1] === "true");
       if (drawerFab[1] !== null) setShowDrawerFab(drawerFab[1] !== "false");
       if (statusBar[1] !== null) setShowStatusBar(statusBar[1] !== "false");
       setDisableSystemKeyboard(disableSysKb[1] === "true");
     });
-    AsyncStorage.getItem("onboardingData").then((val) => {
+    AsyncStorage.getItem(STORAGE_KEYS.onboardingData).then((val) => {
       if (val) {
         try {
           const data = JSON.parse(val);
@@ -184,12 +185,12 @@ export default function Settings() {
   };
 
   const changeCodeBackground = async (value: string) => {
-    setCodeBackgroundState(value);
+    setCodeBackground(value);
     await AsyncStorage.setItem(SETTINGS_KEYS.codeBackground, value);
   };
 
   const changeKeyboardHeight = async (value: string) => {
-    setKeyboardHeightState(value);
+    setKeyboardHeight(value);
     await AsyncStorage.setItem(SETTINGS_KEYS.keyboardHeight, value);
   };
 
@@ -205,10 +206,10 @@ export default function Settings() {
 
   const handleDisplayNameChange = useCallback(async (text: string) => {
     setDisplayName(text);
-    AsyncStorage.getItem("onboardingData").then((val) => {
+    AsyncStorage.getItem(STORAGE_KEYS.onboardingData).then((val) => {
       const data = val ? JSON.parse(val) : {};
       data.displayName = text;
-      AsyncStorage.setItem("onboardingData", JSON.stringify(data));
+      AsyncStorage.setItem(STORAGE_KEYS.onboardingData, JSON.stringify(data));
     });
   }, []);
 

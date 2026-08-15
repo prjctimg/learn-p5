@@ -2,8 +2,8 @@ import { createContext, useContext, useState, useEffect, useCallback, useMemo, t
 import { useColorScheme as useRNColorScheme } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DEFAULTS } from "../constants/Defaults";
+import { STORAGE_KEYS } from "../constants/StorageKeys";
 import { deriveColorsFromAccent, type DerivedColors } from "../utils/colorUtils";
-import { applyAccentIcon } from "../utils/dynamicIcon";
 
 type ThemeColorScheme = "light" | "dark";
 
@@ -14,9 +14,6 @@ interface ThemeContextValue {
   setCtaColor: (color: string) => void;
   derivedColors: DerivedColors;
 }
-
-const THEME_KEY = "userColorScheme";
-const CTA_COLOR_KEY = "setting_ctaColor";
 
 const ThemeContext = createContext<ThemeContextValue>({
   colorScheme: "light",
@@ -37,16 +34,16 @@ interface ThemeProviderProps {
 export default function ThemeProvider({ children }: ThemeProviderProps) {
   const systemScheme = useRNColorScheme();
   const [userScheme, setUserScheme] = useState<ThemeColorScheme | null>(null);
-  const [ctaColor, setCtaColorState] = useState(DEFAULTS.ctaColor);
+  const [ctaColor, setStoredCtaColor] = useState(DEFAULTS.ctaColor);
 
   useEffect(() => {
-    AsyncStorage.multiGet([THEME_KEY, CTA_COLOR_KEY])
+    AsyncStorage.multiGet([STORAGE_KEYS.userColorScheme, STORAGE_KEYS.settingCtaColor])
       .then(([schemeEntry, ctaEntry]) => {
         if (schemeEntry[1] === "light" || schemeEntry[1] === "dark") {
           setUserScheme(schemeEntry[1]);
         }
         if (ctaEntry[1]) {
-          setCtaColorState(ctaEntry[1]);
+          setStoredCtaColor(ctaEntry[1]);
         }
       })
       .catch(() => {});
@@ -56,7 +53,7 @@ export default function ThemeProvider({ children }: ThemeProviderProps) {
 
   useEffect(() => {
     if (userScheme !== null) {
-      AsyncStorage.setItem(THEME_KEY, userScheme).catch(() => {});
+      AsyncStorage.setItem(STORAGE_KEYS.userColorScheme, userScheme).catch(() => {});
     }
   }, [userScheme]);
 
@@ -65,18 +62,14 @@ export default function ThemeProvider({ children }: ThemeProviderProps) {
   }, []);
 
   const setCtaColor = useCallback((color: string) => {
-    setCtaColorState(color);
-    AsyncStorage.setItem(CTA_COLOR_KEY, color).catch(() => {});
+    setStoredCtaColor(color);
+    AsyncStorage.setItem(STORAGE_KEYS.settingCtaColor, color).catch(() => {});
   }, []);
 
   const derivedColors = useMemo(
     () => deriveColorsFromAccent(ctaColor, colorScheme === "dark"),
     [ctaColor, colorScheme]
   );
-
-  useEffect(() => {
-    applyAccentIcon(ctaColor);
-  }, [ctaColor]);
 
   return (
     <ThemeContext.Provider value={{ colorScheme, toggleTheme, ctaColor, setCtaColor, derivedColors }}>

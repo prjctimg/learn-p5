@@ -8,15 +8,15 @@ import { loadAllCourses } from "../../utils/courseLoader";
 import { Course } from "../../data/types";
 import { useThemeContext } from "../../components/ThemeProvider";
 import { Colors } from "../../constants/Colors";
+import { STORAGE_KEYS } from "../../constants/StorageKeys";
 import { useShakeDetection } from "../../hooks/useShakeDetection";
 import ReportErrorModal from "../../components/ReportErrorModal";
 
-const COMPLETED_COURSES_KEY = "completedCourses";
 
 export default function Learn() {
   const router = useRouter();
   const [courses, setCourses] = useState<Course[]>([]);
-  const [completedLessons, setCompletedLessons] = useState<string[]>([]);
+  const [completedExercises, setCompletedExercises] = useState<string[]>([]);
   const [completedCourses, setCompletedCourses] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,16 +33,16 @@ export default function Learn() {
   useEffect(() => {
     Promise.all([
       loadAllCourses(),
-      AsyncStorage.getItem("completedLessons"),
-      AsyncStorage.getItem(COMPLETED_COURSES_KEY),
+      AsyncStorage.getItem(STORAGE_KEYS.completedLessons),
+      AsyncStorage.getItem(STORAGE_KEYS.completedCourses),
     ])
-      .then(([loaded, lessonsRaw, coursesRaw]) => {
+      .then(([loaded, exercisesRaw, coursesRaw]) => {
         setCourses(loaded);
-        if (lessonsRaw) {
+        if (exercisesRaw) {
           try {
-            setCompletedLessons(JSON.parse(lessonsRaw));
+            setCompletedExercises(JSON.parse(exercisesRaw));
           } catch {
-            setCompletedLessons([]);
+            setCompletedExercises([]);
           }
         }
         if (coursesRaw) {
@@ -61,7 +61,7 @@ export default function Learn() {
     if (completedCourses.includes(course.slug)) return true;
     if (course.exercises.length === 0) return false;
     return course.exercises.every((l) =>
-      completedLessons.includes(`${course.slug}/${l.id}`)
+      completedExercises.includes(`${course.slug}/${l.id}`)
     );
   };
 
@@ -70,7 +70,7 @@ export default function Learn() {
       if (!isCourseCompleted(c)) return c.slug;
     }
     return null;
-  }, [courses, completedLessons, completedCourses]);
+  }, [courses, completedExercises, completedCourses]);
 
   // The single "current" (first incomplete) course is the blocker for every
   // locked card under the sequential completion model. Surface its title so a
@@ -85,7 +85,7 @@ export default function Learn() {
     const active = courses.filter((c) => !isCourseCompleted(c));
     const completed = courses.filter((c) => isCourseCompleted(c));
     return [...active, ...completed];
-  }, [courses, completedLessons, completedCourses]);
+  }, [courses, completedExercises, completedCourses]);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.surface }]}>
@@ -112,6 +112,7 @@ export default function Learn() {
                 title={item.title}
                 moduleName={item.moduleName}
                 description={`${item.exercises.length} exercise${item.exercises.length > 1 ? "s" : ""} · ${item.description}`}
+                slug={item.slug}
                 locked={locked}
                 completed={completed}
                 isCurrent={isCurrent}

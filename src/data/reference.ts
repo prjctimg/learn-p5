@@ -27,8 +27,7 @@ interface ReferenceData {
 
 const data = generated as ReferenceData;
 
-// Backward-compatible views with the old P5Symbol shape
-export type P5SymbolView = {
+export type P5Symbol = {
   name: string;
   module: string;
   description: string;
@@ -38,7 +37,7 @@ export type P5SymbolView = {
   norender?: boolean;
 };
 
-function toP5SymbolView(sym: GeneratedSymbol): P5SymbolView {
+function toP5Symbol(sym: GeneratedSymbol): P5Symbol {
   return {
     name: sym.name,
     module: sym.module,
@@ -54,9 +53,9 @@ function toP5SymbolView(sym: GeneratedSymbol): P5SymbolView {
   };
 }
 
-export const P5_SYMBOLS: P5SymbolView[] = Object.values(data.byName).map(toP5SymbolView);
+export const P5_SYMBOLS: P5Symbol[] = Object.values(data.byName).map(toP5Symbol);
 
-export const P5_SYMBOLS_BY_NAME: Record<string, P5SymbolView> = {};
+export const P5_SYMBOLS_BY_NAME: Record<string, P5Symbol> = {};
 for (const view of P5_SYMBOLS) {
   P5_SYMBOLS_BY_NAME[view.name] = view;
 }

@@ -9,14 +9,15 @@ import { loadCourse } from "../../../utils/courseLoader";
 import { Course } from "../../../data/types";
 import { useThemeContext } from "../../../components/ThemeProvider";
 import { Colors } from "../../../constants/Colors";
-import { isExerciseLocked as checkExerciseLocked } from "../../../utils/isExerciseLocked";
+import { STORAGE_KEYS } from "../../../constants/StorageKeys";
+import { isExerciseLocked } from "../../../utils/isExerciseLocked";
 
 export default function CourseDetail() {
  const { course } = useLocalSearchParams<{ course: string }>();
  const router = useRouter();
  const [courseData, setCourseData] = useState<Course | null>(null);
  const [loading, setLoading] = useState(true);
- const [completedLessons, setCompletedLessons] = useState<string[]>([]);
+  const [completedExercises, setCompletedExercises] = useState<string[]>([]);
  const [error, setError] = useState<string | null>(null);
  const { colorScheme, derivedColors } = useThemeContext();
  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
@@ -28,8 +29,8 @@ export default function CourseDetail() {
  const data = await loadCourse(course);
  setCourseData(data);
  try {
- const val = await AsyncStorage.getItem("completedLessons");
- if (val) setCompletedLessons(JSON.parse(val));
+ const val = await AsyncStorage.getItem(STORAGE_KEYS.completedLessons);
+  if (val) setCompletedExercises(JSON.parse(val));
  } catch {}
  } catch (e) {
  setError(e instanceof Error ? e.message : "Failed to load course");
@@ -45,38 +46,38 @@ export default function CourseDetail() {
  const nextExerciseIdx = useMemo(() => {
  if (!courseData || !course) return -1;
  return courseData.exercises.findIndex(
- (_, i) => !completedLessons.includes(`${course}/${courseData.exercises[i].id}`)
+  (_, i) => !completedExercises.includes(`${course}/${courseData.exercises[i].id}`)
  );
- }, [courseData, completedLessons, course]);
+ }, [courseData, completedExercises, course]);
 
  const nextExercise = useMemo(() => {
  if (!courseData || nextExerciseIdx < 0) return null;
  return courseData.exercises[nextExerciseIdx];
  }, [courseData, nextExerciseIdx]);
 
- const upNextLessons = useMemo(() => {
+ const upNextExercises = useMemo(() => {
  if (!courseData || nextExerciseIdx < 0) return [];
  return courseData.exercises.slice(nextExerciseIdx + 1);
  }, [courseData, nextExerciseIdx]);
 
- const completedLessonItems = useMemo(() => {
+ const completedExerciseItems = useMemo(() => {
  if (!courseData || !course) return [];
  return courseData.exercises.filter(
- (l) => completedLessons.includes(`${course}/${l.id}`)
+  (l) => completedExercises.includes(`${course}/${l.id}`)
  );
- }, [courseData, completedLessons, course]);
+ }, [courseData, completedExercises, course]);
 
  const progress = useMemo(() => {
  if (!courseData || courseData.exercises.length === 0) return 0;
- const courseCompleted = completedLessons.filter((id) =>
+  const courseCompleted = completedExercises.filter((id) =>
  id.startsWith(`${course}/`)
  ).length;
  return courseCompleted / courseData.exercises.length;
- }, [courseData, completedLessons, course]);
+ }, [courseData, completedExercises, course]);
 
-  function isLessonLocked(index: number) {
+  function isLocked(index: number) {
     if (!course || !courseData) return true;
-    return checkExerciseLocked(completedLessons, course, courseData.exercises[index].id, courseData.exercises);
+    return isExerciseLocked(completedExercises, course, courseData.exercises[index].id, courseData.exercises);
   }
 
 if (loading) {
@@ -268,7 +269,7 @@ if (!courseData) {
  </View>
 )}
 
- {upNextLessons.length > 0 && (
+ {upNextExercises.length > 0 && (
  <View style={styles.section}>
  <View style={styles.sectionHeader}>
  <Text style={[styles.sectionTitle, { color: derivedColors.primary }]}>
@@ -283,21 +284,21 @@ if (!courseData) {
  {courseData.moduleName}
  </Text>
  </View>
- <View style={styles.lessonList}>
- {upNextLessons.map((lesson, index) => {
+ <View style={styles.exerciseList}>
+  {upNextExercises.map((exercise, index) => {
  const globalIdx = nextExerciseIdx + 1 + index;
- const locked = isLessonLocked(globalIdx);
- const isLast = index === upNextLessons.length - 1;
+ const locked = isLocked(globalIdx);
+ const isLast = index === upNextExercises.length - 1;
  return (
  <Pressable
- key={lesson.id}
+ key={exercise.id}
  disabled={locked}
  onPress={() =>
- router.push(`/learn/${course}/${lesson.id}`)
+ router.push(`/learn/${course}/${exercise.id}`)
  }
  style={({ pressed }) => [
-  styles.lessonRow,
-  isLast && styles.lessonRowLast,
+  styles.exerciseRow,
+  isLast && styles.exerciseRowLast,
   { borderColor: locked ? "transparent" : colors.outlineVariant },
   pressed &&
   !locked && {
@@ -307,7 +308,7 @@ if (!courseData) {
   >
   <View
   style={[
-  styles.lessonIcon,
+  styles.exerciseIcon,
   { borderColor: locked ? "transparent" : colors.outlineVariant },
   ]}
  >
@@ -325,10 +326,10 @@ if (!courseData) {
  />
 )}
  </View>
- <View style={styles.lessonInfo}>
+ <View style={styles.exerciseInfo}>
  <Text
  style={[
- styles.lessonTitle,
+ styles.exerciseTitle,
  {
  color: locked
  ? colors.textSecondary
@@ -336,17 +337,17 @@ if (!courseData) {
  },
  ]}
  >
- {lesson.title}
+ {exercise.title}
  </Text>
  <Text
  style={[
- styles.lessonModule,
+ styles.exerciseModule,
  { color: colors.textSecondary },
  ]}
  >
  {isLast
  ? `Earn ${courseData.moduleName} Badge`
-  : lesson.module}
+  : exercise.module}
  </Text>
  </View>
  <MaterialCommunityIcons
@@ -361,7 +362,7 @@ if (!courseData) {
  </View>
 )}
 
- {completedLessonItems.length > 0 && (
+ {completedExerciseItems.length > 0 && (
  <View
  style={[
  styles.completedSection,
@@ -373,10 +374,10 @@ if (!courseData) {
   <Text style={[styles.completedLabel, { color: colors.onSurface }]}>
   Completed
   </Text>
- {completedLessonItems.map((lesson) => (
+  {completedExerciseItems.map((exercise) => (
  <Pressable
- key={lesson.id}
- onPress={() => router.push(`/learn/${course}/${lesson.id}`)}
+ key={exercise.id}
+ onPress={() => router.push(`/learn/${course}/${exercise.id}`)}
  style={({ pressed }) => [
  styles.completedRow,
  pressed && { backgroundColor: colors.surfaceContainerHigh },
@@ -393,7 +394,7 @@ if (!courseData) {
  { color: colors.onSurface },
  ]}
  >
- {lesson.title}
+ {exercise.title}
  </Text>
  <MaterialCommunityIcons
  name="chevron-right"
@@ -424,13 +425,7 @@ const styles = StyleSheet.create({
  justifyContent: "center",
  paddingHorizontal: 24,
  },
- notFoundInner: {
- flex: 1,
- alignItems: "center",
- justifyContent: "center",
- paddingHorizontal: 24,
- },
- notFoundTitle: {
+  notFoundTitle: {
  fontFamily: "JetBrainsMono",
  fontSize: 20,
  fontWeight: "700",
@@ -461,29 +456,17 @@ const styles = StyleSheet.create({
  backButtonPressed: {
  opacity: 0.5,
  },
- backButtonText: {
- fontFamily: "JetBrainsMono",
- fontSize: 14,
- },
-  headerTitle: {
+  backButtonText: {
   fontFamily: "JetBrainsMono",
-  fontSize: 24,
-  fontWeight: "900",
-  fontStyle: "italic",
+  fontSize: 14,
   },
- headerRight: {
- flexDirection: "row",
- alignItems: "center",
- gap: 4,
- width: 40,
- justifyContent: "flex-end",
- },
- lessonCount: {
- fontFamily: "JetBrainsMono",
- fontSize: 18,
- fontWeight: "700",
- },
- scrollView: {
+   headerTitle: {
+   fontFamily: "JetBrainsMono",
+   fontSize: 24,
+   fontWeight: "900",
+   fontStyle: "italic",
+   },
+  scrollView: {
  flex: 1,
  },
  scrollContent: {
@@ -554,38 +537,38 @@ sectionSubtitle: {
   fontWeight: "400",
   flexShrink: 1,
 },
- lessonList: {
+ exerciseList: {
  gap: 4,
  },
- lessonRow: {
+ exerciseRow: {
  flexDirection: "row",
  alignItems: "center",
  gap: 16,
  padding: 16,
  borderWidth: 1,
  },
- lessonRowLast: {
+ exerciseRowLast: {
  marginTop: 16,
  borderStyle: "dashed",
  borderWidth: 2,
  opacity: 0.6,
  },
- lessonIcon: {
+ exerciseIcon: {
  width: 48,
  height: 48,
  alignItems: "center",
  justifyContent: "center",
  borderWidth: 1,
  },
- lessonInfo: {
+ exerciseInfo: {
  flex: 1,
  },
- lessonTitle: {
+ exerciseTitle: {
  fontFamily: "JetBrainsMono",
  fontSize: 18,
  fontWeight: "700",
  },
- lessonModule: {
+ exerciseModule: {
  fontFamily: "JetBrainsMono",
  fontSize: 11,
  fontWeight: "700",

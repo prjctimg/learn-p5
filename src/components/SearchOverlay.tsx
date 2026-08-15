@@ -4,7 +4,7 @@ import { WebView } from "react-native-webview";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useThemeContext } from "./ThemeProvider";
 import { Colors } from "../constants/Colors";
-import { P5_SYMBOLS, P5_SYMBOLS_BY_NAME, P5SymbolView } from "../data/reference";
+import { P5_SYMBOLS, P5_SYMBOLS_BY_NAME, P5Symbol } from "../data/reference";
 import { getExampleHtml } from "../utils/editor/exampleHtml";
 import { highlightSyntax, parseDescription, extractDescribeCaption, stripDescribe } from "../utils/referenceRender";
 import Fuse from "fuse.js";
@@ -23,7 +23,7 @@ export default function SearchOverlay({ visible, onClose, inline = false, onSele
   const { colorScheme, derivedColors } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
   const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState<P5SymbolView | null>(null);
+  const [selected, setSelected] = useState<P5Symbol | null>(null);
   const inputRef = useRef<TextInput>(null);
 
   const fuse = useMemo(
@@ -52,7 +52,7 @@ export default function SearchOverlay({ visible, onClose, inline = false, onSele
     onClose();
   }, [onClose]);
 
-  const handleSelect = useCallback((sym: P5SymbolView) => {
+  const handleSelect = useCallback((sym: P5Symbol) => {
     if (inline) {
       setSelected(sym);
       Keyboard.dismiss();
@@ -165,7 +165,7 @@ function SymbolInlineDetail({
   onClose,
   onSymbolPress,
 }: {
-  sym: P5SymbolView;
+  sym: P5Symbol;
   colorScheme: "light" | "dark";
   onBack: () => void;
   onClose: () => void;

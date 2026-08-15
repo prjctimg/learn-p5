@@ -4,8 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useDrawerContext } from "../contexts/DrawerContext";
 import { useThemeContext } from "./ThemeProvider";
-
-const SETTING_KEY = "setting_showDrawerFab";
+import { STORAGE_KEYS } from "../constants/StorageKeys";
 
 export default function DrawerFab() {
   const { openDrawer } = useDrawerContext();
@@ -13,7 +12,7 @@ export default function DrawerFab() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    AsyncStorage.getItem(SETTING_KEY).then((val) => {
+    AsyncStorage.getItem(STORAGE_KEYS.settingShowDrawerFab).then((val) => {
       setVisible(val !== "false");
     });
   }, []);

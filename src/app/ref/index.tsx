@@ -1,15 +1,14 @@
 import { useLocalSearchParams, useRouter, useIsFocused } from "expo-router";
 import { useRef, useMemo, useState, useCallback } from "react";
-import { View, Text, FlatList, ScrollView, Pressable, Alert, StyleSheet, Linking } from "react-native";
+import { View, Text, FlatList, ScrollView, Pressable, StyleSheet, Linking } from "react-native";
 
 import { WebView } from "react-native-webview";
 import Header from "../../components/Header";
 import Breadcrumbs from "../../components/Breadcrumbs";
-import { P5_SYMBOLS_BY_NAME, P5_SYMBOLS, P5SymbolView as P5Symbol } from "../../data/reference";
+import { P5_SYMBOLS_BY_NAME, P5_SYMBOLS, P5Symbol } from "../../data/reference";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useThemeContext } from "../../components/ThemeProvider";
 import { Colors } from "../../constants/Colors";
-import { useModuleProgress } from "../../hooks/useModuleProgress";
 import { useShakeDetection } from "../../hooks/useShakeDetection";
 import ReportErrorModal from "../../components/ReportErrorModal";
 import SearchOverlay from "../../components/SearchOverlay";
@@ -31,22 +30,13 @@ const MODULE_GROUPS = P5_SYMBOLS.reduce<{ module: string; symbols: P5Symbol[] }[
   const sym = P5_SYMBOLS_BY_NAME[symbol];
   const { colorScheme, derivedColors } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
-  const { getLockedCourseName } = useModuleProgress();
   const currentIndex = sym ? P5_SYMBOLS.indexOf(sym) : -1;
   const prevSym = currentIndex > 0 ? P5_SYMBOLS[currentIndex - 1] : null;
   const nextSym = currentIndex >= 0 && currentIndex < P5_SYMBOLS.length - 1 ? P5_SYMBOLS[currentIndex + 1] : null;
 
- const handleSymbolPress = (name: string) => {
- const lockedCourse = getLockedCourseName(P5_SYMBOLS_BY_NAME[name]?.module ?? "");
- if (lockedCourse) {
- Alert.alert(
- "Course Locked",
- `Complete the "${lockedCourse}" course to unlock this reference.`
- );
- return;
- }
- router.push(`/ref?symbol=${name}`);
- };
+  const handleSymbolPress = (name: string) => {
+    router.push(`/ref?symbol=${name}`);
+  };
 
  if (!sym) {
   return (

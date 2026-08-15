@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useThemeContext } from "./ThemeProvider";
+import { STORAGE_KEYS } from "../constants/StorageKeys";
 import { luminance } from "../utils/colorUtils";
 
 export default function StatusBarAccent() {
@@ -9,7 +10,7 @@ export default function StatusBarAccent() {
   const [showStatusBar, setShowStatusBar] = useState(true);
 
   useEffect(() => {
-    AsyncStorage.getItem("setting_showStatusBar").then((val) => {
+    AsyncStorage.getItem(STORAGE_KEYS.settingShowStatusBar).then((val) => {
       setShowStatusBar(val !== "false");
     });
   }, []);

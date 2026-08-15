@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { STORAGE_KEYS } from "../constants/StorageKeys";
 
 export interface Achievement {
   id: string;
@@ -53,9 +54,9 @@ interface CompletionEvent {
   durationMs?: number;
 }
 
-const UNLOCKED_KEY = "achievements_unlocked";
-const UNLOCKED_AT_KEY = "achievements_unlocked_at";
-const EVENTS_KEY = "completion_events";
+const UNLOCKED_KEY = STORAGE_KEYS.achievementsUnlocked;
+const UNLOCKED_AT_KEY = STORAGE_KEYS.achievementsUnlockedAt;
+const EVENTS_KEY = STORAGE_KEYS.completionEvents;
 
 function dateKey(ts: number): string {
   return new Date(ts).toISOString().split("T")[0];
@@ -115,12 +116,12 @@ export async function recordCompletion(
 
   // Weekender: streak >= 7. Read live so the badge can unlock the moment
   // the streak crosses the threshold, independent of completion timing.
-  const streakCountStr = await AsyncStorage.getItem("streak_count");
+  const streakCountStr = await AsyncStorage.getItem(STORAGE_KEYS.streakCount);
   const streakCount = streakCountStr ? parseInt(streakCountStr, 10) : 0;
   grant("weekender", () => streakCount >= 7);
 
   // Backfill: any achievement unlocked before timestamps were tracked gets
-// today's date so its badge modal can still show an "earned" date.
+  // today's date so its badge modal can still show an "earned" date.
   let backfilled = false;
   for (const id of unlocked) {
     if (!unlockedAt[id]) {

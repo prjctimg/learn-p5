@@ -10,6 +10,7 @@ import DrawerProvider from "../contexts/DrawerContext";
 import SideDrawer from "../components/SideDrawer";
 import DrawerFab from "../components/DrawerFab";
 import { DEFAULTS } from "../constants/Defaults";
+import { STORAGE_KEYS } from "../constants/StorageKeys";
 
 export default function RootLayout() {
   const [loaded] = useFonts({
@@ -22,7 +23,7 @@ export default function RootLayout() {
   const [accentColor, setAccentColor] = useState(DEFAULTS.ctaColor);
 
   useEffect(() => {
-    AsyncStorage.getItem("setting_ctaColor").then((val) => {
+    AsyncStorage.getItem(STORAGE_KEYS.settingCtaColor).then((val) => {
       if (val) setAccentColor(val);
     });
   }, []);

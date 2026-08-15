@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { STORAGE_KEYS } from "../constants/StorageKeys";
 
-const ONBOARDING_KEY = "hasCompletedOnboarding";
-const ONBOARDING_DATA_KEY = "onboardingData";
+const ONBOARDING_KEY = STORAGE_KEYS.hasCompletedOnboarding;
+const ONBOARDING_DATA_KEY = STORAGE_KEYS.onboardingData;
 
 interface OnboardingData {
   experience: string | null;

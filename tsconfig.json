@@ -9,7 +9,8 @@
       "@/assets/*": [
         "./assets/*"
       ]
-    }
+    },
+    "lib": ["ESNext"]
   },
   "include": [
     "**/*.ts",

@@ -1,4 +1,4 @@
-function hexToRgb(hex: string): { r: number; g: number; b: number } {
+export function hexToRgb(hex: string): { r: number; g: number; b: number } {
   const h = hex.replace("#", "");
   return {
     r: parseInt(h.substring(0, 2), 16),
@@ -7,7 +7,7 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } {
   };
 }
 
-function rgbToHex(r: number, g: number, b: number): string {
+export function rgbToHex(r: number, g: number, b: number): string {
   return (
     "#" +
     [r, g, b]
@@ -16,7 +16,7 @@ function rgbToHex(r: number, g: number, b: number): string {
   );
 }
 
-function rgbToHsl(r: number, g: number, b: number): { h: number; s: number; l: number } {
+export function rgbToHsl(r: number, g: number, b: number): { h: number; s: number; l: number } {
   r /= 255;
   g /= 255;
   b /= 255;
@@ -33,7 +33,7 @@ function rgbToHsl(r: number, g: number, b: number): { h: number; s: number; l: n
   return { h: h * 360, s: s * 100, l: l * 100 };
 }
 
-function hslToRgb(h: number, s: number, l: number): { r: number; g: number; b: number } {
+export function hslToRgb(h: number, s: number, l: number): { r: number; g: number; b: number } {
   h /= 360;
   s /= 100;
   l /= 100;
@@ -58,7 +58,7 @@ function hslToRgb(h: number, s: number, l: number): { r: number; g: number; b: n
   };
 }
 
-function hslToHex(h: number, s: number, l: number): string {
+export function hslToHex(h: number, s: number, l: number): string {
   const { r, g, b } = hslToRgb(h, s, l);
   return rgbToHex(r, g, b);
 }
@@ -71,7 +71,7 @@ export function luminance(r: number, g: number, b: number): number {
   return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
 }
 
-function contrastRatio(hex1: string, hex2: string): number {
+export function contrastRatio(hex1: string, hex2: string): number {
   const a = hexToRgb(hex1);
   const b = hexToRgb(hex2);
   const l1 = luminance(a.r, a.g, a.b);
@@ -81,7 +81,7 @@ function contrastRatio(hex1: string, hex2: string): number {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
-function bestOnColor(bgHex: string): string {
+export function bestOnColor(bgHex: string): string {
   return contrastRatio(bgHex, "#FFFFFF") >= 4.5 ? "#FFFFFF" : "#1C1B1F";
 }
 
@@ -149,23 +149,5 @@ export function deriveColorsFromAccent(accentHex: string, isDark: boolean): Deri
     onTertiaryContainer: hslToHex(h, Math.min(100, s - 15), Math.max(10, l - 35)),
     outline: hslToHex(h, Math.min(100, s - 35), Math.max(35, l - 5)),
     outlineVariant: hslToHex(h, Math.min(100, s - 45), Math.min(85, l + 15)),
-  };
-}
-
-export function deriveAccentShades(accentHex: string): {
-  dark: string;
-  medium: string;
-  light: string;
-  veryLight: string;
-} {
-  const rgb = hexToRgb(accentHex);
-  const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
-  const h = hsl.h;
-  const s = hsl.s;
-  return {
-    dark: hslToHex(h, Math.min(100, s + 10), Math.max(15, hsl.l - 25)),
-    medium: accentHex,
-    light: hslToHex(h, Math.min(100, s - 5), Math.min(90, hsl.l + 20)),
-    veryLight: hslToHex(h, Math.min(100, s + 5), Math.min(97, hsl.l + 35)),
   };
 }

@@ -1,26 +1,9 @@
-- Read exact versioned docs at <https://docs.expo.dev/versions/v55.0.0/> before writing code.
-- **Never run `npm install` on the dev machine.** Only edit `package.json`; the user handles installation separately.
-- After editing `package.json`, update this file only if new conventions or build steps were introduced.
+# AGENTS.md
 
-## Course data (YAML)
-
-- Edit `src/data/courses/*.yaml` only — the generated `.ts` files are gitignored build artifacts.
-- After YAML edits, re-run `npm run build-courses`, then `npm run check-exercises` (validates each task's rules against its `solution`).
-- Also run `npm run check-symbols` after YAML edits (flags unknown p5/JS symbols in `startingCode`/`solution` blocks).
-
-## Generated artifacts
-
-- `src/data/courses/*.ts`, `src/utils/p5Source.ts`, `src/utils/p5Version.ts`, `src/data/reference.generated.json`, and `src/data/p5Assets.generated.json` are gitignored and regenerated on `postinstall`/`npm start`. Never commit them.
-- `p5Assets.generated.json` holds base64 `data:` URIs for p5.js-website example assets (`.obj`, `.frag`, `.vert`, fonts, images, etc.) keyed by `__P5_ASSET__<basename>__P5_ASSET__` placeholders inserted into example strings by `scripts/generate-reference.mjs`. `getExampleHtml` substitutes the placeholders at render time so `load*()` calls resolve to bundled blobs offline. Large media (`.mp3`/`.mp4`/`.mov`/`.wav`/`.webm`/`.ogv`) and files >1.5MB are skipped.
-
-## Release cadence
-
-- Every push to `main` must bump the version and create a matching `vX.Y.Z` tag (enforced by the Husky `pre-push` hook).
-- Bump with `sh scripts/bump-version.sh` — no args auto-increments the patch (`0.6.118 → 0.6.119`); pass an explicit `<X.Y.Z>` to override.
-- Workflow: edit → `sh scripts/bump-version.sh` → `git add -A` → commit `v0.6.119: <subject>` → `git tag v0.6.119` → `git push origin main && git push origin v0.6.119`.
-
-## Loop Engineering
-
-- See `.opencode/`: `STATE.md` (loop memory), `LOOP.md` (active loops), `loop-budget.md` (token caps), `loop-constraints.md` (binding rules), `loop-run-log.md` (history), `gate.yaml` (path denylist + auto-merge allowlist), `skills/` (triage + verifier).
-- Start a loop: `opencode run "Run loop-triage. Update .opencode/STATE.md."`
-- Verify changes: `opencode run "Verify diff in worktree" --agent verifier`
+- Consult the official versioned docs of the main dependencies before writing code:
+  - p5.js: <https://p5js.org/reference/>
+  - Expo SDK: <https://docs.expo.dev/versions/v55.0.0/>
+- Never run `npm install` on the dev machine. Edit `package.json` only; the user handles installation.
+- Course content lives in `src/data/courses/*.yaml`. After editing it, run `npm run build-courses`, then `npm run check-exercises` and `npm run check-symbols`.
+- Exercise validation shares one dependency-free core, `src/utils/editor/validation.ts`, used by both the WebView bridge (`src/utils/editor/exerciseHtml.ts`) and the dev checks. Rule types: `functionCall`, `functionExists`, `canvasSize`, `pixelMatch`, `expectedPixels`. Do not fork it.
+- Generated artifacts (`src/data/courses/*.ts`, `src/utils/p5Source.ts`, `src/utils/p5Version.ts`, `src/data/*.generated.json`, `src/utils/editor/*.generated.ts`, `src/constants/fontBase64.generated.ts`) are build outputs — never commit or hand-edit them.

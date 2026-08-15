@@ -13,9 +13,8 @@ exercises:
     startingCode: |
       let data;
 
-      async function setup() {
+      function setup() {
         createCanvas(400, 400);
-        data = await loadJSON("data:application/json;base64,eyJ1c2VySWQiOjEsImlkIjoxLCJ0aXRsZSI6ImRlbGVjdHVzIGF1dCBhdXRlbSIsImNvbXBsZXRlZCI6ZmFsc2V9");
       }
 
       function draw() {
@@ -71,15 +70,14 @@ exercises:
     startingCode: |
       let img;
 
-      async function setup() {
+      function setup() {
         createCanvas(400, 400);
-        img = await loadImage("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAIAAAAiOjnJAAACFElEQVR4nO3SQQkAIADAQHOazqZawiHIwQXYY2OuDdeN5wV8yVgkjEXCWCSMRcJYJIxFwlgkjEXCWCSMRcJYJIxFwlgkjEXCWCSMRcJYJIxFwlgkjEXCWCSMRcJYJIxFwlgkjEXCWCSMRcJYJIxFwlgkjEXCWCSMRcJYJIxFwlgkjEXCWCSMRcJYJIxFwlgkjEXCWCSMRcJYJIxFwlgkjEXCWCSMRcJYJIxFwlgkjEXCWCSMRcJYJIxFwlgkjEXCWCSMRcJYJIxFwlgkjEXCWCSMRcJYJIxFwlgkjEXCWCSMRcJYJIxFwlgkjEXCWCSMRcJYJIxFwlgkjEXCWCSMRcJYJIxFwlgkjEXCWCSMRcJYJIxFwlgkjEXCWCSMRcJYJIxFwlgkjEXCWCSMRcJYJIxFwlgkjEXCWCSMRcJYJIxFwlgkjEXCWCSMRcJYJIxFwlgkjEXCWCSMRcJYJIxFwlgkjEXCWCSMRcJYJIxFwlgkjEXCWCSMRcJYJIxFwlgkjEXCWCSMRcJYJIxFwlgkjEXCWCSMRcJYJIxFwlgkjEXCWCSMRcJYJIxFwlgkjEXCWCSMRcJYJIxFwlgkjEXCWCSMRcJYJIxFwlgkjEXCWCSMRcJYJIxF4gAWb0xNY8eaggAAAABJRU5ErkJggg==");
       }
 
       function draw() {
         background(240);
-        image(img, 100, 100, 200, 200);
       }
+
     solution: |
       let img;
 
@@ -115,17 +113,16 @@ exercises:
     startingCode: |
       let lines;
 
-      async function setup() {
+      function setup() {
         createCanvas(400, 400);
-        lines = await loadStrings("data:text/plain;base64,SGVsbG8gZnJvbSBwNSEKTGluZSAyOiBsb2FkaW5nIHRleHQgb2ZmbGluZS4KTGluZSAzOiBubyBuZXR3b3JrIG5lZWRlZC4=");
       }
 
       function draw() {
         background(240);
         fill(0);
         textSize(16);
-        text(lines.join("\n"), 50, 50, 300, 300);
       }
+
     solution: |
       let lines;
 
