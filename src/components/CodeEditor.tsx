@@ -12,6 +12,7 @@ interface CodeEditorProps {
   onChange: (code: string) => void;
   onRun: () => void;
   isRunning: boolean;
+  wordWrap?: boolean;
 }
 
 interface CodeEditorHandle {
@@ -22,13 +23,13 @@ interface CodeEditorHandle {
 const CODE_FONT_SIZE_KEY = "setting_codeFontSize";
 
 const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
-  function CodeEditor({ code, onChange, onRun, isRunning }, ref) {
+  function CodeEditor({ code, onChange, onRun, isRunning, wordWrap }, ref) {
     const [webViewReady, setWebViewReady] = useState(false);
     const [fontSize, setFontSize] = useState(22);
     const webViewRef = useRef<WebView>(null);
     const { colorScheme, ctaColor } = useThemeContext();
     const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
-    const editorHtml = useMemo(() => getEditorHtml(colorScheme === "dark" ? "dark" : "light", ctaColor), [colorScheme, ctaColor]);
+    const editorHtml = useMemo(() => getEditorHtml(colorScheme === "dark" ? "dark" : "light", ctaColor, wordWrap), [colorScheme, ctaColor, wordWrap]);
 
     useEffect(() => {
       AsyncStorage.getItem(CODE_FONT_SIZE_KEY).then((val) => {

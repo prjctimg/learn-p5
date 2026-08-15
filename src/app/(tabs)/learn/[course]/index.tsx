@@ -3,11 +3,11 @@ import { View, Text, ScrollView, Pressable, ActivityIndicator, StyleSheet } from
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Button from "../../../components/Button";
-import { loadCourse } from "../../../utils/courseLoader";
-import { Course } from "../../../data/types";
-import { useThemeContext } from "../../../components/ThemeProvider";
-import { Colors } from "../../../constants/Colors";
+import Button from "../../../../components/Button";
+import { loadCourse } from "../../../../utils/courseLoader";
+import { Course } from "../../../../data/types";
+import { useThemeContext } from "../../../../components/ThemeProvider";
+import { Colors } from "../../../../constants/Colors";
 
 export default function CourseDetail() {
  const { course } = useLocalSearchParams<{ course: string }>();
@@ -370,7 +370,14 @@ if (loading) {
  COMPLETED
  </Text>
  {completedLessonItems.map((lesson) => (
- <View key={lesson.id} style={styles.completedRow}>
+ <Pressable
+ key={lesson.id}
+ onPress={() => router.push(`/learn/${course}/${lesson.id}`)}
+ style={({ pressed }) => [
+ styles.completedRow,
+ pressed && { backgroundColor: colors.surfaceContainerHigh },
+ ]}
+ >
  <MaterialCommunityIcons
  name="check-circle"
  size={18}
@@ -384,8 +391,13 @@ if (loading) {
  >
  {lesson.title}
  </Text>
- </View>
-))}
+ <MaterialCommunityIcons
+ name="chevron-right"
+ size={16}
+ color={colors.textSecondary}
+ />
+ </Pressable>
+ ))}
  </View>
 )}
  </ScrollView>
@@ -601,6 +613,5 @@ const styles = StyleSheet.create({
  fontFamily: "JetBrainsMono",
  fontSize: 16,
  fontWeight: "400",
- textDecorationLine: "line-through",
  },
 });

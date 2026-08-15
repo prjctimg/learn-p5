@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { View, Text, FlatList, Pressable, StyleSheet, ScrollView } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import Header from "../../components/Header";
+import Header from "../../../components/Header";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useThemeContext } from "../../components/ThemeProvider";
-import { Colors } from "../../constants/Colors";
+import { useThemeContext } from "../../../components/ThemeProvider";
+import { Colors } from "../../../constants/Colors";
 
 interface ErrorLogEntry {
   timestamp: string;

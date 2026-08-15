@@ -27,7 +27,7 @@ const BACKSPACE_DELAY = 300;
 const BACKSPACE_INTERVAL = 60;
 
 export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], onToggleKeyboard, onToggleQwerty, onBackspace, onNewline, onFormat, onCursorMove, onOpenReference, keyboardVisible = true, usedFunctions = [], height = 280 }: ProgrammingKeyboardProps) {
- const { colorScheme } = useThemeContext();
+ const { colorScheme, derivedColors } = useThemeContext();
  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
  const isMediumKeyboard = height === 280;
  const [hintType, setHintType] = useState<"string" | "array" | null>(null);
@@ -119,12 +119,12 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
  onPress={onToggleQwerty}
  style={({ pressed }) => [
  styles.keyboardIcon,
- { backgroundColor: pressed ? colors.primaryContainer : colors.primaryContainer + "33" },
+ { backgroundColor: pressed ? derivedColors.primaryContainer : derivedColors.primaryContainer + "33" },
  ]}
  accessibilityRole="button"
  accessibilityLabel="QWERTY keyboard"
  >
- <MaterialCommunityIcons name="keyboard" size={20} color={colors.primary} />
+ <MaterialCommunityIcons name="keyboard" size={20} color={derivedColors.primary} />
  </Pressable>
  <Pressable
  onPressIn={startBackspaceRepeat}
@@ -166,7 +166,7 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
  styles.symbolButton,
  {
  backgroundColor: hinted
- ? pressed ? colors.primaryContainer : colors.primaryContainer + "4D"
+ ? pressed ? derivedColors.primaryContainer : derivedColors.primaryContainer + "4D"
  : pressed ? colors.outlineVariant : colors.surfaceContainer,
  },
  ]}
@@ -207,12 +207,12 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
  onLongPress={() => handleExerciseLongPress(sym)}
  style={({ pressed }) => [
  styles.exerciseKey,
- { backgroundColor: pressed ? colors.primaryContainer : colors.surfaceContainer },
+ { backgroundColor: pressed ? derivedColors.primaryContainer : colors.surfaceContainer },
  ]}
  accessibilityRole="button"
  accessibilityLabel={sym}
  >
- <Text style={[styles.exerciseKeyText, { color: colors.primary }]}>
+  <Text style={[styles.exerciseKeyText, { color: derivedColors.primary }]}>
  {sym}
  </Text>
  </Pressable>
@@ -235,7 +235,7 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
  backgroundColor: isDisabled
  ? colors.surfaceContainerHigh
  : pressed
- ? colors.primaryContainer
+ ? derivedColors.primaryContainer
  : colors.surfaceContainerHigh,
  opacity: isDisabled ? 0.4 : 1,
  },
@@ -243,7 +243,7 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
  accessibilityRole="button"
  accessibilityLabel={fn.label}
  >
- <Text style={[styles.functionKeyText, { color: isDisabled ? colors.onSurfaceVariant : colors.primary }]}>
+ <Text style={[styles.functionKeyText, { color: isDisabled ? colors.onSurfaceVariant : derivedColors.primary }]}>
  {fn.label}
  </Text>
  </Pressable>
@@ -259,7 +259,7 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
  onPress={() => onCursorMove?.('up')}
  style={({ pressed }) => [
  styles.dpadBtn,
- { backgroundColor: pressed ? colors.primaryContainer : colors.surfaceContainer },
+ { backgroundColor: pressed ? derivedColors.primaryContainer : colors.surfaceContainer },
  ]}
  accessibilityRole="button"
  accessibilityLabel="Move cursor up"
@@ -272,7 +272,7 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
  onPress={() => onCursorMove?.('left')}
  style={({ pressed }) => [
  styles.dpadBtn,
- { backgroundColor: pressed ? colors.primaryContainer : colors.surfaceContainer },
+ { backgroundColor: pressed ? derivedColors.primaryContainer : colors.surfaceContainer },
  ]}
  accessibilityRole="button"
  accessibilityLabel="Move cursor left"
@@ -284,7 +284,7 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
  onPress={() => onCursorMove?.('right')}
  style={({ pressed }) => [
  styles.dpadBtn,
- { backgroundColor: pressed ? colors.primaryContainer : colors.surfaceContainer },
+ { backgroundColor: pressed ? derivedColors.primaryContainer : colors.surfaceContainer },
  ]}
  accessibilityRole="button"
  accessibilityLabel="Move cursor right"
@@ -297,7 +297,7 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
  onPress={() => onCursorMove?.('down')}
  style={({ pressed }) => [
  styles.dpadBtn,
- { backgroundColor: pressed ? colors.primaryContainer : colors.surfaceContainer },
+ { backgroundColor: pressed ? derivedColors.primaryContainer : colors.surfaceContainer },
  ]}
  accessibilityRole="button"
  accessibilityLabel="Move cursor down"

@@ -34,7 +34,7 @@
 | Course listing screen | ✅ Done | `src/app/learn/index.tsx` — loads from `courseLoader.ts` |
 | Course detail / exercise list | ✅ Done | `src/app/learn/[course]/index.tsx` |
 | Exercise screen | ✅ Done | `src/app/learn/[course]/[id].tsx` (951 lines) |
-| — Code editor (CodeMirror 6 in WebView) | ✅ Done | Syntax highlighting, p5.js autocomplete, vim mode |
+| — Code editor (CodeMirror 6 in WebView) | ✅ Done | Syntax highlighting, p5.js autocomplete, word wrap |
 | — Sketch preview (p5.js in WebView) | ✅ Done | Runs user code, shows canvas output |
 | — Run / Reset / Copy / Format buttons | ✅ Done | In editor header |
 | — Fullscreen sketch toggle | ✅ Done | Maximize button in preview header |
@@ -93,7 +93,6 @@
 | p5.js function autocomplete | ✅ Done | From generated reference data |
 | Syntax highlighting (p5.js aware) | ✅ Done | Highlights p5 functions in custom color |
 | Bracket matching | ✅ Done | CodeMirror built-in |
-| Vim mode (via @replit/codemirror-vim) | ✅ Done | Toggle in exercise settings modal |
 | Multiple editor themes | ✅ Done | 6 themes: p5-learn, dark, light, monokai, dracula, nord |
 | Font size adjustment | ✅ Done | 14–30px, persisted |
 | Code background (auto/light/dark) | ✅ Done | Persisted |

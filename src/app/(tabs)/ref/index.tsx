@@ -1,15 +1,16 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useRef, useMemo, useState, useCallback } from "react";
-import { View, Text, FlatList, Pressable, Alert, StyleSheet, Linking, TextInput } from "react-native";
+import { View, Text, FlatList, Pressable, Alert, StyleSheet, Linking, TextInput, Modal, Keyboard } from "react-native";
 import { WebView } from "react-native-webview";
-import Header from "../../components/Header";
-import { P5_SYMBOLS_BY_NAME, P5_SYMBOLS, P5_FUNCTION_NAMES, P5SymbolView as P5Symbol } from "../../data/reference";
+import Header from "../../../components/Header";
+import { P5_SYMBOLS_BY_NAME, P5_SYMBOLS, P5_FUNCTION_NAMES, GENERATED_REFERENCE, P5SymbolView as P5Symbol } from "../../../data/reference";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useThemeContext } from "../../components/ThemeProvider";
-import { Colors } from "../../constants/Colors";
-import { useModuleProgress } from "../../hooks/useModuleProgress";
-import { getEditorTheme } from "../../utils/editor/themes";
-import { getExampleHtml } from "../../utils/editor/exampleHtml";
+import { useThemeContext } from "../../../components/ThemeProvider";
+import { Colors } from "../../../constants/Colors";
+import { useModuleProgress } from "../../../hooks/useModuleProgress";
+import { useShakeDetection } from "../../../hooks/useShakeDetection";
+import { getEditorTheme } from "../../../utils/editor/themes";
+import { getExampleHtml } from "../../../utils/editor/exampleHtml";
 import Fuse from "fuse.js";
 
 const MODULE_GROUPS = P5_SYMBOLS.reduce<{ module: string; symbols: P5Symbol[] }[]>((acc, sym) => {
@@ -127,7 +128,100 @@ function parseDescription(
  return parts.length > 0 ? parts : [<Text key="full" style={{ color: colors.textSecondary }}>{text}</Text>];
 }
 
-function SymbolDetail({ symbol }: { symbol: string }) {
+function SearchOverlay({ visible, onClose, onSelectSymbol }: { visible: boolean; onClose: () => void; onSelectSymbol: (name: string) => void }) {
+ const { colorScheme, derivedColors } = useThemeContext();
+ const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+ const [query, setQuery] = useState("");
+ const inputRef = useRef<TextInput>(null);
+
+ const fuse = useMemo(
+   () =>
+     new Fuse(P5_SYMBOLS, {
+       keys: [
+         { name: "name", weight: 2 },
+         { name: "description", weight: 1 },
+         { name: "module", weight: 1 },
+       ],
+       threshold: 0.4,
+       includeScore: true,
+     }),
+   []
+ );
+
+ const results = useMemo(() => {
+   if (!query.trim()) return P5_SYMBOLS.slice(0, 20);
+   return fuse.search(query.trim()).map((r) => r.item);
+ }, [query, fuse]);
+
+ const handleClose = useCallback(() => {
+   setQuery("");
+   Keyboard.dismiss();
+   onClose();
+ }, [onClose]);
+
+ return (
+   <Modal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
+     <Pressable style={styles.modalOverlay} onPress={handleClose}>
+       <Pressable style={[styles.modalCard, { backgroundColor: colors.surfaceContainerHigh }]} onPress={() => {}}>
+         <View style={styles.modalHeader}>
+           <View style={[styles.modalSearchBar, { backgroundColor: colors.surfaceContainer, borderColor: colors.outlineVariant }]}>
+             <MaterialCommunityIcons name="magnify" size={18} color={colors.onSurfaceVariant} />
+             <TextInput
+               ref={inputRef}
+               value={query}
+               onChangeText={setQuery}
+               placeholder="Search symbols..."
+               placeholderTextColor={colors.onSurfaceVariant}
+               style={[styles.modalSearchInput, { color: colors.onSurface }]}
+               autoCapitalize="none"
+               autoCorrect={false}
+               autoFocus
+             />
+             {query.length > 0 && (
+               <Pressable onPress={() => setQuery("")} accessibilityRole="button" accessibilityLabel="Clear search">
+                 <MaterialCommunityIcons name="close-circle" size={18} color={colors.onSurfaceVariant} />
+               </Pressable>
+             )}
+           </View>
+           <Pressable onPress={handleClose} style={styles.modalCloseBtn} accessibilityRole="button" accessibilityLabel="Close search">
+             <MaterialCommunityIcons name="close" size={22} color={colors.onSurfaceVariant} />
+           </Pressable>
+         </View>
+         <View style={[styles.modalDivider, { backgroundColor: colors.outlineVariant }]} />
+         <FlatList
+           data={results}
+           keyExtractor={(item) => item.name}
+           style={styles.modalResultsList}
+           contentContainerStyle={{ paddingBottom: 8 }}
+           renderItem={({ item: sym }) => (
+             <Pressable
+               onPress={() => { handleClose(); onSelectSymbol(sym.name); }}
+               style={({ pressed }) => [
+                 styles.modalResultRow,
+                 pressed && { backgroundColor: colors.surfaceContainer },
+               ]}
+               accessibilityRole="button"
+               accessibilityLabel={`View reference for ${sym.name}`}
+             >
+               <View style={styles.flex1}>
+                 <Text style={[styles.modalResultName, { color: derivedColors.primary }]}>
+                   {sym.name}()
+                 </Text>
+                 <Text style={[styles.modalResultModule, { color: colors.textSecondary }]}>
+                   {sym.module}
+                 </Text>
+               </View>
+               <MaterialCommunityIcons name="chevron-right" size={18} color={colors.onSurfaceVariant} />
+             </Pressable>
+           )}
+         />
+       </Pressable>
+     </Pressable>
+   </Modal>
+ );
+}
+
+function SymbolDetail({ symbol, onOpenSearch }: { symbol: string; onOpenSearch: () => void }) {
  const router = useRouter();
  const sym = P5_SYMBOLS_BY_NAME[symbol];
  const { colorScheme, derivedColors } = useThemeContext();
@@ -143,7 +237,7 @@ function SymbolDetail({ symbol }: { symbol: string }) {
  Alert.alert(
  "Module Locked",
  `Complete the "${lockedCourse}" course to unlock this reference.`
-);
+ );
  return;
  }
  router.push(`/ref?symbol=${name}`);
@@ -177,7 +271,7 @@ function SymbolDetail({ symbol }: { symbol: string }) {
  </Pressable>
  </View>
  </View>
-);
+ );
  }
 
  const syntaxTokens = highlightSyntax(sym.syntax.replace(/\n/g, " "), colorScheme);
@@ -338,11 +432,19 @@ function SymbolDetail({ symbol }: { symbol: string }) {
  View on p5js.org
  </Text>
  </Pressable>
- </>
+  </>
  }
  />
+ <Pressable
+   onPress={onOpenSearch}
+   style={[styles.searchFab, { backgroundColor: derivedColors.primary }]}
+   accessibilityRole="button"
+   accessibilityLabel="Search symbols"
+ >
+   <MaterialCommunityIcons name="magnify" size={24} color={colors.onPrimary} />
+ </Pressable>
  </View>
-);
+ );
 }
 
 export default function Reference() {
@@ -350,100 +452,40 @@ export default function Reference() {
  const router = useRouter();
  const { colorScheme, derivedColors } = useThemeContext();
  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
- const [searchQuery, setSearchQuery] = useState("");
- const inputRef = useRef<TextInput>(null);
+ const [searchVisible, setSearchVisible] = useState(false);
 
- const fuse = useMemo(
- () =>
- new Fuse(P5_SYMBOLS, {
- keys: [
- { name: "name", weight: 2 },
- { name: "description", weight: 1 },
- { name: "module", weight: 1 },
- ],
- threshold: 0.4,
- includeScore: true,
- }),
- []
-);
+ useShakeDetection(
+   useCallback(() => setSearchVisible(true), []),
+   { enabled: true, haptic: true }
+ );
 
- const filteredSymbols = useMemo(() => {
- if (!searchQuery.trim()) return null;
- return fuse.search(searchQuery.trim()).map((r) => r.item);
- }, [searchQuery, fuse]);
-
- const handleClearSearch = useCallback(() => {
- setSearchQuery("");
- inputRef.current?.blur();
- }, []);
+ const handleSelectSymbol = useCallback((name: string) => {
+   router.push(`/ref?symbol=${name}`);
+ }, [router]);
 
  if (symbol) {
- return <SymbolDetail symbol={symbol} />;
+ return <SymbolDetail symbol={symbol} onOpenSearch={() => setSearchVisible(true)} />;
  }
 
  return (
  <View style={[styles.flex1, { backgroundColor: colors.surface }]}>
  <Header title="Reference" />
- <View
- style={[
- styles.searchContainer,
- { backgroundColor: colors.surfaceContainer, borderColor: colors.outlineVariant },
- ]}
- >
- <MaterialCommunityIcons name="magnify" size={18} color={colors.onSurfaceVariant} />
- <TextInput
- ref={inputRef}
- value={searchQuery}
- onChangeText={setSearchQuery}
- placeholder="Search symbols..."
- placeholderTextColor={colors.onSurfaceVariant}
- style={[styles.searchInput, { color: colors.onSurface }]}
- autoCapitalize="none"
- autoCorrect={false}
- />
- {searchQuery.length > 0 && (
- <Pressable onPress={handleClearSearch} accessibilityRole="button" accessibilityLabel="Clear search">
- <MaterialCommunityIcons name="close" size={18} color={colors.onSurfaceVariant} />
- </Pressable>
-)}
- </View>
  <FlatList
  style={[styles.flex1, { paddingHorizontal: 16 }]}
- contentContainerStyle={{ paddingTop: 12, paddingBottom: 32 }}
- ListHeaderComponent={
- !filteredSymbols ? (
- <Text style={[styles.bodyBase, { color: colors.textSecondary, marginBottom: 24 }]}>
- Browse the full p5.js API reference and documentation.
- </Text>
-) : null
- }
- data={filteredSymbols || MODULE_GROUPS}
- keyExtractor={filteredSymbols ? (item) => item.name : (item) => item.module}
- renderItem={
- filteredSymbols
- ? ({ item: sym }) => (
- <Pressable
- key={sym.name}
- onPress={() => router.push(`/ref?symbol=${sym.name}`)}
- style={({ pressed }) => [
- styles.flexRow,
- styles.symbolRow,
- pressed && { opacity: 0.6 },
- ]}
- accessibilityRole="button"
- accessibilityLabel={`View reference for ${sym.name}`}
- >
-  <Text style={[styles.monoSm, { color: derivedColors.primary, flex: 1 }]}>
-  {sym.name}()
-  </Text>
-  <MaterialCommunityIcons
-  name="chevron-right"
-  size={18}
-  color={colors.onSurfaceVariant}
-  />
-  </Pressable>
-)
-  : ({ item: group }) => (
+ contentContainerStyle={{ paddingTop: 12, paddingBottom: 80 }}
+   ListHeaderComponent={
+     <View style={{ marginBottom: 24 }}>
+       <Text style={[styles.headlineXl, { color: colors.onSurface, marginBottom: 4 }]}>
+         p5.js Reference
+       </Text>
+       <Text style={[styles.bodySm, { color: colors.textSecondary }]}>
+         v{GENERATED_REFERENCE.metadata.p5Version}
+       </Text>
+     </View>
+   }
+ data={MODULE_GROUPS}
+ keyExtractor={(item) => item.module}
+ renderItem={({ item: group }) => (
  <View style={{ marginBottom: 24 }}>
  <Text style={[styles.moduleGroupTitle, { color: colors.onSurface, marginBottom: 12 }]}>
  {group.module}
@@ -460,22 +502,35 @@ export default function Reference() {
  accessibilityRole="button"
  accessibilityLabel={`View reference for ${sym.name}`}
  >
-  <Text style={[styles.monoSm, { color: derivedColors.primary, flex: 1 }]}>
-  {sym.name}()
-  </Text>
-  <MaterialCommunityIcons
-  name="chevron-right"
-  size={18}
-  color={colors.onSurfaceVariant}
-  />
-  </Pressable>
+   <Text style={[styles.monoSm, { color: derivedColors.primary, flex: 1 }]}>
+   {sym.name}()
+   </Text>
+   <MaterialCommunityIcons
+   name="chevron-right"
+   size={18}
+   color={colors.onSurfaceVariant}
+   />
+   </Pressable>
 ))}
-  </View>
-)
+   </View>
+ )
  }
  />
+ <Pressable
+   onPress={() => setSearchVisible(true)}
+   style={[styles.searchFab, { backgroundColor: derivedColors.primary }]}
+   accessibilityRole="button"
+   accessibilityLabel="Search symbols"
+ >
+   <MaterialCommunityIcons name="magnify" size={24} color={colors.onPrimary} />
+ </Pressable>
+ <SearchOverlay
+   visible={searchVisible}
+   onClose={() => setSearchVisible(false)}
+   onSelectSymbol={handleSelectSymbol}
+ />
  </View>
-);
+ );
 }
 
 const styles = StyleSheet.create({
@@ -640,5 +695,86 @@ const styles = StyleSheet.create({
  fontFamily: "JetBrainsMono",
  fontSize: 13,
  fontWeight: "700",
+ },
+ searchFab: {
+   position: "absolute",
+   right: 20,
+   bottom: 24,
+   width: 56,
+   height: 56,
+   borderRadius: 28,
+   alignItems: "center",
+   justifyContent: "center",
+   elevation: 4,
+   shadowColor: "#000",
+   shadowOffset: { width: 0, height: 2 },
+   shadowOpacity: 0.25,
+   shadowRadius: 4,
+ },
+ modalOverlay: {
+   flex: 1,
+   backgroundColor: "rgba(0,0,0,0.5)",
+   justifyContent: "center",
+   alignItems: "center",
+   padding: 24,
+ },
+ modalCard: {
+   width: "100%",
+   maxWidth: 400,
+   maxHeight: "70%",
+   borderRadius: 16,
+   padding: 20,
+ },
+ modalHeader: {
+   flexDirection: "row",
+   alignItems: "center",
+   gap: 12,
+ },
+ modalSearchBar: {
+   flex: 1,
+   flexDirection: "row",
+   alignItems: "center",
+   paddingHorizontal: 12,
+   height: 44,
+   borderRadius: 12,
+   borderWidth: 1,
+   gap: 8,
+ },
+ modalSearchInput: {
+   flex: 1,
+   fontSize: 15,
+   height: 44,
+   padding: 0,
+ },
+ modalCloseBtn: {
+   width: 36,
+   height: 36,
+   borderRadius: 18,
+   alignItems: "center",
+   justifyContent: "center",
+ },
+ modalDivider: {
+   height: StyleSheet.hairlineWidth,
+   marginTop: 12,
+   marginBottom: 4,
+ },
+ modalResultsList: {
+   marginTop: 4,
+ },
+ modalResultRow: {
+   flexDirection: "row",
+   alignItems: "center",
+   paddingVertical: 12,
+   paddingHorizontal: 4,
+ },
+ modalResultName: {
+   fontFamily: "JetBrainsMono",
+   fontSize: 15,
+   fontWeight: "700",
+ },
+ modalResultModule: {
+   fontFamily: "JetBrainsMono",
+   fontSize: 12,
+   marginTop: 2,
  },
 });

@@ -4,7 +4,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const STREAK_COUNT_KEY = "streak_count";
 const LAST_VISIT_KEY = "streak_last_visit";
 const LONGEST_STREAK_KEY = "streak_longest";
-const LAST_TIER_KEY = "streak_last_tier";
 const STREAK_TOAST_PENDING_KEY = "streak_toast_pending";
 
 export const STREAK_TIERS = [3, 7, 14, 30, 100, 365];

@@ -1,6 +1,6 @@
 import { getEditorTheme } from './themes';
 
-export function getBridgeScript(colorScheme: 'light' | 'dark', themeId?: string, ctaColor?: string): string {
+export function getBridgeScript(colorScheme: 'light' | 'dark', themeId?: string, ctaColor?: string, wordWrap?: boolean): string {
   const theme = getEditorTheme(themeId || 'p5-learn', colorScheme, ctaColor);
   const cta = ctaColor || '#ED225D';
   const ctaH = cta.replace('#', '');
@@ -36,6 +36,12 @@ var tags = _CM.tags;
 var indentSelection = _CM.indentSelection;
 var autocompletion = _CM.autocompletion;
 var CompletionContext = _CM.CompletionContext;
+var lineWrapping = _CM.lineWrapping;
+var prettierLib = _CM.prettier;
+var prettierEstree = _CM.prettierPluginEstree;
+var prettierAcorn = _CM.prettierPluginAcorn;
+
+var WORD_WRAP = ${wordWrap ?? false};
 
 var P5_COMPLETIONS = ["setup","draw","createCanvas","background","fill","circle","stroke","strokeWeight","line","rect","ellipse","noStroke","noFill","noLoop","arc","point","quad","square","triangle","ellipseMode","rectMode"];
 
@@ -123,27 +129,30 @@ const p5Highlight = HighlightStyle.define([
 let view;
 
 function createEditor(initialCode) {
+  var exts = [
+    basicSetup,
+    javascript(),
+    p5Theme,
+    syntaxHighlighting(p5Highlight),
+    autocompletion({ override: [p5CompletionSource] }),
+    keymap.of([{
+      key: 'Ctrl-s',
+      run: () => true,
+    }, {
+      key: 'Cmd-s',
+      run: () => true,
+    }]),
+    EditorView.updateListener.of((update) => {
+      if (update.docChanged) {
+        postCodeChange(update.state.doc.toString());
+      }
+    }),
+  ];
+  if (WORD_WRAP) exts.push(lineWrapping);
+
   const state = EditorState.create({
     doc: initialCode || '',
-    extensions: [
-      basicSetup,
-      javascript(),
-      p5Theme,
-      syntaxHighlighting(p5Highlight),
-      autocompletion({ override: [p5CompletionSource] }),
-      keymap.of([{
-        key: 'Ctrl-s',
-        run: () => true,
-      }, {
-        key: 'Cmd-s',
-        run: () => true,
-      }]),
-      EditorView.updateListener.of((update) => {
-        if (update.docChanged) {
-          postCodeChange(update.state.doc.toString());
-        }
-      }),
-    ],
+    extensions: exts,
   });
 
   view = new EditorView({
@@ -257,10 +266,29 @@ function handleMessage(data) {
       }
     } else if (msg.type === 'format') {
       if (view) {
-        view.dispatch({ selection: { anchor: 0, head: view.state.doc.length } });
-        indentSelection({ state: view.state, dispatch: view.dispatch });
-        view.dispatch({ selection: { anchor: view.state.doc.length } });
-        view.focus();
+        try {
+          var codeToFormat = view.state.doc.toString();
+          var pw = WORD_WRAP ? 80 : 120;
+          if (typeof prettierLib !== 'undefined' && prettierLib.format) {
+            prettierLib.format(codeToFormat, {
+              parser: 'acorn',
+              plugins: [prettierEstree, prettierAcorn],
+              printWidth: pw,
+              semi: true,
+              singleQuote: false,
+            }).then(function(formatted) {
+              if (formatted !== codeToFormat) {
+                view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: formatted } });
+              }
+              view.focus();
+            }).catch(function() { view.focus(); });
+          } else {
+            view.dispatch({ selection: { anchor: 0, head: view.state.doc.length } });
+            indentSelection({ state: view.state, dispatch: view.dispatch });
+            view.dispatch({ selection: { anchor: view.state.doc.length } });
+            view.focus();
+          }
+        } catch(e) { view.focus(); }
       }
     }
   } catch(e) {}
@@ -271,9 +299,27 @@ document.addEventListener('message', function(event) { handleMessage(event.data)
 
 document.getElementById('formatBtn').addEventListener('click', function() {
   if (view) {
-    view.dispatch({ selection: { anchor: 0, head: view.state.doc.length } });
-    indentSelection({ state: view.state, dispatch: view.dispatch });
-    view.dispatch({ selection: { anchor: view.state.doc.length } });
+    try {
+      var codeToFormat = view.state.doc.toString();
+      var pw = WORD_WRAP ? 80 : 120;
+      if (typeof prettierLib !== 'undefined' && prettierLib.format) {
+        prettierLib.format(codeToFormat, {
+          parser: 'acorn',
+          plugins: [prettierEstree, prettierAcorn],
+          printWidth: pw,
+          semi: true,
+          singleQuote: false,
+        }).then(function(formatted) {
+          if (formatted !== codeToFormat) {
+            view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: formatted } });
+          }
+        }).catch(function() {});
+      } else {
+        view.dispatch({ selection: { anchor: 0, head: view.state.doc.length } });
+        indentSelection({ state: view.state, dispatch: view.dispatch });
+        view.dispatch({ selection: { anchor: view.state.doc.length } });
+      }
+    } catch(e) {}
   }
 });
 

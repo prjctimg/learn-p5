@@ -62,9 +62,13 @@ export function getExerciseHtml(params: {
   codeFontSize?: number;
   ctaColor?: string;
   validation?: ValidationRule[];
+  wordWrap?: boolean;
 }): string {
   const colors = Colors[params.colorScheme === "dark" ? "dark" : "light"];
   const ctaColor = params.ctaColor ?? colors.cta;
+  const cta = ctaColor;
+  const ctaH = cta.replace('#', '');
+  const ctaRgb = `${parseInt(ctaH.substring(0,2),16)},${parseInt(ctaH.substring(2,4),16)},${parseInt(ctaH.substring(4,6),16)}`;
   const themeColors = getEditorTheme(params.editorTheme || "p5-learn", params.colorScheme, ctaColor);
   const editorBg = themeColors.bg;
   const fontSize = params.codeFontSize ?? 22;
@@ -95,15 +99,6 @@ export function getExerciseHtml(params: {
     padding: 16px;
     background: ${colors.surfaceContainer};
   }
-  .description-title {
-    font-family: "JetBrains Mono", monospace;
-    font-weight: 700;
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: ${colors.primary};
-    margin-bottom: 8px;
-  }
   .description-text {
     font-size: 15px;
     line-height: 22px;
@@ -113,7 +108,7 @@ export function getExerciseHtml(params: {
   .symbol {
     font-weight: 700;
     text-decoration: underline;
-    color: ${colors.primary};
+    color: ${cta};
     cursor: pointer;
   }
 
@@ -237,8 +232,8 @@ export function getExerciseHtml(params: {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: ${colors.primary};
-    background: ${colors.primaryContainer}66;
+    color: ${cta};
+    background: rgba(${ctaRgb}, 0.12);
     padding: 2px 6px;
     border-radius: 3px;
   }
@@ -348,7 +343,6 @@ export function getExerciseHtml(params: {
 <body>
 
 <div class="description">
-  <div class="description-title">Exercise ${params.exerciseNumber}: ${escapeHtml(params.title)}</div>
   <div class="description-text">${instructionHtml}</div>
 </div>
 
@@ -396,7 +390,7 @@ ${
 <script>${p5Source}</script>
 <script>${CODEMIRROR_BUNDLE}</script>
 <script>
-${getBridgeScript(params.startingCode, params.solution, themeColors, params.colorScheme, params.exerciseNumber, ctaColor, params.validation)}
+${getBridgeScript(params.startingCode, params.solution, themeColors, params.colorScheme, params.exerciseNumber, ctaColor, params.validation, params.wordWrap)}
 </script>
 
 ${params.exerciseNumber === 1 ? `
@@ -414,8 +408,7 @@ ${params.exerciseNumber === 1 ? `
 </html>`;
 }
 
-function getBridgeScript(startingCode: string, solution: string, theme: EditorThemeColors, colorScheme: "light" | "dark", exerciseNumber?: number, ctaColor?: string, validation?: ValidationRule[]): string {
-  const isDark = colorScheme === "dark";
+function getBridgeScript(startingCode: string, solution: string, theme: EditorThemeColors, colorScheme: "light" | "dark", exerciseNumber?: number, ctaColor?: string, validation?: ValidationRule[], wordWrap?: boolean): string {
   const codeArg = jsString(startingCode);
   const solutionArg = jsString(solution);
   const cta = ctaColor ?? '#FF69B4';
@@ -430,7 +423,6 @@ function getBridgeScript(startingCode: string, solution: string, theme: EditorTh
     activeBg,
     selBg,
     keyword: kwColor,
-    definitionKeyword: defKwColor,
     string: strColor,
     number: numColor,
     comment: commentColor,
@@ -457,6 +449,12 @@ var Decoration = _CM.Decoration;
 var DecorationSet = _CM.DecorationSet;
 var autocompletion = _CM.autocompletion;
 var CompletionContext = _CM.CompletionContext;
+var lineWrapping = _CM.lineWrapping;
+var prettierLib = _CM.prettier;
+var prettierEstree = _CM.prettierPluginEstree;
+var prettierAcorn = _CM.prettierPluginAcorn;
+
+var WORD_WRAP = ${wordWrap ?? false};
 
 let view;
 const INITIAL_CODE = ${codeArg};
@@ -521,8 +519,6 @@ P5FnPlugin.prototype.update = function(update) {
 var p5FnPlugin = ViewPlugin.fromClass(P5FnPlugin, {
   decorations: function(v) { return v.decorations; }
 });
-
-var vimEnabled = false;
 
 var p5Theme = EditorView.theme({
   '&': { backgroundColor: '${editorBg}', color: '${fg}' },
@@ -589,13 +585,7 @@ function getExtensions() {
       }
     }),
   ];
-  if (vimEnabled) {
-    try {
-      exts.push(_CM.vim());
-    } catch (_e) {
-      // vim extension not available in the bundle
-    }
-  }
+  if (WORD_WRAP) { exts.push(lineWrapping); }
   return exts;
 }
 
@@ -746,12 +736,12 @@ function postOpenRef(symbol) {
   }
 }
 
-function renderSketch(containerId, code) {
+async function renderSketch(containerId, code) {
   var container = document.getElementById(containerId);
   if (!container) return;
 
   if (container.__p5) {
-    container.__p5.remove();
+    try { await container.__p5.remove(); } catch (e) { console.error('Error removing p5 instance:', e); }
     container.__p5 = null;
   }
   container.innerHTML = '';
@@ -770,6 +760,9 @@ function renderSketch(containerId, code) {
   } catch(e) {
     console.error('Sketch render error:', e);
     container.innerHTML = '<div style="color:${cta};padding:16px;font-family:\\"JetBrains Mono\\",monospace">\\u26A0 ' + e.message + '</div>';
+    if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+      window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'sketchError', error: e.message, container: containerId }));
+    }
   }
 }
 
@@ -820,15 +813,6 @@ function handleMessage(data) {
           }
           view.focus();
         } else {
-          postEditorReady();
-        }
-        break;
-      case 'toggleVimMode':
-        vimEnabled = msg.enabled;
-        if (view) {
-          var code = view.state.doc.toString();
-          view.destroy();
-          initEditorView(code);
           postEditorReady();
         }
         break;
@@ -888,29 +872,57 @@ function handleMessage(data) {
         break;
       case 'format':
         if (view) {
-          view.dispatch({ selection: { anchor: 0, head: view.state.doc.length } });
-          indentSelection({ state: view.state, dispatch: view.dispatch });
-          view.dispatch({ selection: { anchor: view.state.doc.length } });
-          view.focus();
+          try {
+            var codeToFormat = view.state.doc.toString();
+            var pw = WORD_WRAP ? 80 : 120;
+            if (typeof prettierLib !== 'undefined' && prettierLib.format) {
+              prettierLib.format(codeToFormat, {
+                parser: 'acorn',
+                plugins: [prettierEstree, prettierAcorn],
+                printWidth: pw,
+                semi: true,
+                singleQuote: false,
+              }).then(function(formatted) {
+                if (formatted !== codeToFormat) {
+                  view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: formatted } });
+                }
+                view.focus();
+              }).catch(function() { view.focus(); });
+            } else {
+              view.dispatch({ selection: { anchor: 0, head: view.state.doc.length } });
+              indentSelection({ state: view.state, dispatch: view.dispatch });
+              view.dispatch({ selection: { anchor: view.state.doc.length } });
+              view.focus();
+            }
+          } catch(e) { view.focus(); }
         }
         break;
       case 'runSketch':
         if (!view) { console.error('Editor not initialized'); break; }
         var userCode = view.state.doc.toString();
+        if (!userCode || !userCode.trim()) {
+          if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+            window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'validationFailed', reason: 'Editor is empty — write some code first' }));
+          }
+          break;
+        }
         renderSketch('user-sketch', userCode);
         if (typeof window.__tutRun === 'function') window.__tutRun();
         var validationPassed = false;
+        try {
         if (VALIDATION_RULES.length > 0) {
           var allPassed = true;
           var failReason = '';
           for (var ri = 0; ri < VALIDATION_RULES.length; ri++) {
             var rule = VALIDATION_RULES[ri];
             if (rule.type === 'functionCall') {
-              var callRe = new RegExp('\\b' + rule.name + '\\s*\\(([^)]*)\\)', 'g');
+              var callRe = new RegExp('\\b' + rule.name + '[\\s]*\\(', 'g');
+              var argRe = new RegExp('\\b' + rule.name + '[\\s]*\\(([^)]*)\\)', 'g');
               var matches = [];
               var rm;
-              while ((rm = callRe.exec(userCode)) !== null) {
-                var args = rm[1].split(',').map(function(a) { return a.trim(); }).filter(Boolean);
+              while ((rm = argRe.exec(userCode)) !== null) {
+                var rawArgs = rm[1];
+                var args = rawArgs.split(',').map(function(a) { return a.trim(); }).filter(function(a) { return a.length > 0; });
                 matches.push(args);
               }
               if (matches.length === 0) {
@@ -951,10 +963,20 @@ function handleMessage(data) {
         } else {
           validationPassed = SOLUTION_CODE && userCode.trim() === SOLUTION_CODE.trim();
         }
+        } catch(ve) { console.error('Validation error:', ve); }
         if (validationPassed) {
           if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
             window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'exerciseComplete' }));
           }
+        }
+        if (typeof prettierLib !== 'undefined' && prettierLib.format) {
+          var postCode = view.state.doc.toString();
+          var pw2 = WORD_WRAP ? 80 : 120;
+          prettierLib.format(postCode, { parser: 'acorn', plugins: [prettierEstree, prettierAcorn], printWidth: pw2, semi: true, singleQuote: false }).then(function(formatted) {
+            if (formatted !== postCode) {
+              view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: formatted } });
+            }
+          }).catch(function() {});
         }
         setTimeout(function() {
           var el = document.getElementById('user-sketch');
@@ -970,6 +992,27 @@ function handleMessage(data) {
 
 window.addEventListener('message', function(event) { handleMessage(event.data); });
 document.addEventListener('message', function(event) { handleMessage(event.data); });
+
+(function() {
+  var lastScrollY = window.scrollY || 0;
+  var scrollTicking = false;
+  window.addEventListener('scroll', function() {
+    if (!scrollTicking) {
+      requestAnimationFrame(function() {
+        var currentY = window.scrollY || 0;
+        var diff = currentY - lastScrollY;
+        if (Math.abs(diff) > 10) {
+          if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+            window.ReactNativeWebView.postMessage(JSON.stringify({ type: diff > 0 ? 'scrollDown' : 'scrollUp' }));
+          }
+          lastScrollY = currentY;
+        }
+        scrollTicking = false;
+      });
+      scrollTicking = true;
+    }
+  }, { passive: true });
+})();
 
 document.querySelectorAll('.symbol').forEach(function(el) {
   el.addEventListener('click', function() {

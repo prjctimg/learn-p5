@@ -70,7 +70,7 @@ function buildOutput(byName, byModule, byClass) {
     functionNames,
     metadata: {
       generatedAt: new Date().toISOString(),
-      p5Version: "1.11.13",
+      p5Version: "2.3.0",
       symbolCount: Object.keys(byName).length,
     },
   };

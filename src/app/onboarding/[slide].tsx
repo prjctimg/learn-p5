@@ -1,9 +1,8 @@
-import { useState, useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { View, Text, TextInput, Pressable, ScrollView, StyleSheet } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useEffect } from "react";
 import Animated, {
  useSharedValue,
  useAnimatedStyle,

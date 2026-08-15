@@ -3,14 +3,14 @@ import { View, Text, Pressable, ScrollView, StyleSheet, Animated } from "react-n
 import { useRouter, useFocusEffect } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useThemeContext } from "../components/ThemeProvider";
-import { Colors } from "../constants/Colors";
-import Header from "../components/Header";
-import Toast from "../components/Toast";
-import StreakToast from "../components/StreakToast";
-import { loadAllCourses } from "../utils/courseLoader";
-import { Lesson, Course } from "../data/types";
-import { getStreakFromStorage, useStreak } from "../hooks/useStreak";
+import { useThemeContext } from "../../components/ThemeProvider";
+import { Colors } from "../../constants/Colors";
+import Header from "../../components/Header";
+import Toast from "../../components/Toast";
+import StreakToast from "../../components/StreakToast";
+import { loadAllCourses } from "../../utils/courseLoader";
+import { Lesson, Course } from "../../data/types";
+import { getStreakFromStorage, useStreak } from "../../hooks/useStreak";
 
 const LAST_GREETING_KEY = "last_greeting_period";
 

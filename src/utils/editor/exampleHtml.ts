@@ -7,7 +7,6 @@ import {
 
 export function getExampleHtml(code: string, colorScheme?: "light" | "dark"): string {
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
-  const escaped = code.replace(/<\/script>/gi, "<\\/script>");
   const needsWrap = !code.includes("function setup");
   const sketch = needsWrap ? `function setup() {\n  createCanvas(400, 400);\n${code.split("\n").map((l) => "  " + l).join("\n")}\n}` : code;
 

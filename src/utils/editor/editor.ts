@@ -2,9 +2,9 @@ import { CODEMIRROR_BUNDLE } from "./codemirror-bundle.generated";
 import { getStyles } from "./styles";
 import { getBridgeScript } from "./bridge";
 
-export function getEditorHtml(colorScheme: 'light' | 'dark' = 'dark', ctaColor?: string): string {
+export function getEditorHtml(colorScheme: 'light' | 'dark' = 'dark', ctaColor?: string, wordWrap?: boolean): string {
   const styles = getStyles(colorScheme, ctaColor);
-  const bridgeScript = getBridgeScript(colorScheme, undefined, ctaColor);
+  const bridgeScript = getBridgeScript(colorScheme, undefined, ctaColor, wordWrap);
   return `<!DOCTYPE html>
 <html lang="en">
 <head>

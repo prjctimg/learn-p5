@@ -5,20 +5,21 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { WebView } from "react-native-webview";
-import { useDrawerContext } from "../../../contexts/DrawerContext";
-import { useThemeContext } from "../../../components/ThemeProvider";
-import { Colors } from "../../../constants/Colors";
-import { DEFAULTS } from "../../../constants/Defaults";
-import ProgrammingKeyboard from "../../../components/ProgrammingKeyboard";
-import QwertyKeyboard from "../../../components/QwertyKeyboard";
-import Toast from "../../../components/Toast";
-import StreakToast from "../../../components/StreakToast";
-import { loadExercise, loadCourse } from "../../../utils/courseLoader";
-import { Lesson } from "../../../data/types";
-import { P5_FUNCTION_NAMES, ONCE_ONLY_P5_FUNCTIONS } from "../../../data/reference";
-import { getExerciseHtml } from "../../../utils/editor/exerciseHtml";
-import { EDITOR_THEMES, getThemeSwatches } from "../../../utils/editor/themes";
-import { useStreak } from "../../../hooks/useStreak";
+import { useBottomNavContext } from "../../../../contexts/BottomNavContext";
+import { useThemeContext } from "../../../../components/ThemeProvider";
+import { Colors } from "../../../../constants/Colors";
+import { DEFAULTS } from "../../../../constants/Defaults";
+import ProgrammingKeyboard from "../../../../components/ProgrammingKeyboard";
+import QwertyKeyboard from "../../../../components/QwertyKeyboard";
+
+import Toast from "../../../../components/Toast";
+import StreakToast from "../../../../components/StreakToast";
+import { loadExercise, loadCourse } from "../../../../utils/courseLoader";
+import { Lesson } from "../../../../data/types";
+import { P5_FUNCTION_NAMES, ONCE_ONLY_P5_FUNCTIONS } from "../../../../data/reference";
+import { getExerciseHtml } from "../../../../utils/editor/exerciseHtml";
+import { EDITOR_THEMES, getThemeSwatches } from "../../../../utils/editor/themes";
+import { useStreak } from "../../../../hooks/useStreak";
 
 const EXERCISE_CODE_PREFIX = "exerciseCode_";
 
@@ -91,7 +92,7 @@ export default function Exercise() {
  const { course, id } = useLocalSearchParams<{ course: string; id: string }>();
  const router = useRouter();
  const insets = useSafeAreaInsets();
- const { openDrawer } = useDrawerContext();
+  const { hide, show } = useBottomNavContext();
 const [state, dispatch] = useReducer(exerciseReducer, {
  exercise: null,
  loading: true,
@@ -107,14 +108,19 @@ const [state, dispatch] = useReducer(exerciseReducer, {
  const [webViewReady, setWebViewReady] = useState(false);
  const [editorViewReady, setEditorViewReady] = useState(false);
  const [keyboardVisible, setKeyboardVisible] = useState(true);
+
+ useEffect(() => {
+   if (keyboardVisible) hide();
+ }, [keyboardVisible]);
  const [keyboardMode, setKeyboardMode] = useState<"programming" | "qwerty">("programming");
- const [vimEnabled, setVimEnabled] = useState(false); const [codeSyncKey, setCodeSyncKey] = useState(0);
+ const [codeSyncKey, setCodeSyncKey] = useState(0);
  const codeRef = useRef(state.code);
  codeRef.current = state.code;
  const [editorTheme, setEditorTheme] = useState<string>("p5-learn");
  const [codeFontSize, setCodeFontSize] = useState<number>(DEFAULTS.codeFontSize);
  const [keyboardHeight, setKeyboardHeight] = useState<string>(DEFAULTS.keyboardHeight);
  const [settingsMenuVisible, setSettingsMenuVisible] = useState(false);
+ const [wordWrap, setWordWrap] = useState(false);
  const [toastKey, setToastKey] = useState(0);
  const [toastVisible, setToastVisible] = useState(false);
  const [toastMessage, setToastMessage] = useState("");
@@ -145,8 +151,9 @@ const [state, dispatch] = useReducer(exerciseReducer, {
     codeFontSize,
     ctaColor,
     validation: state.exercise.validation,
+    wordWrap,
   });
- }, [state.exercise, colorScheme, id, editorTheme, codeFontSize, ctaColor]);
+ }, [state.exercise, colorScheme, id, editorTheme, codeFontSize, ctaColor, wordWrap]);
 
  const styles = useMemo(
  () =>
@@ -214,15 +221,14 @@ const [state, dispatch] = useReducer(exerciseReducer, {
  menuButton: {
  padding: 8,
  },
- logoText: {
- fontFamily: "JetBrainsMono",
- fontSize: 20,
- fontWeight: "700",
- color: derivedColors.primary,
- marginLeft: 8,
- textTransform: "uppercase",
- letterSpacing: -0.5,
- },
+  logoText: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 20,
+    fontWeight: "700",
+    color: colors.onSurface,
+    marginLeft: 8,
+    letterSpacing: -0.5,
+  },
  spacer: {
  flex: 1,
  },
@@ -408,18 +414,40 @@ const [state, dispatch] = useReducer(exerciseReducer, {
     case "validationFailed":
       showToast(msg.reason || "Not quite right — check the instructions");
       break;
- case "goToNextLesson":
- loadCourse(course).then((courseData) => {
- if (!courseData) return;
- const currentIndex = courseData.lessons.findIndex((l) => l.id === id);
- if (currentIndex >= 0 && currentIndex < courseData.lessons.length - 1) {
- const nextLesson = courseData.lessons[currentIndex + 1];
- router.replace(`/learn/${course}/${nextLesson.id}`);
- } else {
- router.replace(`/learn/${course}`);
- }
- });
- break;
+    case "sketchError":
+      if (msg.error) {
+        (async () => {
+          const logEntry = {
+            timestamp: new Date().toISOString(),
+            route: `/learn/${course}/${id}`,
+            error: `[Sketch] ${msg.error}`,
+            context: msg.container || "unknown",
+          };
+          const existing = await AsyncStorage.getItem("error_log");
+          const logs = existing ? JSON.parse(existing) : [];
+          logs.push(logEntry);
+          await AsyncStorage.setItem("error_log", JSON.stringify(logs.slice(-20)));
+        })();
+      }
+      break;
+  case "goToNextLesson":
+  loadCourse(course).then((courseData) => {
+  if (!courseData) return;
+  const currentIndex = courseData.lessons.findIndex((l) => l.id === id);
+  if (currentIndex >= 0 && currentIndex < courseData.lessons.length - 1) {
+  const nextLesson = courseData.lessons[currentIndex + 1];
+  router.replace(`/learn/${course}/${nextLesson.id}`);
+  } else {
+  router.replace(`/learn/${course}`);
+  }
+  });
+  break;
+    case "scrollUp":
+      show();
+      break;
+    case "scrollDown":
+      if (keyboardVisible) hide();
+      break;
  }
  } catch {}
  },
@@ -457,24 +485,16 @@ const [state, dispatch] = useReducer(exerciseReducer, {
  }, [editorViewReady]);
 
  const handleToggleKeyboard = useCallback(() => {
- setKeyboardVisible((prev) => !prev);
+ setKeyboardVisible((prev) => {
+   const next = !prev;
+   if (!next) show();
+   return next;
+ });
  }, []);
 
  const handleToggleKeyboardMode = useCallback(() => {
  setKeyboardMode((prev) => (prev === "programming" ? "qwerty" : "programming"));
  }, []);
-
- const handleToggleVim = useCallback(
- (enabled: boolean) => {
- setVimEnabled(enabled);
- if (webViewRef.current && editorViewReady) {
- webViewRef.current.postMessage(
- JSON.stringify({ type: "toggleVimMode", enabled })
-);
- }
- },
- [editorViewReady]
-);
 
  const handleBackspace = useCallback(() => {
  if (webViewRef.current && editorViewReady) {
@@ -525,10 +545,13 @@ const [state, dispatch] = useReducer(exerciseReducer, {
  AsyncStorage.getItem("setting_codeFontSize").then((val) => {
  setCodeFontSize(val ? parseInt(val, 10) : DEFAULTS.codeFontSize);
  });
- AsyncStorage.getItem("setting_keyboardHeight").then((val) => {
- setKeyboardHeight(val || "medium");
- });
- }, [])
+  AsyncStorage.getItem("setting_keyboardHeight").then((val) => {
+  setKeyboardHeight(val || "medium");
+  });
+  AsyncStorage.getItem("setting_wordWrap").then((val) => {
+  setWordWrap(val === "true");
+  });
+  }, [])
 );
 
  const changeCodeFontSize = useCallback((delta: number) => {
@@ -551,9 +574,14 @@ const [state, dispatch] = useReducer(exerciseReducer, {
  }, []);
 
  const changeKeyboardHeight = useCallback((value: string) => {
- setKeyboardHeight(value);
- AsyncStorage.setItem("setting_keyboardHeight", value);
- }, []);
+  setKeyboardHeight(value);
+  AsyncStorage.setItem("setting_keyboardHeight", value);
+  }, []);
+
+ const changeWordWrap = useCallback((value: boolean) => {
+  setWordWrap(value);
+  AsyncStorage.setItem("setting_wordWrap", value.toString());
+  }, []);
 
  useEffect(() => {
  if (!state.completed || !state.exercise) return;
@@ -705,12 +733,12 @@ if (state.loading) {
  style={[styles.header, { paddingTop: insets.top + 4 }]}
  >
  <Pressable
- onPress={openDrawer}
+ onPress={() => router.back()}
  style={styles.menuButton}
  accessibilityRole="button"
- accessibilityLabel="Open navigation menu"
+ accessibilityLabel="Go back"
  >
- <MaterialCommunityIcons name="menu" size={24} color={colors.onSurfaceVariant} />
+ <MaterialCommunityIcons name="arrow-left" size={24} color={colors.onSurfaceVariant} />
  </Pressable>
   <Text style={styles.logoText} numberOfLines={1}>
   {state.exercise?.title ?? ""}
@@ -827,7 +855,7 @@ if (state.loading) {
  accessibilityRole="button"
  accessibilityLabel="Show custom keyboard"
  >
- <MaterialCommunityIcons name="keyboard-variant" size={24} color={colors.onSurface} />
+  <MaterialCommunityIcons name="keyboard-variant" size={24} color={derivedColors.primary} />
  </Pressable>
 )}
 
@@ -907,21 +935,6 @@ if (state.loading) {
  </View>
 
  <View style={styles.modalSection}>
- <Text style={[styles.modalSectionTitle, { color: colors.textSecondary }]}>Editing</Text>
- <View style={styles.modalRow}>
- <Text style={{ fontSize: 14, color: colors.onSurface }}>
- Vim Mode
- </Text>
-  <Switch
-  value={vimEnabled}
-  onValueChange={handleToggleVim}
-   trackColor={{ false: "#767577", true: ctaColor }}
-  thumbColor="#ffffff"
-  />
- </View>
- </View>
-
- <View style={styles.modalSection}>
  <Text style={[styles.modalSectionTitle, { color: colors.textSecondary }]}>Editor Theme</Text>
  <View style={[styles.modalRow, { flexWrap: "wrap", gap: 6 }]}>
  {Object.entries(EDITOR_THEMES).map(([key, theme]) => {
@@ -937,26 +950,23 @@ if (state.loading) {
  paddingHorizontal: 10,
  paddingVertical: 5,
  borderRadius: 6,
- backgroundColor:
- editorTheme === key
- ? derivedColors.primary
- : pressed
- ? derivedColors.primaryContainer + "33"
- : colors.surfaceContainer,
- })}
- >
- <View style={{ flexDirection: "row", gap: 2 }}>
- {swatches.map((s, i) => (
- <View key={i} style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: s }} />
-))}
- </View>
- <Text style={{
- fontFamily: "JetBrainsMono",
- fontSize: 11,
- fontWeight: "700",
- textTransform: "uppercase",
- letterSpacing: 0.5,
- color: editorTheme === key ? colors.onPrimary : colors.onSurfaceVariant,
+  borderBottomWidth: editorTheme === key ? 2 : 0,
+  borderBottomColor: editorTheme === key ? derivedColors.primary : "transparent",
+  backgroundColor: pressed ? derivedColors.primaryContainer + "33" : colors.surfaceContainer,
+  })}
+  >
+  <View style={{ flexDirection: "row", gap: 2 }}>
+  {swatches.map((s, i) => (
+  <View key={i} style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: s }} />
+  ))}
+  </View>
+  <Text style={{
+  fontFamily: "JetBrainsMono",
+  fontSize: 11,
+  fontWeight: "700",
+  textTransform: "uppercase",
+  letterSpacing: 0.5,
+  color: colors.onSurfaceVariant,
  }}>
  {theme.label}
  </Text>
@@ -966,41 +976,74 @@ if (state.loading) {
  </View>
  </View>
 
- <View style={styles.modalSection}>
- <Text style={[styles.modalSectionTitle, { color: colors.textSecondary }]}>Keyboard Height</Text>
- <View style={styles.modalRow}>
- {["small", "medium", "tall"].map((opt) => (
- <Pressable
- key={opt}
- onPress={() => changeKeyboardHeight(opt)}
- style={({ pressed }) => ({
- paddingHorizontal: 12,
- paddingVertical: 6,
- borderRadius: 6,
- minWidth: 42,
- alignItems: "center",
- backgroundColor:
- keyboardHeight === opt
- ? derivedColors.primary
- : pressed
- ? derivedColors.primaryContainer + "33"
- : colors.surfaceContainer,
- })}
- >
- <Text style={{
- fontFamily: "JetBrainsMono",
- fontSize: 11,
- fontWeight: "700",
- textTransform: "uppercase",
- letterSpacing: 0.5,
- color: keyboardHeight === opt ? colors.onPrimary : colors.onSurfaceVariant,
- }}>
- {opt === "small" ? "S" : opt === "medium" ? "M" : "T"}
- </Text>
- </Pressable>
+  <View style={styles.modalSection}>
+  <Text style={[styles.modalSectionTitle, { color: colors.textSecondary }]}>Keyboard Height</Text>
+  <View style={styles.modalRow}>
+  {["small", "medium", "tall"].map((opt) => (
+  <Pressable
+  key={opt}
+  onPress={() => changeKeyboardHeight(opt)}
+  style={({ pressed }) => ({
+  paddingHorizontal: 12,
+  paddingVertical: 6,
+  borderRadius: 6,
+  minWidth: 42,
+  alignItems: "center",
+  borderBottomWidth: keyboardHeight === opt ? 2 : 0,
+  borderBottomColor: keyboardHeight === opt ? derivedColors.primary : "transparent",
+  backgroundColor: pressed ? derivedColors.primaryContainer + "33" : colors.surfaceContainer,
+  })}
+  >
+  <Text style={{
+  fontFamily: "JetBrainsMono",
+  fontSize: 11,
+  fontWeight: "700",
+  textTransform: "uppercase",
+  letterSpacing: 0.5,
+  color: colors.onSurfaceVariant,
+  }}>
+  {opt === "small" ? "S" : opt === "medium" ? "M" : "T"}
+  </Text>
+  </Pressable>
 ))}
- </View>
- </View>
+  </View>
+  </View>
+
+  <View style={styles.modalSection}>
+  <Text style={[styles.modalSectionTitle, { color: colors.textSecondary }]}>Word Wrap</Text>
+  <View style={styles.modalRow}>
+  {[
+    { label: "Off", value: false },
+    { label: "On", value: true },
+  ].map((opt) => (
+  <Pressable
+  key={opt.label}
+  onPress={() => changeWordWrap(opt.value)}
+  style={({ pressed }) => ({
+  paddingHorizontal: 12,
+  paddingVertical: 6,
+  borderRadius: 6,
+  minWidth: 42,
+  alignItems: "center",
+  borderBottomWidth: wordWrap === opt.value ? 2 : 0,
+  borderBottomColor: wordWrap === opt.value ? derivedColors.primary : "transparent",
+  backgroundColor: pressed ? derivedColors.primaryContainer + "33" : colors.surfaceContainer,
+  })}
+  >
+  <Text style={{
+  fontFamily: "JetBrainsMono",
+  fontSize: 11,
+  fontWeight: "700",
+  textTransform: "uppercase",
+  letterSpacing: 0.5,
+  color: colors.onSurfaceVariant,
+  }}>
+  {opt.label}
+  </Text>
+  </Pressable>
+))}
+  </View>
+  </View>
  </Pressable>
  </Pressable>
  </Modal>
