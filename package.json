@@ -1,7 +1,7 @@
 {
   "name": "learn-p5",
   "main": "expo-router/entry",
-  "version": "0.6.120",
+  "version": "0.6.126",
   "scripts": {
     "postinstall": "npm run bundle-p5 && npm run gen-reference && npm run build-courses",
     "start": "npm run bundle-p5 && npm run gen-reference && npm run build-courses && npm run bundle-editor && expo start",

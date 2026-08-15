@@ -6,7 +6,70 @@ import jsyaml from "js-yaml";
 
 const WEBSITE_REPO = "https://github.com/processing/p5.js-website.git";
 const REF_DIR = "src/content/reference/en";
+const ASSETS_DIR = "public/assets";
 const OUT_FILE = path.resolve("src/data/reference.generated.json");
+const ASSETS_OUT_FILE = path.resolve("src/data/p5Assets.generated.json");
+
+// Match p5.js load* calls that reference /assets/<name> or "./<name>" files.
+// Captures the quote char and the path so we can rewrite to a placeholder
+// token that getExampleHtml substitutes with the real data: URI at render
+// time. Using placeholders (instead of inlining the base64 blob) keeps the
+// reference JSON small — the same asset (e.g. teapot.obj) is referenced by
+// dozens of examples and would otherwise be duplicated hundreds of times.
+const ASSET_PATH_RE = /(['"])\/assets\/([^'"\\\s)]+)\1/g;
+const RELATIVE_ASSET_RE = /(['"])\.\/([^'"\\\s)]+)\1/g;
+const ASSET_PLACEHOLDER_PREFIX = "__P5_ASSET__";
+
+// Extensions safe to bundle as base64 data: URIs. Large media (audio/video)
+// is skipped to avoid bloating the asset map — those example paths are left
+// untouched (the example will simply fail to load that asset in-preview,
+// which is preferable to a multi-MB JSON blob).
+const SKIP_EXTS = new Set([".mp3", ".ogg", ".wav", ".mp4", ".mov", ".webm", ".ogv"]);
+const MAX_ASSET_BYTES = 1_500_000; // 1.5 MB per file — skip larger assets
+
+const MIME_BY_EXT = {
+  ".obj": "text/plain",
+  ".mtl": "text/plain",
+  ".glsl": "text/plain",
+  ".frag": "text/plain",
+  ".vert": "text/plain",
+  ".txt": "text/plain",
+  ".csv": "text/csv",
+  ".json": "application/json",
+  ".xml": "application/xml",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".png": "image/png",
+  ".gif": "image/gif",
+  ".otf": "font/otf",
+  ".ttf": "font/ttf",
+};
+
+function mimeForExt(ext) {
+  return MIME_BY_EXT[ext.toLowerCase()] || "application/octet-stream";
+}
+
+function buildDataUri(filePath) {
+  const ext = path.extname(filePath).toLowerCase();
+  if (SKIP_EXTS.has(ext)) return null;
+  try {
+    const stat = fs.statSync(filePath);
+    if (stat.size > MAX_ASSET_BYTES) {
+      console.log(`  Skipping large asset (${stat.size} bytes): ${path.basename(filePath)}`);
+      return null;
+    }
+    const buf = fs.readFileSync(filePath);
+    return `data:${mimeForExt(ext)};base64,${buf.toString("base64")}`;
+  } catch {
+    return null;
+  }
+}
+
+function writeAssetMap(assetMap) {
+  fs.writeFileSync(ASSETS_OUT_FILE, JSON.stringify(assetMap, null, 2), "utf-8");
+  console.log(`Generated ${ASSETS_OUT_FILE}`);
+  console.log(`  ${Object.keys(assetMap).length} bundled assets`);
+}
 
 // p5 version stamp: read from the bundle-p5 generated artefact so the
 // reference metadata always matches the p5 version actually bundled.
@@ -155,11 +218,70 @@ function generateFromRepo() {
 
   console.log(`Found ${mdxFiles.length} reference files`);
 
+  // Pre-build a map of {basename → absolute path} for every file under
+  // public/assets so we can resolve `/assets/<name>` references and bundle
+  // them as base64 data: URIs in a separate asset map (placeholders are
+  // inserted into example strings and substituted at render time).
+  const assetsRoot = path.join(tmpDir, ASSETS_DIR);
+  const assetByBasename = new Map();
+  if (fs.existsSync(assetsRoot)) {
+    function walkAssets(dir) {
+      for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+        const full = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          walkAssets(full);
+        } else {
+          assetByBasename.set(entry.name, full);
+        }
+      }
+    }
+    walkAssets(assetsRoot);
+    console.log(`Found ${assetByBasename.size} bundled asset files`);
+  } else {
+    console.log("  No public/assets dir found — skipping asset inlining");
+  }
+
+  // Build the asset map: { placeholderToken → data: URI }. Each unique
+  // referenced basename gets one entry; example strings reference the
+  // placeholder so the base64 blob is stored once, not duplicated.
+  const assetMap = {};
+  const placeholderByBasename = new Map();
+  function getPlaceholder(basename) {
+    if (placeholderByBasename.has(basename)) return placeholderByBasename.get(basename);
+    const filePath = assetByBasename.get(basename);
+    if (!filePath) return null;
+    const uri = buildDataUri(filePath);
+    if (!uri) return null;
+    const token = `${ASSET_PLACEHOLDER_PREFIX}${basename}${ASSET_PLACEHOLDER_PREFIX}`;
+    assetMap[token] = uri;
+    placeholderByBasename.set(basename, token);
+    return token;
+  }
+
+  // Rewrite every `/assets/<name>` and `./<name>` reference in an example
+  // string to a placeholder token. Unresolved or skipped assets are left
+  // untouched. getExampleHtml substitutes the placeholders with data: URIs
+  // at render time.
+  function inlineAssets(code) {
+    if (!assetByBasename.size) return code;
+    let out = code;
+    out = out.replace(ASSET_PATH_RE, (full, quote, name) => {
+      const token = getPlaceholder(name);
+      return token ? `${quote}${token}${quote}` : full;
+    });
+    out = out.replace(RELATIVE_ASSET_RE, (full, quote, name) => {
+      const token = getPlaceholder(name);
+      return token ? `${quote}${token}${quote}` : full;
+    });
+    return out;
+  }
+
   const byName = {};
   const byModule = {};
   const byClass = {};
 
   let skipped = 0;
+  let assetsInlined = 0;
   for (const file of mdxFiles) {
     const content = fs.readFileSync(file, "utf-8");
     const frontmatter = parseMdxFrontmatter(content);
@@ -201,7 +323,13 @@ function generateFromRepo() {
         ? frontmatter.example
         : [frontmatter.example];
       symbol.examples = examples
-        .map((ex) => (typeof ex === "string" ? ex.trim() : String(ex).trim()))
+        .map((ex) => {
+          const raw = (typeof ex === "string" ? ex.trim() : String(ex).trim());
+          if (!raw) return "";
+          const inlined = inlineAssets(raw);
+          if (inlined !== raw) assetsInlined++;
+          return inlined;
+        })
         .filter((ex) => ex.length > 0);
     }
 
@@ -215,6 +343,9 @@ function generateFromRepo() {
   }
 
   if (skipped > 0) console.log(`  Skipped ${skipped} files (no frontmatter)`);
+  if (assetsInlined > 0) console.log(`  Inlined asset placeholders into ${assetsInlined} example strings`);
+
+  writeAssetMap(assetMap);
 
   const output = buildOutput(byName, byModule, byClass);
   writeOutput(output);
@@ -528,6 +659,9 @@ function generateStub() {
 
   const output = buildOutput(byName, byModule, byClass);
   writeOutput(output);
+  // Stub fallback has no access to p5.js-website assets — write an empty
+  // asset map so the render-time substitution lookup always finds a file.
+  writeAssetMap({});
 }
 
 const args = process.argv.slice(2);

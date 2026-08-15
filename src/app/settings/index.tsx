@@ -17,7 +17,6 @@ import { PROCESSING_COLOR_HEX } from "../../constants/ProcessingColors";
 
 const SETTINGS_KEYS = {
   dailyReminder: "setting_dailyReminder",
-  snippetAlternatives: "setting_snippetAlternatives",
   notificationHour: "setting_notificationHour",
   notificationMinute: "setting_notificationMinute",
   codeFontSize: "setting_codeFontSize",
@@ -85,7 +84,6 @@ export default function Settings() {
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
   const styles = createStyles(colors);
   const [dailyReminder, setDailyReminder] = useState(false);
-  const [snippetAlternatives, setSnippetAlternatives] = useState(false);
   const [notificationHour, setNotificationHour] = useState(18);
   const [notificationMinute, setNotificationMinute] = useState(0);
   const [codeFontSize, setCodeFontSize] = useState(DEFAULTS.codeFontSize);
@@ -108,7 +106,6 @@ export default function Settings() {
   useEffect(() => {
     AsyncStorage.multiGet([
       SETTINGS_KEYS.dailyReminder,
-      SETTINGS_KEYS.snippetAlternatives,
       SETTINGS_KEYS.notificationHour,
       SETTINGS_KEYS.notificationMinute,
       SETTINGS_KEYS.codeFontSize,
@@ -119,9 +116,8 @@ export default function Settings() {
       SETTINGS_KEYS.showDrawerFab,
       SETTINGS_KEYS.showStatusBar,
       SETTINGS_KEYS.disableSystemKeyboard,
-    ]).then(([reminder, snippet, hour, minute, fontSize, bg, kb, theme, wrap, drawerFab, statusBar, disableSysKb]) => {
+    ]).then(([reminder, hour, minute, fontSize, bg, kb, theme, wrap, drawerFab, statusBar, disableSysKb]) => {
       setDailyReminder(reminder[1] === "true");
-      setSnippetAlternatives(snippet[1] === "true");
       if (hour[1]) setNotificationHour(parseInt(hour[1], 10));
       if (minute[1]) setNotificationMinute(parseInt(minute[1], 10));
       if (fontSize[1]) setCodeFontSize(parseInt(fontSize[1], 10));
@@ -179,11 +175,6 @@ export default function Settings() {
     if (dailyReminder) {
       await scheduleNotification(hour, minute);
     }
-  };
-
-  const toggleSnippetAlternatives = async (value: boolean) => {
-    setSnippetAlternatives(value);
-    await AsyncStorage.setItem(SETTINGS_KEYS.snippetAlternatives, value.toString());
   };
 
   const changeCodeFontSize = async (delta: number) => {
@@ -367,18 +358,6 @@ export default function Settings() {
           )}
 
           <View style={styles.cardDivider} />
-          <View style={styles.cardRow}>
-            <View style={styles.flexChild}>
-              <Text style={styles.settingTitle}>Snippet Alternatives</Text>
-              <Text style={styles.settingDescription}>Show p5.js variants in other languages</Text>
-            </View>
-            <Switch
-              value={snippetAlternatives}
-              onValueChange={toggleSnippetAlternatives}
-              trackColor={{ false: "#767577", true: ctaColor }}
-              thumbColor="#ffffff"
-            />
-          </View>
         </View>
 
         {/* Code Editor */}

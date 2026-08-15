@@ -9,23 +9,27 @@ const asteriskPath =
  "M16.909,10.259l8.533-2.576l1.676,5.156l-8.498,2.899l5.275,7.48l-4.447,3.225l-5.553-7.348L8.487,26.25l-4.318-3.289l5.275-7.223L0.88,12.647l1.678-5.16l8.598,2.771V1.364h5.754V10.259z";
 
 interface ExerciseCardProps {
- title: string;
- moduleName: string;
- description: string;
- locked?: boolean;
- isCurrent?: boolean;
- completed?: boolean;
- onContinue?: () => void;
+  title: string;
+  moduleName: string;
+  description: string;
+  locked?: boolean;
+  isCurrent?: boolean;
+  completed?: boolean;
+  /** Title of the prior module the user must complete to unlock this card.
+   *  When provided, the locked-state description names it explicitly. */
+  lockHint?: string;
+  onContinue?: () => void;
 }
 
 export default function ExerciseCard({
- title,
- moduleName,
- description,
- locked = false,
- isCurrent = false,
- completed = false,
- onContinue,
+  title,
+  moduleName,
+  description,
+  locked = false,
+  isCurrent = false,
+  completed = false,
+  lockHint,
+  onContinue,
 }: ExerciseCardProps) {
   const { colorScheme, derivedColors } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
@@ -39,7 +43,7 @@ export default function ExerciseCard({
      { backgroundColor: colors.surfaceDim, opacity: locked ? 0.5 : pressed ? 0.85 : 1 },
    ]}
    accessibilityRole="button"
-   accessibilityLabel={locked ? `${title} (locked)` : title}
+    accessibilityLabel={locked ? `${title} (locked${lockHint ? `, complete ${lockHint} first` : ""})` : title}
  >
   <View style={[styles.iconContainer, { backgroundColor: derivedColors.primary + "1A" }]}>
   {locked ? (
@@ -60,9 +64,13 @@ export default function ExerciseCard({
   <Text style={[styles.moduleName, { color: derivedColors.primary }]}>
   {moduleName}
   </Text>
- <Text style={[styles.description, { color: colors.textSecondary }]}>
- {locked ? "Complete the current module to unlock this one." : description}
- </Text>
+  <Text style={[styles.description, { color: colors.textSecondary }]}>
+  {locked
+    ? (lockHint
+      ? `Complete "${lockHint}" to unlock this one.`
+      : "Complete the current module to unlock this one.")
+    : description}
+  </Text>
   </View>
 
  {!locked && isCurrent && onContinue && (
