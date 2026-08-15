@@ -1,1 +1,1 @@
-export const APP_VERSION = "0.3.0-debug";
+export { APP_VERSION } from "./Version.generated";

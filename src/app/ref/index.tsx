@@ -1,11 +1,12 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { View, Text, FlatList, Pressable, StyleSheet } from "react-native";
+import { View, Text, FlatList, Pressable, Alert, StyleSheet } from "react-native";
 import Header from "../../components/Header";
-import { P5_SYMBOLS_BY_NAME, P5_SYMBOLS } from "../../data/p5Symbols";
+import { P5_SYMBOLS_BY_NAME, P5_SYMBOLS, P5_FUNCTION_NAMES } from "../../data/p5Symbols";
 import { P5Symbol } from "../../data/types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useThemeContext } from "../../components/ThemeProvider";
 import { Colors } from "../../constants/Colors";
+import { useModuleProgress } from "../../hooks/useModuleProgress";
 
 const MODULE_GROUPS = P5_SYMBOLS.reduce<{ module: string; symbols: P5Symbol[] }[]>((acc, sym) => {
   const existing = acc.find((g) => g.module === sym.module);
@@ -17,11 +18,114 @@ const MODULE_GROUPS = P5_SYMBOLS.reduce<{ module: string; symbols: P5Symbol[] }[
   return acc;
 }, []);
 
+const SYMBOL_PATTERN = new RegExp(
+  `\\b(${P5_FUNCTION_NAMES.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b`,
+  "g"
+);
+
+function highlightSyntax(code: string): { text: string; color: string }[] {
+  const KEYWORD_RE = /\b(function|if|else|for|while|return|let|const|var|new|this|class)\b/g;
+  const P5_RE = new RegExp(`\\b(${P5_FUNCTION_NAMES.join("|")})\\b`, "g");
+  const NUMBER_RE = /\b\d+(\.\d+)?\b/g;
+  const STRING_RE = /("[^"]*"|'[^']*'|`[^']*`)/g;
+  const COMMENT_RE = /(\/\/.*)/g;
+
+  const allMatches: { index: number; text: string; colorKey: string }[] = [];
+  const patterns: [RegExp, string][] = [
+    [COMMENT_RE, "#6B7280"],
+    [KEYWORD_RE, "#ED225D"],
+    [P5_RE, "#FFB2BB"],
+    [NUMBER_RE, "#FF4F75"],
+    [STRING_RE, "#22C55E"],
+  ];
+  for (const [re, colorKey] of patterns) {
+    re.lastIndex = 0;
+    let match;
+    while ((match = re.exec(code)) !== null) {
+      allMatches.push({ index: match.index, text: match[0], colorKey });
+    }
+  }
+  allMatches.sort((a, b) => a.index - b.index);
+
+  const tokens: { text: string; color: string }[] = [];
+  let lastEnd = 0;
+  for (const m of allMatches) {
+    if (m.index < lastEnd) continue;
+    if (m.index > lastEnd) {
+      tokens.push({ text: code.slice(lastEnd, m.index), color: "#E3E2E7" });
+    }
+    tokens.push({ text: m.text, color: m.colorKey });
+    lastEnd = m.index + m.text.length;
+  }
+  if (lastEnd < code.length) {
+    tokens.push({ text: code.slice(lastEnd), color: "#E3E2E7" });
+  }
+  return tokens.length > 0 ? tokens : [{ text: code, color: "#E3E2E7" }];
+}
+
+function parseDescription(
+  text: string,
+  onSymbolPress: (name: string) => void,
+  colors: Record<string, string>
+): React.ReactNode[] {
+  if (!text) return [<Text key="empty" style={{ color: colors.textSecondary }} />];
+
+  const parts: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  SYMBOL_PATTERN.lastIndex = 0;
+
+  while ((match = SYMBOL_PATTERN.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(
+        <Text key={`txt-${lastIndex}`} style={{ color: colors.textSecondary }}>
+          {text.slice(lastIndex, match.index)}
+        </Text>
+      );
+    }
+    const symbolName = match[0];
+    parts.push(
+      <Text
+        key={`sym-${match.index}`}
+        style={{ color: colors.primary, fontWeight: "700", textDecorationLine: "underline" }}
+        onPress={() => onSymbolPress(symbolName)}
+      >
+        {symbolName}
+      </Text>
+    );
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push(
+      <Text key={`txt-${lastIndex}`} style={{ color: colors.textSecondary }}>
+        {text.slice(lastIndex)}
+      </Text>
+    );
+  }
+
+  return parts.length > 0 ? parts : [<Text key="full" style={{ color: colors.textSecondary }}>{text}</Text>];
+}
+
 function SymbolDetail({ symbol }: { symbol: string }) {
   const router = useRouter();
   const sym = P5_SYMBOLS_BY_NAME[symbol];
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const { getLockedCourseName } = useModuleProgress();
+
+  const handleSymbolPress = (name: string) => {
+    const lockedCourse = getLockedCourseName(P5_SYMBOLS_BY_NAME[name]?.module ?? "");
+    if (lockedCourse) {
+      Alert.alert(
+        "Module Locked",
+        `Complete the "${lockedCourse}" course to unlock this reference.`
+      );
+      return;
+    }
+    router.push(`/ref?symbol=${name}`);
+  };
 
   if (!sym) {
     return (
@@ -54,6 +158,8 @@ function SymbolDetail({ symbol }: { symbol: string }) {
     );
   }
 
+  const syntaxTokens = highlightSyntax(sym.syntax);
+
   return (
     <View style={[styles.flex1, { backgroundColor: colors.surface }]}>
       <Header title={sym.name} />
@@ -75,16 +181,20 @@ function SymbolDetail({ symbol }: { symbol: string }) {
               </View>
             </View>
 
-            <Text style={[styles.bodyBase, { color: colors.textSecondary, lineHeight: 24, marginBottom: 24 }]}>
-              {sym.description}
+            <Text style={[styles.bodyBase, { lineHeight: 24, marginBottom: 24 }]}>
+              {parseDescription(sym.description, handleSymbolPress, colors)}
             </Text>
 
             <Text style={[styles.sectionTitle, { color: colors.onSurface, marginBottom: 12 }]}>
               Syntax
             </Text>
             <View style={[styles.syntaxBox, { backgroundColor: colors.surfaceDim, marginBottom: 24 }]}>
-              <Text style={[styles.syntaxText, { color: colors.onSurface, lineHeight: 24 }]}>
-                {sym.syntax}
+              <Text style={{ fontFamily: "JetBrainsMono", fontSize: 16, lineHeight: 24 }}>
+                {syntaxTokens.map((t, i) => (
+                  <Text key={i} style={{ color: t.color, fontFamily: "JetBrainsMono", fontSize: 16 }}>
+                    {t.text}
+                  </Text>
+                ))}
               </Text>
             </View>
 

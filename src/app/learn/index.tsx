@@ -25,21 +25,12 @@ export default function Learn() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.surface }]}>
-      <Header title="p5.js Learn" right={
-        <View style={[styles.versionBadge, { backgroundColor: colors.surfaceDim }]}>
-          <Text style={[styles.versionText, { color: colors.textSecondary }]}>
-            v4.0.2
-          </Text>
-        </View>
-      } />
+      <Header title="p5.js Learn" />
       <FlatList
         style={styles.flatList}
         contentContainerStyle={{ paddingBottom: 32 }}
         ListHeaderComponent={
           <>
-            <Text style={[styles.heading, { color: colors.onSurface }]}>
-              Hello, Coder!
-            </Text>
             <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
               Choose a course to begin your creative coding journey.
             </Text>
@@ -84,25 +75,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  versionBadge: {
-    borderRadius: 9999,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-  },
-  versionText: {
-    fontFamily: "JetBrainsMono",
-    fontSize: 11,
-  },
   flatList: {
     flex: 1,
     paddingHorizontal: 16,
     paddingTop: 24,
-  },
-  heading: {
-    fontFamily: "JetBrainsMono",
-    fontSize: 32,
-    fontWeight: "900",
-    letterSpacing: -0.5,
   },
   subtitle: {
     fontFamily: "JetBrainsMono",

@@ -1,14 +1,61 @@
-import { useMemo } from "react";
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import { useMemo, useState, useEffect } from "react";
+import { View, Text, Pressable, ScrollView, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useThemeContext } from "../components/ThemeProvider";
 import { Colors } from "../constants/Colors";
 import Header from "../components/Header";
+import { loadAllCourses } from "../utils/courseLoader";
+import { Lesson, Course } from "../data/types";
+
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
+}
 
 export default function Dashboard() {
   const router = useRouter();
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const [completedLessons, setCompletedLessons] = useState<string[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
+
+  useEffect(() => {
+    AsyncStorage.getItem("completedLessons").then((val) => {
+      if (val) {
+        try {
+          setCompletedLessons(JSON.parse(val));
+        } catch {
+          setCompletedLessons([]);
+        }
+      }
+    });
+    loadAllCourses().then(setCourses);
+  }, []);
+
+  const nextExercise: (Lesson & { courseSlug: string; courseTitle: string }) | null = useMemo(() => {
+    if (courses.length === 0) return null;
+    const flat = courses.flatMap((c) =>
+      c.lessons.map((l) => ({ ...l, courseSlug: c.slug, courseTitle: c.title }))
+    );
+    return flat.find((l) => !completedLessons.includes(`${l.courseSlug}/${l.id}`)) ?? null;
+  }, [courses, completedLessons]);
+
+  const upcomingExercises = useMemo(() => {
+    if (courses.length === 0 || !nextExercise) return [];
+    const flat = courses.flatMap((c) =>
+      c.lessons.map((l) => ({ ...l, courseSlug: c.slug, courseTitle: c.title }))
+    );
+    const startIndex = flat.findIndex(
+      (l) => l.courseSlug === nextExercise.courseSlug && l.id === nextExercise.id
+    );
+    if (startIndex === -1) return [];
+    return flat.slice(startIndex + 1, startIndex + 6);
+  }, [courses, nextExercise]);
+
+  const greeting = useMemo(() => getGreeting(), []);
 
   const styles = useMemo(
     () =>
@@ -22,7 +69,7 @@ export default function Dashboard() {
           paddingHorizontal: 24,
           paddingTop: 32,
         },
-        title: {
+        greeting: {
           fontFamily: "JetBrainsMono",
           fontSize: 32,
           fontWeight: "700",
@@ -72,7 +119,7 @@ export default function Dashboard() {
           color: colors.textSecondary,
           marginTop: 4,
         },
-        quickActionsSection: {
+        continueSection: {
           marginTop: 40,
         },
         sectionTitle: {
@@ -82,29 +129,102 @@ export default function Dashboard() {
           color: colors.onSurface,
           marginBottom: 16,
         },
-        actionsContainer: {
-          gap: 12,
-        },
-        actionCard: {
+        nextCard: {
           backgroundColor: colors.surfaceDim,
           borderRadius: 12,
           paddingHorizontal: 20,
-          paddingVertical: 16,
+          paddingVertical: 20,
+          marginBottom: 12,
         },
-        actionCardPressed: {
+        nextCardPressed: {
           opacity: 0.8,
         },
-        actionCardTitle: {
+        nextCardTitle: {
           fontFamily: "JetBrainsMono",
           fontSize: 20,
           fontWeight: "700",
           color: colors.onSurface,
         },
-        actionCardSubtitle: {
+        nextCardModule: {
+          fontFamily: "JetBrainsMono",
+          fontSize: 11,
+          color: colors.primary,
+          textTransform: "uppercase",
+          letterSpacing: 1,
+          marginTop: 4,
+        },
+        nextCardDescription: {
           fontFamily: "JetBrainsMono",
           fontSize: 16,
           color: colors.textSecondary,
-          marginTop: 4,
+          marginTop: 8,
+        },
+        nextCardButton: {
+          backgroundColor: colors.primary,
+          borderRadius: 8,
+          paddingHorizontal: 20,
+          paddingVertical: 10,
+          alignSelf: "flex-start",
+          marginTop: 16,
+        },
+        nextCardButtonPressed: {
+          transform: [{ translateY: 2 }],
+        },
+        nextCardButtonText: {
+          fontFamily: "JetBrainsMono",
+          fontWeight: "900",
+          fontSize: 13,
+          textTransform: "uppercase",
+          letterSpacing: 0.5,
+          color: colors.onPrimary,
+        },
+        listTitle: {
+          fontFamily: "JetBrainsMono",
+          fontSize: 16,
+          fontWeight: "700",
+          color: colors.onSurface,
+          marginBottom: 12,
+        },
+        listItem: {
+          flexDirection: "row",
+          alignItems: "center",
+          paddingVertical: 12,
+          paddingHorizontal: 16,
+          backgroundColor: colors.surfaceDim,
+          borderRadius: 8,
+          marginBottom: 8,
+        },
+        listItemPressed: {
+          opacity: 0.8,
+        },
+        listItemNumber: {
+          fontFamily: "JetBrainsMono",
+          fontSize: 13,
+          fontWeight: "700",
+          color: colors.textSecondary,
+          width: 28,
+        },
+        listItemTitle: {
+          fontFamily: "JetBrainsMono",
+          fontSize: 16,
+          fontWeight: "700",
+          color: colors.onSurface,
+          flex: 1,
+        },
+        listItemMeta: {
+          fontFamily: "JetBrainsMono",
+          fontSize: 11,
+          color: colors.textSecondary,
+        },
+        allCompleteContainer: {
+          alignItems: "center",
+          paddingVertical: 32,
+        },
+        allCompleteText: {
+          fontFamily: "JetBrainsMono",
+          fontSize: 16,
+          color: colors.textSecondary,
+          textAlign: "center",
         },
       }),
     [colorScheme]
@@ -113,9 +233,12 @@ export default function Dashboard() {
   return (
     <View style={styles.container}>
       <Header title="Dashboard" />
-      <View style={styles.inner}>
-        <Text style={styles.title}>
-          Hello, Coder!
+      <ScrollView
+        style={styles.inner}
+        contentContainerStyle={{ paddingBottom: 32 }}
+      >
+        <Text style={styles.greeting}>
+          {greeting}, Coder!
         </Text>
         <Text style={styles.subtitle}>
           Level 3 · 84% to next level
@@ -148,46 +271,86 @@ export default function Dashboard() {
           </View>
         </View>
 
-        <View style={styles.quickActionsSection}>
+        <View style={styles.continueSection}>
           <Text style={styles.sectionTitle}>
-            Quick Actions
+            Continue Learning
           </Text>
-          <View style={styles.actionsContainer}>
+
+          {nextExercise ? (
             <Pressable
-              onPress={() => router.push("/learn/shapes/exercise-1")}
+              onPress={() =>
+                router.push(`/learn/${nextExercise.courseSlug}/${nextExercise.id}`)
+              }
               style={({ pressed }) => [
-                styles.actionCard,
-                pressed && styles.actionCardPressed,
+                styles.nextCard,
+                pressed && styles.nextCardPressed,
               ]}
               accessibilityRole="button"
-              accessibilityLabel="Continue Learning"
+              accessibilityLabel={`Continue with ${nextExercise.title}`}
             >
-              <Text style={styles.actionCardTitle}>
-                Continue Learning
+              <Text style={styles.nextCardTitle}>
+                {nextExercise.title}
               </Text>
-              <Text style={styles.actionCardSubtitle}>
-                Pick up where you left off
+              <Text style={styles.nextCardModule}>
+                {nextExercise.courseTitle} · {nextExercise.module}
               </Text>
+              <Text style={styles.nextCardDescription} numberOfLines={2}>
+                {nextExercise.description}
+              </Text>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.nextCardButton,
+                  pressed && styles.nextCardButtonPressed,
+                ]}
+                accessibilityRole="button"
+                accessibilityLabel="Continue"
+              >
+                <Text style={styles.nextCardButtonText}>
+                  Continue
+                </Text>
+              </Pressable>
             </Pressable>
-            <Pressable
-              onPress={() => router.push("/learn/shapes")}
-              style={({ pressed }) => [
-                styles.actionCard,
-                pressed && styles.actionCardPressed,
-              ]}
-              accessibilityRole="button"
-              accessibilityLabel="Up next"
-            >
-              <Text style={styles.actionCardTitle}>
-                Up next
+          ) : (
+            <View style={styles.allCompleteContainer}>
+              <Text style={styles.allCompleteText}>
+                All exercises complete! 🎉
               </Text>
-              <Text style={styles.actionCardSubtitle}>
-                Continue your next exercise
+            </View>
+          )}
+
+          {upcomingExercises.length > 0 && (
+            <>
+              <Text style={[styles.listTitle, { marginTop: 24 }]}>
+                Up Next
               </Text>
-            </Pressable>
-          </View>
+              {upcomingExercises.map((ex) => (
+                <Pressable
+                  key={`${ex.courseSlug}/${ex.id}`}
+                  onPress={() =>
+                    router.push(`/learn/${ex.courseSlug}/${ex.id}`)
+                  }
+                  style={({ pressed }) => [
+                    styles.listItem,
+                    pressed && styles.listItemPressed,
+                  ]}
+                  accessibilityRole="button"
+                  accessibilityLabel={ex.title}
+                >
+                  <Text style={styles.listItemNumber}>
+                    {ex.id.replace("exercise-", "#")}
+                  </Text>
+                  <Text style={styles.listItemTitle} numberOfLines={1}>
+                    {ex.title}
+                  </Text>
+                  <Text style={styles.listItemMeta}>
+                    {ex.module}
+                  </Text>
+                </Pressable>
+              ))}
+            </>
+          )}
         </View>
-      </View>
+      </ScrollView>
     </View>
   );
 }

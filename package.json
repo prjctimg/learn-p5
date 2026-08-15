@@ -1,9 +1,11 @@
 {
   "name": "learn-p5",
   "main": "expo-router/entry",
-  "version": "0.4.1",
+  "version": "0.4.3",
   "scripts": {
-    "start": "expo start",
+    "postinstall": "npm run gen-version",
+    "start": "npm run gen-version && expo start",
+    "gen-version": "sh scripts/gen-version.sh",
     "android": "expo start --android",
     "web": "expo start --web",
     "lint": "expo lint"

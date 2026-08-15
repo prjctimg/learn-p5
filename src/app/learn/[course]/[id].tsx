@@ -1,5 +1,5 @@
-import { useRef, useEffect, useReducer, useMemo, useCallback } from "react";
-import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
+import { useRef, useEffect, useReducer, useMemo } from "react";
+import { View, Text, Pressable, ScrollView, StyleSheet } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -8,7 +8,7 @@ import { useDrawerContext } from "../../../contexts/DrawerContext";
 import { useThemeContext } from "../../../components/ThemeProvider";
 import { Colors } from "../../../constants/Colors";
 import ExerciseDescription from "../../../components/ExerciseDescription";
-import CodeEditor from "../../../components/CodeEditor";
+import CodeEditor, { type CodeEditorHandle } from "../../../components/CodeEditor";
 import ProgrammingKeyboard from "../../../components/ProgrammingKeyboard";
 import { buildSketchHTML, DEFAULT_SKETCH } from "../../../utils/sketchTemplate";
 import { loadExercise } from "../../../utils/courseLoader";
@@ -23,17 +23,15 @@ interface ExerciseState {
   userHTML: string;
   isRunning: boolean;
   showSolution: boolean;
-  selectedTab: "solution" | "output";
 }
 
 type ExerciseAction =
   | { type: "LOAD_START" }
   | { type: "LOAD_DONE"; exercise: Lesson | null }
   | { type: "SET_CODE"; code: string }
-  | { type: "APPEND_CODE"; text: string }
+  | { type: "APPEND_CODE"; text: string; cursorOffset?: number }
   | { type: "RUN_START" }
-  | { type: "RUN_DONE" }
-  | { type: "SET_TAB"; tab: "solution" | "output" };
+  | { type: "RUN_DONE" };
 
 function exerciseReducer(state: ExerciseState, action: ExerciseAction): ExerciseState {
   switch (action.type) {
@@ -60,8 +58,6 @@ function exerciseReducer(state: ExerciseState, action: ExerciseAction): Exercise
       };
     case "RUN_DONE":
       return { ...state, isRunning: false };
-    case "SET_TAB":
-      return { ...state, selectedTab: action.tab };
     default:
       return state;
   }
@@ -75,7 +71,6 @@ const INITIAL_STATE: ExerciseState = {
   userHTML: "",
   isRunning: false,
   showSolution: false,
-  selectedTab: "output",
 };
 
 export default function Exercise() {
@@ -87,17 +82,7 @@ export default function Exercise() {
   const runCounter = useRef(0);
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
-  const systemKeyboardRef = useRef(false);
-  const codeInputRef = useRef<TextInput>(null);
-
-  const toggleSystemKeyboard = useCallback(() => {
-    systemKeyboardRef.current = !systemKeyboardRef.current;
-    if (systemKeyboardRef.current) {
-      setTimeout(() => codeInputRef.current?.focus(), 100);
-    } else {
-      codeInputRef.current?.blur();
-    }
-  }, []);
+  const codeEditorRef = useRef<CodeEditorHandle>(null);
 
   const styles = useMemo(
     () =>
@@ -177,48 +162,38 @@ export default function Exercise() {
         spacer: {
           flex: 1,
         },
-        codeAreaContainer: {
+        scrollArea: {
           flex: 1,
         },
-        tabBar: {
-          flexDirection: "row",
-          backgroundColor: colors.surface,
+        scrollContent: {
+          paddingBottom: 24,
         },
-        tabButton: {
-          flex: 1,
-          height: 28,
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: colors.surfaceContainerHigh,
+        previewSection: {
+          marginTop: 16,
+          paddingHorizontal: 16,
         },
-        tabButtonActive: {
-          backgroundColor: colors.surface,
-        },
-        tabButtonText: {
-          fontSize: 9,
+        previewLabel: {
+          fontFamily: "JetBrainsMono",
+          fontSize: 11,
           fontWeight: "700",
           textTransform: "uppercase",
           letterSpacing: 1,
+          marginBottom: 8,
         },
-        tabButtonTextActive: {
-          color: colors.primary,
-        },
-        tabButtonTextInactive: {
-          color: colors.onSurfaceVariant,
-        },
-        previewContainer: {
-          flex: 1,
+        previewBox: {
+          height: 180,
           backgroundColor: "#000000",
-          alignItems: "center",
-          justifyContent: "center",
+          borderRadius: 8,
           overflow: "hidden",
         },
         solutionPlaceholder: {
-          width: 48,
-          height: 48,
+          width: 40,
+          height: 40,
           borderRadius: 9999,
           backgroundColor: colors.primaryContainer,
           opacity: 0.5,
+          alignSelf: "center",
+          marginTop: 70,
         },
         outputPlaceholder: {
           width: 40,
@@ -226,6 +201,15 @@ export default function Exercise() {
           borderRadius: 9999,
           backgroundColor: colors.primary,
           opacity: 0.5,
+          alignSelf: "center",
+          marginTop: 70,
+        },
+        editorWrapper: {
+          height: 280,
+          marginTop: 16,
+          marginHorizontal: 16,
+          borderRadius: 8,
+          overflow: "hidden",
         },
       }),
     [colorScheme]
@@ -255,8 +239,8 @@ export default function Exercise() {
     }, 2000);
   };
 
-  const handleInsert = (text: string) => {
-    dispatch({ type: "APPEND_CODE", text });
+  const handleInsert = (text: string, cursorOffset?: number) => {
+    codeEditorRef.current?.insertText(text, cursorOffset);
   };
 
   const exerciseSymbols = useMemo(() => {
@@ -323,7 +307,11 @@ export default function Exercise() {
         <View style={styles.spacer} />
       </View>
 
-      <View style={styles.codeAreaContainer}>
+      <ScrollView
+        style={styles.scrollArea}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
         <ExerciseDescription
           title={state.exercise.title}
           moduleName={state.exercise.module}
@@ -331,67 +319,10 @@ export default function Exercise() {
           exerciseNumber={parseInt(id?.replace("exercise-", "") ?? "1", 10)}
         />
 
-        <View style={{ height: 260 }}>
-          <View style={styles.tabBar}>
-            {state.showSolution && (
-              <Pressable
-                onPress={() => dispatch({ type: "SET_TAB", tab: "solution" })}
-                style={({ pressed }) => [
-                  styles.tabButton,
-                  state.selectedTab === "solution" && styles.tabButtonActive,
-                  pressed && { opacity: 0.8 },
-                ]}
-                accessibilityRole="button"
-                accessibilityLabel="Show target solution"
-              >
-                <Text
-                  style={[
-                    styles.tabButtonText,
-                    state.selectedTab === "solution"
-                      ? styles.tabButtonTextActive
-                      : styles.tabButtonTextInactive,
-                  ]}
-                >
-                  Target Solution
-                </Text>
-              </Pressable>
-            )}
-            <Pressable
-              onPress={() => dispatch({ type: "SET_TAB", tab: "output" })}
-              style={({ pressed }) => [
-                styles.tabButton,
-                state.selectedTab === "output" && styles.tabButtonActive,
-                pressed && { opacity: 0.8 },
-              ]}
-              accessibilityRole="button"
-              accessibilityLabel="Show your output"
-            >
-              <Text
-                style={[
-                  styles.tabButtonText,
-                  state.selectedTab === "output"
-                    ? styles.tabButtonTextActive
-                    : styles.tabButtonTextInactive,
-                ]}
-              >
-                Your Output
-              </Text>
-            </Pressable>
-          </View>
-
-          <View style={styles.previewContainer}>
-            {state.selectedTab === "solution" && state.solutionHTML && state.showSolution ? (
-              <WebView
-                source={{ html: state.solutionHTML }}
-                style={{ flex: 1, width: "100%" }}
-                scrollEnabled={false}
-                bounces={false}
-                javaScriptEnabled
-                domStorageEnabled
-                originWhitelist={["*"]}
-                onError={(_e) => console.warn("Solution WebView error")}
-              />
-            ) : state.selectedTab === "output" && state.userHTML ? (
+        <View style={styles.previewSection}>
+          <Text style={styles.previewLabel}>Your Output</Text>
+          <View style={styles.previewBox}>
+            {state.userHTML ? (
               <WebView
                 source={{ html: state.userHTML }}
                 style={{ flex: 1, width: "100%" }}
@@ -403,31 +334,48 @@ export default function Exercise() {
                 onError={(_e) => console.warn("User WebView error")}
               />
             ) : (
-              <View
-                style={
-                  state.selectedTab === "solution"
-                    ? styles.solutionPlaceholder
-                    : styles.outputPlaceholder
-                }
-              />
+              <View style={styles.outputPlaceholder} />
             )}
           </View>
         </View>
 
-        <CodeEditor
-          code={state.code}
-          onChange={(c) => dispatch({ type: "SET_CODE", code: c })}
-          onRun={handleRun}
-          isRunning={state.isRunning}
-          inputRef={codeInputRef}
-        />
+        {state.showSolution && (
+          <View style={styles.previewSection}>
+            <Text style={styles.previewLabel}>Target Solution</Text>
+            <View style={styles.previewBox}>
+              {state.solutionHTML ? (
+                <WebView
+                  source={{ html: state.solutionHTML }}
+                  style={{ flex: 1, width: "100%" }}
+                  scrollEnabled={false}
+                  bounces={false}
+                  javaScriptEnabled
+                  domStorageEnabled
+                  originWhitelist={["*"]}
+                  onError={(_e) => console.warn("Solution WebView error")}
+                />
+              ) : (
+                <View style={styles.solutionPlaceholder} />
+              )}
+            </View>
+          </View>
+        )}
 
-        <ProgrammingKeyboard
-          onInsert={handleInsert}
-          exerciseSymbols={exerciseSymbols}
-          onToggleKeyboard={toggleSystemKeyboard}
-        />
-      </View>
+        <View style={styles.editorWrapper}>
+          <CodeEditor
+            ref={codeEditorRef}
+            code={state.code}
+            onChange={(c) => dispatch({ type: "SET_CODE", code: c })}
+            onRun={handleRun}
+            isRunning={state.isRunning}
+          />
+        </View>
+      </ScrollView>
+
+      <ProgrammingKeyboard
+        onInsert={handleInsert}
+        exerciseSymbols={exerciseSymbols}
+      />
     </View>
   );
 }

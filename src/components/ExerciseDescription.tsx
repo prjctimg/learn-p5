@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import { View, Text, Pressable, Alert, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useThemeContext } from "./ThemeProvider";
 import { Colors } from "../constants/Colors";
-import { P5_FUNCTION_NAMES } from "../data/p5Symbols";
+import { P5_FUNCTION_NAMES, P5_SYMBOLS_BY_NAME } from "../data/p5Symbols";
+import { useModuleProgress } from "../hooks/useModuleProgress";
 
 const SYMBOL_PATTERN = new RegExp(
   `\\b(${P5_FUNCTION_NAMES.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b`,
@@ -54,6 +55,7 @@ export default function ExerciseDescription({
   const router = useRouter();
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const { getLockedCourseName } = useModuleProgress();
 
   const parts = parseInstruction(instruction);
 
@@ -63,6 +65,14 @@ export default function ExerciseDescription({
       ).slice(0, 10);
 
   const handleSymbolPress = (name: string) => {
+    const lockedCourse = getLockedCourseName(P5_SYMBOLS_BY_NAME[name]?.module ?? "");
+    if (lockedCourse) {
+      Alert.alert(
+        "Module Locked",
+        `Complete the "${lockedCourse}" course to unlock this reference.`
+      );
+      return;
+    }
     router.push(`/ref?symbol=${name}`);
   };
 

@@ -110,6 +110,10 @@ export default function OnboardingSlide() {
   const isLast = isLastSlide(slide);
   const isFirst = isFirstSlide(slide);
 
+  const needsSelection = slide === "2" || slide === "3";
+  const hasSelection = slide === "2" ? !!data.experience : slide === "3" ? !!data.path : true;
+  const canProceed = !needsSelection || hasSelection;
+
   return (
     <View style={[styles.flex1, { backgroundColor: "#2a0516" }]}>
       <View style={[styles.headerRow, { paddingTop: insets.top + 8 }]}>
@@ -310,9 +314,15 @@ export default function OnboardingSlide() {
         ) : (
           <Pressable
             onPress={handleNext}
-            style={styles.ctaButton}
+            disabled={!canProceed}
+            style={({ pressed }) => [
+              styles.ctaButton,
+              !canProceed && { opacity: 0.4 },
+              pressed && canProceed && { opacity: 0.8 },
+            ]}
             accessibilityRole="button"
             accessibilityLabel="Next"
+            accessibilityState={{ disabled: !canProceed }}
           >
             <Text style={styles.ctaButtonText}>
               Next

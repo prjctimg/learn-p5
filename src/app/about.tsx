@@ -39,9 +39,6 @@ export default function About() {
           through guided exercises, challenges, and real-time code execution.
         </Text>
         <View style={styles.footer}>
-          <Text style={[styles.footerText, { color: colors.textSecondary }]}>
-            Built with Expo & React Native
-          </Text>
           <Text style={[styles.footerMono, { color: colors.textSecondary }]}>
             p5.js is a JS client-side library for creative coding
           </Text>
@@ -83,10 +80,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 24,
     maxWidth: 300,
-  },
-  footerText: {
-    fontFamily: "JetBrainsMono",
-    fontSize: 13,
   },
   footer: {
     marginTop: 40,
