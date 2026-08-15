@@ -106,7 +106,7 @@ export default function Settings() {
   const [debugToastVisible, setDebugToastVisible] = useState(false);
   const [debugStreakToastVisible, setDebugStreakToastVisible] = useState(false);
   const [debugStreakCount, setDebugStreakCount] = useState("7");
-  const [examsCompleteAllLabel, setExamsCompleteAllLabel] = useState("Complete All Exercises");
+  const [exercisesCompleteAllLabel, setExercisesCompleteAllLabel] = useState("Complete All Exercises");
 
   useEffect(() => {
     AsyncStorage.multiGet([
@@ -236,20 +236,20 @@ export default function Settings() {
     const courses = await loadAllCourses();
     const allLessonKeys: string[] = [];
     for (const c of courses) {
-      for (const l of c.lessons) {
+      for (const l of c.exercises) {
         allLessonKeys.push(`${c.slug}/${l.id}`);
       }
     }
-    await AsyncStorage.setItem("completedLessons", JSON.stringify(allLessonKeys));
-    setExamsCompleteAllLabel("Done! Reload to see");
-    setTimeout(() => setExamsCompleteAllLabel("Complete All Exercises"), 3000);
+ await AsyncStorage.setItem("completedLessons", JSON.stringify(allLessonKeys));
+ setExercisesCompleteAllLabel("Done! Reload to see");
+ setTimeout(() => setExercisesCompleteAllLabel("Complete All Exercises"), 3000);
   };
 
   const handleResetAllProgress = async () => {
-    await AsyncStorage.removeItem("completedLessons");
-    await AsyncStorage.removeItem("completedCourses");
-    setExamsCompleteAllLabel("Reset! Reload to see");
-    setTimeout(() => setExamsCompleteAllLabel("Complete All Exercises"), 3000);
+ await AsyncStorage.removeItem("completedLessons");
+ await AsyncStorage.removeItem("completedCourses");
+ setExercisesCompleteAllLabel("Reset! Reload to see");
+ setTimeout(() => setExercisesCompleteAllLabel("Complete All Exercises"), 3000);
   };
 
   const handleSetStreak = async () => {
@@ -657,8 +657,8 @@ export default function Settings() {
             <View style={[styles.card, { marginTop: 8 }]}>
               <View style={styles.cardRow}>
                 <View style={styles.flexChild}>
-                  <Text style={styles.settingTitle}>{examsCompleteAllLabel}</Text>
-                  <Text style={styles.settingDescription}>Mark every lesson as completed</Text>
+                   <Text style={styles.settingTitle}>{exercisesCompleteAllLabel}</Text>
+                   <Text style={styles.settingDescription}>Mark every exercise as completed</Text>
                 </View>
                 <Pressable
                   onPress={handleCompleteAllExercises}
@@ -678,7 +678,7 @@ export default function Settings() {
               <View style={styles.cardRow}>
                 <View style={styles.flexChild}>
                   <Text style={styles.settingTitle}>Reset All Progress</Text>
-                  <Text style={styles.settingDescription}>Clear all completed lessons and courses</Text>
+                   <Text style={styles.settingDescription}>Clear all completed exercises and courses</Text>
                 </View>
                 <Pressable
                   onPress={handleResetAllProgress}

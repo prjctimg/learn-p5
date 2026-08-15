@@ -13,12 +13,14 @@ import QwertyKeyboard from "../../../components/QwertyKeyboard";
 
 import Toast from "../../../components/Toast";
 import StreakToast from "../../../components/StreakToast";
+import ShakeModal from "../../../components/ShakeModal";
 import { loadExercise, loadCourse } from "../../../utils/courseLoader";
-import { Lesson } from "../../../data/types";
+import { Exercise } from "../../../data/types";
 import { P5_FUNCTION_NAMES, ONCE_ONLY_P5_FUNCTIONS } from "../../../data/reference";
 import { getExerciseHtml } from "../../../utils/editor/exerciseHtml";
 import { EDITOR_THEMES, getThemeSwatches } from "../../../utils/editor/themes";
 import { useStreak } from "../../../hooks/useStreak";
+import { useShakeDetection } from "../../../hooks/useShakeDetection";
 
 const EXERCISE_CODE_PREFIX = "exerciseCode_";
 
@@ -27,25 +29,28 @@ function getExerciseCodeKey(course: string, id: string): string {
 }
 
 interface ExerciseState {
- exercise: Lesson | null;
+ exercise: Exercise | null;
  loading: boolean;
  code: string;
  startingCode: string;
  isRunning: boolean;
  completed: boolean;
  error: string | null;
+ currentTaskIndex: number;
+ completedTasks: number[];
 }
 
 type ExerciseAction =
  | { type: "LOAD_START" }
- | { type: "LOAD_DONE"; exercise: Lesson | null; course: string; id: string }
+ | { type: "LOAD_DONE"; exercise: Exercise | null; course: string; id: string }
  | { type: "LOAD_ERROR"; error: string }
  | { type: "SET_CODE"; code: string }
  | { type: "RESET_CODE"; course: string; id: string }
  | { type: "APPEND_CODE"; text: string; cursorOffset?: number }
  | { type: "RUN_START" }
  | { type: "RUN_DONE" }
- | { type: "EXERCISE_COMPLETE" };
+ | { type: "EXERCISE_COMPLETE" }
+ | { type: "TASK_COMPLETE"; taskIndex: number };
 
 function exerciseReducer(state: ExerciseState, action: ExerciseAction): ExerciseState {
  switch (action.type) {
@@ -82,6 +87,16 @@ function exerciseReducer(state: ExerciseState, action: ExerciseAction): Exercise
  return { ...state, isRunning: false };
  case "EXERCISE_COMPLETE":
  return { ...state, completed: true };
+ case "TASK_COMPLETE": {
+ const completedTasks = [...state.completedTasks, action.taskIndex];
+ const hasMoreTasks = state.exercise?.tasks && action.taskIndex < state.exercise.tasks.length - 1;
+ return {
+ ...state,
+ completedTasks,
+ currentTaskIndex: hasMoreTasks ? action.taskIndex + 1 : state.currentTaskIndex,
+ completed: !hasMoreTasks,
+ };
+ }
  default:
  return state;
  }
@@ -91,7 +106,7 @@ export default function Exercise() {
  const { course, id } = useLocalSearchParams<{ course: string; id: string }>();
  const router = useRouter();
  const insets = useSafeAreaInsets();
-const [state, dispatch] = useReducer(exerciseReducer, {
+ const [state, dispatch] = useReducer(exerciseReducer, {
  exercise: null,
  loading: true,
  code: "",
@@ -99,7 +114,9 @@ const [state, dispatch] = useReducer(exerciseReducer, {
  isRunning: false,
  completed: false,
  error: null,
-});
+ currentTaskIndex: 0,
+ completedTasks: [],
+ });
  const { colorScheme, toggleTheme, ctaColor, derivedColors } = useThemeContext();
  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
  const webViewRef = useRef<WebView>(null);
@@ -121,8 +138,9 @@ const [state, dispatch] = useReducer(exerciseReducer, {
  const [toastMessage, setToastMessage] = useState("");
  const [toastActionLabel, setToastActionLabel] = useState<string | undefined>(undefined);
  const toastActionRef = useRef<(() => void) | undefined>(undefined);
- const streak = useStreak();
- const [streakToastVisible, setStreakToastVisible] = useState(false);
+  const streak = useStreak();
+  const [streakToastVisible, setStreakToastVisible] = useState(false);
+  const [shakeModalVisible, setShakeModalVisible] = useState(false);
 
  const showToast = useCallback((message: string, actionLabel?: string, onAction?: () => void) => {
  setToastMessage(message);
@@ -147,8 +165,10 @@ const [state, dispatch] = useReducer(exerciseReducer, {
     ctaColor,
     validation: state.exercise.validation,
     wordWrap,
+    tasks: state.exercise.tasks,
+    activeTaskIndex: state.currentTaskIndex,
   });
- }, [state.exercise, colorScheme, id, editorTheme, codeFontSize, ctaColor, wordWrap]);
+ }, [state.exercise, colorScheme, id, editorTheme, codeFontSize, ctaColor, wordWrap, state.currentTaskIndex]);
 
  const styles = useMemo(
  () =>
@@ -406,6 +426,9 @@ const [state, dispatch] = useReducer(exerciseReducer, {
     case "exerciseComplete":
       dispatch({ type: "EXERCISE_COMPLETE" });
       break;
+    case "taskComplete":
+      dispatch({ type: "TASK_COMPLETE", taskIndex: msg.taskIndex });
+      break;
     case "validationFailed":
       showToast(msg.reason || "Not quite right — check the instructions");
       break;
@@ -428,9 +451,9 @@ const [state, dispatch] = useReducer(exerciseReducer, {
   case "goToNextLesson":
   loadCourse(course).then((courseData) => {
   if (!courseData) return;
-  const currentIndex = courseData.lessons.findIndex((l) => l.id === id);
-  if (currentIndex >= 0 && currentIndex < courseData.lessons.length - 1) {
-  const nextLesson = courseData.lessons[currentIndex + 1];
+  const currentIndex = courseData.exercises.findIndex((l) => l.id === id);
+  if (currentIndex >= 0 && currentIndex < courseData.exercises.length - 1) {
+  const nextLesson = courseData.exercises[currentIndex + 1];
   router.replace(`/learn/${course}/${nextLesson.id}`);
   } else {
   router.replace(`/learn/${course}`);
@@ -518,15 +541,40 @@ const [state, dispatch] = useReducer(exerciseReducer, {
  }
  }, [editorViewReady]);
 
- useEffect(() => {
- streak.consumePendingToast().then((data) => {
- if (data) {
- setStreakToastVisible(true);
- }
- });
- }, []);
+  useEffect(() => {
+    streak.consumePendingToast().then((data) => {
+      if (data) {
+        setStreakToastVisible(true);
+      }
+    });
+  }, []);
 
- useFocusEffect(
+  const handleShake = useCallback(() => {
+    setShakeModalVisible(true);
+  }, []);
+
+  useShakeDetection(handleShake, { enabled: !state.loading && !!state.exercise });
+
+  useEffect(() => {
+    if (editorViewReady && webViewRef.current && state.exercise?.tasks) {
+      const task = state.exercise.tasks[state.currentTaskIndex];
+      if (task) {
+        const instructionHtml = task.instruction
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+        webViewRef.current.postMessage(
+          JSON.stringify({
+            type: "setActiveTask",
+            taskIndex: state.currentTaskIndex,
+            instructionHtml,
+          })
+        );
+      }
+    }
+  }, [state.currentTaskIndex, editorViewReady, state.exercise]);
+
+  useFocusEffect(
  useCallback(() => {
  AsyncStorage.getItem("setting_editorTheme").then((val) => {
  setEditorTheme(val || "p5-learn");
@@ -591,9 +639,9 @@ const [state, dispatch] = useReducer(exerciseReducer, {
  if (!courseData) return;
  AsyncStorage.getItem("completedLessons").then((val) => {
  const completed: string[] = val ? JSON.parse(val) : [];
- const allDone = courseData.lessons.every((l) =>
+ const allDone = courseData.exercises.every((l) =>
  completed.includes(`${course}/${l.id}`)
-);
+ );
  if (allDone) {
  AsyncStorage.getItem("completedCourses").then((prev) => {
  const arr: string[] = prev ? JSON.parse(prev) : [];
@@ -612,9 +660,9 @@ const [state, dispatch] = useReducer(exerciseReducer, {
  if (!state.exercise) return;
  loadCourse(course).then((courseData) => {
  if (!courseData) return;
- const currentIndex = courseData.lessons.findIndex((l) => l.id === id);
- if (currentIndex >= 0 && currentIndex < courseData.lessons.length - 1) {
- const nextLesson = courseData.lessons[currentIndex + 1];
+ const currentIndex = courseData.exercises.findIndex((l) => l.id === id);
+ if (currentIndex >= 0 && currentIndex < courseData.exercises.length - 1) {
+ const nextLesson = courseData.exercises[currentIndex + 1];
  router.replace(`/learn/${course}/${nextLesson.id}`);
  } else {
  router.replace(`/learn/${course}`);
@@ -788,13 +836,30 @@ if (state.loading) {
  </Pressable>
  </View>
 
- <StreakToast
- visible={streakToastVisible}
- streakCount={streak.count}
- tierProgress={streak.tierProgress}
- nextTier={streak.nextTier}
- onDismiss={() => setStreakToastVisible(false)}
- />
+  <StreakToast
+  visible={streakToastVisible}
+  streakCount={streak.count}
+  tierProgress={streak.tierProgress}
+  nextTier={streak.nextTier}
+  onDismiss={() => setStreakToastVisible(false)}
+  />
+
+  <ShakeModal
+  visible={shakeModalVisible}
+  onDismiss={() => setShakeModalVisible(false)}
+  onHint={() => {
+    setShakeModalVisible(false);
+    showToast("Hint: Check the reference for function syntax", "Open Ref", () => {
+      if (exerciseSymbols.length > 0) {
+        router.push(`/ref?symbol=${exerciseSymbols[0]}`);
+      }
+    });
+  }}
+  onReset={() => {
+    setShakeModalVisible(false);
+    handleReset();
+  }}
+  />
 
  <Toast
  key={toastKey}

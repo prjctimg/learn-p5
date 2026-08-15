@@ -5,7 +5,16 @@ export type ValidationRule =
   | { type: "canvasSize"; width: number; height: number }
   | { type: "pixelMatch"; x: number; y: number; expected: [number, number, number]; tolerance?: number };
 
-export interface Lesson {
+export interface ExerciseTask {
+  id: string;
+  title: string;
+  instruction: string;
+  validation: ValidationRule[];
+  startingCode?: string;
+  solution?: string;
+}
+
+export interface Exercise {
   id: string;
   title: string;
   module: string;
@@ -14,6 +23,7 @@ export interface Lesson {
   startingCode?: string;
   solution?: string;
   validation?: ValidationRule[];
+  tasks?: ExerciseTask[];
 }
 
 export interface Course {
@@ -21,5 +31,5 @@ export interface Course {
   title: string;
   moduleName: string;
   description: string;
-  lessons: Lesson[];
+  exercises: Exercise[];
 }

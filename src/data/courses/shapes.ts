@@ -3,7 +3,7 @@ export const shapesCourse = {
   title: "Shapes",
   moduleName: "Fundamentals",
   description: "Master the coordinate system and draw your first primitive shapes using code.",
-  lessons: [
+  exercises: [
     {
       id: "exercise-1",
       title: "The First Circle",

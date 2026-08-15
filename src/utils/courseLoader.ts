@@ -1,5 +1,5 @@
 import { shapesCourse } from "../data/courses/shapes";
-import { Course, Lesson } from "../data/types";
+import { Course, Exercise } from "../data/types";
 
 const COURSE_FILES = [shapesCourse];
 
@@ -21,8 +21,8 @@ export async function loadCourse(slug: string): Promise<Course | null> {
 export async function loadExercise(
   courseSlug: string,
   exerciseId: string
-): Promise<Lesson | null> {
+): Promise<Exercise | null> {
   const course = await loadCourse(courseSlug);
   if (!course) return null;
-  return course.lessons.find((l) => l.id === exerciseId) ?? null;
+  return course.exercises.find((l) => l.id === exerciseId) ?? null;
 }

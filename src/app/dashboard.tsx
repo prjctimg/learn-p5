@@ -9,7 +9,7 @@ import Header from "../components/Header";
 import Toast from "../components/Toast";
 import StreakToast from "../components/StreakToast";
 import { loadAllCourses } from "../utils/courseLoader";
-import { Lesson, Course } from "../data/types";
+import { Exercise, Course } from "../data/types";
 import { getStreakFromStorage, useStreak } from "../hooks/useStreak";
 
 const LAST_GREETING_KEY = "last_greeting_period";
@@ -94,19 +94,19 @@ export default function Dashboard() {
  return () => clearTimeout(timer);
  }, []);
 
- const nextExercise: (Lesson & { courseSlug: string; courseTitle: string }) | null = useMemo(() => {
+ const nextExercise: (Exercise & { courseSlug: string; courseTitle: string }) | null = useMemo(() => {
  if (courses.length === 0) return null;
  const flat = courses.flatMap((c) =>
- c.lessons.map((l) => ({ ...l, courseSlug: c.slug, courseTitle: c.title }))
-);
+ c.exercises.map((l) => ({ ...l, courseSlug: c.slug, courseTitle: c.title }))
+ );
  return flat.find((l) => !completedLessons.includes(`${l.courseSlug}/${l.id}`)) ?? null;
  }, [courses, completedLessons]);
 
  const upcomingExercises = useMemo(() => {
  if (courses.length === 0 || !nextExercise) return [];
  const flat = courses.flatMap((c) =>
- c.lessons.map((l) => ({ ...l, courseSlug: c.slug, courseTitle: c.title }))
-);
+ c.exercises.map((l) => ({ ...l, courseSlug: c.slug, courseTitle: c.title }))
+ );
  const startIndex = flat.findIndex(
  (l) => l.courseSlug === nextExercise.courseSlug && l.id === nextExercise.id
 );
@@ -117,10 +117,10 @@ export default function Dashboard() {
  function isExerciseLocked(lessonId: string, courseSlug: string): boolean {
  const course = courses.find((c) => c.slug === courseSlug);
  if (!course) return true;
- const idx = course.lessons.findIndex((l) => l.id === lessonId);
+ const idx = course.exercises.findIndex((l) => l.id === lessonId);
  if (idx <= 0) return false;
  for (let j = 0; j < idx; j++) {
- if (!completedLessons.includes(`${courseSlug}/${course.lessons[j].id}`)) {
+ if (!completedLessons.includes(`${courseSlug}/${course.exercises[j].id}`)) {
  return true;
  }
  }
@@ -130,7 +130,7 @@ export default function Dashboard() {
  const progressAnim = useRef(new Animated.Value(0)).current;
 
  const totalLessons = useMemo(() => {
- return courses.reduce((sum, c) => sum + c.lessons.length, 0);
+ return courses.reduce((sum, c) => sum + c.exercises.length, 0);
  }, [courses]);
 
  const progress = totalLessons > 0 ? completedLessons.length / totalLessons : 0;
@@ -391,7 +391,7 @@ export default function Dashboard() {
 
  <View style={styles.continueSection}>
  <Text style={styles.sectionTitle}>
- Pickup where you left
+ Pick up where you left off
  </Text>
 
  {nextExercise ? (

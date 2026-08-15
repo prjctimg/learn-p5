@@ -1,12 +1,27 @@
-## Task 1 [this heading is just for guidance and  is not shown in the UI]
+# The First Circle
 
-A `circle` is a primitive 2D shape. To draw a one, we need 3 parameters;
+A `circle` is a primitive 2D shape. To draw one, we need 3 parameters:
 
-- [param-1]
-- [param-2]
-- [param-3]
+- x: horizontal position on the canvas
+- y: vertical position on the canvas
+- diameter: how wide/tall the circle is
 
-[These are the instructions for the task]
-Let's start by drawing a circle and giving it a fill of any color.
+---
 
-<!-- Once the user completes the task successfully, the webview transitions to the next task. Take note of how the instructions are structured in a simple and non repetitive tone. These instructions need to be structured in such a way that our exercise solution will automatically be constrained by the words we use. Design a parser or solution verifying logic around this.  -->
+## Task 1 — Draw the Circle
+
+Let's draw a circle at the center of the canvas.
+
+Use `circle(x, y, diameter)` with x=200, y=200, and a diameter of 100.
+
+**Validation:** `circle(3)` + `pixelMatch(200, 200, [255, 105, 180])`
+
+---
+
+## Task 2 — Style It
+
+Now change the fill color to something other than pink.
+
+Use `fill(r, g, b)` before the `circle()` call. Try a warm orange: `fill(255, 165, 0)`.
+
+**Validation:** `circle(3)` + `pixelMatch(200, 200, [255, 165, 0])`

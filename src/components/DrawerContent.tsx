@@ -24,7 +24,6 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: "view-dashboard-outline" },
   { label: "Learn", href: "/learn", icon: "book-open-outline" },
-  { label: "Playground", href: "/playground", icon: "code-braces" },
   { label: "Reference", href: "/ref", icon: "bookmark-outline" },
   { label: "Settings", href: "/settings", icon: "cog-outline" },
   { label: "About", href: "/about", icon: "information-outline" },

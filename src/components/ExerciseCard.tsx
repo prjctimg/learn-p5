@@ -8,7 +8,7 @@ import Button from "./Button";
 const asteriskPath =
  "M16.909,10.259l8.533-2.576l1.676,5.156l-8.498,2.899l5.275,7.48l-4.447,3.225l-5.553-7.348L8.487,26.25l-4.318-3.289l5.275-7.223L0.88,12.647l1.678-5.16l8.598,2.771V1.364h5.754V10.259z";
 
-interface ChallengeCardProps {
+interface ExerciseCardProps {
  title: string;
  moduleName: string;
  description: string;
@@ -16,13 +16,13 @@ interface ChallengeCardProps {
  onContinue?: () => void;
 }
 
-export default function ChallengeCard({
+export default function ExerciseCard({
  title,
  moduleName,
  description,
  locked = false,
  onContinue,
-}: ChallengeCardProps) {
+}: ExerciseCardProps) {
   const { colorScheme, derivedColors } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
@@ -46,7 +46,7 @@ export default function ChallengeCard({
   {moduleName}
   </Text>
  <Text style={[styles.description, { color: colors.textSecondary }]}>
- {locked ? "Complete the previous lesson to unlock this one." : description}
+ {locked ? "Complete the previous exercise to unlock this one." : description}
  </Text>
  </View>
 

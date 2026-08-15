@@ -235,7 +235,7 @@ function SymbolDetail({ symbol, onOpenSearch }: { symbol: string; onOpenSearch: 
  const lockedCourse = getLockedCourseName(P5_SYMBOLS_BY_NAME[name]?.module ?? "");
  if (lockedCourse) {
  Alert.alert(
- "Module Locked",
+ "Course Locked",
  `Complete the "${lockedCourse}" course to unlock this reference.`
  );
  return;

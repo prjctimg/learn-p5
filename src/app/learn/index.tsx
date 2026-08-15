@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { View, Text, FlatList, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import Header from "../../components/Header";
-import ChallengeCard from "../../components/ChallengeCard";
+import ExerciseCard from "../../components/ExerciseCard";
 import { loadAllCourses } from "../../utils/courseLoader";
 import { Course } from "../../data/types";
 import { useThemeContext } from "../../components/ThemeProvider";
@@ -40,12 +40,12 @@ export default function Learn() {
  keyExtractor={(item) => item.slug}
  renderItem={({ item }) => (
  <View style={styles.cardWrapper}>
- <ChallengeCard
+<ExerciseCard
  title={item.title}
  moduleName={item.moduleName}
- description={`${item.lessons.length} lesson${item.lessons.length > 1 ? "s" : ""} · ${item.description}`}
+ description={`${item.exercises.length} exercise${item.exercises.length > 1 ? "s" : ""} · ${item.description}`}
  onContinue={() => router.push(`/learn/${item.slug}`)}
- />
+/>
  </View>
 )}
  ListEmptyComponent={

@@ -52,7 +52,7 @@ export default function About() {
  >
  <View style={[styles.sectionCard, { backgroundColor: colors.surfaceDim }]}>
  <Text style={[styles.sectionHeading, { color: colors.onSurface }]}>
- What is p5.js ?
+ What is p5.js?
  </Text>
  <Svg width={100} height={46} viewBox="0 0 250 114" style={styles.logo}>
  {p5LogoPaths.map((d, i) => (

@@ -3,7 +3,7 @@ import { p5Source } from "../p5Source";
 import { P5_FUNCTION_NAMES } from "../../data/reference";
 import { Colors } from "../../constants/Colors";
 import { getEditorTheme, EditorThemeColors } from "./themes";
-import { ValidationRule } from "../../data/types";
+import { ValidationRule, ExerciseTask } from "../../data/types";
 import {
   JETBRAINS_MONO_REGULAR_BASE64,
   JETBRAINS_MONO_BOLD_BASE64,
@@ -63,6 +63,8 @@ export function getExerciseHtml(params: {
   ctaColor?: string;
   validation?: ValidationRule[];
   wordWrap?: boolean;
+  tasks?: ExerciseTask[];
+  activeTaskIndex?: number;
 }): string {
   const colors = Colors[params.colorScheme === "dark" ? "dark" : "light"];
   const ctaColor = params.ctaColor ?? colors.cta;
@@ -160,7 +162,7 @@ export function getExerciseHtml(params: {
     height: 400px;
     border-radius: 0;
   }
-  .sketch-box canvas { display: block; }
+   .sketch-box canvas { display: block; touch-action: pan-y !important; }
   .run-btn {
     position: absolute;
     bottom: 8px;
@@ -462,6 +464,8 @@ let view;
 const INITIAL_CODE = ${codeArg};
 const SOLUTION_CODE = ${solutionArg};
 const VALIDATION_RULES = ${JSON.stringify(validation ?? [])};
+const TASKS = ${JSON.stringify(params.tasks ?? [])};
+var ACTIVE_TASK_INDEX = ${params.activeTaskIndex ?? 0};
 var P5_COMPLETIONS = ${JSON.stringify(P5_FUNCTION_NAMES)};
 
 function p5CompletionSource(context) {
@@ -759,6 +763,11 @@ async function renderSketch(containerId, code) {
 
   try {
     container.__p5 = new p5(undefined, container);
+    var cnv = container.querySelector('canvas');
+    if (cnv) {
+      cnv.style.touchAction = 'pan-y';
+      cnv.onwheel = null;
+    }
   } catch(e) {
     console.error('Sketch render error:', e);
     container.innerHTML = '<div style="color:${cta};padding:16px;font-family:\\"JetBrains Mono\\",monospace">\\u26A0 ' + e.message + '</div>';
@@ -794,6 +803,13 @@ function handleMessage(data) {
           view.dispatch({
             changes: { from: 0, to: view.state.doc.length, insert: msg.code },
           });
+        }
+        break;
+      case 'setActiveTask':
+        ACTIVE_TASK_INDEX = msg.taskIndex || 0;
+        if (msg.instruction) {
+          var descEl = document.querySelector('.description-text');
+          if (descEl) descEl.innerHTML = msg.instructionHtml || msg.instruction;
         }
         break;
       case 'insert':
@@ -955,10 +971,14 @@ function handleMessage(data) {
 
         var syncResult = { passed: false, reason: '' };
         var hasPixelRules = false;
+        var activeRules = VALIDATION_RULES;
+        if (TASKS.length > 0 && TASKS[ACTIVE_TASK_INDEX]) {
+          activeRules = TASKS[ACTIVE_TASK_INDEX].validation || [];
+        }
         try {
-          if (VALIDATION_RULES.length > 0) {
-            var nonPixelRules = VALIDATION_RULES.filter(function(r) { return r.type !== 'pixelMatch'; });
-            hasPixelRules = VALIDATION_RULES.some(function(r) { return r.type === 'pixelMatch'; });
+          if (activeRules.length > 0) {
+            var nonPixelRules = activeRules.filter(function(r) { return r.type !== 'pixelMatch'; });
+            hasPixelRules = activeRules.some(function(r) { return r.type === 'pixelMatch'; });
             syncResult = validateSync(userCode, nonPixelRules);
           } else {
             syncResult = { passed: SOLUTION_CODE && userCode.trim() === SOLUTION_CODE.trim(), reason: '' };
@@ -974,12 +994,16 @@ function handleMessage(data) {
 
         if (!hasPixelRules) {
           if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-            window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'exerciseComplete' }));
+            if (TASKS.length > 0 && ACTIVE_TASK_INDEX < TASKS.length - 1) {
+              window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'taskComplete', taskIndex: ACTIVE_TASK_INDEX }));
+            } else {
+              window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'exerciseComplete' }));
+            }
           }
           break;
         }
 
-        var pixelRules = VALIDATION_RULES.filter(function(r) { return r.type === 'pixelMatch'; });
+        var pixelRules = activeRules.filter(function(r) { return r.type === 'pixelMatch'; });
         var pixelDelay = 300;
         setTimeout(function() {
           var container = document.getElementById('user-sketch');
@@ -1025,7 +1049,11 @@ function handleMessage(data) {
               }
             }
             if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-              window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'exerciseComplete' }));
+              if (TASKS.length > 0 && ACTIVE_TASK_INDEX < TASKS.length - 1) {
+                window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'taskComplete', taskIndex: ACTIVE_TASK_INDEX }));
+              } else {
+                window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'exerciseComplete' }));
+              }
             }
           } catch(e) {
             console.error('Pixel validation error:', e);

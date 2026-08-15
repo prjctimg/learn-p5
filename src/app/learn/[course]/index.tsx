@@ -42,40 +42,40 @@ export default function CourseDetail() {
 
  const nextExerciseIdx = useMemo(() => {
  if (!courseData || !course) return -1;
- return courseData.lessons.findIndex(
- (_, i) => !completedLessons.includes(`${course}/${courseData.lessons[i].id}`)
-);
+ return courseData.exercises.findIndex(
+ (_, i) => !completedLessons.includes(`${course}/${courseData.exercises[i].id}`)
+ );
  }, [courseData, completedLessons, course]);
 
  const nextExercise = useMemo(() => {
  if (!courseData || nextExerciseIdx < 0) return null;
- return courseData.lessons[nextExerciseIdx];
+ return courseData.exercises[nextExerciseIdx];
  }, [courseData, nextExerciseIdx]);
 
  const upNextLessons = useMemo(() => {
  if (!courseData || nextExerciseIdx < 0) return [];
- return courseData.lessons.slice(nextExerciseIdx + 1);
+ return courseData.exercises.slice(nextExerciseIdx + 1);
  }, [courseData, nextExerciseIdx]);
 
  const completedLessonItems = useMemo(() => {
  if (!courseData || !course) return [];
- return courseData.lessons.filter(
+ return courseData.exercises.filter(
  (l) => completedLessons.includes(`${course}/${l.id}`)
-);
+ );
  }, [courseData, completedLessons, course]);
 
  const progress = useMemo(() => {
- if (!courseData || courseData.lessons.length === 0) return 0;
+ if (!courseData || courseData.exercises.length === 0) return 0;
  const courseCompleted = completedLessons.filter((id) =>
  id.startsWith(`${course}/`)
-).length;
- return courseCompleted / courseData.lessons.length;
+ ).length;
+ return courseCompleted / courseData.exercises.length;
  }, [courseData, completedLessons, course]);
 
  function isLessonLocked(index: number) {
  if (!course || !courseData) return true;
  for (let j = 0; j < index; j++) {
- if (!completedLessons.includes(`${course}/${courseData.lessons[j].id}`)) {
+ if (!completedLessons.includes(`${course}/${courseData.exercises[j].id}`)) {
  return true;
  }
  }
