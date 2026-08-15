@@ -35,6 +35,7 @@ const SETTINGS_KEYS = {
   editorTheme: "setting_editorTheme",
   wordWrap: "setting_wordWrap",
   devMode: "setting_devMode",
+  showDrawerFab: "setting_showDrawerFab",
 };
 
 const createStyles = (colors: Record<string, string>) =>
@@ -101,6 +102,7 @@ export default function Settings() {
   const [wordWrap, setWordWrap] = useState(false);
   const [displayName, setDisplayName] = useState("");
   const [devMode, setDevMode] = useState(false);
+  const [showDrawerFab, setShowDrawerFab] = useState(true);
   const [debugToastVisible, setDebugToastVisible] = useState(false);
   const [debugStreakToastVisible, setDebugStreakToastVisible] = useState(false);
   const [debugStreakCount, setDebugStreakCount] = useState("7");
@@ -118,7 +120,8 @@ export default function Settings() {
       SETTINGS_KEYS.editorTheme,
       SETTINGS_KEYS.wordWrap,
       SETTINGS_KEYS.devMode,
-    ]).then(([reminder, snippet, hour, minute, fontSize, bg, kb, theme, wrap, dev]) => {
+      SETTINGS_KEYS.showDrawerFab,
+    ]).then(([reminder, snippet, hour, minute, fontSize, bg, kb, theme, wrap, dev, drawerFab]) => {
       setDailyReminder(reminder[1] === "true");
       setSnippetAlternatives(snippet[1] === "true");
       if (hour[1]) setNotificationHour(parseInt(hour[1], 10));
@@ -129,6 +132,7 @@ export default function Settings() {
       if (theme[1]) setEditorTheme(theme[1]);
       setWordWrap(wrap[1] === "true");
       setDevMode(dev[1] === "true");
+      if (drawerFab[1] !== null) setShowDrawerFab(drawerFab[1] !== "false");
     });
     AsyncStorage.getItem("onboardingData").then((val) => {
       if (val) {
@@ -221,6 +225,11 @@ export default function Settings() {
   const toggleDevMode = async (value: boolean) => {
     setDevMode(value);
     await AsyncStorage.setItem(SETTINGS_KEYS.devMode, value.toString());
+  };
+
+  const toggleShowDrawerFab = async (value: boolean) => {
+    setShowDrawerFab(value);
+    await AsyncStorage.setItem(SETTINGS_KEYS.showDrawerFab, value.toString());
   };
 
   const handleCompleteAllExercises = async () => {
@@ -331,6 +340,20 @@ export default function Settings() {
                 accessibilityLabel={`Set accent color to ${hex}`}
               />
             ))}
+          </View>
+        </View>
+        <View style={[styles.card, { marginTop: 8 }]}>
+          <View style={styles.cardRow}>
+            <View style={styles.flexChild}>
+              <Text style={styles.settingTitle}>Drawer FAB</Text>
+              <Text style={styles.settingDescription}>Show the drawer shortcut on the left edge</Text>
+            </View>
+            <Switch
+              value={showDrawerFab}
+              onValueChange={toggleShowDrawerFab}
+              trackColor={{ false: "#767577", true: ctaColor }}
+              thumbColor="#ffffff"
+            />
           </View>
         </View>
 

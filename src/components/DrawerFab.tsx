@@ -14,7 +14,7 @@ export default function DrawerFab() {
 
   useEffect(() => {
     AsyncStorage.getItem(SETTING_KEY).then((val) => {
-      setVisible(val === "true");
+      setVisible(val !== "false");
     });
   }, []);
 

@@ -50,7 +50,6 @@ export default function SideDrawer() {
     });
 
   const openGesture = Gesture.Pan()
-    .activateAfterLongPress(150)
     .onUpdate((e) => {
       if (e.translationX > 0) {
         translateX.value = Math.min(0, -DRAWER_WIDTH + e.translationX);

@@ -59,7 +59,8 @@ export default function DrawerContent({ onClose }: DrawerContentProps) {
           ))}
         </Svg>
         <View style={{ height: 12 }} />
-        <Text style={[styles.tagline, { color: derivedColors.onPrimary }]}>Learn p5.js</Text>
+        <Text style={[styles.tagline, { color: derivedColors.onPrimary }]}>Learn creative coding</Text>
+        <Text style={[styles.tagline, { color: derivedColors.onPrimary, fontSize: 12, opacity: 0.7 }]}>One sketch at a time</Text>
       </View>
 
       <View style={styles.navList}>
