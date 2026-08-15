@@ -269,8 +269,6 @@ export function getExerciseHtml(params: {
   .cm-editor .cm-gutters { background: ${editorBg}; border-right: 1px solid ${params.colorScheme === 'dark' ? '#292A2E' : '#E5E7EB'}; color: ${params.colorScheme === 'dark' ? '#6B7280' : '#9CA3AF'}; }
   .cm-editor .cm-activeLineGutter { background: ${params.colorScheme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}; }
   .cm-editor .cm-activeLine { background: ${params.colorScheme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}; }
-  .cm-editor .cm-cursor { border-left-color: ${ctaColor}; animation: cm-blink 1s step-end infinite; }
-  @keyframes cm-blink { 50% { border-left-color: transparent; } }
   .cm-editor .cm-selectionBackground,
   .cm-editor.cm-focused .cm-selectionBackground { background: ${params.colorScheme === 'dark' ? 'rgba(255, 105, 180, 0.2)' : 'rgba(255, 105, 180, 0.15)'} !important; }
   .cm-editor .cm-matchingBracket {
@@ -439,6 +437,15 @@ function getBridgeScript(startingCode: string, solution: string, theme: EditorTh
 
   return `
 var _CM = typeof CM !== 'undefined' ? CM : null;
+if (!_CM) {
+  var editorEl = document.getElementById('editor');
+  if (editorEl) editorEl.innerHTML = '<div style="color:#FF4444;padding:16px;font-family:monospace">\\u26A0 CodeMirror failed to load. Run: npm run bundle-editor</div>';
+  if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'ready' }));
+    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'editorReady', ready: false }));
+  }
+  throw new Error('CodeMirror bundle not loaded — run: npm run bundle-editor');
+}
 var basicSetup = _CM.basicSetup;
 var EditorView = _CM.EditorView;
 var EditorState = _CM.EditorState;
@@ -454,7 +461,7 @@ var Decoration = _CM.Decoration;
 var DecorationSet = _CM.DecorationSet;
 var autocompletion = _CM.autocompletion;
 var CompletionContext = _CM.CompletionContext;
-var lineWrapping = _CM.EditorView.lineWrapping;
+var lineWrapping = _CM.lineWrapping;
 var prettierLib = _CM.prettier;
 var prettierEstree = _CM.prettierPluginEstree;
 var prettierAcorn = _CM.prettierPluginAcorn;
@@ -533,7 +540,8 @@ var p5Theme = EditorView.theme({
   '.cm-gutters': { backgroundColor: '${editorBg}', color: '${gutterFg}', borderRight: '1px solid ${gutterBorder}' },
   '.cm-activeLineGutter': { backgroundColor: '${activeBg}' },
   '.cm-activeLine': { backgroundColor: '${activeBg}' },
-  '.cm-cursor': { borderLeft: '2px solid ${cta}' },
+  '.cm-cursor': { borderLeft: '2px solid ${cta}', animation: 'cm-blink 1s step-end infinite' },
+  '@keyframes cm-blink': { '50%': { borderLeftColor: 'transparent' } },
   '.cm-selectionBackground': { backgroundColor: '${selBg}' },
   '.cm-matchingBracket': { backgroundColor: 'rgba(${ctaRgb}, 0.3)', outline: '1px solid ${cta}' },
   '.cm-p5-fn': { fontWeight: '600' },
@@ -655,54 +663,6 @@ function initEditorView(code) {
 function initEditor() {
   try {
     initEditorView(INITIAL_CODE);
-    view.dom.addEventListener('mousedown', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      var coords = { x: e.clientX, y: e.clientY };
-      var pos = view.posAtCoords(coords);
-      if (pos !== null) {
-        view.dispatch({ selection: { anchor: pos, head: pos } });
-      }
-      view.focus();
-      if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-        window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'editorTapped' }));
-      }
-    });
-    var touchStartY = 0;
-    var touchStartX = 0;
-    var isScrolling = false;
-    view.dom.addEventListener('touchstart', function(e) {
-      var touch = e.touches[0];
-      touchStartX = touch.clientX;
-      touchStartY = touch.clientY;
-      isScrolling = false;
-    }, { passive: true });
-    view.dom.addEventListener('touchmove', function(e) {
-      if (!isScrolling) {
-        var touch = e.touches[0];
-        var dx = Math.abs(touch.clientX - touchStartX);
-        var dy = Math.abs(touch.clientY - touchStartY);
-        if (dy > 10 || dx > 10) {
-          isScrolling = true;
-        }
-      }
-    }, { passive: true });
-    view.dom.addEventListener('touchend', function(e) {
-      if (!isScrolling) {
-        e.preventDefault();
-        e.stopPropagation();
-        var touch = e.changedTouches[0];
-        var coords = { x: touch.clientX, y: touch.clientY };
-        var pos = view.posAtCoords(coords);
-        if (pos !== null) {
-          view.dispatch({ selection: { anchor: pos, head: pos } });
-        }
-        view.focus();
-        if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-          window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'editorTapped' }));
-        }
-      }
-    }, { passive: false });
     postReady();
     postEditorReady();
     setTimeout(function() {
@@ -893,7 +853,8 @@ function handleMessage(data) {
         if (view) {
           try {
             var codeToFormat = view.state.doc.toString();
-            var pw = WORD_WRAP ? 80 : 120;
+            // Use mobile-friendly printWidth (60) for better readability on small screens
+            var pw = 60;
             if (typeof prettierLib !== 'undefined' && prettierLib.format) {
               prettierLib.format(codeToFormat, {
                 parser: 'acorn',
@@ -901,9 +862,16 @@ function handleMessage(data) {
                 printWidth: pw,
                 semi: true,
                 singleQuote: false,
+                trailingComma: 'es5',
+                bracketSpacing: true,
+                arrowParens: 'avoid',
+                endOfLine: 'lf',
               }).then(function(formatted) {
-                if (formatted !== codeToFormat) {
-                  view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: formatted } });
+                // Also strip trailing whitespace from each line
+                var lines = formatted.split('\n');
+                var cleaned = lines.map(function(line) { return line.replace(/\s+$/, ''); }).join('\n');
+                if (cleaned !== codeToFormat) {
+                  view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: cleaned } });
                 }
                 view.focus();
               }).catch(function() { view.focus(); });
@@ -1065,10 +1033,14 @@ function handleMessage(data) {
 
         if (typeof prettierLib !== 'undefined' && prettierLib.format) {
           var postCode = view.state.doc.toString();
-          var pw2 = WORD_WRAP ? 80 : 120;
-          prettierLib.format(postCode, { parser: 'acorn', plugins: [prettierEstree, prettierAcorn], printWidth: pw2, semi: true, singleQuote: false }).then(function(formatted) {
-            if (formatted !== postCode) {
-              view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: formatted } });
+          // Use mobile-friendly printWidth (60) for better readability on small screens
+          var pw2 = 60;
+          prettierLib.format(postCode, { parser: 'acorn', plugins: [prettierEstree, prettierAcorn], printWidth: pw2, semi: true, singleQuote: false, trailingComma: 'es5', bracketSpacing: true, arrowParens: 'avoid', endOfLine: 'lf' }).then(function(formatted) {
+            // Strip trailing whitespace from each line
+            var lines = formatted.split('\n');
+            var cleaned = lines.map(function(line) { return line.replace(/\s+$/, ''); }).join('\n');
+            if (cleaned !== postCode) {
+              view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: cleaned } });
             }
           }).catch(function() {});
         }

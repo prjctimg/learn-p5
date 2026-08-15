@@ -34,6 +34,21 @@ jobs:
             exit 1
           fi
 
+      - name: Verify CodeMirror bundle
+        run: |
+          BUNDLE_FILE="src/utils/editor/codemirror-bundle.generated.ts"
+          if [ ! -f "$BUNDLE_FILE" ]; then
+            echo "ERROR: $BUNDLE_FILE not found"
+            exit 1
+          fi
+          SIZE=$(wc -c < "$BUNDLE_FILE")
+          if [ "$SIZE" -lt 100000 ]; then
+            echo "ERROR: CodeMirror bundle is too small ($SIZE bytes, expected >= 100000)"
+            echo "Regenerate with: npm run bundle-editor"
+            exit 1
+          fi
+          echo "CodeMirror bundle OK ($SIZE bytes)"
+
       - name: Setup JDK
         uses: actions/setup-java@v4
         with:

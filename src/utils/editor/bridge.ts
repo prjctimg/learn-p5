@@ -24,6 +24,15 @@ export function getBridgeScript(colorScheme: 'light' | 'dark', themeId?: string,
 
   return `
 var _CM = typeof CM !== 'undefined' ? CM : null;
+if (!_CM) {
+  var editorEl = document.getElementById('editor');
+  if (editorEl) editorEl.innerHTML = '<div style="color:#FF4444;padding:16px;font-family:monospace">\\u26A0 CodeMirror failed to load. Run: npm run bundle-editor</div>';
+  if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'ready' }));
+    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'editorReady', ready: false }));
+  }
+  throw new Error('CodeMirror bundle not loaded — run: npm run bundle-editor');
+}
 
 var basicSetup = _CM.basicSetup;
 var EditorView = _CM.EditorView;
@@ -36,7 +45,7 @@ var tags = _CM.tags;
 var indentSelection = _CM.indentSelection;
 var autocompletion = _CM.autocompletion;
 var CompletionContext = _CM.CompletionContext;
-var lineWrapping = _CM.EditorView.lineWrapping;
+var lineWrapping = _CM.lineWrapping;
 var prettierLib = _CM.prettier;
 var prettierEstree = _CM.prettierPluginEstree;
 var prettierAcorn = _CM.prettierPluginAcorn;

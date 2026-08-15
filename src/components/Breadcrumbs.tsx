@@ -15,7 +15,7 @@ interface BreadcrumbsProps {
 
 export default function Breadcrumbs({ segments }: BreadcrumbsProps) {
   const router = useRouter();
-  const { colorScheme } = useThemeContext();
+  const { colorScheme, derivedColors } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
   return (
@@ -44,7 +44,7 @@ export default function Breadcrumbs({ segments }: BreadcrumbsProps) {
                 <Text
                   style={[
                     styles.segmentText,
-                    { color: colors.primary },
+                    { color: derivedColors.primary },
                   ]}
                 >
                   {segment.label}

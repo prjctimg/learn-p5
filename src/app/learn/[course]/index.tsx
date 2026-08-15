@@ -101,16 +101,16 @@ if (loading) {
  );
  }
 
- if (error) {
- return (
- <View style={[styles.container, { backgroundColor: colors.surface }]}>
- <View
- style={[
- styles.header,
- { backgroundColor: colors.surface },
- ]}
- >
- <Pressable onPress={() => router.push("/learn")} style={styles.backButton}>
+if (error) {
+  return (
+  <View style={[styles.container, { backgroundColor: colors.surface }]}>
+  <View
+  style={[
+    styles.header,
+    { backgroundColor: colors.surface },
+  ]}
+  >
+  <Pressable onPress={() => router.back()} style={styles.backButton}>
  <MaterialCommunityIcons
  name="arrow-left"
  size={24}
@@ -132,9 +132,9 @@ if (loading) {
  {error}
  </Text>
  <View style={styles.notFoundButtonWrapper}>
- <Pressable
- onPress={() => router.push("/learn")}
- style={({ pressed }) => [
+<Pressable
+  onPress={() => router.back()}
+  style={({ pressed }) => [
  styles.backButton,
  pressed && styles.backButtonPressed,
  ]}
@@ -151,16 +151,16 @@ if (loading) {
  );
  }
 
- if (!courseData) {
- return (
- <View style={[styles.container, { backgroundColor: colors.surface }]}>
- <View
- style={[
- styles.header,
- { backgroundColor: colors.surface },
- ]}
- >
- <Pressable onPress={() => router.push("/learn")} style={styles.backButton}>
+if (!courseData) {
+  return (
+  <View style={[styles.container, { backgroundColor: colors.surface }]}>
+  <View
+  style={[
+    styles.header,
+    { backgroundColor: colors.surface },
+  ]}
+  >
+  <Pressable onPress={() => router.back()} style={styles.backButton}>
  <MaterialCommunityIcons
  name="arrow-left"
  size={24}
@@ -194,7 +194,7 @@ if (loading) {
         { backgroundColor: colors.surface },
       ]}
       >
-        <Pressable onPress={() => router.push("/learn")} style={styles.backButton}>
+<Pressable onPress={() => router.back()} style={styles.backButton}>
         <MaterialCommunityIcons
           name="arrow-left"
           size={24}
@@ -533,23 +533,27 @@ const styles = StyleSheet.create({
  paddingHorizontal: 24,
  paddingTop: 32,
  },
- sectionHeader: {
- flexDirection: "row",
- justifyContent: "space-between",
- alignItems: "flex-end",
- marginBottom: 24,
- },
- sectionTitle: {
- fontFamily: "JetBrainsMono",
- fontSize: 24,
- fontWeight: "700",
- fontStyle: "italic",
- },
- sectionSubtitle: {
- fontFamily: "JetBrainsMono",
- fontSize: 13,
- fontWeight: "400",
- },
+sectionHeader: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "flex-end",
+  marginBottom: 24,
+  flexWrap: "wrap",
+  gap: 8,
+},
+sectionTitle: {
+  fontFamily: "JetBrainsMono",
+  fontSize: 24,
+  fontWeight: "700",
+  fontStyle: "italic",
+  flexShrink: 1,
+},
+sectionSubtitle: {
+  fontFamily: "JetBrainsMono",
+  fontSize: 13,
+  fontWeight: "400",
+  flexShrink: 1,
+},
  lessonList: {
  gap: 4,
  },

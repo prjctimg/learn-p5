@@ -767,19 +767,19 @@ if (state.loading) {
 );
  }
 
- return (
-  <View style={styles.container}>
-  <View
-  style={[styles.header, { paddingTop: insets.top + 4 }]}
-  >
-  <Pressable
-  onPress={() => router.push(`/learn/${course}`)}
-  style={styles.menuButton}
-  accessibilityRole="button"
-  accessibilityLabel="Go back"
-  >
-  <MaterialCommunityIcons name="arrow-left" size={24} color={colors.onSurfaceVariant} />
-  </Pressable>
+return (
+   <View style={styles.container}>
+   <View
+   style={[styles.header, { paddingTop: insets.top + 4 }]}
+   >
+   <Pressable
+   onPress={() => router.back()}
+   style={styles.menuButton}
+   accessibilityRole="button"
+   accessibilityLabel="Go back"
+   >
+   <MaterialCommunityIcons name="arrow-left" size={24} color={colors.onSurfaceVariant} />
+   </Pressable>
   <Text style={styles.logoText} numberOfLines={1}>
   {state.exercise?.title ?? ""}
   </Text>

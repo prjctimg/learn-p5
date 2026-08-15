@@ -11,7 +11,7 @@ export default function StatusBarAccent() {
 
   return (
     <StatusBar
-      barStyle={isLight ? "dark" : "light"}
+      style={isLight ? "dark" : "light"}
       backgroundColor={colorScheme === "dark" ? "#121317" : ctaColor}
     />
   );
