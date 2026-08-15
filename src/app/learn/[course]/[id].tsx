@@ -168,7 +168,7 @@ export default function Exercise() {
     tasks: state.exercise.tasks,
     activeTaskIndex: state.currentTaskIndex,
   });
- }, [state.exercise, colorScheme, id, editorTheme, codeFontSize, ctaColor, wordWrap, state.currentTaskIndex]);
+  }, [state.exercise, colorScheme, id, editorTheme, codeFontSize, ctaColor, wordWrap]);
 
  const styles = useMemo(
  () =>
@@ -215,12 +215,11 @@ export default function Exercise() {
  transform: [{ translateY: 2 }],
  },
  backButtonText: {
- fontFamily: "JetBrainsMono",
- fontWeight: "900",
- fontSize: 13,
- textTransform: "uppercase",
- letterSpacing: 0.5,
- color: colors.onPrimary,
+  fontFamily: "JetBrainsMono",
+  fontWeight: "900",
+  fontSize: 13,
+  letterSpacing: 0.5,
+  color: colors.onPrimary,
  },
  container: {
  flex: 1,
@@ -329,7 +328,6 @@ export default function Exercise() {
  modalSectionTitle: {
  fontFamily: "JetBrainsMono",
  fontSize: 11,
- textTransform: "uppercase",
  letterSpacing: 1,
  marginBottom: 8,
  },
@@ -617,39 +615,36 @@ export default function Exercise() {
   }, []);
 
  useEffect(() => {
- if (!state.completed || !state.exercise) return;
+  if (!state.completed || !state.exercise) return;
 
- const key = `${course}/${state.exercise.id}`;
+  const key = `${course}/${state.exercise.id}`;
 
- AsyncStorage.getItem("completedLessons").then((val) => {
- const arr: string[] = val ? JSON.parse(val) : [];
- if (!arr.includes(key)) {
- arr.push(key);
- AsyncStorage.setItem("completedLessons", JSON.stringify(arr));
- }
- });
+  showToast("✓ Exercise completed!", "Next →", handleToastNext);
 
- showToast("✓ Exercise completed!", "Next →", handleToastNext);
+  (async () => {
+  const val = await AsyncStorage.getItem("completedLessons");
+  const arr: string[] = val ? JSON.parse(val) : [];
+  if (!arr.includes(key)) {
+  arr.push(key);
+  await AsyncStorage.setItem("completedLessons", JSON.stringify(arr));
+  }
 
- loadCourse(course).then((courseData) => {
- if (!courseData) return;
- AsyncStorage.getItem("completedLessons").then((val) => {
- const completed: string[] = val ? JSON.parse(val) : [];
- const allDone = courseData.exercises.every((l) =>
- completed.includes(`${course}/${l.id}`)
- );
- if (allDone) {
- AsyncStorage.getItem("completedCourses").then((prev) => {
- const arr: string[] = prev ? JSON.parse(prev) : [];
- if (!arr.includes(course)) {
- arr.push(course);
- AsyncStorage.setItem("completedCourses", JSON.stringify(arr));
- }
- });
- }
- });
- });
- }, [state.completed, state.exercise, course, webViewReady]);
+  const courseData = await loadCourse(course);
+  if (!courseData) return;
+
+  const allDone = courseData.exercises.every((l) =>
+  arr.includes(`${course}/${l.id}`)
+  );
+  if (allDone) {
+  const prev = await AsyncStorage.getItem("completedCourses");
+  const courses: string[] = prev ? JSON.parse(prev) : [];
+  if (!courses.includes(course)) {
+  courses.push(course);
+  await AsyncStorage.setItem("completedCourses", JSON.stringify(courses));
+  }
+  }
+  })();
+  }, [state.completed, state.exercise, course, webViewReady, handleToastNext]);
 
  const handleToastNext = useCallback(() => {
  setToastVisible(false);

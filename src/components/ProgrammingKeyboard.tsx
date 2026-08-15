@@ -320,8 +320,8 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
  <Text style={[popupTextStyles.popupDesc, { color: colors.onSurfaceVariant }]}>{ref.description}</Text>
  {ref.parameters.map(p => (
  <Text key={p.name} style={[popupTextStyles.popupParam, { color: colors.onSurfaceVariant }]}>
-  <Text style={{ fontFamily: "JetBrainsMono", color: colors.primary, fontWeight: "700" }}>{p.name}</Text>
-  {' '}<Text style={{ fontFamily: "JetBrainsMono", fontSize: 11, color: colors.primary }}>({p.type})</Text>: {p.description}
+   <Text style={{ fontFamily: "JetBrainsMono", color: derivedColors.primary, fontWeight: "700" }}>{p.name}</Text>
+   {' '}<Text style={{ fontFamily: "JetBrainsMono", fontSize: 11, color: derivedColors.primary }}>({p.type})</Text>: {p.description}
  </Text>
 ))}
  </>

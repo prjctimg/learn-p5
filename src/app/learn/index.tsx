@@ -82,7 +82,6 @@ const styles = StyleSheet.create({
   fontSize: 24,
   fontWeight: "700",
   fontStyle: "italic",
-  textTransform: "uppercase",
   marginBottom: 16,
   },
   cardWrapper: {

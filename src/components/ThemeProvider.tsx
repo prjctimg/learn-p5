@@ -3,6 +3,7 @@ import { useColorScheme as useRNColorScheme } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DEFAULTS } from "../constants/Defaults";
 import { deriveColorsFromAccent, type DerivedColors } from "../utils/colorUtils";
+import { applyAccentIcon } from "../utils/dynamicIcon";
 
 type ThemeColorScheme = "light" | "dark";
 
@@ -72,6 +73,10 @@ export default function ThemeProvider({ children }: ThemeProviderProps) {
     () => deriveColorsFromAccent(ctaColor, colorScheme === "dark"),
     [ctaColor, colorScheme]
   );
+
+  useEffect(() => {
+    applyAccentIcon(ctaColor);
+  }, [ctaColor]);
 
   return (
     <ThemeContext.Provider value={{ colorScheme, toggleTheme, ctaColor, setCtaColor, derivedColors }}>

@@ -1,0 +1,18 @@
+import { StatusBar } from "expo-status-bar";
+import { useThemeContext } from "./ThemeProvider";
+import { luminance } from "../utils/colorUtils";
+
+export default function StatusBarAccent() {
+  const { ctaColor, colorScheme } = useThemeContext();
+  const r = parseInt(ctaColor.slice(1, 3), 16);
+  const g = parseInt(ctaColor.slice(3, 5), 16);
+  const b = parseInt(ctaColor.slice(5, 7), 16);
+  const isLight = luminance(r, g, b) > 0.4;
+
+  return (
+    <StatusBar
+      barStyle={isLight ? "dark" : "light"}
+      backgroundColor={colorScheme === "dark" ? "#121317" : ctaColor}
+    />
+  );
+}

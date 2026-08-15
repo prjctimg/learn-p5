@@ -31,7 +31,7 @@ This app is intended for anyone who wants to learn p5.js at a relaxed pace that 
 
 The app is currently available on Android only and ChromeOS if you are on the `dev` branch.
 
-You can [grab the releases here](https://github.com/skchr/learn-p5/releases)
+You can [grab the latest release here](https://github.com/skchr/learn-p5/releases/tag/latest)
 
 ## Where can I see and share suggestions ?
 

@@ -217,7 +217,6 @@ const styles = StyleSheet.create({
     fontFamily: "JetBrainsMono",
     fontSize: 11,
     fontWeight: "700",
-    textTransform: "uppercase",
     letterSpacing: 1,
   },
   stackToggle: {

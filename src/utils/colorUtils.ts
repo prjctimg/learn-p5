@@ -63,7 +63,7 @@ function hslToHex(h: number, s: number, l: number): string {
   return rgbToHex(r, g, b);
 }
 
-function luminance(r: number, g: number, b: number): number {
+export function luminance(r: number, g: number, b: number): number {
   const [rs, gs, bs] = [r, g, b].map((c) => {
     c /= 255;
     return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);

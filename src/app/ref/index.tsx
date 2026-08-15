@@ -517,14 +517,7 @@ export default function Reference() {
   style={[styles.flex1, { paddingHorizontal: 16 }]}
   contentContainerStyle={{ paddingTop: 12, paddingBottom: 80 }}
     ListHeaderComponent={
-      <View style={{ marginBottom: 24 }}>
-        <Text style={[styles.headlineXl, { color: colors.onSurface, marginBottom: 4 }]}>
-          p5.js Reference
-        </Text>
-        <Text style={[styles.bodySm, { color: colors.textSecondary }]}>
-          v{GENERATED_REFERENCE.metadata.p5Version}
-        </Text>
-      </View>
+      <View style={{ marginBottom: 12 }} />
     }
   data={MODULE_GROUPS}
   keyExtractor={(item) => item.module}

@@ -1,11 +1,10 @@
 {
   "name": "learn-p5",
   "main": "expo-router/entry",
-  "version": "0.6.75",
+  "version": "0.6.84",
   "scripts": {
-    "postinstall": "npm run gen-version && npm run gen-reference && npm run bundle-editor",
-    "start": "npm run gen-version && npm run gen-reference && npm run bundle-editor && expo start",
-    "gen-version": "sh scripts/gen-version.sh",
+    "postinstall": "npm run gen-reference && npm run bundle-editor",
+    "start": "npm run gen-reference && npm run bundle-editor && expo start",
     "gen-reference": "node scripts/generate-reference.mjs --stub",
     "bundle-editor": "node scripts/bundle-editor.mjs",
     "version": "sh scripts/bump-version.sh",
@@ -33,6 +32,7 @@
     "expo-notifications": "~55.0.23",
     "expo-router": "~55.0.16",
     "expo-sensors": "~55.0.13",
+    "expo-status-bar": "~2.2.3",
     "expo-web-browser": "~55.0.16",
     "fuse.js": "7.1.0",
     "prettier": "^3.9.5",

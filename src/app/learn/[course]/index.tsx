@@ -218,9 +218,9 @@ if (loading) {
  { backgroundColor: colors.surfaceContainerLow },
  ]}
  >
- <Text style={[styles.heroLabel, { color: derivedColors.primary }]}>
- NEXT EXERCISE
- </Text>
+  <Text style={[styles.heroLabel, { color: derivedColors.primary }]}>
+  Next exercise
+  </Text>
  <Text style={[styles.heroTitle, { color: colors.onSurface }]}>
  {nextExercise.title}
  </Text>
@@ -292,20 +292,20 @@ if (loading) {
  router.push(`/learn/${course}/${lesson.id}`)
  }
  style={({ pressed }) => [
- styles.lessonRow,
- isLast && styles.lessonRowLast,
- { borderColor: colors.outlineVariant },
- pressed &&
- !locked && {
- backgroundColor: colors.surfaceContainerHigh,
- },
- ]}
- >
- <View
- style={[
- styles.lessonIcon,
- { borderColor: colors.outlineVariant },
- ]}
+  styles.lessonRow,
+  isLast && styles.lessonRowLast,
+  { borderColor: locked ? "transparent" : colors.outlineVariant },
+  pressed &&
+  !locked && {
+  backgroundColor: colors.surfaceContainerHigh,
+  },
+  ]}
+  >
+  <View
+  style={[
+  styles.lessonIcon,
+  { borderColor: locked ? "transparent" : colors.outlineVariant },
+  ]}
  >
  {locked || isLast ? (
  <MaterialCommunityIcons
@@ -342,7 +342,7 @@ if (loading) {
  >
  {isLast
  ? `Earn ${courseData.moduleName} Badge`
- : lesson.module.toUpperCase()}
+  : lesson.module}
  </Text>
  </View>
  <MaterialCommunityIcons
@@ -366,9 +366,9 @@ if (loading) {
  },
  ]}
  >
- <Text style={[styles.completedLabel, { color: colors.onSurface }]}>
- COMPLETED
- </Text>
+  <Text style={[styles.completedLabel, { color: colors.onSurface }]}>
+  Completed
+  </Text>
  {completedLessonItems.map((lesson) => (
  <Pressable
  key={lesson.id}
@@ -461,13 +461,12 @@ const styles = StyleSheet.create({
  fontFamily: "JetBrainsMono",
  fontSize: 14,
  },
- headerTitle: {
- fontFamily: "JetBrainsMono",
- fontSize: 24,
- fontWeight: "900",
- fontStyle: "italic",
- textTransform: "uppercase",
- },
+  headerTitle: {
+  fontFamily: "JetBrainsMono",
+  fontSize: 24,
+  fontWeight: "900",
+  fontStyle: "italic",
+  },
  headerRight: {
  flexDirection: "row",
  alignItems: "center",
@@ -496,7 +495,6 @@ const styles = StyleSheet.create({
  fontSize: 14,
  fontWeight: "700",
  letterSpacing: 1,
- textTransform: "uppercase",
  },
  heroTitle: {
  fontFamily: "JetBrainsMono",
@@ -542,13 +540,11 @@ const styles = StyleSheet.create({
  fontSize: 24,
  fontWeight: "700",
  fontStyle: "italic",
- textTransform: "uppercase",
  },
  sectionSubtitle: {
  fontFamily: "JetBrainsMono",
  fontSize: 13,
  fontWeight: "400",
- textTransform: "uppercase",
  },
  lessonList: {
  gap: 4,
@@ -586,7 +582,6 @@ const styles = StyleSheet.create({
  fontSize: 11,
  fontWeight: "700",
  marginTop: 4,
- textTransform: "uppercase",
  },
  completedSection: {
  paddingHorizontal: 24,
@@ -600,7 +595,6 @@ const styles = StyleSheet.create({
  fontSize: 11,
  fontWeight: "700",
  letterSpacing: 2,
- textTransform: "uppercase",
  marginBottom: 16,
  },
  completedRow: {

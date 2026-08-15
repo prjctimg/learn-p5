@@ -7,7 +7,6 @@ set -e
 # Updates version in:
 #   - app.json (expo.version)
 #   - package.json (version)
-#   - src/constants/Version.generated.ts
 
 VERSION="$1"
 
@@ -42,9 +41,5 @@ pkg.version = '$VERSION';
 fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
 console.log('  Updated package.json');
 "
-
-# Update Version.generated.ts
-echo "export const APP_VERSION = \"v$VERSION\";" > src/constants/Version.generated.ts
-echo "  Updated Version.generated.ts"
 
 echo "Version bumped to $VERSION"

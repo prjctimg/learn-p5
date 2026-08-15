@@ -26,7 +26,6 @@ const navItems: NavItem[] = [
   { label: "Learn", href: "/learn", icon: "book-open-outline" },
   { label: "Reference", href: "/ref", icon: "bookmark-outline" },
   { label: "Settings", href: "/settings", icon: "cog-outline" },
-  { label: "About", href: "/about", icon: "information-outline" },
 ];
 
 interface DrawerContentProps {
@@ -54,12 +53,12 @@ export default function DrawerContent({ onClose }: DrawerContentProps) {
       >
         <Svg width={60} height={28} viewBox="0 0 250 114">
           {logoPaths.map((d, i) => (
-            <Path key={`logo-path-${i}`} d={d} fill={derivedColors.onPrimary} />
+            <Path key={`logo-path-${i}`} d={d} fill="#FFFFFF" />
           ))}
         </Svg>
         <View style={{ height: 12 }} />
-        <Text style={[styles.tagline, { color: derivedColors.onPrimary }]}>Learn creative coding</Text>
-        <Text style={[styles.tagline, { color: derivedColors.onPrimary, fontSize: 12, opacity: 0.7 }]}>One sketch at a time</Text>
+        <Text style={[styles.tagline, { color: "#FFFFFF" }]}>Learn creative coding</Text>
+        <Text style={[styles.tagline, { color: "#FFFFFF", fontSize: 12, opacity: 0.7 }]}>One sketch at a time</Text>
       </View>
 
       <View style={styles.navList}>

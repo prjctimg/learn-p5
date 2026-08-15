@@ -61,7 +61,6 @@ const createStyles = (colors: Record<string, string>) =>
       fontFamily: "JetBrainsMono",
       fontSize: 13,
       fontWeight: "700",
-      textTransform: "uppercase",
       letterSpacing: 1,
       color: colors.textSecondary,
     },
