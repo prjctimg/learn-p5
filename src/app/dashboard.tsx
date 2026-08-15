@@ -500,9 +500,9 @@ progressBarOuter: {
  <Text style={[styles.listTitle, { marginTop: 24 }]}>
  Up Next
  </Text>
- {upcomingExercises.map((ex) => {
- const locked = isExerciseLocked(ex.id, ex.courseSlug);
- return (
+  {upcomingExercises.map((ex, i) => {
+  const locked = isExerciseLocked(ex.id, ex.courseSlug) || (i === 0 && nextExercise !== null);
+  return (
  <Pressable
  key={`${ex.courseSlug}/${ex.id}`}
  disabled={locked}
