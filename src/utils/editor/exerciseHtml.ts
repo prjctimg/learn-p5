@@ -3,6 +3,10 @@ import { p5Source } from "../p5Source";
 import { P5_FUNCTION_NAMES } from "../../data/reference";
 import { Colors } from "../../constants/Colors";
 import { getEditorTheme, EditorThemeColors } from "./themes";
+import {
+  JETBRAINS_MONO_REGULAR_BASE64,
+  JETBRAINS_MONO_BOLD_BASE64,
+} from "../../constants/fontBase64.generated";
 
 const SYMBOL_PATTERN = new RegExp(
   `\\b(${P5_FUNCTION_NAMES.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b(?=\\()`,
@@ -67,8 +71,19 @@ export function getExerciseHtml(params: {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
+  @font-face {
+    font-family: 'JetBrains Mono';
+    font-style: normal;
+    font-weight: 400;
+    src: url(data:font/truetype;charset=utf-8;base64,${JETBRAINS_MONO_REGULAR_BASE64}) format('truetype');
+  }
+  @font-face {
+    font-family: 'JetBrains Mono';
+    font-style: normal;
+    font-weight: 700;
+    src: url(data:font/truetype;charset=utf-8;base64,${JETBRAINS_MONO_BOLD_BASE64}) format('truetype');
+  }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { min-height: 100%; background: ${colors.surface}; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
 
@@ -79,7 +94,7 @@ export function getExerciseHtml(params: {
   .description-title {
     font-family: "SpaceGrotesk", sans-serif;
     font-weight: 700;
-    font-size: 11px;
+    font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: ${colors.primary};
@@ -103,7 +118,7 @@ export function getExerciseHtml(params: {
   }
   .preview-label {
     font-family: "JetBrains Mono", monospace;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -180,7 +195,7 @@ export function getExerciseHtml(params: {
   }
   .code-label {
     font-family: "JetBrains Mono", monospace;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -188,7 +203,7 @@ export function getExerciseHtml(params: {
   }
   .lang-tag {
     font-family: "JetBrains Mono", monospace;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -206,7 +221,7 @@ export function getExerciseHtml(params: {
     border: 1px solid ${colors.outlineVariant};
     color: ${colors.onSurfaceVariant};
     font-family: "JetBrains Mono", monospace;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -466,6 +481,90 @@ var p5FnPlugin = ViewPlugin.fromClass(P5FnPlugin, {
   decorations: function(v) { return v.decorations; }
 });
 
+var vimEnabled = false;
+
+function getExtensions() {
+  var exts = [
+    basicSetup,
+    javascript(),
+    p5Theme,
+    syntaxHighlighting(p5Highlight),
+    p5FnPlugin,
+    autocompletion({ override: [p5CompletionSource] }),
+    keymap.of([{ key: 'Ctrl-s', run: function() { return true; } }, { key: 'Cmd-s', run: function() { return true; } }]),
+    EditorView.updateListener.of(function(update) {
+      if (update.docChanged) {
+        postCodeChange(update.state.doc.toString());
+        if (typeof window.__tutEdit === 'function') window.__tutEdit();
+      }
+    }),
+  ];
+  if (vimEnabled) {
+    try {
+      exts.push(_CM.vim());
+    } catch (_e) {
+      // vim extension not available in the bundle
+    }
+  }
+  return exts;
+}
+
+function initEditorView(code) {
+  const state = EditorState.create({
+    doc: code || '',
+    extensions: getExtensions(),
+  });
+  view = new EditorView({ state, parent: document.getElementById('editor') });
+  view.dom.addEventListener('mousedown', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    var coords = { x: e.clientX, y: e.clientY };
+    var pos = view.posAtCoords(coords);
+    if (pos !== null) {
+      view.dispatch({ selection: { anchor: pos, head: pos } });
+    }
+    view.focus();
+    if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+      window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'editorTapped' }));
+    }
+  });
+  var touchStartY = 0;
+  var touchStartX = 0;
+  var isScrolling = false;
+  view.dom.addEventListener('touchstart', function(e) {
+    var touch = e.touches[0];
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+    isScrolling = false;
+  }, { passive: true });
+  view.dom.addEventListener('touchmove', function(e) {
+    if (!isScrolling) {
+      var touch = e.touches[0];
+      var dx = Math.abs(touch.clientX - touchStartX);
+      var dy = Math.abs(touch.clientY - touchStartY);
+      if (dy > 10 || dx > 10) {
+        isScrolling = true;
+      }
+    }
+  }, { passive: true });
+  view.dom.addEventListener('touchend', function(e) {
+    if (!isScrolling) {
+      e.preventDefault();
+      e.stopPropagation();
+      var touch = e.changedTouches[0];
+      var coords = { x: touch.clientX, y: touch.clientY };
+      var pos = view.posAtCoords(coords);
+      if (pos !== null) {
+        view.dispatch({ selection: { anchor: pos, head: pos } });
+      }
+      view.focus();
+      if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+        window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'editorTapped' }));
+      }
+    }
+  }, { passive: false });
+}
+
 function initEditor() {
   try {
     const p5Theme = EditorView.theme({
@@ -517,54 +616,31 @@ function initEditor() {
       { tag: tags.special(tags.variableName), color: '${constColor}' },
     ]);
 
-    const state = EditorState.create({
-      doc: INITIAL_CODE || '',
-      extensions: [
-        basicSetup,
-        javascript(),
-        p5Theme,
-        syntaxHighlighting(p5Highlight),
-        p5FnPlugin,
-        autocompletion({ override: [p5CompletionSource] }),
-        keymap.of([{ key: 'Ctrl-s', run: function() { return true; } }, { key: 'Cmd-s', run: function() { return true; } }]),
-        EditorView.updateListener.of(function(update) {
-          if (update.docChanged) {
-            postCodeChange(update.state.doc.toString());
-            if (typeof window.__tutEdit === 'function') window.__tutEdit();
-          }
-        }),
-      ],
-    });
-    view = new EditorView({ state, parent: document.getElementById('editor') });
-    window.__systemKeyboardEnabled = false;
+    initEditorView(INITIAL_CODE);
     view.dom.addEventListener('mousedown', function(e) {
-      if (!window.__systemKeyboardEnabled) {
-        e.preventDefault();
-        e.stopPropagation();
-        var coords = { x: e.clientX, y: e.clientY };
-        var pos = view.posAtCoords(coords);
-        if (pos !== null) {
-          view.dispatch({ selection: { anchor: pos, head: pos } });
-        }
-        view.focus();
-        if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-          window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'editorTapped' }));
-        }
+      e.preventDefault();
+      e.stopPropagation();
+      var coords = { x: e.clientX, y: e.clientY };
+      var pos = view.posAtCoords(coords);
+      if (pos !== null) {
+        view.dispatch({ selection: { anchor: pos, head: pos } });
+      }
+      view.focus();
+      if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+        window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'editorTapped' }));
       }
     });
     var touchStartY = 0;
     var touchStartX = 0;
     var isScrolling = false;
     view.dom.addEventListener('touchstart', function(e) {
-      if (!window.__systemKeyboardEnabled) {
-        var touch = e.touches[0];
-        touchStartX = touch.clientX;
-        touchStartY = touch.clientY;
-        isScrolling = false;
-      }
+      var touch = e.touches[0];
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+      isScrolling = false;
     }, { passive: true });
     view.dom.addEventListener('touchmove', function(e) {
-      if (!window.__systemKeyboardEnabled && !isScrolling) {
+      if (!isScrolling) {
         var touch = e.touches[0];
         var dx = Math.abs(touch.clientX - touchStartX);
         var dy = Math.abs(touch.clientY - touchStartY);
@@ -574,7 +650,7 @@ function initEditor() {
       }
     }, { passive: true });
     view.dom.addEventListener('touchend', function(e) {
-      if (!window.__systemKeyboardEnabled && !isScrolling) {
+      if (!isScrolling) {
         e.preventDefault();
         e.stopPropagation();
         var touch = e.changedTouches[0];
@@ -592,7 +668,7 @@ function initEditor() {
     postReady();
     postEditorReady();
     setTimeout(function() {
-      view.dom.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      if (view) view.dom.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }, 300);
   } catch(e) {
     console.error('Editor init failed:', e);
@@ -706,43 +782,18 @@ function handleMessage(data) {
           postEditorReady();
         }
         break;
-      case 'focus':
+      case 'toggleVimMode':
+        vimEnabled = msg.enabled;
         if (view) {
-          window.__systemKeyboardEnabled = true;
-          window.__handleEnter = function(e) {
-            if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
-              e.preventDefault();
-              e.stopPropagation();
-              var cursor = view.state.selection.main.head;
-              view.dispatch({
-                changes: { from: cursor, insert: '\\n' },
-                selection: { anchor: cursor + 1 },
-              });
-              return false;
-            }
-          };
-          view.dom.addEventListener('keydown', window.__handleEnter);
-          var cmContent = view.dom.querySelector('.cm-content');
-          if (cmContent) {
-            cmContent.setAttribute('inputmode', 'text');
-            cmContent.contentEditable = 'true';
-            cmContent.focus();
-          }
-          view.dom.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          var code = view.state.doc.toString();
+          view.destroy();
+          initEditorView(code);
+          postEditorReady();
         }
         break;
-      case 'useCustomKeyboard':
-        window.__systemKeyboardEnabled = false;
+      case 'focus':
         if (view) {
-          if (window.__handleEnter) {
-            view.dom.removeEventListener('keydown', window.__handleEnter);
-            window.__handleEnter = null;
-          }
-          var cmContent = view.dom.querySelector('.cm-content');
-          if (cmContent) {
-            cmContent.setAttribute('inputmode', 'none');
-            cmContent.contentEditable = 'false';
-          }
+          view.focus();
         }
         break;
       case 'setFontSize':

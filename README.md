@@ -1,5 +1,9 @@
 > # Learn P5
 
+[![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](./LICENSE)
+[![Android build](https://github.com/skchr/learn-p5/actions/workflows/release.yaml/badge.svg)](https://github.com/skchr/learn-p5/actions/workflows/release.yaml)
+[![GitHub release](https://img.shields.io/github/v/release/skchr/learn-p5)](https://github.com/skchr/learn-p5/releases)
+
 - [What is this ?](#what-is-this)
 - [Who is this for ?](#who-is-this-for)
 - [How can I try it out ?](#how-can-i-try-it-out)

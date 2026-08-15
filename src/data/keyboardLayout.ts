@@ -23,6 +23,7 @@ export const pairedSymbols: PairedSymbol[] = [
 
 export const singleSymbols = [
   ".", ";", ",", "=", "+", "-", "*", "/",
+  ">", "<", ">=", "<=", "===", "!==", "&&", "||", "!",
 ];
 
 const P5_TYPE_TO_KEYBOARD_TYPE: Record<string, "string" | "number" | "array" | "color" | "boolean"> = {

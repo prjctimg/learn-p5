@@ -1,3 +1,5 @@
+import { p5Source } from "../p5Source";
+
 export function getExampleHtml(code: string): string {
   const escaped = code.replace(/<\/script>/gi, "<\\/script>");
   const needsWrap = !code.includes("function setup");
@@ -15,7 +17,7 @@ canvas { display: block; max-width: 100%; height: auto; }
 </style>
 </head>
 <body>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.3/p5.min.js"><\/script>
+<script>${p5Source}<\/script>
 <script>${sketch}<\/script>
 </body>
 </html>`;

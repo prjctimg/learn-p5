@@ -33,7 +33,7 @@ export const Typography = {
   },
   labelSmall: {
     fontFamily: Fonts.label,
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: "600" as const,
   },
   mono: {
@@ -48,7 +48,7 @@ export const Typography = {
   },
   monoLabel: {
     fontFamily: Fonts.mono,
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: "700" as const,
   },
 } as const;

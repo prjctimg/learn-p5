@@ -194,16 +194,7 @@ function handleMessage(data) {
       }
     } else if (msg.type === 'focus') {
       if (view) {
-        window.__systemKeyboardEnabled = true;
-        var cmContent = view.dom.querySelector('.cm-content');
-        if (cmContent) cmContent.setAttribute('inputmode', 'text');
         view.focus();
-      }
-    } else if (msg.type === 'useCustomKeyboard') {
-      window.__systemKeyboardEnabled = false;
-      if (view) {
-        var cmContent = view.dom.querySelector('.cm-content');
-        if (cmContent) cmContent.setAttribute('inputmode', 'none');
       }
     } else if (msg.type === 'setFontSize') {
       var scroller = view?.dom.querySelector('.cm-scroller');
