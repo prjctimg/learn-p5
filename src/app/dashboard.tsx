@@ -12,6 +12,9 @@ import { loadAllCourses } from "../utils/courseLoader";
 import { Exercise, Course } from "../data/types";
 import { isExerciseLocked as checkExerciseLocked } from "../utils/isExerciseLocked";
 import { getStreakFromStorage, useStreak } from "../hooks/useStreak";
+import { useAchievements, ACHIEVEMENTS } from "../hooks/useAchievements";
+import { useActivityLog } from "../hooks/useActivityLog";
+import ActivityHeatmap from "../components/ActivityHeatmap";
 
 const LAST_GREETING_KEY = "last_greeting_period";
 
@@ -39,6 +42,8 @@ export default function Dashboard() {
  const [streakLongest, setStreakLongest] = useState(0);
  const streak = useStreak();
  const [streakToastVisible, setStreakToastVisible] = useState(false);
+const { unlocked: unlockedAchievements, refresh: refreshAchievements } = useAchievements();
+const { activity, refresh: refreshActivity } = useActivityLog();
  const [greetingToastVisible, setGreetingToastVisible] = useState(false);
  const [greetingMessage, setGreetingMessage] = useState("");
  const levelAnim = useRef(new Animated.Value(0)).current;
@@ -64,6 +69,8 @@ export default function Dashboard() {
  setStreakCount(count);
  setStreakLongest(longest);
  });
+refreshAchievements();
+ refreshActivity();
  }, [])
 );
 
@@ -73,6 +80,8 @@ export default function Dashboard() {
  setStreakToastVisible(true);
  }
  });
+ refreshAchievements();
+ refreshActivity();
  }, []);
 
  useEffect(() => {
@@ -250,6 +259,35 @@ export default function Dashboard() {
  color: colors.onSurface,
  marginBottom: 16,
  },
+ achievementsRow: {
+ flexDirection: "row",
+ flexWrap: "wrap",
+ gap: 10,
+ marginTop: 8,
+ justifyContent: "space-between",
+ },
+ badgeCard: {
+ width: "31%",
+ borderRadius: 12,
+ padding: 12,
+ alignItems: "center",
+ justifyContent: "center",
+ minHeight: 96,
+ },
+ badgeLabel: {
+ fontFamily: "JetBrainsMono",
+ fontSize: 12,
+ fontWeight: "700",
+ marginTop: 6,
+ lineHeight: 14,
+ },
+ badgeSub: {
+ fontFamily: "JetBrainsMono",
+ fontSize: 10,
+ marginTop: 2,
+ textAlign: "center",
+ lineHeight: 12,
+ },
   nextCard: {
   backgroundColor: colors.surfaceDim,
   borderRadius: 16,
@@ -382,6 +420,48 @@ export default function Dashboard() {
  </Text>
  </View>
  </View>
+
+ <Text style={styles.sectionTitle}>Achievements</Text>
+ <View style={styles.achievementsRow}>
+ {ACHIEVEMENTS.map((a) => {
+ const isUnlocked = unlockedAchievements.includes(a.id);
+ return (
+ <View
+ key={a.id}
+ style={[
+ styles.badgeCard,
+ { backgroundColor: isUnlocked ? colors.successContainer : colors.surfaceContainerHigh },
+ ]}
+ >
+ <MaterialCommunityIcons
+ name={a.icon as any}
+ size={22}
+ color={isUnlocked ? colors.success : colors.outlineVariant}
+ />
+ <Text
+ style={[
+ styles.badgeLabel,
+ { color: isUnlocked ? colors.onSuccessContainer : colors.onSurfaceVariant },
+ ]}
+ numberOfLines={1}
+ >
+ {a.title}
+ </Text>
+ <Text
+ style={[
+ styles.badgeSub,
+ { color: isUnlocked ? colors.onSuccessContainer : colors.outline },
+ ]}
+ numberOfLines={2}
+ >
+ {isUnlocked ? a.subtitle : "Locked"}
+ </Text>
+ </View>
+ );
+ })}
+ </View>
+
+ <ActivityHeatmap activity={activity} />
 
  <View style={styles.continueSection}>
  <Text style={styles.sectionTitle}>

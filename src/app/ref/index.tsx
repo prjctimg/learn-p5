@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useRef, useMemo, useState, useCallback } from "react";
-import { View, Text, FlatList, Pressable, Alert, StyleSheet, Linking } from "react-native";
+import { View, Text, FlatList, ScrollView, Pressable, Alert, StyleSheet, Linking } from "react-native";
 import { WebView } from "react-native-webview";
 import Header from "../../components/Header";
 import { P5_SYMBOLS_BY_NAME, P5_SYMBOLS, P5_FUNCTION_NAMES, GENERATED_REFERENCE, P5SymbolView as P5Symbol } from "../../data/reference";
@@ -188,13 +188,11 @@ function SymbolDetail({ symbol, onOpenSearch }: { symbol: string; onOpenSearch: 
   return (
   <View style={[styles.flex1, { backgroundColor: colors.surface }]}>
   <Header title={sym.name} onBack={() => router.push("/ref")} />
- <FlatList
- style={[styles.flex1, { paddingHorizontal: 16, paddingTop: 24 }]}
- contentContainerStyle={{ paddingBottom: 48 }}
- data={sym.parameters}
- keyExtractor={(item) => item.name}
- ListHeaderComponent={
- <>
+<ScrollView
+  style={[styles.flex1, { paddingHorizontal: 16, paddingTop: 24 }]}
+  contentContainerStyle={{ paddingBottom: 48 }}
+  nestedScrollEnabled
+>
  <View style={[styles.flexRow, { alignItems: "center", gap: 8, marginBottom: 8 }]}>
  <View style={[styles.symbolNameCode, { backgroundColor: colors.surfaceDim }]}>
  <Text style={[styles.symbolNameText, { color: derivedColors.primary }]}>
@@ -244,6 +242,7 @@ function SymbolDetail({ symbol, onOpenSearch }: { symbol: string; onOpenSearch: 
  source={{ html: getExampleHtml(ex) }}
  style={[styles.exampleWebView, { backgroundColor: colors.surface }]}
  scrollEnabled={false}
+ pointerEvents="none"
  javaScriptEnabled
  domStorageEnabled
  bounces={false}
@@ -267,30 +266,30 @@ function SymbolDetail({ symbol, onOpenSearch }: { symbol: string; onOpenSearch: 
  </Text>
  </>
 )}
- </>
- }
- ItemSeparatorComponent={() => (
+
+ {sym.parameters.map((item, i) => (
+ <View key={item.name}>
+ <View style={[styles.flexRow, styles.paramRow]}>
+ <View style={styles.flex1}>
+ <Text style={[styles.paramNameText, { color: colors.onSurface }]}>
+ {item.name}
+ </Text>
+ </View>
+ <View style={{ flex: 2 }}>
+ <Text style={[styles.paramDescText, { color: colors.textSecondary, lineHeight: 24 }]}>
+ {item.description || "No description"}
+ </Text>
+ <Text style={[styles.paramTypeText, { color: derivedColors.primary, marginTop: 2 }]}>
+ {item.type}
+ </Text>
+ </View>
+ </View>
+ {i < sym.parameters.length - 1 && (
  <View style={{ height: 1, backgroundColor: colors.outlineVariant + "30" }} />
-)}
-  renderItem={({ item }) => (
-  <View style={[styles.flexRow, styles.paramRow]}>
-  <View style={styles.flex1}>
-  <Text style={[styles.paramNameText, { color: colors.onSurface }]}>
-  {item.name}
-  </Text>
-  </View>
-  <View style={{ flex: 2 }}>
-  <Text style={[styles.paramDescText, { color: colors.textSecondary, lineHeight: 24 }]}>
-  {item.description || "No description"}
-  </Text>
-  <Text style={[styles.paramTypeText, { color: derivedColors.primary, marginTop: 2 }]}>
-  {item.type}
-  </Text>
-  </View>
-  </View>
-  )}
- ListFooterComponent={
- <>
+ )}
+ </View>
+ ))}
+
  <View style={[styles.flexRow, { alignItems: "center", gap: 12, marginTop: 24, justifyContent: "space-between" }]}>
  {prevSym ? (
  <Pressable
@@ -340,9 +339,7 @@ function SymbolDetail({ symbol, onOpenSearch }: { symbol: string; onOpenSearch: 
  View on p5js.org
  </Text>
  </Pressable>
-  </>
- }
- />
+</ScrollView>
  <Pressable
    onPress={onOpenSearch}
    style={[styles.searchFab, { backgroundColor: derivedColors.primary }]}
