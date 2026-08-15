@@ -1,6 +1,6 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { View, Text, Pressable, ScrollView, StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useThemeContext } from "../components/ThemeProvider";
 import { Colors } from "../constants/Colors";
@@ -22,18 +22,20 @@ export default function Dashboard() {
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
 
-  useEffect(() => {
-    AsyncStorage.getItem("completedLessons").then((val) => {
-      if (val) {
-        try {
-          setCompletedLessons(JSON.parse(val));
-        } catch {
-          setCompletedLessons([]);
+  useFocusEffect(
+    useCallback(() => {
+      AsyncStorage.getItem("completedLessons").then((val) => {
+        if (val) {
+          try {
+            setCompletedLessons(JSON.parse(val));
+          } catch {
+            setCompletedLessons([]);
+          }
         }
-      }
-    });
-    loadAllCourses().then(setCourses);
-  }, []);
+      });
+      loadAllCourses().then(setCourses);
+    }, [])
+  );
 
   const nextExercise: (Lesson & { courseSlug: string; courseTitle: string }) | null = useMemo(() => {
     if (courses.length === 0) return null;
@@ -298,6 +300,9 @@ export default function Dashboard() {
                 {nextExercise.description}
               </Text>
               <Pressable
+                onPress={() =>
+                  router.push(`/learn/${nextExercise.courseSlug}/${nextExercise.id}`)
+                }
                 style={({ pressed }) => [
                   styles.nextCardButton,
                   pressed && styles.nextCardButtonPressed,

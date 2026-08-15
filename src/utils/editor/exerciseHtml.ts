@@ -1,4 +1,4 @@
-import { CODEMIRROR_BUNDLE } from "./codemirror-bundle.generated";
+import { importMap } from "./importmap";
 import { p5Source } from "../p5Source";
 import { P5_FUNCTION_NAMES } from "../../data/p5Symbols";
 import { Colors } from "../../constants/Colors";
@@ -53,9 +53,11 @@ export function getExerciseHtml(params: {
   solution: string;
   colorScheme: "light" | "dark";
   codeBackground?: string;
+  codeFontSize?: number;
 }): string {
   const colors = Colors[params.colorScheme === "dark" ? "dark" : "light"];
   const editorBg = params.codeBackground || colors.surfaceContainerLowest;
+  const fontSize = params.codeFontSize ?? 22;
   const instructionHtml = parseInstructionHtml(params.instruction);
 
   return `<!DOCTYPE html>
@@ -314,7 +316,8 @@ ${
     <span class="preview-label" style="margin-bottom:0">Target Solution</span>
     <span class="solution-chevron" id="solution-chevron">&#9660;</span>
   </button>
-  <div id="solution-sketch" class="sketch-box">
+  <div style="position:relative">
+    <div id="solution-sketch" class="sketch-box"></div>
     <button id="solution-run-btn" class="run-btn">&#9654; Run</button>
   </div>
 </div>`
@@ -342,9 +345,11 @@ ${
 <div class="scroll-whitespace"></div>
 
 <script>${p5Source}</script>
-<script>${CODEMIRROR_BUNDLE}</script>
-<script>
-${getBridgeScript(params.startingCode, params.solution, editorBg, params.colorScheme, params.exerciseNumber)}
+<script type="importmap">
+${JSON.stringify({ imports: importMap }, null, 2)}
+</script>
+<script type="module">
+${getBridgeScript(params.startingCode, params.solution, editorBg, params.colorScheme, params.exerciseNumber, fontSize)}
 </script>
 
 ${params.exerciseNumber === 1 ? `
@@ -362,7 +367,7 @@ ${params.exerciseNumber === 1 ? `
 </html>`;
 }
 
-function getBridgeScript(startingCode: string, solution: string, editorBg: string, colorScheme: "light" | "dark", exerciseNumber?: number): string {
+function getBridgeScript(startingCode: string, solution: string, editorBg: string, colorScheme: "light" | "dark", exerciseNumber?: number, codeFontSize?: number): string {
   const isDark = colorScheme === "dark";
   const codeArg = jsString(startingCode);
   const solutionArg = jsString(solution);
@@ -382,57 +387,80 @@ function getBridgeScript(startingCode: string, solution: string, editorBg: strin
   const constColor = isDark ? '#FF4F75' : '#D31D4E';
 
   return `
-var _CM = typeof CM !== 'undefined' ? CM : null;
-var basicSetup = _CM.basicSetup;
-var EditorView = _CM.EditorView;
-var EditorState = _CM.EditorState;
-var keymap = _CM.keymap;
-var syntaxHighlighting = _CM.syntaxHighlighting;
-var HighlightStyle = _CM.HighlightStyle;
-var javascript = _CM.javascript;
-var tags = _CM.tags;
-var indentSelection = _CM.indentSelection;
-var syntaxTree = _CM.syntaxTree;
-var ViewPlugin = _CM.ViewPlugin;
-var Decoration = _CM.Decoration;
-var DecorationSet = _CM.DecorationSet;
-
 let view;
 const INITIAL_CODE = ${codeArg};
 const SOLUTION_CODE = ${solutionArg};
+const CODE_FONT_SIZE = ${codeFontSize ?? 22};
+const EDITOR_BG = '${editorBg}';
+let CM_READY = false;
 
-const p5FnMark = Decoration.mark({ class: 'cm-p5-fn' });
+(async function() {
+  let basicSetup, EditorView, EditorState, keymap, syntaxHighlighting, HighlightStyle, javascript, tags, indentSelection, syntaxTree, ViewPlugin, Decoration, DecorationSet;
+  try {
+    const cm = await import('codemirror');
+    basicSetup = cm.basicSetup;
+    const viewMod = await import('@codemirror/view');
+    EditorView = viewMod.EditorView;
+    keymap = viewMod.keymap;
+    ViewPlugin = viewMod.ViewPlugin;
+    Decoration = viewMod.Decoration;
+    DecorationSet = viewMod.DecorationSet;
+    const stateMod = await import('@codemirror/state');
+    EditorState = stateMod.EditorState;
+    const langMod = await import('@codemirror/language');
+    syntaxHighlighting = langMod.syntaxHighlighting;
+    HighlightStyle = langMod.HighlightStyle;
+    syntaxTree = langMod.syntaxTree;
+    const jsMod = await import('@codemirror/lang-javascript');
+    javascript = jsMod.javascript;
+    const cmdMod = await import('@codemirror/commands');
+    indentSelection = cmdMod.indentSelection;
+    const hlMod = await import('@lezer/highlight');
+    tags = hlMod.tags;
+    CM_READY = true;
+  } catch(e) {
+    console.error('CM load failed:', e);
+  }
 
-function computeP5Decos(v) {
-  var decos = [];
-  syntaxTree(v.state).iterate({
-    enter: function(n) {
-      if (n.name === 'CallExpression' || n.name === 'NewExpression') {
-        var callee = n.node.firstChild;
-        if (callee && callee.name === 'Identifier') {
-          var name = v.state.sliceDoc(callee.from, callee.to);
-          if (${JSON.stringify(P5_FUNCTION_NAMES)}.indexOf(name) >= 0) {
-            decos.push(p5FnMark.range(callee.from, callee.to));
+  if (!CM_READY) {
+    var editorEl = document.getElementById('editor');
+    if (editorEl) {
+      editorEl.innerHTML = '<div style="color:#6B7280;padding:20px;font-family:sans-serif;text-align:center">Code editor bundle unavailable. Type code below.</div><textarea id="cm-fallback" style="width:100%;height:400px;background:' + EDITOR_BG + ';color:${fg};font-family:JetBrains Mono,monospace;font-size:' + CODE_FONT_SIZE + 'px;border:none;outline:none;resize:none;padding:12px">' + INITIAL_CODE + '</textarea>';
+    }
+    postReady();
+    postEditorReady();
+    return;
+  }
+
+  try {
+    var p5FnMark = Decoration.mark({ class: 'cm-p5-fn' });
+    function computeP5Decos(v) {
+      var decos = [];
+      syntaxTree(v.state).iterate({
+        enter: function(n) {
+          if (n.name === 'CallExpression' || n.name === 'NewExpression') {
+            var callee = n.node.firstChild;
+            if (callee && callee.name === 'Identifier') {
+              var name = v.state.sliceDoc(callee.from, callee.to);
+              if (${JSON.stringify(P5_FUNCTION_NAMES)}.indexOf(name) >= 0) {
+                decos.push(p5FnMark.range(callee.from, callee.to));
+              }
+            }
           }
         }
-      }
+      });
+      return DecorationSet.create(v.state, decos);
     }
-  });
-  return DecorationSet.create(v.state, decos);
-}
+    function P5FnPlugin(view) { this.decorations = computeP5Decos(view); }
+    P5FnPlugin.prototype.update = function(update) {
+      if (update.docChanged || update.viewportChanged) {
+        this.decorations = computeP5Decos(update.view);
+      }
+    };
+    var p5FnPlugin = ViewPlugin.fromClass(P5FnPlugin, {
+      decorations: function(v) { return v.decorations; }
+    });
 
-function P5FnPlugin(view) { this.decorations = computeP5Decos(view); }
-P5FnPlugin.prototype.update = function(update) {
-  if (update.docChanged || update.viewportChanged) {
-    this.decorations = computeP5Decos(update.view);
-  }
-};
-var p5FnPlugin = ViewPlugin.fromClass(P5FnPlugin, {
-  decorations: function(v) { return v.decorations; }
-});
-
-function initEditor() {
-  try {
     const p5Theme = EditorView.theme({
       '&': { backgroundColor: '${editorBg}', color: '${fg}' },
       '.cm-content': { caretColor: '#ED225D', fontFamily: "'JetBrains Mono', monospace" },
@@ -514,7 +542,7 @@ function initEditor() {
     postReady();
     postEditorReady();
   }
-}
+})();
 
 function postCodeChange(code) {
   if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
@@ -540,6 +568,13 @@ function postOpenRef(symbol) {
   }
 }
 
+function wrapInstanceCode(code) {
+  return code.replace(
+    /\\bfunction\\s+(setup|draw|preload|mousePressed|mouseReleased|mouseClicked|mouseMoved|mouseDragged|mouseWheel|keyPressed|keyReleased|keyTyped|touchStarted|touchMoved|touchEnded|windowResized|doubleClicked|deviceMoved|deviceTurned|deviceShaken)\\s*\\(/g,
+    'p.$1 = function('
+  );
+}
+
 function renderSketch(containerId, code) {
   var container = document.getElementById(containerId);
   if (!container) return;
@@ -552,15 +587,13 @@ function renderSketch(containerId, code) {
 
   if (!code) return;
 
-  delete window.setup;
-  delete window.draw;
-
-  var script = document.createElement('script');
-  script.textContent = code;
-  document.body.appendChild(script);
-
   try {
-    container.__p5 = new p5(undefined, container);
+    var wrapped = wrapInstanceCode(code);
+    container.__p5 = new p5(function(p) {
+      with(p) {
+        eval(wrapped);
+      }
+    }, container);
   } catch(e) {
     console.error('Sketch render error:', e);
     container.innerHTML = '<div style="color:#ED225D;padding:16px;font-family:sans-serif">\\u26A0 ' + e.message + '</div>';
@@ -584,12 +617,13 @@ function smoothScrollTo(el, duration) {
   requestAnimationFrame(step);
 }
 
-function renderAllSketches(userCode, solutionCode) {
-  renderSketch('user-sketch', userCode);
-  if (solutionCode) {
-    renderSketch('solution-sketch', solutionCode);
-  }
-  if (typeof window.__tutPreview === 'function') window.__tutPreview();
+function normalizeCode(code) {
+  return code
+    .replace(/\/\/.*$/gm, '')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/\/\*[\s\S]*$/, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function handleMessage(data) {
@@ -605,10 +639,10 @@ function handleMessage(data) {
         break;
       case 'insert':
         if (view) {
-          var cursor = view.state.selection.main.head;
+          var sel = view.state.selection.main;
           view.dispatch({
-            changes: { from: cursor, insert: msg.text },
-            selection: { anchor: cursor + (msg.cursorOffset !== undefined ? msg.cursorOffset : msg.text.length) },
+            changes: { from: sel.from, to: sel.to, insert: msg.text },
+            selection: { anchor: sel.from + (msg.cursorOffset !== undefined ? msg.cursorOffset : msg.text.length) },
           });
           view.focus();
         } else {
@@ -617,6 +651,8 @@ function handleMessage(data) {
         break;
       case 'focus':
         if (view) {
+          var cont = view.dom.querySelector('.cm-content');
+          if (cont) cont.removeAttribute('inputmode');
           view.dom.scrollIntoView({ behavior: 'smooth', block: 'center' });
           setTimeout(function() { view.focus(); }, 200);
         }
@@ -627,14 +663,51 @@ function handleMessage(data) {
         break;
       case 'backspace':
         if (view) {
-          var cur = view.state.selection.main.head;
-          if (cur > 0) {
+          var sel = view.state.selection.main;
+          var bsFrom = sel.from;
+          var bsTo = sel.to;
+          if (bsFrom < bsTo) {
             view.dispatch({
-              changes: { from: cur - 1, to: cur },
-              selection: { anchor: cur - 1 },
+              changes: { from: bsFrom, to: bsTo },
+              selection: { anchor: bsFrom },
             });
-            view.focus();
+          } else if (bsFrom > 0) {
+            view.dispatch({
+              changes: { from: bsFrom - 1, to: bsFrom },
+              selection: { anchor: bsFrom - 1 },
+            });
           }
+          view.focus();
+        }
+        break;
+      case 'cursorMove':
+        if (view) {
+          var curPos = view.state.selection.main.head;
+          switch (msg.direction) {
+            case 'left':
+              if (curPos > 0) view.dispatch({ selection: { anchor: curPos - 1 } });
+              break;
+            case 'right':
+              if (curPos < view.state.doc.length) view.dispatch({ selection: { anchor: curPos + 1 } });
+              break;
+            case 'up':
+              var curLine = view.state.doc.lineAt(curPos);
+              if (curLine.number > 1) {
+                var prevLine = view.state.doc.line(curLine.number - 1);
+                var col = curPos - curLine.from;
+                view.dispatch({ selection: { anchor: Math.min(prevLine.from + col, prevLine.to) } });
+              }
+              break;
+            case 'down':
+              var curLine2 = view.state.doc.lineAt(curPos);
+              if (curLine2.number < view.state.doc.lines) {
+                var nextLine = view.state.doc.line(curLine2.number + 1);
+                var col2 = curPos - curLine2.from;
+                view.dispatch({ selection: { anchor: Math.min(nextLine.from + col2, nextLine.to) } });
+              }
+              break;
+          }
+          view.focus();
         }
         break;
       case 'format':
@@ -646,11 +719,17 @@ function handleMessage(data) {
         }
         break;
       case 'runSketch':
-        if (!view) { console.error('Editor not initialized'); break; }
-        var userCode = view.state.doc.toString();
-        renderAllSketches(userCode, SOLUTION_CODE);
+        var userCode;
+        if (view) {
+          userCode = view.state.doc.toString();
+        } else {
+          var ta = document.getElementById('cm-fallback');
+          userCode = ta ? ta.value : '';
+        }
+        if (!userCode) break;
+        renderSketch('user-sketch', userCode);
         if (typeof window.__tutRun === 'function') window.__tutRun();
-        if (SOLUTION_CODE && userCode.trim() === SOLUTION_CODE.trim()) {
+        if (SOLUTION_CODE && normalizeCode(userCode) === normalizeCode(SOLUTION_CODE)) {
           if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
             window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'exerciseComplete' }));
           }
@@ -692,8 +771,8 @@ if (solutionToggle) {
 var copyBtn = document.getElementById('copyBtn');
 if (copyBtn) {
   copyBtn.addEventListener('click', function() {
-    if (view) {
-      var code = view.state.doc.toString();
+    var code = view ? view.state.doc.toString() : (document.getElementById('cm-fallback') ? document.getElementById('cm-fallback').value : '');
+    if (code) {
       navigator.clipboard.writeText(code).then(function() {
         copyBtn.textContent = 'Copied!';
         copyBtn.classList.add('copied');
@@ -707,10 +786,15 @@ if (copyBtn) {
 }
 
 var solRunBtn = document.getElementById('solution-run-btn');
+var solutionHasRun = false;
 if (solRunBtn) {
   solRunBtn.addEventListener('click', function() {
-    if (view && SOLUTION_CODE) {
+    if (SOLUTION_CODE) {
       renderSketch('solution-sketch', SOLUTION_CODE);
+      if (!solutionHasRun) {
+        solutionHasRun = true;
+        solRunBtn.innerHTML = '&#x21bb; Replay';
+      }
       if (typeof window.__tutRun === 'function') window.__tutRun();
       setTimeout(function() {
         var el = document.getElementById('solution-sketch');
@@ -721,6 +805,16 @@ if (solRunBtn) {
 }
 
 initEditor();
+if (CM_READY && view) {
+  if (CODE_FONT_SIZE) {
+    var scroller = view.dom.querySelector('.cm-scroller');
+    if (scroller) scroller.style.fontSize = CODE_FONT_SIZE + 'px';
+  }
+  var cmContent = view.dom.querySelector('.cm-content');
+  if (cmContent) cmContent.setAttribute('inputmode', 'none');
+}
+renderSketch('user-sketch', INITIAL_CODE);
+if (typeof window.__tutPreview === 'function') window.__tutPreview();
 
 ${exerciseNumber === 1 ? `
 (function() {

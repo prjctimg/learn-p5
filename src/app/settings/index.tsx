@@ -15,6 +15,7 @@ const SETTINGS_KEYS = {
   showDrawerFab: "setting_showDrawerFab",
   codeFontSize: "setting_codeFontSize",
   codeBackground: "setting_codeBackground",
+  keyboardHeight: "setting_keyboardHeight",
 };
 
 const createStyles = (colors: Record<string, string>) =>
@@ -54,6 +55,7 @@ export default function Settings() {
   const [showDrawerFab, setShowDrawerFab] = useState(false);
   const [codeFontSize, setCodeFontSize] = useState(33);
   const [codeBackground, setCodeBackgroundState] = useState<string>("auto");
+  const [keyboardHeight, setKeyboardHeightState] = useState<string>("medium");
 
   useEffect(() => {
     AsyncStorage.multiGet([
@@ -64,7 +66,8 @@ export default function Settings() {
       SETTINGS_KEYS.showDrawerFab,
       SETTINGS_KEYS.codeFontSize,
       SETTINGS_KEYS.codeBackground,
-    ]).then(([reminder, snippet, hour, minute, fab, fontSize, bg]) => {
+      SETTINGS_KEYS.keyboardHeight,
+    ]).then(([reminder, snippet, hour, minute, fab, fontSize, bg, kb]) => {
       setDailyReminder(reminder[1] === "true");
       setSnippetAlternatives(snippet[1] === "true");
       if (hour[1]) setNotificationHour(parseInt(hour[1], 10));
@@ -72,6 +75,7 @@ export default function Settings() {
       setShowDrawerFab(fab[1] === "true");
       if (fontSize[1]) setCodeFontSize(parseInt(fontSize[1], 10));
       if (bg[1]) setCodeBackgroundState(bg[1]);
+      if (kb[1]) setKeyboardHeightState(kb[1]);
     });
   }, []);
 
@@ -132,6 +136,17 @@ export default function Settings() {
   const changeCodeBackground = async (value: string) => {
     setCodeBackgroundState(value);
     await AsyncStorage.setItem(SETTINGS_KEYS.codeBackground, value);
+  };
+
+  const changeKeyboardHeight = async (value: string) => {
+    setKeyboardHeightState(value);
+    await AsyncStorage.setItem(SETTINGS_KEYS.keyboardHeight, value);
+  };
+
+  const keyboardHeightPixels: Record<string, number> = {
+    small: 180,
+    medium: 240,
+    tall: 320,
   };
 
   return (
@@ -292,6 +307,59 @@ export default function Settings() {
                     }}
                   >
                     {opt === "auto" ? "Auto" : opt === "#FFFFFF" ? "Light" : "Dark"}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        </View>
+
+        {/* Keyboard */}
+        <Text style={[styles.sectionTitle, styles.sectionMargin]}>Keyboard</Text>
+        <View style={styles.card}>
+          <View style={styles.cardRow}>
+            <View style={styles.flexChild}>
+              <Text style={styles.settingTitle}>Keyboard Height</Text>
+              <Text style={styles.settingDescription}>
+                {keyboardHeight === "small"
+                  ? "180px — compact"
+                  : keyboardHeight === "medium"
+                    ? "240px — default"
+                    : "320px — tall"}
+              </Text>
+            </View>
+            <View style={{ flexDirection: "row", gap: 6 }}>
+              {["small", "medium", "tall"].map((opt) => (
+                <Pressable
+                  key={opt}
+                  onPress={() => changeKeyboardHeight(opt)}
+                  style={({ pressed }) => ({
+                    paddingHorizontal: 12,
+                    paddingVertical: 6,
+                    borderRadius: 6,
+                    minWidth: 56,
+                    alignItems: "center",
+                    backgroundColor:
+                      keyboardHeight === opt
+                        ? colors.primary
+                        : pressed
+                          ? colors.primaryContainer + "33"
+                          : colors.surfaceContainerHigh,
+                  })}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${opt} keyboard`}
+                >
+                  <Text
+                    style={{
+                      fontFamily: "JetBrainsMono",
+                      fontSize: 11,
+                      fontWeight: "700",
+                      textTransform: "uppercase",
+                      letterSpacing: 0.5,
+                      color: keyboardHeight === opt ? colors.onPrimary : colors.onSurfaceVariant,
+                    }}
+                  >
+                    {opt === "small" ? "S" : opt === "medium" ? "M" : "T"}
                   </Text>
                 </Pressable>
               ))}
