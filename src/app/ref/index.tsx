@@ -2,15 +2,15 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useRef, useMemo, useState, useCallback } from "react";
 import { View, Text, FlatList, Pressable, Alert, StyleSheet, Linking, TextInput, Modal, Keyboard } from "react-native";
 import { WebView } from "react-native-webview";
-import Header from "../../../components/Header";
-import { P5_SYMBOLS_BY_NAME, P5_SYMBOLS, P5_FUNCTION_NAMES, GENERATED_REFERENCE, P5SymbolView as P5Symbol } from "../../../data/reference";
+import Header from "../../components/Header";
+import { P5_SYMBOLS_BY_NAME, P5_SYMBOLS, P5_FUNCTION_NAMES, GENERATED_REFERENCE, P5SymbolView as P5Symbol } from "../../data/reference";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useThemeContext } from "../../../components/ThemeProvider";
-import { Colors } from "../../../constants/Colors";
-import { useModuleProgress } from "../../../hooks/useModuleProgress";
-import { useShakeDetection } from "../../../hooks/useShakeDetection";
-import { getEditorTheme } from "../../../utils/editor/themes";
-import { getExampleHtml } from "../../../utils/editor/exampleHtml";
+import { useThemeContext } from "../../components/ThemeProvider";
+import { Colors } from "../../constants/Colors";
+import { useModuleProgress } from "../../hooks/useModuleProgress";
+import { useShakeDetection } from "../../hooks/useShakeDetection";
+import { getEditorTheme } from "../../utils/editor/themes";
+import { getExampleHtml } from "../../utils/editor/exampleHtml";
 import Fuse from "fuse.js";
 
 const MODULE_GROUPS = P5_SYMBOLS.reduce<{ module: string; symbols: P5Symbol[] }[]>((acc, sym) => {
@@ -244,9 +244,9 @@ function SymbolDetail({ symbol, onOpenSearch }: { symbol: string; onOpenSearch: 
  };
 
  if (!sym) {
- return (
- <View style={[styles.flex1, { backgroundColor: colors.surface }]}>
- <Header title="Reference" />
+  return (
+  <View style={[styles.flex1, { backgroundColor: colors.surface }]}>
+  <Header title="Reference" onBack={() => router.push("/ref")} />
  <View style={[styles.flex1, { alignItems: "center", justifyContent: "center", paddingHorizontal: 24 }]}>
  <MaterialCommunityIcons name="book-search-outline" size={48} color={derivedColors.primary} />
  <Text style={[styles.headlineXl, { color: colors.onSurface, marginTop: 16 }]}>
@@ -277,9 +277,9 @@ function SymbolDetail({ symbol, onOpenSearch }: { symbol: string; onOpenSearch: 
  const syntaxTokens = highlightSyntax(sym.syntax.replace(/\n/g, " "), colorScheme);
  const refUrl = `https://p5js.org/reference/p5/${sym.name.toLowerCase()}/`;
 
- return (
- <View style={[styles.flex1, { backgroundColor: colors.surface }]}>
- <Header title={sym.name} />
+  return (
+  <View style={[styles.flex1, { backgroundColor: colors.surface }]}>
+  <Header title={sym.name} onBack={() => router.push("/ref")} />
  <FlatList
  style={[styles.flex1, { paddingHorizontal: 16, paddingTop: 24 }]}
  contentContainerStyle={{ paddingBottom: 48 }}
@@ -464,12 +464,21 @@ export default function Reference() {
  }, [router]);
 
  if (symbol) {
- return <SymbolDetail symbol={symbol} onOpenSearch={() => setSearchVisible(true)} />;
+   return (
+     <>
+       <SymbolDetail symbol={symbol} onOpenSearch={() => setSearchVisible(true)} />
+       <SearchOverlay
+         visible={searchVisible}
+         onClose={() => setSearchVisible(false)}
+         onSelectSymbol={handleSelectSymbol}
+       />
+     </>
+   );
  }
 
  return (
  <View style={[styles.flex1, { backgroundColor: colors.surface }]}>
- <Header title="Reference" />
+ <Header title="Reference" showBack={false} />
  <FlatList
  style={[styles.flex1, { paddingHorizontal: 16 }]}
  contentContainerStyle={{ paddingTop: 12, paddingBottom: 80 }}

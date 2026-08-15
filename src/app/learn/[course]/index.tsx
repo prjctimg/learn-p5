@@ -3,11 +3,11 @@ import { View, Text, ScrollView, Pressable, ActivityIndicator, StyleSheet } from
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Button from "../../../../components/Button";
-import { loadCourse } from "../../../../utils/courseLoader";
-import { Course } from "../../../../data/types";
-import { useThemeContext } from "../../../../components/ThemeProvider";
-import { Colors } from "../../../../constants/Colors";
+import Button from "../../../components/Button";
+import { loadCourse } from "../../../utils/courseLoader";
+import { Course } from "../../../data/types";
+import { useThemeContext } from "../../../components/ThemeProvider";
+import { Colors } from "../../../constants/Colors";
 
 export default function CourseDetail() {
  const { course } = useLocalSearchParams<{ course: string }>();
@@ -113,7 +113,7 @@ if (loading) {
  { backgroundColor: colors.surface },
  ]}
  >
- <Pressable onPress={() => router.back()} style={styles.backButton}>
+ <Pressable onPress={() => router.push("/learn")} style={styles.backButton}>
  <MaterialCommunityIcons
  name="arrow-left"
  size={24}
@@ -136,7 +136,7 @@ if (loading) {
  </Text>
  <View style={styles.notFoundButtonWrapper}>
  <Pressable
- onPress={() => router.back()}
+ onPress={() => router.push("/learn")}
  style={({ pressed }) => [
  styles.backButton,
  pressed && styles.backButtonPressed,
@@ -163,7 +163,7 @@ if (loading) {
  { backgroundColor: colors.surface },
  ]}
  >
- <Pressable onPress={() => router.back()} style={styles.backButton}>
+ <Pressable onPress={() => router.push("/learn")} style={styles.backButton}>
  <MaterialCommunityIcons
  name="arrow-left"
  size={24}
@@ -197,13 +197,13 @@ if (loading) {
  { backgroundColor: colors.surface },
  ]}
   >
-  <Pressable onPress={() => router.back()} style={styles.backButton}>
-  <MaterialCommunityIcons
-    name="arrow-left"
-    size={24}
-    color={derivedColors.primary}
-  />
-  </Pressable>
+   <Pressable onPress={() => router.push("/learn")} style={styles.backButton}>
+   <MaterialCommunityIcons
+     name="arrow-left"
+     size={24}
+     color={derivedColors.primary}
+   />
+   </Pressable>
   <View style={{ flex: 1 }} />
   </View>
 

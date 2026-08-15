@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { View, Text, FlatList, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
-import Header from "../../../components/Header";
-import ChallengeCard from "../../../components/ChallengeCard";
-import { loadAllCourses } from "../../../utils/courseLoader";
-import { Course } from "../../../data/types";
-import { useThemeContext } from "../../../components/ThemeProvider";
-import { Colors } from "../../../constants/Colors";
+import Header from "../../components/Header";
+import ChallengeCard from "../../components/ChallengeCard";
+import { loadAllCourses } from "../../utils/courseLoader";
+import { Course } from "../../data/types";
+import { useThemeContext } from "../../components/ThemeProvider";
+import { Colors } from "../../constants/Colors";
 
 export default function Learn() {
  const router = useRouter();

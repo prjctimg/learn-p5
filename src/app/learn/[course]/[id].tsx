@@ -5,21 +5,20 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { WebView } from "react-native-webview";
-import { useBottomNavContext } from "../../../../contexts/BottomNavContext";
-import { useThemeContext } from "../../../../components/ThemeProvider";
-import { Colors } from "../../../../constants/Colors";
-import { DEFAULTS } from "../../../../constants/Defaults";
-import ProgrammingKeyboard from "../../../../components/ProgrammingKeyboard";
-import QwertyKeyboard from "../../../../components/QwertyKeyboard";
+import { useThemeContext } from "../../../components/ThemeProvider";
+import { Colors } from "../../../constants/Colors";
+import { DEFAULTS } from "../../../constants/Defaults";
+import ProgrammingKeyboard from "../../../components/ProgrammingKeyboard";
+import QwertyKeyboard from "../../../components/QwertyKeyboard";
 
-import Toast from "../../../../components/Toast";
-import StreakToast from "../../../../components/StreakToast";
-import { loadExercise, loadCourse } from "../../../../utils/courseLoader";
-import { Lesson } from "../../../../data/types";
-import { P5_FUNCTION_NAMES, ONCE_ONLY_P5_FUNCTIONS } from "../../../../data/reference";
-import { getExerciseHtml } from "../../../../utils/editor/exerciseHtml";
-import { EDITOR_THEMES, getThemeSwatches } from "../../../../utils/editor/themes";
-import { useStreak } from "../../../../hooks/useStreak";
+import Toast from "../../../components/Toast";
+import StreakToast from "../../../components/StreakToast";
+import { loadExercise, loadCourse } from "../../../utils/courseLoader";
+import { Lesson } from "../../../data/types";
+import { P5_FUNCTION_NAMES, ONCE_ONLY_P5_FUNCTIONS } from "../../../data/reference";
+import { getExerciseHtml } from "../../../utils/editor/exerciseHtml";
+import { EDITOR_THEMES, getThemeSwatches } from "../../../utils/editor/themes";
+import { useStreak } from "../../../hooks/useStreak";
 
 const EXERCISE_CODE_PREFIX = "exerciseCode_";
 
@@ -92,7 +91,6 @@ export default function Exercise() {
  const { course, id } = useLocalSearchParams<{ course: string; id: string }>();
  const router = useRouter();
  const insets = useSafeAreaInsets();
-  const { hide, show } = useBottomNavContext();
 const [state, dispatch] = useReducer(exerciseReducer, {
  exercise: null,
  loading: true,
@@ -109,9 +107,6 @@ const [state, dispatch] = useReducer(exerciseReducer, {
  const [editorViewReady, setEditorViewReady] = useState(false);
  const [keyboardVisible, setKeyboardVisible] = useState(true);
 
- useEffect(() => {
-   if (keyboardVisible) hide();
- }, [keyboardVisible]);
  const [keyboardMode, setKeyboardMode] = useState<"programming" | "qwerty">("programming");
  const [codeSyncKey, setCodeSyncKey] = useState(0);
  const codeRef = useRef(state.code);
@@ -442,12 +437,6 @@ const [state, dispatch] = useReducer(exerciseReducer, {
   }
   });
   break;
-    case "scrollUp":
-      show();
-      break;
-    case "scrollDown":
-      if (keyboardVisible) hide();
-      break;
  }
  } catch {}
  },
@@ -733,7 +722,7 @@ if (state.loading) {
  style={[styles.header, { paddingTop: insets.top + 4 }]}
  >
  <Pressable
- onPress={() => router.back()}
+ onPress={() => router.push(`/learn/${course}`)}
  style={styles.menuButton}
  accessibilityRole="button"
  accessibilityLabel="Go back"

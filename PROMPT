@@ -1,0 +1,36 @@
+
+## Improve 'Shake to' feature
+
+Redesign the 'Shake to' modal to match the app design and not use the system default.
+
+Improve the consistency of shake detections by searching for open source implementations of such features (if they exist).
+
+## Exercises templates
+
+Look at the files in the ./exercises/ directory and treat the files as a template on how to structure the  module exercises.
+
+## Terminology check
+
+Assess how we use terminology in the app and take note of inconsistencies and improper usages of words and suggest a tone that keeps the desired tone we have so far.
+
+## Exercise design
+
+Look at the @exercises directory and flesh out the ideas. Take note of the practical shortfalls and refer to the official p5.js reference on how to create an exercise per symbol. 
+
+Also, instead of just having one task in an exercise, the user may have to complete several tasks to fully understand the full capabilities of a symbol. So when the user completes a task the webview transitions to the next task showing a more elaborate or sophisticated way to use the symbol.
+
+
+## Enhancements
+
+- Show the canvas full with and just constrict the height as is.
+- Allow the user to scroll over a  canvas as they're scrolling the page.
+
+## Side drawer
+
+- Restore the two headings below the logo (one of the strings said "I should write something catchy here") and never use back text on any of the headings below the logo as well as the logo text itself since it distorts the design
+
+
+## Bugs
+
+The code mirror and sketch previews crash when you enable word wrap.
+

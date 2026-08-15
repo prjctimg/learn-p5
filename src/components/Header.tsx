@@ -3,19 +3,25 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useThemeContext } from "./ThemeProvider";
+import { useDrawerContext } from "../contexts/DrawerContext";
 import { Colors } from "../constants/Colors";
 
 interface HeaderProps {
   title: string;
   subtitle?: string;
   right?: React.ReactNode;
+  showBack?: boolean;
+  onBack?: () => void;
 }
 
-export default function Header({ title, subtitle, right }: HeaderProps) {
+export default function Header({ title, subtitle, right, showBack = true, onBack }: HeaderProps) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const { openDrawer } = useDrawerContext();
+
+  const handleBack = onBack ?? (() => router.back());
 
   return (
     <View
@@ -25,14 +31,25 @@ export default function Header({ title, subtitle, right }: HeaderProps) {
       ]}
     >
       <View style={styles.leftSection}>
-        <Pressable
-          onPress={() => router.back()}
-          style={styles.backButton}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-        >
-          <MaterialCommunityIcons name="arrow-left" size={24} color={colors.onSurfaceVariant} />
-        </Pressable>
+        {showBack ? (
+          <Pressable
+            onPress={handleBack}
+            style={styles.menuButton}
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
+          >
+            <MaterialCommunityIcons name="arrow-left" size={24} color={colors.onSurfaceVariant} />
+          </Pressable>
+        ) : (
+          <Pressable
+            onPress={openDrawer}
+            style={styles.menuButton}
+            accessibilityRole="button"
+            accessibilityLabel="Open navigation drawer"
+          >
+            <MaterialCommunityIcons name="menu" size={24} color={colors.onSurfaceVariant} />
+          </Pressable>
+        )}
         <View>
           <Text style={[styles.title, { color: colors.onSurface }]}>
             {title}
@@ -62,7 +79,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
   },
-  backButton: {
+  menuButton: {
     padding: 8,
   },
   title: {

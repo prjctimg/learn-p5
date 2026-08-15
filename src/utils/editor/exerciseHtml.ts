@@ -908,67 +908,131 @@ function handleMessage(data) {
         }
         renderSketch('user-sketch', userCode);
         if (typeof window.__tutRun === 'function') window.__tutRun();
-        var validationPassed = false;
-        try {
-        if (VALIDATION_RULES.length > 0) {
-          var allPassed = true;
-          var failReason = '';
-          for (var ri = 0; ri < VALIDATION_RULES.length; ri++) {
-            var rule = VALIDATION_RULES[ri];
+
+        function validateSync(code, rules) {
+          for (var ri = 0; ri < rules.length; ri++) {
+            var rule = rules[ri];
             if (rule.type === 'functionCall') {
-              var callRe = new RegExp('\\b' + rule.name + '[\\s]*\\(', 'g');
               var argRe = new RegExp('\\b' + rule.name + '[\\s]*\\(([^)]*)\\)', 'g');
               var matches = [];
               var rm;
-              while ((rm = argRe.exec(userCode)) !== null) {
+              while ((rm = argRe.exec(code)) !== null) {
                 var rawArgs = rm[1];
                 var args = rawArgs.split(',').map(function(a) { return a.trim(); }).filter(function(a) { return a.length > 0; });
                 matches.push(args);
               }
-              if (matches.length === 0) {
-                allPassed = false;
-                failReason = 'Add a ' + rule.name + '() call';
-                break;
-              }
+              if (matches.length === 0) return { passed: false, reason: 'Add a ' + rule.name + '() call' };
               if (rule.exactArgs !== undefined) {
                 var hasCorrect = false;
                 for (var mi = 0; mi < matches.length; mi++) {
                   if (matches[mi].length === rule.exactArgs) { hasCorrect = true; break; }
                 }
-                if (!hasCorrect) {
-                  allPassed = false;
-                  failReason = rule.name + '() needs ' + rule.exactArgs + ' arguments';
-                  break;
-                }
+                if (!hasCorrect) return { passed: false, reason: rule.name + '() needs ' + rule.exactArgs + ' arguments' };
               }
               if (rule.minArgs !== undefined) {
                 var hasMin = false;
                 for (var mi2 = 0; mi2 < matches.length; mi2++) {
                   if (matches[mi2].length >= rule.minArgs) { hasMin = true; break; }
                 }
-                if (!hasMin) {
-                  allPassed = false;
-                  failReason = rule.name + '() needs at least ' + rule.minArgs + ' arguments';
-                  break;
-                }
+                if (!hasMin) return { passed: false, reason: rule.name + '() needs at least ' + rule.minArgs + ' arguments' };
               }
+            } else if (rule.type === 'functionExists') {
+              var fnRe = new RegExp('\\b' + rule.name + '\\s*[=:]\\s*function|function\\s+' + rule.name + '\\s*\\(', 'g');
+              if (!fnRe.test(code)) return { passed: false, reason: 'Define a ' + rule.name + '() function' };
+            } else if (rule.type === 'canvasSize') {
+              var canvasRe = /createCanvas\s*\(\s*(\d+)\s*,\s*(\d+)\s*\)/g;
+              var canvasMatch = canvasRe.exec(code);
+              if (!canvasMatch) return { passed: false, reason: 'Use createCanvas() to set canvas size' };
+              var w = parseInt(canvasMatch[1], 10);
+              var h = parseInt(canvasMatch[2], 10);
+              if (w !== rule.width || h !== rule.height) return { passed: false, reason: 'Canvas should be ' + rule.width + 'x' + rule.height };
             }
           }
-          validationPassed = allPassed;
-          if (!allPassed && failReason) {
-            if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-              window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'validationFailed', reason: failReason }));
-            }
-          }
-        } else {
-          validationPassed = SOLUTION_CODE && userCode.trim() === SOLUTION_CODE.trim();
+          return { passed: true, reason: '' };
         }
+
+        var syncResult = { passed: false, reason: '' };
+        var hasPixelRules = false;
+        try {
+          if (VALIDATION_RULES.length > 0) {
+            var nonPixelRules = VALIDATION_RULES.filter(function(r) { return r.type !== 'pixelMatch'; });
+            hasPixelRules = VALIDATION_RULES.some(function(r) { return r.type === 'pixelMatch'; });
+            syncResult = validateSync(userCode, nonPixelRules);
+          } else {
+            syncResult = { passed: SOLUTION_CODE && userCode.trim() === SOLUTION_CODE.trim(), reason: '' };
+          }
         } catch(ve) { console.error('Validation error:', ve); }
-        if (validationPassed) {
+
+        if (!syncResult.passed) {
+          if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+            window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'validationFailed', reason: syncResult.reason }));
+          }
+          break;
+        }
+
+        if (!hasPixelRules) {
           if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
             window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'exerciseComplete' }));
           }
+          break;
         }
+
+        var pixelRules = VALIDATION_RULES.filter(function(r) { return r.type === 'pixelMatch'; });
+        var pixelDelay = 300;
+        setTimeout(function() {
+          var container = document.getElementById('user-sketch');
+          if (!container || !container.__p5) {
+            if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+              window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'validationFailed', reason: 'Sketch did not render' }));
+            }
+            return;
+          }
+          var p5Instance = container.__p5;
+          try {
+            var cnv = p5Instance.canvas;
+            if (!cnv) {
+              if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+                window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'validationFailed', reason: 'Canvas not found' }));
+              }
+              return;
+            }
+            var ctx = cnv.getContext('2d');
+            if (!ctx) {
+              if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+                window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'validationFailed', reason: 'Cannot read canvas pixels' }));
+              }
+              return;
+            }
+            for (var pi = 0; pi < pixelRules.length; pi++) {
+              var pr = pixelRules[pi];
+              var tol = pr.tolerance !== undefined ? pr.tolerance : 30;
+              var px = Math.min(Math.max(0, Math.floor(pr.x)), cnv.width - 1);
+              var py = Math.min(Math.max(0, Math.floor(pr.y)), cnv.height - 1);
+              var imageData = ctx.getImageData(px, py, 1, 1).data;
+              var rDiff = Math.abs(imageData[0] - pr.expected[0]);
+              var gDiff = Math.abs(imageData[1] - pr.expected[1]);
+              var bDiff = Math.abs(imageData[2] - pr.expected[2]);
+              if (rDiff > tol || gDiff > tol || bDiff > tol) {
+                if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+                  window.ReactNativeWebView.postMessage(JSON.stringify({
+                    type: 'validationFailed',
+                    reason: 'Color at (' + pr.x + ',' + pr.y + ') is wrong — expected rgb(' + pr.expected.join(',') + ') but got rgb(' + imageData[0] + ',' + imageData[1] + ',' + imageData[2] + ')'
+                  }));
+                }
+                return;
+              }
+            }
+            if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+              window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'exerciseComplete' }));
+            }
+          } catch(e) {
+            console.error('Pixel validation error:', e);
+            if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+              window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'validationFailed', reason: 'Could not verify sketch output' }));
+            }
+          }
+        }, pixelDelay);
+
         if (typeof prettierLib !== 'undefined' && prettierLib.format) {
           var postCode = view.state.doc.toString();
           var pw2 = WORD_WRAP ? 80 : 120;

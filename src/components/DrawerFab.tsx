@@ -1,22 +1,35 @@
+import { useEffect, useState } from "react";
 import { Pressable, StyleSheet } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useBottomNavContext } from "../contexts/BottomNavContext";
+import { useDrawerContext } from "../contexts/DrawerContext";
 import { useThemeContext } from "./ThemeProvider";
 
-export default function BottomNavFab() {
-  const { toggle } = useBottomNavContext();
+const SETTING_KEY = "setting_showDrawerFab";
+
+export default function DrawerFab() {
+  const { openDrawer } = useDrawerContext();
   const { derivedColors } = useThemeContext();
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    AsyncStorage.getItem(SETTING_KEY).then((val) => {
+      setVisible(val === "true");
+    });
+  }, []);
+
+  if (!visible) return null;
 
   return (
     <Pressable
-      onPress={toggle}
+      onPress={openDrawer}
       style={({ pressed }) => [
         styles.fab,
         { backgroundColor: pressed ? derivedColors.primaryContainer : derivedColors.primary },
         pressed && { opacity: 0.8 },
       ]}
       accessibilityRole="button"
-      accessibilityLabel="Toggle navigation"
+      accessibilityLabel="Open navigation drawer"
     >
       <MaterialCommunityIcons name="menu" size={18} color="#FFFFFF" />
     </Pressable>

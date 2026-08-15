@@ -4,17 +4,17 @@ import { useRouter } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
-import Header from "../../../components/Header";
-import TimePicker from "../../../components/TimePicker";
-import Toast from "../../../components/Toast";
-import StreakToast from "../../../components/StreakToast";
-import { useThemeContext } from "../../../components/ThemeProvider";
-import { Colors } from "../../../constants/Colors";
-import { DEFAULTS } from "../../../constants/Defaults";
+import Header from "../../components/Header";
+import TimePicker from "../../components/TimePicker";
+import Toast from "../../components/Toast";
+import StreakToast from "../../components/StreakToast";
+import { useThemeContext } from "../../components/ThemeProvider";
+import { Colors } from "../../constants/Colors";
+import { DEFAULTS } from "../../constants/Defaults";
 
-import { EDITOR_THEMES, getThemeSwatches } from "../../../utils/editor/themes";
-import { loadAllCourses } from "../../../utils/courseLoader";
-import { PROCESSING_COLOR_HEX } from "../../../constants/ProcessingColors";
+import { EDITOR_THEMES, getThemeSwatches } from "../../utils/editor/themes";
+import { loadAllCourses } from "../../utils/courseLoader";
+import { PROCESSING_COLOR_HEX } from "../../constants/ProcessingColors";
 
 const STREAK_KEYS = {
   count: "streak_count",
@@ -40,13 +40,28 @@ const SETTINGS_KEYS = {
 const createStyles = (colors: Record<string, string>) =>
   StyleSheet.create({
     container: { flex: 1 },
-    scrollContent: { flex: 1, paddingHorizontal: 16, paddingTop: 24 },
+    scrollContent: { flex: 1, paddingHorizontal: 16, paddingTop: 16 },
+    sectionHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      marginTop: 28,
+      marginBottom: 12,
+      paddingHorizontal: 4,
+    },
+    sectionIcon: {
+      width: 28,
+      height: 28,
+      borderRadius: 8,
+      alignItems: "center",
+      justifyContent: "center",
+    },
     sectionTitle: {
       fontFamily: "JetBrainsMono",
-      fontSize: 11,
+      fontSize: 13,
+      fontWeight: "700",
       textTransform: "uppercase",
       letterSpacing: 1,
-      marginBottom: 12,
       color: colors.textSecondary,
     },
     card: { borderRadius: 12, overflow: "hidden", backgroundColor: colors.surfaceDim },
@@ -55,19 +70,19 @@ const createStyles = (colors: Record<string, string>) =>
       alignItems: "center",
       justifyContent: "space-between",
       paddingHorizontal: 16,
-      paddingVertical: 16,
+      paddingVertical: 14,
     },
+    cardDivider: { height: StyleSheet.hairlineWidth, backgroundColor: colors.surfaceContainerHighest },
     flexChild: { flex: 1 },
-    settingTitle: { fontFamily: "JetBrainsMono", fontSize: 16, fontWeight: "700", color: colors.onSurface },
+    settingTitle: { fontFamily: "JetBrainsMono", fontSize: 14, fontWeight: "700", color: colors.onSurface },
     settingDescription: { fontFamily: "JetBrainsMono", fontSize: 11, marginTop: 2, color: colors.textSecondary },
     nameInput: {
       fontFamily: "JetBrainsMono",
-      fontSize: 16,
+      fontSize: 14,
       borderBottomWidth: 1,
-      paddingVertical: 8,
+      paddingVertical: 6,
       flex: 1,
     },
-    sectionMargin: { marginTop: 32 },
   });
 
 export default function Settings() {
@@ -238,25 +253,35 @@ export default function Settings() {
     ]);
   };
 
+  function SectionHeader({ icon, label, color }: { icon: string; label: string; color: string }) {
+    return (
+      <View style={styles.sectionHeader}>
+        <View style={[styles.sectionIcon, { backgroundColor: color + "20" }]}>
+          <MaterialCommunityIcons name={icon as any} size={16} color={color} />
+        </View>
+        <Text style={styles.sectionTitle}>{label}</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={[styles.container, { backgroundColor: colors.surface }]}>
-      <Header title="Settings" />
+      <Header title="Settings" showBack={false} />
       <ScrollView
         style={styles.scrollContent}
         contentContainerStyle={{ paddingBottom: 32 }}
       >
         {/* Profile */}
-        <Text style={styles.sectionTitle}>Profile</Text>
+        <SectionHeader icon="account-outline" label="Profile" color={derivedColors.primary} />
         <View style={styles.card}>
           <View style={styles.cardRow}>
             <View style={styles.flexChild}>
               <Text style={styles.settingTitle}>Display Name</Text>
-              <Text style={styles.settingDescription}>
-                Used in greetings and notifications
-              </Text>
+              <Text style={styles.settingDescription}>Used in greetings and notifications</Text>
             </View>
           </View>
-          <View style={[styles.cardRow, { borderTopWidth: 1, borderTopColor: colors.surfaceContainerHighest }]}>
+          <View style={styles.cardDivider} />
+          <View style={styles.cardRow}>
             <TextInput
               style={[styles.nameInput, { color: derivedColors.primary, borderColor: colors.outlineVariant }]}
               placeholder="Enter your name"
@@ -269,14 +294,12 @@ export default function Settings() {
         </View>
 
         {/* Appearance */}
-        <Text style={styles.sectionTitle}>Appearance</Text>
+        <SectionHeader icon="palette-outline" label="Appearance" color={derivedColors.primary} />
         <View style={styles.card}>
           <View style={styles.cardRow}>
             <View style={styles.flexChild}>
               <Text style={styles.settingTitle}>Dark Mode</Text>
-              <Text style={styles.settingDescription}>
-                Switch between light and dark themes
-              </Text>
+              <Text style={styles.settingDescription}>Switch between light and dark themes</Text>
             </View>
             <Switch
               value={colorScheme === "dark"}
@@ -285,12 +308,11 @@ export default function Settings() {
               thumbColor="#ffffff"
             />
           </View>
-          <View style={[styles.cardRow, { borderTopWidth: 1, borderTopColor: colors.surfaceContainerHighest, flexWrap: "wrap", gap: 8 }]}>
+          <View style={styles.cardDivider} />
+          <View style={[styles.cardRow, { flexWrap: "wrap", gap: 8 }]}>
             <View style={{ width: "100%", marginBottom: 4 }}>
               <Text style={styles.settingTitle}>Accent Color</Text>
-              <Text style={styles.settingDescription}>
-                Choose a CTA color for buttons and highlights
-              </Text>
+              <Text style={styles.settingDescription}>Choose a CTA color for buttons and highlights</Text>
             </View>
             {PROCESSING_COLOR_HEX.map((hex) => (
               <Pressable
@@ -313,14 +335,12 @@ export default function Settings() {
         </View>
 
         {/* Learning */}
-        <Text style={[styles.sectionTitle, styles.sectionMargin]}>Learning</Text>
+        <SectionHeader icon="school-outline" label="Learning" color={derivedColors.primary} />
         <View style={styles.card}>
           <View style={styles.cardRow}>
             <View style={styles.flexChild}>
               <Text style={styles.settingTitle}>Daily Reminder</Text>
-              <Text style={styles.settingDescription}>
-                Get reminded to practice daily
-              </Text>
+              <Text style={styles.settingDescription}>Get reminded to practice daily</Text>
             </View>
             <Switch
               value={dailyReminder}
@@ -338,12 +358,11 @@ export default function Settings() {
             />
           )}
 
+          <View style={styles.cardDivider} />
           <View style={styles.cardRow}>
             <View style={styles.flexChild}>
               <Text style={styles.settingTitle}>Snippet Alternatives</Text>
-              <Text style={styles.settingDescription}>
-                Show p5.js variants in other languages
-              </Text>
+              <Text style={styles.settingDescription}>Show p5.js variants in other languages</Text>
             </View>
             <Switch
               value={snippetAlternatives}
@@ -355,21 +374,19 @@ export default function Settings() {
         </View>
 
         {/* Code Editor */}
-        <Text style={[styles.sectionTitle, styles.sectionMargin]}>Code Editor</Text>
+        <SectionHeader icon="code-tags" label="Code Editor" color={derivedColors.primary} />
         <View style={styles.card}>
           <View style={styles.cardRow}>
             <View style={styles.flexChild}>
               <Text style={styles.settingTitle}>Font Size</Text>
-              <Text style={styles.settingDescription}>
-                {codeFontSize}px — adjust code editor text size
-              </Text>
+              <Text style={styles.settingDescription}>{codeFontSize}px — adjust code editor text size</Text>
             </View>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
               <Pressable
                 onPress={() => changeCodeFontSize(-2)}
                 style={({ pressed }) => ({
-                  width: 36,
-                  height: 36,
+                  width: 32,
+                  height: 32,
                   borderRadius: 8,
                   backgroundColor: pressed ? derivedColors.primaryContainer : colors.surfaceContainerHigh,
                   alignItems: "center",
@@ -378,16 +395,16 @@ export default function Settings() {
                 accessibilityRole="button"
                 accessibilityLabel="Decrease font size"
               >
-                <Text style={{ fontSize: 18, fontWeight: "700", color: colors.onSurface }}>−</Text>
+                <Text style={{ fontSize: 16, fontWeight: "700", color: colors.onSurface }}>−</Text>
               </Pressable>
-              <Text style={{ fontFamily: "JetBrainsMono", fontSize: 16, fontWeight: "700", color: colors.onSurface, minWidth: 32, textAlign: "center" }}>
+              <Text style={{ fontFamily: "JetBrainsMono", fontSize: 14, fontWeight: "700", color: colors.onSurface, minWidth: 28, textAlign: "center" }}>
                 {codeFontSize}
               </Text>
               <Pressable
                 onPress={() => changeCodeFontSize(2)}
                 style={({ pressed }) => ({
-                  width: 36,
-                  height: 36,
+                  width: 32,
+                  height: 32,
                   borderRadius: 8,
                   backgroundColor: pressed ? derivedColors.primaryContainer : colors.surfaceContainerHigh,
                   alignItems: "center",
@@ -396,20 +413,17 @@ export default function Settings() {
                 accessibilityRole="button"
                 accessibilityLabel="Increase font size"
               >
-                <Text style={{ fontSize: 18, fontWeight: "700", color: colors.onSurface }}>+</Text>
+                <Text style={{ fontSize: 16, fontWeight: "700", color: colors.onSurface }}>+</Text>
               </Pressable>
             </View>
           </View>
 
-          <View style={[styles.cardRow, { borderTopWidth: 1, borderTopColor: colors.surfaceContainerHighest }]}>
+          <View style={styles.cardDivider} />
+          <View style={styles.cardRow}>
             <View style={styles.flexChild}>
               <Text style={styles.settingTitle}>Code Background</Text>
               <Text style={styles.settingDescription}>
-                {codeBackground === "auto"
-                  ? "Follow system theme"
-                  : codeBackground === "#FFFFFF"
-                    ? "Light background"
-                    : "Dark background"}
+                {codeBackground === "auto" ? "Follow system theme" : codeBackground === "#FFFFFF" ? "Light background" : "Dark background"}
               </Text>
             </View>
             <View style={{ flexDirection: "row", gap: 6 }}>
@@ -418,28 +432,17 @@ export default function Settings() {
                   key={opt}
                   onPress={() => changeCodeBackground(opt)}
                   style={({ pressed }) => ({
-                    paddingHorizontal: 12,
-                    paddingVertical: 6,
+                    paddingHorizontal: 10,
+                    paddingVertical: 5,
                     borderRadius: 6,
                     borderBottomWidth: codeBackground === opt ? 2 : 0,
                     borderBottomColor: codeBackground === opt ? derivedColors.primary : "transparent",
                     backgroundColor: pressed ? derivedColors.primaryContainer + "33" : colors.surfaceContainerHigh,
                   })}
                   accessibilityRole="button"
-                  accessibilityLabel={
-                    opt === "auto" ? "Auto" : opt === "#FFFFFF" ? "Light" : "Dark"
-                  }
+                  accessibilityLabel={opt === "auto" ? "Auto" : opt === "#FFFFFF" ? "Light" : "Dark"}
                 >
-                  <Text
-                    style={{
-                      fontFamily: "JetBrainsMono",
-                      fontSize: 11,
-                      fontWeight: "700",
-                      textTransform: "uppercase",
-                      letterSpacing: 0.5,
-                      color: colors.onSurfaceVariant,
-                    }}
-                  >
+                  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 10, fontWeight: "700", textTransform: "uppercase", letterSpacing: 0.5, color: colors.onSurfaceVariant }}>
                     {opt === "auto" ? "Auto" : opt === "#FFFFFF" ? "Light" : "Dark"}
                   </Text>
                 </Pressable>
@@ -447,12 +450,11 @@ export default function Settings() {
             </View>
           </View>
 
-          <View style={[styles.cardRow, { borderTopWidth: 1, borderTopColor: colors.surfaceContainerHighest, flexWrap: "wrap", gap: 6 }]}>
-            <View style={{ width: "100%", marginBottom: 8 }}>
+          <View style={styles.cardDivider} />
+          <View style={[styles.cardRow, { flexWrap: "wrap", gap: 6 }]}>
+            <View style={{ width: "100%", marginBottom: 6 }}>
               <Text style={styles.settingTitle}>Editor Theme</Text>
-              <Text style={styles.settingDescription}>
-                Choose a color theme for the code editor
-              </Text>
+              <Text style={styles.settingDescription}>Choose a color theme for the code editor</Text>
             </View>
             {Object.entries(EDITOR_THEMES).map(([key, theme]) => {
               const swatches = getThemeSwatches(key, colorScheme === "dark" ? "dark" : "light");
@@ -477,34 +479,37 @@ export default function Settings() {
                       <View key={i} style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: s }} />
                     ))}
                   </View>
-                  <Text
-                    style={{
-                      fontFamily: "JetBrainsMono",
-                      fontSize: 11,
-                      fontWeight: "700",
-                      textTransform: "uppercase",
-                      letterSpacing: 0.5,
-                      color: colors.onSurfaceVariant,
-                    }}
-                  >
+                  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 10, fontWeight: "700", textTransform: "uppercase", letterSpacing: 0.5, color: colors.onSurfaceVariant }}>
                     {theme.label}
                   </Text>
                 </Pressable>
               );
             })}
           </View>
+
+          <View style={styles.cardDivider} />
+          <View style={styles.cardRow}>
+            <View style={styles.flexChild}>
+              <Text style={styles.settingTitle}>Word Wrap</Text>
+              <Text style={styles.settingDescription}>Wrap long lines in the editor</Text>
+            </View>
+            <Switch
+              value={wordWrap}
+              onValueChange={changeWordWrap}
+              trackColor={{ false: "#767577", true: ctaColor }}
+              thumbColor="#ffffff"
+            />
+          </View>
         </View>
 
         {/* Keyboard */}
-        <Text style={[styles.sectionTitle, styles.sectionMargin]}>Keyboard</Text>
+        <SectionHeader icon="keyboard" label="Keyboard" color={derivedColors.primary} />
         <View style={styles.card}>
           <View style={styles.cardRow}>
             <View style={styles.flexChild}>
               <Text style={styles.settingTitle}>Keyboard Height</Text>
               <Text style={styles.settingDescription}>
-                {keyboardHeight === "medium"
-                  ? "280px — default"
-                  : "360px — tall"}
+                {keyboardHeight === "small" ? "200px — compact" : keyboardHeight === "medium" ? "280px — default" : "360px — tall"}
               </Text>
             </View>
             <View style={{ flexDirection: "row", gap: 6 }}>
@@ -513,10 +518,10 @@ export default function Settings() {
                   key={opt}
                   onPress={() => changeKeyboardHeight(opt)}
                   style={({ pressed }) => ({
-                    paddingHorizontal: 12,
-                    paddingVertical: 6,
+                    paddingHorizontal: 10,
+                    paddingVertical: 5,
                     borderRadius: 6,
-                    minWidth: 42,
+                    minWidth: 36,
                     alignItems: "center",
                     borderBottomWidth: keyboardHeight === opt ? 2 : 0,
                     borderBottomColor: keyboardHeight === opt ? derivedColors.primary : "transparent",
@@ -525,16 +530,7 @@ export default function Settings() {
                   accessibilityRole="button"
                   accessibilityLabel={`${opt} keyboard`}
                 >
-                  <Text
-                    style={{
-                      fontFamily: "JetBrainsMono",
-                      fontSize: 11,
-                      fontWeight: "700",
-                      textTransform: "uppercase",
-                      letterSpacing: 0.5,
-                      color: colors.onSurfaceVariant,
-                    }}
-                  >
+                  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 10, fontWeight: "700", textTransform: "uppercase", letterSpacing: 0.5, color: colors.onSurfaceVariant }}>
                     {opt === "small" ? "S" : opt === "medium" ? "M" : "T"}
                   </Text>
                 </Pressable>
@@ -543,9 +539,8 @@ export default function Settings() {
           </View>
         </View>
 
-        {/* Accessibility */}
         {/* About */}
-        <Text style={[styles.sectionTitle, styles.sectionMargin]}>About</Text>
+        <SectionHeader icon="information-outline" label="About" color={derivedColors.primary} />
         <View style={styles.card}>
           <Pressable
             onPress={() => router.push("/settings/about")}
@@ -553,23 +548,19 @@ export default function Settings() {
           >
             <View style={styles.flexChild}>
               <Text style={styles.settingTitle}>About Learn p5.js</Text>
-              <Text style={styles.settingDescription}>
-                Learn about p5.js and Processing
-              </Text>
+              <Text style={styles.settingDescription}>Learn about p5.js and Processing</Text>
             </View>
             <MaterialCommunityIcons name="chevron-right" size={20} color={colors.textSecondary} />
           </Pressable>
         </View>
 
         {/* Debugging */}
-        <Text style={[styles.sectionTitle, styles.sectionMargin]}>Debugging</Text>
+        <SectionHeader icon="bug-outline" label="Debugging" color={derivedColors.primary} />
         <View style={styles.card}>
           <View style={styles.cardRow}>
             <View style={styles.flexChild}>
               <Text style={styles.settingTitle}>Dev Mode</Text>
-              <Text style={styles.settingDescription}>
-                Enable debug controls for testing
-              </Text>
+              <Text style={styles.settingDescription}>Enable debug controls for testing</Text>
             </View>
             <Switch
               value={devMode}
@@ -582,120 +573,111 @@ export default function Settings() {
 
         {devMode && (
           <>
-            <View style={styles.card}>
+            <View style={[styles.card, { marginTop: 8 }]}>
               <View style={styles.cardRow}>
                 <View style={styles.flexChild}>
                   <Text style={styles.settingTitle}>View Error Logs</Text>
-                  <Text style={styles.settingDescription}>
-                    Open stored error logs for debugging
-                  </Text>
+                  <Text style={styles.settingDescription}>Open stored error logs for debugging</Text>
                 </View>
                 <Pressable
                   onPress={() => router.push("/settings/error-logs")}
                   style={({ pressed }) => ({
-                    paddingHorizontal: 14,
-                    paddingVertical: 8,
+                    paddingHorizontal: 12,
+                    paddingVertical: 6,
                     borderRadius: 8,
                     backgroundColor: pressed ? derivedColors.primaryContainer : derivedColors.primary,
                   })}
                 >
-                  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 11, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
+                  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 10, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
                     Open
                   </Text>
                 </Pressable>
               </View>
             </View>
 
-            <Text style={[styles.sectionTitle, styles.sectionMargin]}>
-              Component Triggers
-            </Text>
-            <View style={styles.card}>
+            <View style={[styles.card, { marginTop: 8 }]}>
               <View style={styles.cardRow}>
                 <Text style={styles.settingTitle}>Show Toast</Text>
                 <Pressable
                   onPress={() => setDebugToastVisible(true)}
                   style={({ pressed }) => ({
-                    paddingHorizontal: 14,
-                    paddingVertical: 8,
+                    paddingHorizontal: 12,
+                    paddingVertical: 6,
                     borderRadius: 8,
                     backgroundColor: pressed ? derivedColors.primaryContainer : derivedColors.primary,
                   })}
                 >
-                  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 11, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
+                  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 10, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
                     Trigger
                   </Text>
                 </Pressable>
               </View>
-              <View style={[styles.cardRow, { borderTopWidth: 1, borderTopColor: colors.surfaceContainerHighest }]}>
+              <View style={styles.cardDivider} />
+              <View style={styles.cardRow}>
                 <Text style={styles.settingTitle}>Show Streak Toast</Text>
                 <Pressable
                   onPress={() => setDebugStreakToastVisible(true)}
                   style={({ pressed }) => ({
-                    paddingHorizontal: 14,
-                    paddingVertical: 8,
+                    paddingHorizontal: 12,
+                    paddingVertical: 6,
                     borderRadius: 8,
                     backgroundColor: pressed ? derivedColors.primaryContainer : derivedColors.primary,
                   })}
                 >
-                  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 11, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
+                  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 10, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
                     Trigger
                   </Text>
                 </Pressable>
               </View>
             </View>
 
-            <Text style={[styles.sectionTitle, styles.sectionMargin]}>
-              Mock Exercise State
-            </Text>
-            <View style={styles.card}>
+            <View style={[styles.card, { marginTop: 8 }]}>
               <View style={styles.cardRow}>
                 <View style={styles.flexChild}>
                   <Text style={styles.settingTitle}>{examsCompleteAllLabel}</Text>
-                  <Text style={styles.settingDescription}>
-                    Mark every lesson as completed
-                  </Text>
+                  <Text style={styles.settingDescription}>Mark every lesson as completed</Text>
                 </View>
                 <Pressable
                   onPress={handleCompleteAllExercises}
                   style={({ pressed }) => ({
-                    paddingHorizontal: 14,
-                    paddingVertical: 8,
+                    paddingHorizontal: 12,
+                    paddingVertical: 6,
                     borderRadius: 8,
                     backgroundColor: pressed ? derivedColors.primaryContainer : derivedColors.primary,
                   })}
                 >
-                  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 11, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
+                  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 10, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
                     Run
                   </Text>
                 </Pressable>
               </View>
-              <View style={[styles.cardRow, { borderTopWidth: 1, borderTopColor: colors.surfaceContainerHighest }]}>
+              <View style={styles.cardDivider} />
+              <View style={styles.cardRow}>
                 <View style={styles.flexChild}>
                   <Text style={styles.settingTitle}>Reset All Progress</Text>
-                  <Text style={styles.settingDescription}>
-                    Clear all completed lessons and courses
-                  </Text>
+                  <Text style={styles.settingDescription}>Clear all completed lessons and courses</Text>
                 </View>
                 <Pressable
                   onPress={handleResetAllProgress}
                   style={({ pressed }) => ({
-                    paddingHorizontal: 14,
-                    paddingVertical: 8,
+                    paddingHorizontal: 12,
+                    paddingVertical: 6,
                     borderRadius: 8,
                     backgroundColor: pressed ? colors.errorContainer : colors.error,
                   })}
                 >
-                  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 11, fontWeight: "700", color: colors.onError, textTransform: "uppercase" }}>
+                  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 10, fontWeight: "700", color: colors.onError, textTransform: "uppercase" }}>
                     Reset
                   </Text>
                 </Pressable>
               </View>
-              <View style={[styles.cardRow, { borderTopWidth: 1, borderTopColor: colors.surfaceContainerHighest, flexWrap: "wrap", gap: 8 }]}>
+              <View style={styles.cardDivider} />
+              <View style={[styles.cardRow, { flexWrap: "wrap", gap: 8 }]}>
                 <View style={{ width: "100%", marginBottom: 4 }}>
                   <Text style={styles.settingTitle}>Set Streak Count</Text>
                 </View>
                 <TextInput
-                  style={[styles.nameInput, { color: derivedColors.primary, borderColor: colors.outlineVariant, flex: 0, minWidth: 80, maxWidth: 100 }]}
+                  style={[styles.nameInput, { color: derivedColors.primary, borderColor: colors.outlineVariant, flex: 0, minWidth: 72, maxWidth: 90 }]}
                   value={debugStreakCount}
                   onChangeText={setDebugStreakCount}
                   keyboardType="number-pad"
@@ -704,34 +686,33 @@ export default function Settings() {
                 <Pressable
                   onPress={handleSetStreak}
                   style={({ pressed }) => ({
-                    paddingHorizontal: 14,
-                    paddingVertical: 8,
+                    paddingHorizontal: 12,
+                    paddingVertical: 6,
                     borderRadius: 8,
                     backgroundColor: pressed ? derivedColors.primaryContainer : derivedColors.primary,
                   })}
                 >
-                  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 11, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
+                  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 10, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
                     Set
                   </Text>
                 </Pressable>
               </View>
-              <View style={[styles.cardRow, { borderTopWidth: 1, borderTopColor: colors.surfaceContainerHighest, flexWrap: "wrap", gap: 8 }]}>
-                <View style={{ width: "100%", marginBottom: 4 }}>
+              <View style={styles.cardDivider} />
+              <View style={styles.cardRow}>
+                <View style={styles.flexChild}>
                   <Text style={styles.settingTitle}>Error Logs</Text>
-                  <Text style={styles.settingDescription}>
-                    View recent error logs from the app
-                  </Text>
+                  <Text style={styles.settingDescription}>View recent error logs from the app</Text>
                 </View>
                 <Pressable
                   onPress={() => router.push("/settings/error-logs")}
                   style={({ pressed }) => ({
-                    paddingHorizontal: 14,
-                    paddingVertical: 8,
+                    paddingHorizontal: 12,
+                    paddingVertical: 6,
                     borderRadius: 8,
                     backgroundColor: pressed ? derivedColors.primaryContainer : derivedColors.primary,
                   })}
                 >
-                  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 11, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
+                  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 10, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
                     View Logs
                   </Text>
                 </Pressable>

@@ -1,9 +1,9 @@
-export interface ValidationRule {
-  type: "functionCall";
-  name: string;
-  exactArgs?: number;
-  minArgs?: number;
-}
+export type ValidationRule =
+  | { type: "functionCall"; name: string; exactArgs?: number; minArgs?: number }
+  | { type: "functionExists"; name: string }
+  | { type: "noError" }
+  | { type: "canvasSize"; width: number; height: number }
+  | { type: "pixelMatch"; x: number; y: number; expected: [number, number, number]; tolerance?: number };
 
 export interface Lesson {
   id: string;
@@ -23,5 +23,3 @@ export interface Course {
   description: string;
   lessons: Lesson[];
 }
-
-
