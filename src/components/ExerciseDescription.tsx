@@ -8,7 +8,7 @@ import { P5_FUNCTION_NAMES, P5_SYMBOLS_BY_NAME } from "../data/p5Symbols";
 import { useModuleProgress } from "../hooks/useModuleProgress";
 
 const SYMBOL_PATTERN = new RegExp(
-  `\\b(${P5_FUNCTION_NAMES.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b`,
+  `\\b(${P5_FUNCTION_NAMES.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b(?=\\()`,
   "g"
 );
 
@@ -17,6 +17,7 @@ interface ExerciseDescriptionProps {
   moduleName: string;
   instruction: string;
   exerciseNumber?: number;
+  course?: string;
 }
 
 function parseInstruction(
@@ -27,6 +28,7 @@ function parseInstruction(
   const parts: { text: string; isSymbol: boolean }[] = [];
   let lastIndex = 0;
   let match: RegExpExecArray | null;
+  const seenSymbols = new Set<string>();
 
   SYMBOL_PATTERN.lastIndex = 0;
 
@@ -34,7 +36,9 @@ function parseInstruction(
     if (match.index > lastIndex) {
       parts.push({ text: text.slice(lastIndex, match.index), isSymbol: false });
     }
-    parts.push({ text: match[0], isSymbol: true });
+    const isFirst = !seenSymbols.has(match[0]);
+    seenSymbols.add(match[0]);
+    parts.push({ text: match[0], isSymbol: isFirst });
     lastIndex = match.index + match[0].length;
   }
 
@@ -50,6 +54,7 @@ export default function ExerciseDescription({
   moduleName,
   instruction,
   exerciseNumber = 1,
+  course,
 }: ExerciseDescriptionProps) {
   const [expanded, setExpanded] = useState(true);
   const router = useRouter();
@@ -65,7 +70,7 @@ export default function ExerciseDescription({
       ).slice(0, 10);
 
   const handleSymbolPress = (name: string) => {
-    const lockedCourse = getLockedCourseName(P5_SYMBOLS_BY_NAME[name]?.module ?? "");
+    const lockedCourse = getLockedCourseName(P5_SYMBOLS_BY_NAME[name]?.module ?? "", course);
     if (lockedCourse) {
       Alert.alert(
         "Module Locked",

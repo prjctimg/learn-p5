@@ -1,28 +1,25 @@
-import { useRef, useEffect, useReducer, useMemo } from "react";
-import { View, Text, Pressable, ScrollView, StyleSheet } from "react-native";
+import { useState, useRef, useEffect, useReducer, useMemo, useCallback } from "react";
+import { View, Text, Pressable, StyleSheet, Keyboard } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { WebView } from "react-native-webview";
 import { useDrawerContext } from "../../../contexts/DrawerContext";
 import { useThemeContext } from "../../../components/ThemeProvider";
 import { Colors } from "../../../constants/Colors";
-import ExerciseDescription from "../../../components/ExerciseDescription";
-import CodeEditor, { type CodeEditorHandle } from "../../../components/CodeEditor";
 import ProgrammingKeyboard from "../../../components/ProgrammingKeyboard";
-import { buildSketchHTML, DEFAULT_SKETCH } from "../../../utils/sketchTemplate";
-import { loadExercise } from "../../../utils/courseLoader";
+import { loadExercise, loadCourse } from "../../../utils/courseLoader";
 import { Lesson } from "../../../data/types";
-import { P5_FUNCTION_NAMES } from "../../../data/p5Symbols";
+import { P5_FUNCTION_NAMES, ONCE_ONLY_P5_FUNCTIONS } from "../../../data/p5Symbols";
+import { getExerciseHtml } from "../../../utils/editor/exerciseHtml";
 
 interface ExerciseState {
   exercise: Lesson | null;
   loading: boolean;
   code: string;
-  solutionHTML: string;
-  userHTML: string;
   isRunning: boolean;
-  showSolution: boolean;
+  completed: boolean;
 }
 
 type ExerciseAction =
@@ -31,58 +28,76 @@ type ExerciseAction =
   | { type: "SET_CODE"; code: string }
   | { type: "APPEND_CODE"; text: string; cursorOffset?: number }
   | { type: "RUN_START" }
-  | { type: "RUN_DONE" };
+  | { type: "RUN_DONE" }
+  | { type: "EXERCISE_COMPLETE" };
 
 function exerciseReducer(state: ExerciseState, action: ExerciseAction): ExerciseState {
   switch (action.type) {
     case "LOAD_START":
       return { ...state, loading: true };
-    case "LOAD_DONE":
+    case "LOAD_DONE": {
+      const ex = action.exercise;
+      let code = ex?.startingCode ?? "";
+      const hasSetup = /function\s+setup\s*\(/.test(code);
+      const hasDraw = /function\s+draw\s*\(/.test(code);
+      if (!hasSetup || !hasDraw) {
+        code = 'function setup() {\n  createCanvas(400, 400);\n}\n\nfunction draw() {\n  background(20);\n}\n';
+      }
       return {
         ...state,
         loading: false,
-        exercise: action.exercise,
-        code: action.exercise?.startingCode ?? state.code,
+        exercise: ex ? { ...ex, startingCode: code } : null,
+        code,
       };
+    }
     case "SET_CODE":
       return { ...state, code: action.code };
     case "APPEND_CODE":
       return { ...state, code: state.code + action.text };
     case "RUN_START":
-      return {
-        ...state,
-        isRunning: true,
-        userHTML: buildSketchHTML(state.code),
-        solutionHTML: state.exercise?.solution ? buildSketchHTML(state.exercise.solution) : "",
-        showSolution: !!state.exercise?.solution,
-      };
+      return { ...state, isRunning: true };
     case "RUN_DONE":
       return { ...state, isRunning: false };
+    case "EXERCISE_COMPLETE":
+      return { ...state, completed: true };
     default:
       return state;
   }
 }
-
-const INITIAL_STATE: ExerciseState = {
-  exercise: null,
-  loading: true,
-  code: DEFAULT_SKETCH,
-  solutionHTML: "",
-  userHTML: "",
-  isRunning: false,
-  showSolution: false,
-};
 
 export default function Exercise() {
   const { course, id } = useLocalSearchParams<{ course: string; id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { openDrawer } = useDrawerContext();
-  const [state, dispatch] = useReducer(exerciseReducer, INITIAL_STATE);
-  const runCounter = useRef(0);
+  const [state, dispatch] = useReducer(exerciseReducer, {
+    exercise: null,
+    loading: true,
+    code: "",
+    isRunning: false,
+    completed: false,
+  });
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
-  const codeEditorRef = useRef<CodeEditorHandle>(null);
+  const webViewRef = useRef<WebView>(null);
+  const [webViewReady, setWebViewReady] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(true);
+  const [systemKeyboardVisible, setSystemKeyboardVisible] = useState(false);
+  const [codeBackground, setCodeBackground] = useState<string | undefined>(undefined);
+
+  const exerciseHtml = useMemo(() => {
+    if (!state.exercise) return null;
+    return getExerciseHtml({
+      title: state.exercise.title,
+      moduleName: state.exercise.module,
+      instruction: state.exercise.instruction,
+      exerciseNumber: parseInt(id?.replace("exercise-", "") ?? "1", 10),
+      startingCode: state.exercise.startingCode ?? "",
+      solution: state.exercise.solution ?? "",
+      colorScheme: colorScheme === "dark" ? "dark" : "light",
+      codeBackground,
+    });
+  }, [state.exercise, colorScheme, id, codeBackground]);
 
   const styles = useMemo(
     () =>
@@ -162,54 +177,48 @@ export default function Exercise() {
         spacer: {
           flex: 1,
         },
-        scrollArea: {
+        webview: {
           flex: 1,
         },
-        scrollContent: {
-          paddingBottom: 24,
-        },
-        previewSection: {
-          marginTop: 16,
-          paddingHorizontal: 16,
-        },
-        previewLabel: {
-          fontFamily: "JetBrainsMono",
-          fontSize: 11,
-          fontWeight: "700",
-          textTransform: "uppercase",
-          letterSpacing: 1,
-          marginBottom: 8,
-        },
-        previewBox: {
-          height: 180,
-          backgroundColor: "#000000",
-          borderRadius: 8,
-          overflow: "hidden",
-        },
-        solutionPlaceholder: {
-          width: 40,
-          height: 40,
-          borderRadius: 9999,
-          backgroundColor: colors.primaryContainer,
-          opacity: 0.5,
-          alignSelf: "center",
-          marginTop: 70,
-        },
-        outputPlaceholder: {
-          width: 40,
-          height: 40,
+        runButton: {
+          position: "absolute",
+          right: 24,
+          bottom: 260,
+          width: 56,
+          height: 56,
           borderRadius: 9999,
           backgroundColor: colors.primary,
-          opacity: 0.5,
-          alignSelf: "center",
-          marginTop: 70,
+          alignItems: "center",
+          justifyContent: "center",
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 12 },
+          shadowOpacity: 0.25,
+          shadowRadius: 25,
+          elevation: 12,
         },
-        editorWrapper: {
-          height: 280,
-          marginTop: 16,
-          marginHorizontal: 16,
-          borderRadius: 8,
-          overflow: "hidden",
+        runButtonPressed: {
+          transform: [{ scale: 0.9 }],
+        },
+        showKeyboardFab: {
+          position: "absolute",
+          left: 24,
+          bottom: 32,
+          width: 48,
+          height: 48,
+          borderRadius: 9999,
+          backgroundColor: colors.surfaceContainerHigh,
+          alignItems: "center",
+          justifyContent: "center",
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 8 },
+          shadowOpacity: 0.2,
+          shadowRadius: 16,
+          elevation: 8,
+          borderWidth: 1,
+          borderColor: colors.outlineVariant,
+        },
+        showKeyboardFabPressed: {
+          transform: [{ scale: 0.9 }],
         },
       }),
     [colorScheme]
@@ -225,29 +234,168 @@ export default function Exercise() {
     load();
   }, [course, id]);
 
+  useEffect(() => {
+    if (webViewReady && webViewRef.current) {
+      webViewRef.current.postMessage(
+        JSON.stringify({ type: "setCode", code: state.code })
+      );
+    }
+  }, [state.code, webViewReady]);
+
+  const handleMessage = useCallback(
+    (event: { nativeEvent: { data: string } }) => {
+      try {
+        const msg = JSON.parse(event.nativeEvent.data);
+        switch (msg.type) {
+          case "codeChange":
+            dispatch({ type: "SET_CODE", code: msg.code });
+            break;
+          case "ready":
+            setWebViewReady(true);
+            break;
+          case "openRef":
+            router.push(`/ref?symbol=${msg.symbol}`);
+            break;
+          case "exerciseComplete":
+            dispatch({ type: "EXERCISE_COMPLETE" });
+            break;
+          case "goToNextLesson":
+            loadCourse(course).then((courseData) => {
+              if (!courseData) return;
+              const currentIndex = courseData.lessons.findIndex((l) => l.id === id);
+              if (currentIndex >= 0 && currentIndex < courseData.lessons.length - 1) {
+                const nextLesson = courseData.lessons[currentIndex + 1];
+                router.replace(`/learn/${course}/${nextLesson.id}`);
+              } else {
+                router.replace(`/learn/${course}`);
+              }
+            });
+            break;
+        }
+      } catch {}
+    },
+    [router, course, id]
+  );
+
   const handleRun = () => {
     if (!state.exercise) return;
-    runCounter.current += 1;
-    const counter = runCounter.current;
 
     dispatch({ type: "RUN_START" });
 
-    setTimeout(() => {
-      if (counter === runCounter.current) {
-        dispatch({ type: "RUN_DONE" });
-      }
-    }, 2000);
+    if (webViewRef.current && webViewReady) {
+      webViewRef.current.postMessage(
+        JSON.stringify({ type: "runSketch" })
+      );
+    }
+
+    dispatch({ type: "RUN_DONE" });
   };
 
+  const pendingInserts = useRef<Array<{ text: string; cursorOffset?: number }>>([]);
+
   const handleInsert = (text: string, cursorOffset?: number) => {
-    codeEditorRef.current?.insertText(text, cursorOffset);
+    if (webViewRef.current && webViewReady) {
+      webViewRef.current.postMessage(
+        JSON.stringify({ type: "insert", text, cursorOffset })
+      );
+    } else {
+      pendingInserts.current.push({ text, cursorOffset });
+    }
   };
+
+  useEffect(() => {
+    if (webViewReady && pendingInserts.current.length > 0) {
+      for (const item of pendingInserts.current) {
+        if (webViewRef.current) {
+          webViewRef.current.postMessage(
+            JSON.stringify({ type: "insert", text: item.text, cursorOffset: item.cursorOffset })
+          );
+        }
+      }
+      pendingInserts.current = [];
+    }
+  }, [webViewReady]);
+
+  const handleToggleKeyboard = useCallback(() => {
+    setKeyboardVisible((prev) => !prev);
+  }, []);
+
+  useEffect(() => {
+    if (!keyboardVisible && webViewRef.current && webViewReady) {
+      webViewRef.current.postMessage(JSON.stringify({ type: "focus" }));
+    }
+  }, [keyboardVisible, webViewReady]);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener("keyboardDidShow", () => {
+      setSystemKeyboardVisible(true);
+    });
+    const hideSub = Keyboard.addListener("keyboardDidHide", () => {
+      setSystemKeyboardVisible(false);
+    });
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    AsyncStorage.getItem("setting_codeBackground").then((val) => {
+      if (val) setCodeBackground(val);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!state.completed || !state.exercise) return;
+
+    const key = `${course}/${state.exercise.id}`;
+
+    AsyncStorage.getItem("completedLessons").then((val) => {
+      const arr: string[] = val ? JSON.parse(val) : [];
+      if (!arr.includes(key)) {
+        arr.push(key);
+        AsyncStorage.setItem("completedLessons", JSON.stringify(arr));
+      }
+    });
+
+    if (webViewRef.current && webViewReady) {
+      webViewRef.current.postMessage(
+        JSON.stringify({ type: "showCompletion" })
+      );
+    }
+
+    loadCourse(course).then((courseData) => {
+      if (!courseData) return;
+      AsyncStorage.getItem("completedLessons").then((val) => {
+        const completed: string[] = val ? JSON.parse(val) : [];
+        const allDone = courseData.lessons.every((l) =>
+          completed.includes(`${course}/${l.id}`)
+        );
+        if (allDone) {
+          AsyncStorage.getItem("completedCourses").then((prev) => {
+            const arr: string[] = prev ? JSON.parse(prev) : [];
+            if (!arr.includes(course)) {
+              arr.push(course);
+              AsyncStorage.setItem("completedCourses", JSON.stringify(arr));
+            }
+          });
+        }
+      });
+    });
+  }, [state.completed, state.exercise, course, webViewReady]);
 
   const exerciseSymbols = useMemo(() => {
     if (!state.exercise) return [];
     const code = (state.exercise.startingCode + " " + (state.exercise.solution ?? "")).toLowerCase();
     return P5_FUNCTION_NAMES.filter((fn) => code.includes(fn.toLowerCase()));
   }, [state.exercise]);
+
+  const usedFunctions = useMemo(() => {
+    return ONCE_ONLY_P5_FUNCTIONS.filter((fn) => {
+      const re = new RegExp(`function\\s+${fn}\\s*\\(`);
+      return re.test(state.code);
+    });
+  }, [state.code]);
 
   if (state.loading) {
     return (
@@ -307,75 +455,61 @@ export default function Exercise() {
         <View style={styles.spacer} />
       </View>
 
-      <ScrollView
-        style={styles.scrollArea}
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-      >
-        <ExerciseDescription
-          title={state.exercise.title}
-          moduleName={state.exercise.module}
-          instruction={state.exercise.instruction}
-          exerciseNumber={parseInt(id?.replace("exercise-", "") ?? "1", 10)}
+      {exerciseHtml && (
+        <WebView
+          ref={webViewRef}
+          source={{ html: exerciseHtml }}
+          style={styles.webview}
+          onMessage={handleMessage}
+          javaScriptEnabled
+          domStorageEnabled
+          originWhitelist={["*"]}
+          scrollEnabled={true}
+          bounces={false}
         />
+      )}
 
-        <View style={styles.previewSection}>
-          <Text style={styles.previewLabel}>Your Output</Text>
-          <View style={styles.previewBox}>
-            {state.userHTML ? (
-              <WebView
-                source={{ html: state.userHTML }}
-                style={{ flex: 1, width: "100%" }}
-                scrollEnabled={false}
-                bounces={false}
-                javaScriptEnabled
-                domStorageEnabled
-                originWhitelist={["*"]}
-                onError={(_e) => console.warn("User WebView error")}
-              />
-            ) : (
-              <View style={styles.outputPlaceholder} />
-            )}
-          </View>
-        </View>
+      <Pressable
+        onPress={handleRun}
+        disabled={state.isRunning}
+        style={({ pressed }) => [
+          styles.runButton,
+          pressed && styles.runButtonPressed,
+        ]}
+        accessibilityRole="button"
+        accessibilityLabel="Run sketch"
+        accessibilityState={{ disabled: state.isRunning }}
+      >
+        <MaterialCommunityIcons
+          name={state.isRunning ? "reload" : "play"}
+          size={28}
+          color="#FFFFFF"
+        />
+      </Pressable>
 
-        {state.showSolution && (
-          <View style={styles.previewSection}>
-            <Text style={styles.previewLabel}>Target Solution</Text>
-            <View style={styles.previewBox}>
-              {state.solutionHTML ? (
-                <WebView
-                  source={{ html: state.solutionHTML }}
-                  style={{ flex: 1, width: "100%" }}
-                  scrollEnabled={false}
-                  bounces={false}
-                  javaScriptEnabled
-                  domStorageEnabled
-                  originWhitelist={["*"]}
-                  onError={(_e) => console.warn("Solution WebView error")}
-                />
-              ) : (
-                <View style={styles.solutionPlaceholder} />
-              )}
-            </View>
-          </View>
-        )}
+      {keyboardVisible && (
+        <ProgrammingKeyboard
+          onInsert={handleInsert}
+          exerciseSymbols={exerciseSymbols}
+          onToggleKeyboard={handleToggleKeyboard}
+          keyboardVisible={keyboardVisible}
+          usedFunctions={usedFunctions}
+        />
+      )}
 
-        <View style={styles.editorWrapper}>
-          <CodeEditor
-            ref={codeEditorRef}
-            code={state.code}
-            onChange={(c) => dispatch({ type: "SET_CODE", code: c })}
-            onRun={handleRun}
-            isRunning={state.isRunning}
-          />
-        </View>
-      </ScrollView>
-
-      <ProgrammingKeyboard
-        onInsert={handleInsert}
-        exerciseSymbols={exerciseSymbols}
-      />
+      {!keyboardVisible && !systemKeyboardVisible && (
+        <Pressable
+          onPress={handleToggleKeyboard}
+          style={({ pressed }) => [
+            styles.showKeyboardFab,
+            pressed && styles.showKeyboardFabPressed,
+          ]}
+          accessibilityRole="button"
+          accessibilityLabel="Show custom keyboard"
+        >
+          <MaterialCommunityIcons name="keyboard-variant" size={24} color="#FFFFFF" />
+        </Pressable>
+      )}
     </View>
   );
 }

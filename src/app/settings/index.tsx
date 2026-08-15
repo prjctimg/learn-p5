@@ -14,6 +14,7 @@ const SETTINGS_KEYS = {
   notificationMinute: "setting_notificationMinute",
   showDrawerFab: "setting_showDrawerFab",
   codeFontSize: "setting_codeFontSize",
+  codeBackground: "setting_codeBackground",
 };
 
 const createStyles = (colors: Record<string, string>) =>
@@ -52,6 +53,7 @@ export default function Settings() {
   const [notificationMinute, setNotificationMinute] = useState(0);
   const [showDrawerFab, setShowDrawerFab] = useState(false);
   const [codeFontSize, setCodeFontSize] = useState(33);
+  const [codeBackground, setCodeBackgroundState] = useState<string>("auto");
 
   useEffect(() => {
     AsyncStorage.multiGet([
@@ -61,13 +63,15 @@ export default function Settings() {
       SETTINGS_KEYS.notificationMinute,
       SETTINGS_KEYS.showDrawerFab,
       SETTINGS_KEYS.codeFontSize,
-    ]).then(([reminder, snippet, hour, minute, fab, fontSize]) => {
+      SETTINGS_KEYS.codeBackground,
+    ]).then(([reminder, snippet, hour, minute, fab, fontSize, bg]) => {
       setDailyReminder(reminder[1] === "true");
       setSnippetAlternatives(snippet[1] === "true");
       if (hour[1]) setNotificationHour(parseInt(hour[1], 10));
       if (minute[1]) setNotificationMinute(parseInt(minute[1], 10));
       setShowDrawerFab(fab[1] === "true");
       if (fontSize[1]) setCodeFontSize(parseInt(fontSize[1], 10));
+      if (bg[1]) setCodeBackgroundState(bg[1]);
     });
   }, []);
 
@@ -123,6 +127,11 @@ export default function Settings() {
     const newSize = Math.min(48, Math.max(14, codeFontSize + delta));
     setCodeFontSize(newSize);
     await AsyncStorage.setItem(SETTINGS_KEYS.codeFontSize, newSize.toString());
+  };
+
+  const changeCodeBackground = async (value: string) => {
+    setCodeBackgroundState(value);
+    await AsyncStorage.setItem(SETTINGS_KEYS.codeBackground, value);
   };
 
   return (
@@ -237,6 +246,55 @@ export default function Settings() {
               >
                 <Text style={{ fontSize: 18, fontWeight: "700", color: colors.onSurface }}>+</Text>
               </Pressable>
+            </View>
+          </View>
+
+          <View style={[styles.cardRow, { borderTopWidth: 1, borderTopColor: colors.surfaceContainerHighest }]}>
+            <View style={styles.flexChild}>
+              <Text style={styles.settingTitle}>Code Background</Text>
+              <Text style={styles.settingDescription}>
+                {codeBackground === "auto"
+                  ? "Follow system theme"
+                  : codeBackground === "#FFFFFF"
+                    ? "Light background"
+                    : "Dark background"}
+              </Text>
+            </View>
+            <View style={{ flexDirection: "row", gap: 6 }}>
+              {["auto", "#FFFFFF", "#0D0E12"].map((opt) => (
+                <Pressable
+                  key={opt}
+                  onPress={() => changeCodeBackground(opt)}
+                  style={({ pressed }) => ({
+                    paddingHorizontal: 12,
+                    paddingVertical: 6,
+                    borderRadius: 6,
+                    backgroundColor:
+                      codeBackground === opt
+                        ? colors.primary
+                        : pressed
+                          ? colors.primaryContainer + "33"
+                          : colors.surfaceContainerHigh,
+                  })}
+                  accessibilityRole="button"
+                  accessibilityLabel={
+                    opt === "auto" ? "Auto" : opt === "#FFFFFF" ? "Light" : "Dark"
+                  }
+                >
+                  <Text
+                    style={{
+                      fontFamily: "JetBrainsMono",
+                      fontSize: 11,
+                      fontWeight: "700",
+                      textTransform: "uppercase",
+                      letterSpacing: 0.5,
+                      color: codeBackground === opt ? colors.onPrimary : colors.onSurfaceVariant,
+                    }}
+                  >
+                    {opt === "auto" ? "Auto" : opt === "#FFFFFF" ? "Light" : "Dark"}
+                  </Text>
+                </Pressable>
+              ))}
             </View>
           </View>
         </View>

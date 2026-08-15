@@ -123,6 +123,10 @@ function handleMessage(data) {
         });
         view.focus();
       }
+    } else if (msg.type === 'focus') {
+      if (view) {
+        view.focus();
+      }
     } else if (msg.type === 'setFontSize') {
       var scroller = view?.dom.querySelector('.cm-scroller');
       if (scroller) {

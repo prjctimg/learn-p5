@@ -16,6 +16,7 @@ interface CodeEditorProps {
 
 export interface CodeEditorHandle {
   insertText: (text: string, cursorOffset?: number) => void;
+  focus: () => void;
 }
 
 const CODE_FONT_SIZE_KEY = "setting_codeFontSize";
@@ -73,6 +74,13 @@ const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
           if (webViewRef.current && webViewReady) {
             webViewRef.current.postMessage(
               JSON.stringify({ type: "insert", text, cursorOffset })
+            );
+          }
+        },
+        focus: () => {
+          if (webViewRef.current && webViewReady) {
+            webViewRef.current.postMessage(
+              JSON.stringify({ type: "focus" })
             );
           }
         },

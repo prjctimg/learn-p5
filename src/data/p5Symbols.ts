@@ -230,3 +230,26 @@ for (const sym of P5_SYMBOLS) {
 }
 
 export const P5_FUNCTION_NAMES = P5_SYMBOLS.map((s) => s.name);
+
+export const ONCE_ONLY_P5_FUNCTIONS = [
+  "preload",
+  "setup",
+  "draw",
+  "mouseMoved",
+  "mouseDragged",
+  "mousePressed",
+  "mouseReleased",
+  "mouseClicked",
+  "doubleClicked",
+  "mouseWheel",
+  "keyPressed",
+  "keyReleased",
+  "keyTyped",
+  "touchStarted",
+  "touchMoved",
+  "touchEnded",
+  "deviceMoved",
+  "deviceTurned",
+  "deviceShaken",
+  "windowResized",
+];

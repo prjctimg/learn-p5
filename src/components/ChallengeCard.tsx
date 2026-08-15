@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet } from "react-native";
 import Svg, { Path } from "react-native-svg";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useThemeContext } from "./ThemeProvider";
 import { Colors } from "../constants/Colors";
 import Button from "./Button";
@@ -11,41 +12,49 @@ interface ChallengeCardProps {
   title: string;
   moduleName: string;
   description: string;
-  onContinue: () => void;
+  locked?: boolean;
+  onContinue?: () => void;
 }
 
 export default function ChallengeCard({
   title,
   moduleName,
   description,
+  locked = false,
   onContinue,
 }: ChallengeCardProps) {
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
   return (
-    <View style={[styles.card, { backgroundColor: colors.surfaceDim }]}>
+    <View style={[styles.card, { backgroundColor: colors.surfaceDim, opacity: locked ? 0.5 : 1 }]}>
       <View style={[styles.iconContainer, { backgroundColor: colors.primary + "1A" }]}>
-        <Svg width={48} height={48} viewBox="0 0 28 28" fill="none">
-          <Path d={asteriskPath} fill={colors.primary} />
-        </Svg>
+        {locked ? (
+          <MaterialCommunityIcons name="lock" size={28} color={colors.textSecondary} />
+        ) : (
+          <Svg width={48} height={48} viewBox="0 0 28 28" fill="none">
+            <Path d={asteriskPath} fill={colors.primary} />
+          </Svg>
+        )}
       </View>
 
       <View style={styles.content}>
-        <Text style={[styles.title, { color: colors.onSurface }]}>
+        <Text style={[styles.title, { color: locked ? colors.textSecondary : colors.onSurface }]}>
           {title}
         </Text>
         <Text style={[styles.moduleName, { color: colors.primary }]}>
           {moduleName}
         </Text>
         <Text style={[styles.description, { color: colors.textSecondary }]}>
-          {description}
+          {locked ? "Complete the previous lesson to unlock this one." : description}
         </Text>
       </View>
 
-      <View style={styles.buttonContainer}>
-        <Button title="Continue" onPress={onContinue} variant="primary" />
-      </View>
+      {!locked && onContinue && (
+        <View style={styles.buttonContainer}>
+          <Button title="Continue" onPress={onContinue} variant="primary" />
+        </View>
+      )}
     </View>
   );
 }

@@ -19,13 +19,13 @@ const MODULE_GROUPS = P5_SYMBOLS.reduce<{ module: string; symbols: P5Symbol[] }[
 }, []);
 
 const SYMBOL_PATTERN = new RegExp(
-  `\\b(${P5_FUNCTION_NAMES.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b`,
+  `\\b(${P5_FUNCTION_NAMES.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b(?=\\()`,
   "g"
 );
 
 function highlightSyntax(code: string): { text: string; color: string }[] {
   const KEYWORD_RE = /\b(function|if|else|for|while|return|let|const|var|new|this|class)\b/g;
-  const P5_RE = new RegExp(`\\b(${P5_FUNCTION_NAMES.join("|")})\\b`, "g");
+  const P5_RE = new RegExp(`\\b(${P5_FUNCTION_NAMES.join("|")})\\b(?=\\()`, "g");
   const NUMBER_RE = /\b\d+(\.\d+)?\b/g;
   const STRING_RE = /("[^"]*"|'[^']*'|`[^']*`)/g;
   const COMMENT_RE = /(\/\/.*)/g;
@@ -73,6 +73,7 @@ function parseDescription(
   const parts: React.ReactNode[] = [];
   let lastIndex = 0;
   let match: RegExpExecArray | null;
+  const seenSymbols = new Set<string>();
 
   SYMBOL_PATTERN.lastIndex = 0;
 
@@ -85,15 +86,25 @@ function parseDescription(
       );
     }
     const symbolName = match[0];
-    parts.push(
-      <Text
-        key={`sym-${match.index}`}
-        style={{ color: colors.primary, fontWeight: "700", textDecorationLine: "underline" }}
-        onPress={() => onSymbolPress(symbolName)}
-      >
-        {symbolName}
-      </Text>
-    );
+    const isFirst = !seenSymbols.has(symbolName);
+    seenSymbols.add(symbolName);
+    if (isFirst) {
+      parts.push(
+        <Text
+          key={`sym-${match.index}`}
+          style={{ color: colors.primary, fontWeight: "700", textDecorationLine: "underline" }}
+          onPress={() => onSymbolPress(symbolName)}
+        >
+          {symbolName}
+        </Text>
+      );
+    } else {
+      parts.push(
+        <Text key={`sym-${match.index}`} style={{ color: colors.textSecondary }}>
+          {symbolName}
+        </Text>
+      );
+    }
     lastIndex = match.index + match[0].length;
   }
 

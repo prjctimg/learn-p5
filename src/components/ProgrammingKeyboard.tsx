@@ -8,6 +8,7 @@ interface P5FunctionDef {
   label: string;
   insert: string;
   paramTypes: ("string" | "number" | "array" | "color" | "boolean")[];
+  disabled?: boolean;
 }
 
 const p5Functions: P5FunctionDef[] = [
@@ -48,9 +49,11 @@ interface ProgrammingKeyboardProps {
   onInsert: (text: string, cursorOffset?: number) => void;
   exerciseSymbols?: string[];
   onToggleKeyboard?: () => void;
+  keyboardVisible?: boolean;
+  usedFunctions?: string[];
 }
 
-export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], onToggleKeyboard }: ProgrammingKeyboardProps) {
+export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], onToggleKeyboard, keyboardVisible = true, usedFunctions = [] }: ProgrammingKeyboardProps) {
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
   const [hintType, setHintType] = useState<"string" | "array" | null>(null);
@@ -102,7 +105,7 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
           accessibilityRole="button"
           accessibilityLabel="Toggle system keyboard"
         >
-          <MaterialCommunityIcons name="keyboard-outline" size={20} color="#ED225D" />
+          <MaterialCommunityIcons name={keyboardVisible ? "keyboard-outline" : "keyboard-variant"} size={20} color="#ED225D" />
         </Pressable>
         {pairedSymbols.map((pair) => {
           const hinted = pair.hintTrigger && pair.hintTrigger === hintType;
@@ -167,22 +170,33 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
       )}
 
       <View style={styles.functionsContainer}>
-        {p5Functions.map((fn) => (
-          <Pressable
-            key={fn.label}
-            onPress={() => handleFunctionPress(fn)}
-            style={({ pressed }) => [
-              styles.functionKey,
-              { backgroundColor: pressed ? colors.primaryContainer : colors.surfaceContainerHigh },
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel={fn.label}
-          >
-            <Text style={[styles.functionKeyText, { color: colors.primaryFixedDim }]}>
-              {fn.label}
-            </Text>
-          </Pressable>
-        ))}
+        {p5Functions.map((fn) => {
+          const isDisabled = fn.disabled || usedFunctions.includes(fn.label);
+          return (
+            <Pressable
+              key={fn.label}
+              onPress={isDisabled ? undefined : () => handleFunctionPress(fn)}
+              disabled={isDisabled}
+              style={({ pressed }) => [
+                styles.functionKey,
+                {
+                  backgroundColor: isDisabled
+                    ? colors.surfaceContainerHigh
+                    : pressed
+                      ? colors.primaryContainer
+                      : colors.surfaceContainerHigh,
+                  opacity: isDisabled ? 0.4 : 1,
+                },
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel={fn.label}
+            >
+              <Text style={[styles.functionKeyText, { color: isDisabled ? colors.onSurfaceVariant : colors.primaryFixedDim }]}>
+                {fn.label}
+              </Text>
+            </Pressable>
+          );
+        })}
       </View>
     </View>
   );

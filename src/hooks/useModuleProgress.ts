@@ -29,9 +29,10 @@ export function useModuleProgress() {
     return completedCourses.includes(courseSlug);
   };
 
-  const getLockedCourseName = (moduleName: string): string | null => {
+  const getLockedCourseName = (moduleName: string, currentCourseSlug?: string): string | null => {
     const courseSlug = MODULE_TO_COURSE[moduleName.toLowerCase()];
     if (!courseSlug) return null;
+    if (courseSlug === currentCourseSlug) return null;
     if (completedCourses.includes(courseSlug)) return null;
     return courseSlug;
   };

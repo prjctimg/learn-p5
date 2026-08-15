@@ -1,7 +1,7 @@
 {
   "name": "learn-p5",
   "main": "expo-router/entry",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "scripts": {
     "postinstall": "npm run gen-version",
     "start": "npm run gen-version && expo start",
