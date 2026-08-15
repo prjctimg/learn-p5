@@ -50,9 +50,11 @@ function p5CompletionSource(context) {
           type: 'function',
           detail: 'p5.js',
           apply: function(view, completion, from, to) {
+            var rest = view.state.doc.sliceString(to, to + 2);
+            var hasParens = rest === '()';
             view.dispatch({
-              changes: { from: from, to: to, insert: name + '()' },
-              selection: { anchor: from + name.length + 1 }
+              changes: { from: from, to: to, insert: hasParens ? name : name + '()' },
+              selection: { anchor: from + (hasParens ? name.length : name.length + 1) }
             });
           }
         });

@@ -9,12 +9,16 @@ Use React Native's `StyleSheet.create()` API — **no Tailwind/NativeWind**.
 - Each component defines `const styles = StyleSheet.create({...})` at the bottom of the file.
 - For theme-aware colors, use `useThemeContext()` from `src/components/ThemeProvider.tsx` and import `Colors` from `src/constants/Colors.ts`. Resolve colors at render time: `const colors = Colors[colorScheme === "dark" ? "dark" : "light"]`.
 - For Pressable press-state styles, use the `({ pressed }) => [styles.base, pressed && styles.active]` pattern.
-- Font families: `"SpaceGrotesk"` (headings), `"Inter"` (body/label), `"JetBrainsMono"` (code).
+- Font families: `"JetBrainsMono"` (all text). Import `Fonts` from `src/constants/Fonts.ts` and `Typography` from `src/constants/Typography.ts` to use tokenized font values.
 
 ## Package Management
 
 - **Never run `npm install` on the dev machine.** Only edit `package.json` to add/change dependencies. The user handles installation separately.
 - After editing `package.json`, update `AGENTS.md` if the change introduces new conventions or build steps.
+
+## Initial Install / Asset Prefetch
+
+On first launch after install, the app prefetches assets and reloads itself using `expo-updates`'s `Updates.reloadAsync()`. This is handled in `src/app/index.tsx` and uses the `assets_prefetched` flag in AsyncStorage to run only once. The `expo-updates` package must be kept in dependencies for this to work on native platforms.
 
 ## Reference Data Generation
 

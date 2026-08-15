@@ -38,12 +38,12 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   heading: {
-    fontFamily: "SpaceGrotesk",
+    fontFamily: "JetBrainsMono",
     fontSize: 24,
     fontWeight: "700",
   },
   description: {
-    fontFamily: "Inter",
+    fontFamily: "JetBrainsMono",
     fontSize: 16,
     marginTop: 8,
     textAlign: "center",

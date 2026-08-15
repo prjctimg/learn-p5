@@ -27,7 +27,6 @@ const navItems: NavItem[] = [
   { label: "Playground", href: "/playground", icon: "code-braces" },
   { label: "Reference", href: "/ref", icon: "bookmark-outline" },
   { label: "Settings", href: "/settings", icon: "cog-outline" },
-  { label: "Support", href: "/support", icon: "help-circle-outline" },
   { label: "About", href: "/about", icon: "information-outline" },
 ];
 
@@ -41,7 +40,6 @@ export default function DrawerContent({ onClose }: DrawerContentProps) {
   const router = useRouter();
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
-
   const isActive = (route: string) =>
     pathname === route || pathname.startsWith(route + "/");
 
@@ -66,34 +64,6 @@ export default function DrawerContent({ onClose }: DrawerContentProps) {
         <Text style={[styles.tagline, { color: "rgba(255, 255, 255, 0.7)" }]}>
           I should write something catchy or dynamic here ?
         </Text>
-      </View>
-
-      <View style={styles.body}>
-        <Text style={[styles.greeting, { color: colors.onSurface }]}>
-          Hello, Coder!
-        </Text>
-        <Text style={[styles.levelText, { color: colors.textSecondary }]}>
-          Level 3 · 84% to next level
-        </Text>
-
-        <View style={[styles.progressBarBg, { backgroundColor: colors.surfaceDim }]}>
-          <View style={[styles.progressBarFill, { backgroundColor: colors.primary }]} />
-        </View>
-
-        <View style={styles.statsRow}>
-          <View style={[styles.statCard, { backgroundColor: colors.primary + "1A" }]}>
-            <Text style={[styles.statValue, { color: colors.primary }]}>3</Text>
-            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Level</Text>
-          </View>
-          <View style={[styles.statCard, { backgroundColor: colors.primary + "1A" }]}>
-            <Text style={[styles.statValue, { color: colors.primary }]}>2.4k</Text>
-            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>XP</Text>
-          </View>
-          <View style={[styles.statCard, { backgroundColor: colors.primary + "1A" }]}>
-            <Text style={[styles.statValue, { color: colors.primary }]}>7</Text>
-            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Streak</Text>
-          </View>
-        </View>
       </View>
 
       <View style={styles.navList}>
@@ -154,32 +124,6 @@ const styles = StyleSheet.create({
   tagline: {
     fontFamily: "JetBrainsMono",
     fontSize: 16,
-  },
-  body: {
-    paddingHorizontal: 24,
-    paddingTop: 24,
-    paddingBottom: 16,
-  },
-  greeting: {
-    fontFamily: "JetBrainsMono",
-    fontSize: 20,
-    fontWeight: "700",
-  },
-  levelText: {
-    fontFamily: "JetBrainsMono",
-    fontSize: 16,
-    marginTop: 4,
-  },
-  progressBarBg: {
-    height: 8,
-    borderRadius: 9999,
-    overflow: "hidden",
-    marginTop: 16,
-  },
-  progressBarFill: {
-    height: "100%",
-    width: "84%",
-    borderRadius: 9999,
   },
   statsRow: {
     flexDirection: "row",

@@ -41,8 +41,7 @@ function getRandomBrandColor(): number[] {
 }
 
 function buildProcessingHtml(isDark: boolean, brandColor: number[]): string {
-  const bg = isDark ? "20" : "255";
-  return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><style>*{margin:0;padding:0;box-sizing:border-box}html,body{width:100%;height:100%;overflow:hidden;background:transparent;display:flex;align-items:center;justify-content:center}canvas{display:block}</style></head><body><script>' + p5Source.replace(/<\/script>/gi, '<\\/script>') + '<\/script><script>new p5(function(p){p.setup=function(){p.createCanvas(250,250)};var t=0;p.draw=function(){var u=p.width/8;p.background(' + bg + ');p.strokeCap(p.SQUARE);p.strokeWeight(1.5*u);p.stroke(' + brandColor.join(",") + ');var off=p.sin(t)*u*0.3;p.bezier(4*u,1*u,7*u+off,1*u+off,7*u,5*u,4*u,5*u);p.stroke(' + brandColor.map(function(c){return Math.max(0,c-50)}).join(",") + ');p.line(1*u,6*u,4*u,2*u);p.stroke(' + brandColor.map(function(c){return Math.min(255,c+80)}).join(",") + ');p.line(1*u,3*u,2*u,5*u);t+=0.03}})<\/script></body></html>';
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><style>*{margin:0;padding:0;box-sizing:border-box}html,body{width:100%;height:100%;overflow:hidden;background:transparent;display:flex;align-items:center;justify-content:center}canvas{display:block}</style></head><body><script>' + p5Source.replace(/<\/script>/gi, '<\\/script>') + '<\/script><script>new p5(function(p){p.setup=function(){p.createCanvas(250,250)};var t=0;p.draw=function(){p.clear();var u=p.width/8;p.strokeCap(p.SQUARE);p.strokeWeight(1.5*u);p.stroke(' + brandColor.join(",") + ');var off=p.sin(t)*u*0.3;p.bezier(4*u,1*u,7*u+off,1*u+off,7*u,5*u,4*u,5*u);p.stroke(' + brandColor.map(function (c) { return Math.max(0, c - 50) }).join(",") + ');p.line(1*u,6*u,4*u,2*u);p.stroke(' + brandColor.map(function (c) { return Math.min(255, c + 80) }).join(",") + ');p.line(1*u,3*u,2*u,5*u);t+=0.03}})<\/script></body></html>';
 }
 
 export default function About() {
@@ -78,15 +77,11 @@ export default function About() {
           </Text>
           <Pressable
             onPress={() => Linking.openURL("https://p5js.org")}
-            style={({ pressed }) => [
-              styles.linkButton,
-              { backgroundColor: pressed ? colors.primaryContainer : colors.primary },
-            ]}
-            accessibilityRole="button"
+            accessibilityRole="link"
             accessibilityLabel="Visit p5js.org"
           >
-            <Text style={[styles.linkButtonText, { color: colors.onPrimary }]}>
-              Visit p5js.org
+            <Text style={[styles.link, { color: colors.primary }]}>
+              Visit p5js.org →
             </Text>
           </Pressable>
         </View>
@@ -95,20 +90,17 @@ export default function About() {
           <Text style={[styles.sectionHeading, { color: colors.onSurface }]}>
             What is Processing?
           </Text>
-          <Svg width={100} height={100} viewBox="0 0 100 100" style={styles.logo}>
-            <Path
-              d="M50 5 C25.1 5 5 25.1 5 50 s20.1 45 45 45 s45-20.1 45-45 S74.9 5 50 5z M50 85 C30.7 85 15 69.3 15 50 S30.7 15 50 15 s35 15.7 35 35 S69.3 85 50 85z"
-              fill={colors.primary}
-            />
-            <Path
-              d="M42 30 L42 70 L58 70 C66.8 70 74 62.8 74 54 C74 45.2 66.8 38 58 38 L50 38 L50 30 Z"
-              fill={colors.primary}
-            />
-            <Path
-              d="M50 46 L58 46 C62.4 46 66 49.6 66 54 C66 58.4 62.4 62 58 62 L50 62 Z"
-              fill={colors.surface}
-            />
-          </Svg>
+
+          <WebView
+            source={{ html: sketchHtml }}
+            style={styles.sketchBox}
+            javaScriptEnabled
+            scrollEnabled={false}
+            bounces={false}
+            pointerEvents="none"
+          />
+
+
           <Text style={[styles.definitionText, { color: colors.textSecondary }]}>
             Processing is a flexible software sketchbook and a language for learning how to code
             within the context of the visual arts. Since 2001, Processing has promoted software
@@ -118,26 +110,14 @@ export default function About() {
           </Text>
           <Pressable
             onPress={() => Linking.openURL("https://processing.org")}
-            style={({ pressed }) => [
-              styles.linkButton,
-              { backgroundColor: pressed ? colors.primaryContainer : colors.primary },
-            ]}
-            accessibilityRole="button"
+            accessibilityRole="link"
             accessibilityLabel="Visit processing.org"
           >
-            <Text style={[styles.linkButtonText, { color: colors.onPrimary }]}>
-              Visit processing.org
+            <Text style={[styles.link, { color: colors.primary }]}>
+              Visit processing.org →
             </Text>
           </Pressable>
         </View>
-
-        <Text style={[styles.projectDescription, { color: colors.textSecondary }]}>
-          Learn P5 is a GSoC 2026 project that aims to provide an offline first, ELI5 learning
-          experience with the hope to improve the quality of learning for users who may not have
-          unlimited bandwidth or reliable internet. Based on the existing community knowledge, this
-          app focuses more on making learning creative programming with Processing tools an
-          interactive and hopefully immersive experience.
-        </Text>
 
         <View style={[styles.versionBadge, { backgroundColor: colors.surfaceDim }]}>
           <Text style={[styles.versionText, { color: colors.textSecondary }]}>
@@ -145,14 +125,7 @@ export default function About() {
           </Text>
         </View>
 
-        <WebView
-          source={{ html: sketchHtml }}
-          style={styles.sketchBox}
-          javaScriptEnabled
-          scrollEnabled={false}
-          bounces={false}
-          pointerEvents="none"
-        />
+
       </ScrollView>
     </View>
   );
@@ -175,15 +148,15 @@ const styles = StyleSheet.create({
     width: "100%",
     borderRadius: 12,
     padding: Spacing.lg,
-    alignItems: "center",
+    alignItems: "flex-start",
     marginBottom: Spacing.lg,
   },
   sectionHeading: {
-    fontFamily: "SpaceGrotesk",
+    fontFamily: "JetBrainsMono",
     fontSize: 20,
     fontWeight: "700",
     marginBottom: Spacing.md,
-    textAlign: "center",
+    textAlign: "left",
   },
   logo: {
     marginBottom: Spacing.md,
@@ -191,29 +164,15 @@ const styles = StyleSheet.create({
   definitionText: {
     ...Typography.body,
     fontFamily: "JetBrainsMono",
-    textAlign: "center",
+    textAlign: "left",
     lineHeight: 22,
   },
-  linkButton: {
-    marginTop: Spacing.md,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  linkButtonText: {
+  link: {
     fontFamily: "JetBrainsMono",
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: "700",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  projectDescription: {
-    ...Typography.body,
-    fontFamily: "JetBrainsMono",
-    textAlign: "center",
+    textDecorationLine: "underline",
     marginTop: Spacing.md,
-    maxWidth: 300,
-    lineHeight: 22,
   },
   sketchBox: {
     width: 200,

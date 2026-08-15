@@ -1,51 +1,53 @@
+import { Fonts } from "./Fonts";
+
 export const Typography = {
   display: {
-    fontFamily: "SpaceGrotesk",
+    fontFamily: Fonts.display,
     fontSize: 32,
     fontWeight: "700" as const,
   },
   headline: {
-    fontFamily: "SpaceGrotesk",
+    fontFamily: Fonts.headline,
     fontSize: 24,
     fontWeight: "700" as const,
   },
   title: {
-    fontFamily: "SpaceGrotesk",
+    fontFamily: Fonts.headline,
     fontSize: 18,
     fontWeight: "700" as const,
   },
   body: {
-    fontFamily: "Inter",
+    fontFamily: Fonts.body,
     fontSize: 16,
     fontWeight: "400" as const,
   },
   bodySmall: {
-    fontFamily: "Inter",
+    fontFamily: Fonts.body,
     fontSize: 14,
     fontWeight: "400" as const,
   },
   label: {
-    fontFamily: "Inter",
+    fontFamily: Fonts.label,
     fontSize: 13,
     fontWeight: "600" as const,
   },
   labelSmall: {
-    fontFamily: "Inter",
+    fontFamily: Fonts.label,
     fontSize: 11,
     fontWeight: "600" as const,
   },
   mono: {
-    fontFamily: "JetBrainsMono",
+    fontFamily: Fonts.mono,
     fontSize: 16,
     fontWeight: "400" as const,
   },
   monoSmall: {
-    fontFamily: "JetBrainsMono",
+    fontFamily: Fonts.mono,
     fontSize: 13,
     fontWeight: "400" as const,
   },
   monoLabel: {
-    fontFamily: "JetBrainsMono",
+    fontFamily: Fonts.mono,
     fontSize: 11,
     fontWeight: "700" as const,
   },

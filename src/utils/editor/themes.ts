@@ -187,6 +187,12 @@ export const EDITOR_THEMES: Record<string, ThemeDefinition> = {
   },
 };
 
+export function getThemeSwatches(themeId: string, colorScheme: "light" | "dark"): string[] {
+  const themeDef = EDITOR_THEMES[themeId] || EDITOR_THEMES["p5-learn"];
+  const colors = colorScheme === "dark" ? themeDef.dark : themeDef.light;
+  return [colors.keyword, colors.string, colors.number, colors.type];
+}
+
 export function getEditorTheme(themeId: string, colorScheme: "light" | "dark"): EditorThemeColors {
   const themeDef = EDITOR_THEMES[themeId] || EDITOR_THEMES["p5-learn"];
   return colorScheme === "dark" ? themeDef.dark : themeDef.light;

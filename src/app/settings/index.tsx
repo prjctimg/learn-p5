@@ -4,9 +4,22 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
 import Header from "../../components/Header";
 import TimePicker from "../../components/TimePicker";
+import Toast from "../../components/Toast";
+import StreakToast from "../../components/StreakToast";
 import { useThemeContext } from "../../components/ThemeProvider";
 import { Colors } from "../../constants/Colors";
 import { DEFAULTS } from "../../constants/Defaults";
+import { STREAK_TIERS } from "../../hooks/useStreak";
+import { EDITOR_THEMES, getThemeSwatches } from "../../utils/editor/themes";
+import { loadAllCourses } from "../../utils/courseLoader";
+
+const STREAK_KEYS = {
+  count: "streak_count",
+  lastVisit: "streak_last_visit",
+  longest: "streak_longest",
+  lastTier: "streak_last_tier",
+  toastPending: "streak_toast_pending",
+};
 
 const SETTINGS_KEYS = {
   dailyReminder: "setting_dailyReminder",
@@ -17,6 +30,8 @@ const SETTINGS_KEYS = {
   codeFontSize: "setting_codeFontSize",
   codeBackground: "setting_codeBackground",
   keyboardHeight: "setting_keyboardHeight",
+  editorTheme: "setting_editorTheme",
+  devMode: "setting_devMode",
 };
 
 const createStyles = (colors: Record<string, string>) =>
@@ -64,7 +79,13 @@ export default function Settings() {
   const [codeFontSize, setCodeFontSize] = useState(DEFAULTS.codeFontSize);
   const [codeBackground, setCodeBackgroundState] = useState<string>(DEFAULTS.codeBackground);
   const [keyboardHeight, setKeyboardHeightState] = useState<string>(DEFAULTS.keyboardHeight);
+  const [editorTheme, setEditorTheme] = useState<string>("p5-learn");
   const [displayName, setDisplayName] = useState("");
+  const [devMode, setDevMode] = useState(false);
+  const [debugToastVisible, setDebugToastVisible] = useState(false);
+  const [debugStreakToastVisible, setDebugStreakToastVisible] = useState(false);
+  const [debugStreakCount, setDebugStreakCount] = useState("7");
+  const [examsCompleteAllLabel, setExamsCompleteAllLabel] = useState("Complete All Exercises");
 
   useEffect(() => {
     AsyncStorage.multiGet([
@@ -76,7 +97,9 @@ export default function Settings() {
       SETTINGS_KEYS.codeFontSize,
       SETTINGS_KEYS.codeBackground,
       SETTINGS_KEYS.keyboardHeight,
-    ]).then(([reminder, snippet, hour, minute, fab, fontSize, bg, kb]) => {
+      SETTINGS_KEYS.editorTheme,
+      SETTINGS_KEYS.devMode,
+    ]).then(([reminder, snippet, hour, minute, fab, fontSize, bg, kb, theme, dev]) => {
       setDailyReminder(reminder[1] === "true");
       setSnippetAlternatives(snippet[1] === "true");
       if (hour[1]) setNotificationHour(parseInt(hour[1], 10));
@@ -85,6 +108,8 @@ export default function Settings() {
       if (fontSize[1]) setCodeFontSize(parseInt(fontSize[1], 10));
       if (bg[1]) setCodeBackgroundState(bg[1]);
       if (kb[1]) setKeyboardHeightState(kb[1]);
+      if (theme[1]) setEditorTheme(theme[1]);
+      setDevMode(dev[1] === "true");
     });
     AsyncStorage.getItem("onboardingData").then((val) => {
       if (val) {
@@ -160,6 +185,11 @@ export default function Settings() {
     await AsyncStorage.setItem(SETTINGS_KEYS.keyboardHeight, value);
   };
 
+  const changeEditorTheme = async (value: string) => {
+    setEditorTheme(value);
+    await AsyncStorage.setItem(SETTINGS_KEYS.editorTheme, value);
+  };
+
   const handleDisplayNameChange = useCallback(async (text: string) => {
     setDisplayName(text);
     AsyncStorage.getItem("onboardingData").then((val) => {
@@ -168,6 +198,41 @@ export default function Settings() {
       AsyncStorage.setItem("onboardingData", JSON.stringify(data));
     });
   }, []);
+
+  const toggleDevMode = async (value: boolean) => {
+    setDevMode(value);
+    await AsyncStorage.setItem(SETTINGS_KEYS.devMode, value.toString());
+  };
+
+  const handleCompleteAllExercises = async () => {
+    const courses = await loadAllCourses();
+    const allLessonKeys: string[] = [];
+    for (const c of courses) {
+      for (const l of c.lessons) {
+        allLessonKeys.push(`${c.slug}/${l.id}`);
+      }
+    }
+    await AsyncStorage.setItem("completedLessons", JSON.stringify(allLessonKeys));
+    setExamsCompleteAllLabel("Done! Reload to see");
+    setTimeout(() => setExamsCompleteAllLabel("Complete All Exercises"), 3000);
+  };
+
+  const handleResetAllProgress = async () => {
+    await AsyncStorage.removeItem("completedLessons");
+    await AsyncStorage.removeItem("completedCourses");
+    setExamsCompleteAllLabel("Reset! Reload to see");
+    setTimeout(() => setExamsCompleteAllLabel("Complete All Exercises"), 3000);
+  };
+
+  const handleSetStreak = async () => {
+    const count = parseInt(debugStreakCount, 10);
+    if (isNaN(count)) return;
+    const today = new Date().toISOString().split("T")[0];
+    await AsyncStorage.multiSet([
+      [STREAK_KEYS.count, count.toString()],
+      [STREAK_KEYS.lastVisit, today],
+    ]);
+  };
 
   const keyboardHeightPixels = DEFAULTS.keyboardHeightPixels;
 
@@ -357,6 +422,56 @@ export default function Settings() {
               ))}
             </View>
           </View>
+
+          <View style={[styles.cardRow, { borderTopWidth: 1, borderTopColor: colors.surfaceContainerHighest, flexWrap: "wrap", gap: 6 }]}>
+            <View style={{ width: "100%", marginBottom: 8 }}>
+              <Text style={styles.settingTitle}>Editor Theme</Text>
+              <Text style={styles.settingDescription}>
+                Choose a color theme for the code editor
+              </Text>
+            </View>
+            {Object.entries(EDITOR_THEMES).map(([key, theme]) => {
+              const swatches = getThemeSwatches(key, colorScheme === "dark" ? "dark" : "light");
+              return (
+                <Pressable
+                  key={key}
+                  onPress={() => changeEditorTheme(key)}
+                  style={({ pressed }) => ({
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 6,
+                    paddingHorizontal: 10,
+                    paddingVertical: 5,
+                    borderRadius: 6,
+                    backgroundColor:
+                      editorTheme === key
+                        ? colors.primary
+                        : pressed
+                          ? colors.primaryContainer + "33"
+                          : colors.surfaceContainerHigh,
+                  })}
+                >
+                  <View style={{ flexDirection: "row", gap: 2 }}>
+                    {swatches.map((s, i) => (
+                      <View key={i} style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: s }} />
+                    ))}
+                  </View>
+                  <Text
+                    style={{
+                      fontFamily: "JetBrainsMono",
+                      fontSize: 10,
+                      fontWeight: "700",
+                      textTransform: "uppercase",
+                      letterSpacing: 0.5,
+                      color: editorTheme === key ? colors.onPrimary : colors.onSurfaceVariant,
+                    }}
+                  >
+                    {theme.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
         </View>
 
         {/* Keyboard */}
@@ -428,7 +543,154 @@ export default function Settings() {
             />
           </View>
         </View>
+
+        {/* Debugging */}
+        <Text style={[styles.sectionTitle, styles.sectionMargin]}>Debugging</Text>
+        <View style={styles.card}>
+          <View style={styles.cardRow}>
+            <View style={styles.flexChild}>
+              <Text style={styles.settingTitle}>Dev Mode</Text>
+              <Text style={styles.settingDescription}>
+                Enable debug controls for testing
+              </Text>
+            </View>
+            <Switch
+              value={devMode}
+              onValueChange={toggleDevMode}
+              trackColor={{ false: "#767577", true: "#ED225D" }}
+              thumbColor="#ffffff"
+            />
+          </View>
+        </View>
+
+        {devMode && (
+          <>
+            <Text style={[styles.sectionTitle, styles.sectionMargin]}>
+              Component Triggers
+            </Text>
+            <View style={styles.card}>
+              <View style={styles.cardRow}>
+                <Text style={styles.settingTitle}>Show Toast</Text>
+                <Pressable
+                  onPress={() => setDebugToastVisible(true)}
+                  style={({ pressed }) => ({
+                    paddingHorizontal: 14,
+                    paddingVertical: 8,
+                    borderRadius: 8,
+                    backgroundColor: pressed ? colors.primaryContainer : colors.primary,
+                  })}
+                >
+                  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 11, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
+                    Trigger
+                  </Text>
+                </Pressable>
+              </View>
+              <View style={[styles.cardRow, { borderTopWidth: 1, borderTopColor: colors.surfaceContainerHighest }]}>
+                <Text style={styles.settingTitle}>Show Streak Toast</Text>
+                <Pressable
+                  onPress={() => setDebugStreakToastVisible(true)}
+                  style={({ pressed }) => ({
+                    paddingHorizontal: 14,
+                    paddingVertical: 8,
+                    borderRadius: 8,
+                    backgroundColor: pressed ? colors.primaryContainer : colors.primary,
+                  })}
+                >
+                  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 11, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
+                    Trigger
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+
+            <Text style={[styles.sectionTitle, styles.sectionMargin]}>
+              Mock Exercise State
+            </Text>
+            <View style={styles.card}>
+              <View style={styles.cardRow}>
+                <View style={styles.flexChild}>
+                  <Text style={styles.settingTitle}>{examsCompleteAllLabel}</Text>
+                  <Text style={styles.settingDescription}>
+                    Mark every lesson as completed
+                  </Text>
+                </View>
+                <Pressable
+                  onPress={handleCompleteAllExercises}
+                  style={({ pressed }) => ({
+                    paddingHorizontal: 14,
+                    paddingVertical: 8,
+                    borderRadius: 8,
+                    backgroundColor: pressed ? colors.primaryContainer : colors.primary,
+                  })}
+                >
+                  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 11, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
+                    Run
+                  </Text>
+                </Pressable>
+              </View>
+              <View style={[styles.cardRow, { borderTopWidth: 1, borderTopColor: colors.surfaceContainerHighest }]}>
+                <View style={styles.flexChild}>
+                  <Text style={styles.settingTitle}>Reset All Progress</Text>
+                  <Text style={styles.settingDescription}>
+                    Clear all completed lessons and courses
+                  </Text>
+                </View>
+                <Pressable
+                  onPress={handleResetAllProgress}
+                  style={({ pressed }) => ({
+                    paddingHorizontal: 14,
+                    paddingVertical: 8,
+                    borderRadius: 8,
+                    backgroundColor: pressed ? colors.errorContainer : colors.error,
+                  })}
+                >
+                  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 11, fontWeight: "700", color: colors.onError, textTransform: "uppercase" }}>
+                    Reset
+                  </Text>
+                </Pressable>
+              </View>
+              <View style={[styles.cardRow, { borderTopWidth: 1, borderTopColor: colors.surfaceContainerHighest, flexWrap: "wrap", gap: 8 }]}>
+                <View style={{ width: "100%", marginBottom: 4 }}>
+                  <Text style={styles.settingTitle}>Set Streak Count</Text>
+                </View>
+                <TextInput
+                  style={[styles.nameInput, { color: colors.primary, borderColor: colors.outlineVariant, flex: 0, minWidth: 80, maxWidth: 100 }]}
+                  value={debugStreakCount}
+                  onChangeText={setDebugStreakCount}
+                  keyboardType="number-pad"
+                  maxLength={4}
+                />
+                <Pressable
+                  onPress={handleSetStreak}
+                  style={({ pressed }) => ({
+                    paddingHorizontal: 14,
+                    paddingVertical: 8,
+                    borderRadius: 8,
+                    backgroundColor: pressed ? colors.primaryContainer : colors.primary,
+                  })}
+                >
+                  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 11, fontWeight: "700", color: colors.onPrimary, textTransform: "uppercase" }}>
+                    Set
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+          </>
+        )}
       </ScrollView>
+
+      <Toast
+        visible={debugToastVisible}
+        message="Debug toast — component rendering works!"
+        onDismiss={() => setDebugToastVisible(false)}
+      />
+      <StreakToast
+        visible={debugStreakToastVisible}
+        streakCount={7}
+        tierProgress={0.5}
+        nextTier={14}
+        onDismiss={() => setDebugStreakToastVisible(false)}
+      />
     </View>
   );
 }

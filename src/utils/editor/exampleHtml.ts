@@ -10,8 +10,8 @@ export function getExampleHtml(code: string): string {
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { background: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-canvas { display: block; }
+body { background: #fff; display: flex; align-items: center; justify-content: center; min-height: 220px; }
+canvas { display: block; max-width: 100%; height: auto; }
 </style>
 </head>
 <body>

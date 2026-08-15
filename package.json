@@ -1,9 +1,9 @@
 {
   "name": "learn-p5",
   "main": "expo-router/entry",
-  "version": "0.6.24",
+  "version": "0.6.27",
   "scripts": {
-    "postinstall": "npm run gen-version && npm run gen-reference && npm run bundle-editor",
+    "postinstall": "npm run gen-version && npm run gen-reference && npm run bundle-editor && node scripts/patch-structured-headers.mjs",
     "start": "npm run gen-version && npm run gen-reference && npm run bundle-editor && expo start",
     "gen-version": "sh scripts/gen-version.sh",
     "gen-reference": "node scripts/generate-reference.mjs --stub",
@@ -23,6 +23,7 @@
     "expo-linking": "~55.0.15",
     "expo-notifications": "~55.0.23",
     "expo-router": "~55.0.16",
+    "expo-updates": "~0.7.0",
     "expo-web-browser": "~55.0.16",
     "react": "19.2.0",
     "react-dom": "19.2.0",

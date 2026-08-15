@@ -12,6 +12,7 @@ interface ToastProps {
   onAction?: () => void;
   onDismiss?: () => void;
   duration?: number;
+  icon?: string;
 }
 
 export default function Toast({
@@ -21,6 +22,7 @@ export default function Toast({
   onAction,
   onDismiss,
   duration = 4000,
+  icon = "check-circle",
 }: ToastProps) {
   const translateY = useRef(new Animated.Value(-120)).current;
   const insets = useSafeAreaInsets();
@@ -75,7 +77,7 @@ export default function Toast({
       ]}
     >
       <View style={styles.content}>
-        <MaterialCommunityIcons name="check-circle" size={20} color="#22C55E" />
+        <MaterialCommunityIcons name={icon as any} size={20} color="#22C55E" />
         <Text style={[styles.message, { color: colors.onSurface }]}>
           {message}
         </Text>
@@ -116,7 +118,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   message: {
-    fontFamily: "Inter",
+    fontFamily: "JetBrainsMono",
     fontSize: 15,
     fontWeight: "600",
     flex: 1,

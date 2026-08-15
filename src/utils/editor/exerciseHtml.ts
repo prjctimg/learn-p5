@@ -232,9 +232,7 @@ export function getExerciseHtml(params: {
     background: rgba(237, 34, 93, 0.3);
     outline: 1px solid #ED225D;
   }
-  .scroll-whitespace {
-    height: 700px;
-  }
+  body { padding-bottom: 80px; }
 
   ${params.exerciseNumber === 1 ? `
   .tut-overlay {
@@ -335,13 +333,13 @@ ${
       <span class="lang-tag">JS</span>
     </div>
     <div class="editor-header-right">
+      <button class="editor-header-btn" id="resetBtn">Reset</button>
       <button class="editor-header-btn" id="copyBtn">Copy</button>
     </div>
   </div>
   <div id="editor" style="min-height:400px"></div>
 </div>
 
-<div class="scroll-whitespace"></div>
 
 <script>${p5Source}</script>
 <script>${CODEMIRROR_BUNDLE}</script>
@@ -424,9 +422,11 @@ function p5CompletionSource(context) {
           type: 'function',
           detail: 'p5.js',
           apply: function(view, completion, from, to) {
+            var rest = view.state.doc.sliceString(to, to + 2);
+            var hasParens = rest === '()';
             view.dispatch({
-              changes: { from: from, to: to, insert: name + '()' },
-              selection: { anchor: from + name.length + 1 }
+              changes: { from: from, to: to, insert: hasParens ? name : name + '()' },
+              selection: { anchor: from + (hasParens ? name.length : name.length + 1) }
             });
           }
         });
@@ -867,6 +867,15 @@ function copyToClipboard(text) {
       reject(e);
     }
     document.body.removeChild(ta);
+  });
+}
+
+var resetBtn = document.getElementById('resetBtn');
+if (resetBtn) {
+  resetBtn.addEventListener('click', function() {
+    if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+      window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'resetCode' }));
+    }
   });
 }
 

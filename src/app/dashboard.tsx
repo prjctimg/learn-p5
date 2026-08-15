@@ -1,14 +1,25 @@
 import { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import { View, Text, Pressable, ScrollView, StyleSheet, Animated } from "react-native";
 import { useRouter, useFocusEffect } from "expo-router";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useThemeContext } from "../components/ThemeProvider";
 import { Colors } from "../constants/Colors";
 import Header from "../components/Header";
+import Toast from "../components/Toast";
 import StreakToast from "../components/StreakToast";
 import { loadAllCourses } from "../utils/courseLoader";
 import { Lesson, Course } from "../data/types";
 import { getStreakFromStorage, useStreak } from "../hooks/useStreak";
+
+const LAST_GREETING_KEY = "last_greeting_period";
+
+function getPeriodKey(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return "morning";
+  if (hour < 18) return "afternoon";
+  return "evening";
+}
 
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -25,9 +36,16 @@ export default function Dashboard() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [streakCount, setStreakCount] = useState(0);
   const [streakLongest, setStreakLongest] = useState(0);
-  const [displayName, setDisplayName] = useState("");
   const streak = useStreak();
   const [streakToastVisible, setStreakToastVisible] = useState(false);
+  const [greetingToastVisible, setGreetingToastVisible] = useState(false);
+  const [greetingMessage, setGreetingMessage] = useState("");
+  const levelAnim = useRef(new Animated.Value(0)).current;
+  const completedAnim = useRef(new Animated.Value(0)).current;
+  const streakAnim = useRef(new Animated.Value(0)).current;
+  const [animatedLevel, setAnimatedLevel] = useState(1);
+  const [animatedCompleted, setAnimatedCompleted] = useState(0);
+  const [animatedStreak, setAnimatedStreak] = useState(0);
 
   useFocusEffect(
     useCallback(() => {
@@ -49,22 +67,31 @@ export default function Dashboard() {
   );
 
   useEffect(() => {
-    AsyncStorage.getItem("onboardingData").then((val) => {
-      if (val) {
-        try {
-          const data = JSON.parse(val);
-          setDisplayName(data.displayName || "");
-        } catch {}
-      }
-    });
-  }, []);
-
-  useEffect(() => {
     streak.consumePendingToast().then((data) => {
       if (data) {
         setStreakToastVisible(true);
       }
     });
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      const period = getPeriodKey();
+      const lastPeriod = await AsyncStorage.getItem(LAST_GREETING_KEY);
+      if (lastPeriod === period) return;
+      const onboardingRaw = await AsyncStorage.getItem("onboardingData");
+      let name = "";
+      if (onboardingRaw) {
+        try {
+          const data = JSON.parse(onboardingRaw);
+          name = data.displayName || "";
+        } catch {}
+      }
+      setGreetingMessage(`${getGreeting()}${name ? `, ${name}` : "!"}`);
+      setGreetingToastVisible(true);
+      await AsyncStorage.setItem(LAST_GREETING_KEY, period);
+    }, 1000);
+    return () => clearTimeout(timer);
   }, []);
 
   const nextExercise: (Lesson & { courseSlug: string; courseTitle: string }) | null = useMemo(() => {
@@ -87,7 +114,18 @@ export default function Dashboard() {
     return flat.slice(startIndex + 1, startIndex + 6);
   }, [courses, nextExercise]);
 
-  const greeting = useMemo(() => getGreeting(), []);
+  function isExerciseLocked(lessonId: string, courseSlug: string): boolean {
+    const course = courses.find((c) => c.slug === courseSlug);
+    if (!course) return true;
+    const idx = course.lessons.findIndex((l) => l.id === lessonId);
+    if (idx <= 0) return false;
+    for (let j = 0; j < idx; j++) {
+      if (!completedLessons.includes(`${courseSlug}/${course.lessons[j].id}`)) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   const progressAnim = useRef(new Animated.Value(0)).current;
 
@@ -110,6 +148,49 @@ export default function Dashboard() {
     outputRange: ["0%", "100%"],
   });
 
+  const level = Math.min(10, Math.max(1, Math.floor(progress * 10) + 1));
+  const completedCount = completedLessons.length;
+
+  useEffect(() => {
+    levelAnim.setValue(0);
+    completedAnim.setValue(0);
+    streakAnim.setValue(0);
+
+    const levelListener = levelAnim.addListener(({ value }) => {
+      setAnimatedLevel(Math.round(value));
+    });
+    const completedListener = completedAnim.addListener(({ value }) => {
+      setAnimatedCompleted(Math.round(value));
+    });
+    const streakListener = streakAnim.addListener(({ value }) => {
+      setAnimatedStreak(Math.round(value));
+    });
+
+    Animated.parallel([
+      Animated.timing(levelAnim, {
+        toValue: level,
+        duration: 800,
+        useNativeDriver: false,
+      }),
+      Animated.timing(completedAnim, {
+        toValue: completedCount,
+        duration: 800,
+        useNativeDriver: false,
+      }),
+      Animated.timing(streakAnim, {
+        toValue: streakCount,
+        duration: 800,
+        useNativeDriver: false,
+      }),
+    ]).start();
+
+    return () => {
+      levelAnim.removeListener(levelListener);
+      completedAnim.removeListener(completedListener);
+      streakAnim.removeListener(streakListener);
+    };
+  }, [level, completedCount, streakCount]);
+
   const styles = useMemo(
     () =>
       StyleSheet.create({
@@ -121,12 +202,6 @@ export default function Dashboard() {
           flex: 1,
           paddingHorizontal: 24,
           paddingTop: 32,
-        },
-        greeting: {
-          fontFamily: "JetBrainsMono",
-          fontSize: 32,
-          fontWeight: "700",
-          color: colors.onSurface,
         },
         subtitle: {
           fontFamily: "JetBrainsMono",
@@ -263,11 +338,6 @@ export default function Dashboard() {
           color: colors.onSurface,
           flex: 1,
         },
-        listItemMeta: {
-          fontFamily: "JetBrainsMono",
-          fontSize: 11,
-          color: colors.textSecondary,
-        },
         allCompleteContainer: {
           alignItems: "center",
           paddingVertical: 32,
@@ -289,9 +359,6 @@ export default function Dashboard() {
         style={styles.inner}
         contentContainerStyle={{ paddingBottom: 32 }}
       >
-        <Text style={styles.greeting}>
-          {greeting}{displayName ? `, ${displayName}` : "!"}
-        </Text>
         <Text style={styles.subtitle}>
           {Math.round(progress * 100)}% complete
         </Text>
@@ -302,21 +369,21 @@ export default function Dashboard() {
 
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
-            <Text style={styles.statValue}>{Math.min(10, Math.max(1, Math.floor(progress * 10) + 1))}</Text>
+            <Text style={styles.statValue}>{animatedLevel}</Text>
             <Text style={styles.statLabel}>
               Level
             </Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statValue}>
-              {completedLessons.length}
+              {animatedCompleted}
             </Text>
             <Text style={styles.statLabel}>
               Completed
             </Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statValue}>{streakCount}</Text>
+            <Text style={styles.statValue}>{animatedStreak}</Text>
             <Text style={styles.statLabel}>
               Streak
             </Text>
@@ -325,7 +392,7 @@ export default function Dashboard() {
 
         <View style={styles.continueSection}>
           <Text style={styles.sectionTitle}>
-            Continue Learning
+            Pickup where you left
           </Text>
 
           {nextExercise ? (
@@ -378,35 +445,58 @@ export default function Dashboard() {
               <Text style={[styles.listTitle, { marginTop: 24 }]}>
                 Up Next
               </Text>
-              {upcomingExercises.map((ex) => (
-                <Pressable
-                  key={`${ex.courseSlug}/${ex.id}`}
-                  onPress={() =>
-                    router.push(`/learn/${ex.courseSlug}/${ex.id}`)
-                  }
-                  style={({ pressed }) => [
-                    styles.listItem,
-                    pressed && styles.listItemPressed,
-                  ]}
-                  accessibilityRole="button"
-                  accessibilityLabel={ex.title}
-                >
-                  <Text style={styles.listItemNumber}>
-                    {ex.id.replace("exercise-", "#")}
-                  </Text>
-                  <Text style={styles.listItemTitle} numberOfLines={1}>
-                    {ex.title}
-                  </Text>
-                  <Text style={styles.listItemMeta}>
-                    {ex.module}
-                  </Text>
-                </Pressable>
-              ))}
+              {upcomingExercises.map((ex) => {
+                const locked = isExerciseLocked(ex.id, ex.courseSlug);
+                return (
+                  <Pressable
+                    key={`${ex.courseSlug}/${ex.id}`}
+                    disabled={locked}
+                    onPress={() =>
+                      router.push(`/learn/${ex.courseSlug}/${ex.id}`)
+                    }
+                    style={({ pressed }) => [
+                      styles.listItem,
+                      pressed && !locked && styles.listItemPressed,
+                    ]}
+                    accessibilityRole="button"
+                    accessibilityLabel={locked ? `${ex.title} (locked)` : ex.title}
+                  >
+                    {locked ? (
+                      <MaterialCommunityIcons
+                        name="lock"
+                        size={18}
+                        color={colors.textSecondary}
+                        style={styles.listItemNumber}
+                      />
+                    ) : (
+                      <Text style={styles.listItemNumber}>
+                        {ex.id.replace("exercise-", "#")}
+                      </Text>
+                    )}
+                    <Text
+                      style={[
+                        styles.listItemTitle,
+                        locked && { color: colors.textSecondary },
+                      ]}
+                      numberOfLines={1}
+                    >
+                      {ex.title}
+                    </Text>
+                  </Pressable>
+                );
+              })}
             </>
           )}
         </View>
       </ScrollView>
 
+      <Toast
+        visible={greetingToastVisible}
+        message={greetingMessage}
+        duration={3000}
+        icon="weather-sunny"
+        onDismiss={() => setGreetingToastVisible(false)}
+      />
       <StreakToast
         visible={streakToastVisible}
         streakCount={streak.count}

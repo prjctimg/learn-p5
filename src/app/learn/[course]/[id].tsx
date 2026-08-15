@@ -17,21 +17,29 @@ import { loadExercise, loadCourse } from "../../../utils/courseLoader";
 import { Lesson } from "../../../data/types";
 import { P5_FUNCTION_NAMES, ONCE_ONLY_P5_FUNCTIONS } from "../../../data/reference";
 import { getExerciseHtml } from "../../../utils/editor/exerciseHtml";
-import { EDITOR_THEMES } from "../../../utils/editor/themes";
+import { EDITOR_THEMES, getThemeSwatches } from "../../../utils/editor/themes";
 import { useStreak } from "../../../hooks/useStreak";
+
+const EXERCISE_CODE_PREFIX = "exerciseCode_";
+
+function getExerciseCodeKey(course: string, id: string): string {
+  return `${EXERCISE_CODE_PREFIX}${course}_${id}`;
+}
 
 interface ExerciseState {
   exercise: Lesson | null;
   loading: boolean;
   code: string;
+  startingCode: string;
   isRunning: boolean;
   completed: boolean;
 }
 
 type ExerciseAction =
   | { type: "LOAD_START" }
-  | { type: "LOAD_DONE"; exercise: Lesson | null }
+  | { type: "LOAD_DONE"; exercise: Lesson | null; course: string; id: string }
   | { type: "SET_CODE"; code: string }
+  | { type: "RESET_CODE"; course: string; id: string }
   | { type: "APPEND_CODE"; text: string; cursorOffset?: number }
   | { type: "RUN_START" }
   | { type: "RUN_DONE" }
@@ -43,21 +51,24 @@ function exerciseReducer(state: ExerciseState, action: ExerciseAction): Exercise
       return { ...state, loading: true };
     case "LOAD_DONE": {
       const ex = action.exercise;
-      let code = ex?.startingCode ?? "";
-      const hasSetup = /function\s+setup\s*\(/.test(code);
-      const hasDraw = /function\s+draw\s*\(/.test(code);
-      if (!hasSetup || !hasDraw) {
-        code = 'function setup() {\n  createCanvas(400, 400);\n}\n\nfunction draw() {\n  background(20);\n}\n';
-      }
+      const baseCode = ex?.startingCode ?? "";
+      const hasSetup = /function\s+setup\s*\(/.test(baseCode);
+      const hasDraw = /function\s+draw\s*\(/.test(baseCode);
+      const startingCode = !hasSetup || !hasDraw
+        ? 'function setup() {\n  createCanvas(400, 400);\n}\n\nfunction draw() {\n  background(20);\n}\n'
+        : baseCode;
       return {
         ...state,
         loading: false,
-        exercise: ex ? { ...ex, startingCode: code } : null,
-        code,
+        exercise: ex ? { ...ex, startingCode } : null,
+        startingCode,
+        code: startingCode,
       };
     }
     case "SET_CODE":
       return { ...state, code: action.code };
+    case "RESET_CODE":
+      return { ...state, code: state.startingCode };
     case "APPEND_CODE":
       return { ...state, code: state.code + action.text };
     case "RUN_START":
@@ -80,6 +91,7 @@ export default function Exercise() {
     exercise: null,
     loading: true,
     code: "",
+    startingCode: "",
     isRunning: false,
     completed: false,
   });
@@ -308,7 +320,11 @@ export default function Exercise() {
       if (!course || !id) return;
       dispatch({ type: "LOAD_START" });
       const ex = await loadExercise(course, id);
-      dispatch({ type: "LOAD_DONE", exercise: ex });
+      dispatch({ type: "LOAD_DONE", exercise: ex, course, id });
+      const saved = await AsyncStorage.getItem(getExerciseCodeKey(course, id));
+      if (saved) {
+        dispatch({ type: "SET_CODE", code: saved });
+      }
     };
     load();
   }, [course, id]);
@@ -321,6 +337,24 @@ export default function Exercise() {
     }
   }, [editorViewReady, codeSyncKey]);
 
+  useEffect(() => {
+    if (!state.loading && course && id) {
+      AsyncStorage.setItem(getExerciseCodeKey(course, id), state.code);
+    }
+  }, [state.code, state.loading, course, id]);
+
+  const handleReset = useCallback(() => {
+    if (course && id) {
+      AsyncStorage.removeItem(getExerciseCodeKey(course, id));
+      dispatch({ type: "RESET_CODE", course, id });
+      if (webViewRef.current && editorViewReady) {
+        webViewRef.current.postMessage(
+          JSON.stringify({ type: "setCode", code: state.startingCode })
+        );
+      }
+    }
+  }, [course, id, editorViewReady, state.startingCode]);
+
   const handleMessage = useCallback(
     (event: { nativeEvent: { data: string } }) => {
       try {
@@ -328,6 +362,9 @@ export default function Exercise() {
         switch (msg.type) {
           case "codeChange":
             dispatch({ type: "SET_CODE", code: msg.code });
+            break;
+          case "resetCode":
+            handleReset();
             break;
           case "ready":
             setWebViewReady(true);
@@ -360,7 +397,7 @@ export default function Exercise() {
         }
       } catch {}
     },
-    [router, course, id]
+    [router, course, id, handleReset]
   );
 
   const pendingInserts = useRef<{ text: string; cursorOffset?: number }[]>([]);
@@ -730,6 +767,7 @@ export default function Exercise() {
             onCursorMove={handleCursorMove}
             onBackspace={handleBackspace}
             onNewline={handleNewline}
+            onRun={handleRun}
             height={TOOLBAR_HEIGHT}
           />
         </View>
@@ -744,6 +782,7 @@ export default function Exercise() {
           onBackspace={handleBackspace}
           onNewline={handleNewline}
           onFormat={handleFormat}
+          onReset={handleReset}
           onCursorMove={handleCursorMove}
           onOpenReference={(symbol) => router.push(`/ref?symbol=${symbol}`)}
           keyboardVisible={keyboardVisible}
@@ -830,7 +869,7 @@ export default function Exercise() {
             <View style={styles.modalSection}>
               <Text style={[styles.modalSectionTitle, { color: colors.textSecondary }]}>Theme</Text>
               <View style={styles.modalRow}>
-                <Text style={{ fontFamily: "Inter", fontSize: 14, color: colors.onSurface }}>
+                <Text style={{ fontFamily: "JetBrainsMono", fontSize: 14, color: colors.onSurface }}>
                   {colorScheme === "dark" ? "Dark Mode" : "Light Mode"}
                 </Text>
                 <Switch
@@ -844,35 +883,46 @@ export default function Exercise() {
 
             <View style={styles.modalSection}>
               <Text style={[styles.modalSectionTitle, { color: colors.textSecondary }]}>Editor Theme</Text>
-              <View style={[styles.modalRow, { flexWrap: "wrap" }]}>
-                {Object.entries(EDITOR_THEMES).map(([key, theme]) => (
-                  <Pressable
-                    key={key}
-                    onPress={() => changeEditorTheme(key)}
-                    style={({ pressed }) => ({
-                      paddingHorizontal: 10,
-                      paddingVertical: 5,
-                      borderRadius: 6,
-                      backgroundColor:
-                        editorTheme === key
-                          ? colors.primary
-                          : pressed
-                            ? colors.primaryContainer + "33"
-                            : colors.surfaceContainer,
-                    })}
-                  >
-                    <Text style={{
-                      fontFamily: "JetBrainsMono",
-                      fontSize: 10,
-                      fontWeight: "700",
-                      textTransform: "uppercase",
-                      letterSpacing: 0.5,
-                      color: editorTheme === key ? colors.onPrimary : colors.onSurfaceVariant,
-                    }}>
-                      {theme.label}
-                    </Text>
-                  </Pressable>
-                ))}
+              <View style={[styles.modalRow, { flexWrap: "wrap", gap: 6 }]}>
+                {Object.entries(EDITOR_THEMES).map(([key, theme]) => {
+                  const swatches = getThemeSwatches(key, colorScheme === "dark" ? "dark" : "light");
+                  return (
+                    <Pressable
+                      key={key}
+                      onPress={() => changeEditorTheme(key)}
+                      style={({ pressed }) => ({
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: 6,
+                        paddingHorizontal: 10,
+                        paddingVertical: 5,
+                        borderRadius: 6,
+                        backgroundColor:
+                          editorTheme === key
+                            ? colors.primary
+                            : pressed
+                              ? colors.primaryContainer + "33"
+                              : colors.surfaceContainer,
+                      })}
+                    >
+                      <View style={{ flexDirection: "row", gap: 2 }}>
+                        {swatches.map((s, i) => (
+                          <View key={i} style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: s }} />
+                        ))}
+                      </View>
+                      <Text style={{
+                        fontFamily: "JetBrainsMono",
+                        fontSize: 10,
+                        fontWeight: "700",
+                        textTransform: "uppercase",
+                        letterSpacing: 0.5,
+                        color: editorTheme === key ? colors.onPrimary : colors.onSurfaceVariant,
+                      }}>
+                        {theme.label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
               </View>
             </View>
 

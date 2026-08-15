@@ -6,11 +6,14 @@ import { Spacing } from "../constants/Spacing";
 import { Typography } from "../constants/Typography";
 import { pairedSymbols, singleSymbols } from "../data/keyboardLayout";
 
+const RUN_BUTTON_WIDTH = 72;
+
 interface SystemKeyboardToolbarProps {
   onInsert: (text: string, cursorOffset?: number) => void;
   onCursorMove?: (direction: "left" | "right" | "up" | "down") => void;
   onBackspace?: () => void;
   onNewline?: () => void;
+  onRun?: () => void;
   height: number;
 }
 
@@ -19,6 +22,7 @@ export default function SystemKeyboardToolbar({
   onCursorMove,
   onBackspace,
   onNewline,
+  onRun,
   height,
 }: SystemKeyboardToolbarProps) {
   const { colorScheme } = useThemeContext();
@@ -27,41 +31,57 @@ export default function SystemKeyboardToolbar({
   return (
     <View style={[styles.container, { backgroundColor: colors.surfaceContainerLow, height }]}>
       <View style={styles.row}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.symbolsScroll}
-          contentContainerStyle={styles.symbolsContent}
-        >
-          {pairedSymbols.map((pair) => (
+        <View style={styles.symbolsRowWrapper}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.symbolsScroll}
+            contentContainerStyle={[styles.symbolsContent, { paddingRight: RUN_BUTTON_WIDTH + Spacing.sm }]}
+          >
+            {pairedSymbols.map((pair) => (
+              <Pressable
+                key={pair.display}
+                onPress={() => onInsert(pair.open + pair.close, 1)}
+                style={({ pressed }) => [
+                  styles.symbolBtn,
+                  { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
+                ]}
+              >
+                <Text style={[styles.symbolText, { color: colors.onSurfaceVariant }]}>
+                  {pair.display}
+                </Text>
+              </Pressable>
+            ))}
+            {singleSymbols.map((sym) => (
+              <Pressable
+                key={sym}
+                onPress={() => onInsert(sym)}
+                style={({ pressed }) => [
+                  styles.symbolBtn,
+                  { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
+                ]}
+              >
+                <Text style={[styles.symbolText, { color: colors.onSurfaceVariant }]}>
+                  {sym}
+                </Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+          {onRun && (
             <Pressable
-              key={pair.display}
-              onPress={() => onInsert(pair.open + pair.close, 1)}
+              onPress={onRun}
               style={({ pressed }) => [
-                styles.symbolBtn,
-                { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
+                styles.runButton,
+                { backgroundColor: pressed ? colors.primaryContainer : colors.surfaceContainer },
               ]}
             >
-              <Text style={[styles.symbolText, { color: colors.onSurfaceVariant }]}>
-                {pair.display}
+              <MaterialCommunityIcons name="play" size={16} color={colors.primary} />
+              <Text style={[styles.runButtonText, { color: colors.primary }]}>
+                Run
               </Text>
             </Pressable>
-          ))}
-          {singleSymbols.map((sym) => (
-            <Pressable
-              key={sym}
-              onPress={() => onInsert(sym)}
-              style={({ pressed }) => [
-                styles.symbolBtn,
-                { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
-              ]}
-            >
-              <Text style={[styles.symbolText, { color: colors.onSurfaceVariant }]}>
-                {sym}
-              </Text>
-            </Pressable>
-          ))}
-        </ScrollView>
+          )}
+        </View>
       </View>
       <View style={[styles.row, styles.controlRow]}>
         <Pressable
@@ -141,6 +161,11 @@ const styles = StyleSheet.create({
   controlRow: {
     marginTop: 4,
   },
+  symbolsRowWrapper: {
+    flex: 1,
+    position: "relative",
+    justifyContent: "center",
+  },
   symbolsScroll: {
     maxHeight: 36,
   },
@@ -148,6 +173,23 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
+  },
+  runButton: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    bottom: 0,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 12,
+    borderRadius: 4,
+  },
+  runButtonText: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 12,
+    fontWeight: "700",
+    textTransform: "uppercase",
   },
   symbolBtn: {
     paddingHorizontal: 10,

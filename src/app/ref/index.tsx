@@ -235,14 +235,21 @@ function SymbolDetail({ symbol }: { symbol: string }) {
                         </Text>
                       </View>
                     ) : (
-                      <WebView
-                        source={{ html: getExampleHtml(ex) }}
-                        style={[styles.exampleWebView, { backgroundColor: colors.surface }]}
-                        scrollEnabled={false}
-                        javaScriptEnabled
-                        domStorageEnabled
-                        bounces={false}
-                      />
+                      <>
+                        <WebView
+                          source={{ html: getExampleHtml(ex) }}
+                          style={[styles.exampleWebView, { backgroundColor: colors.surface }]}
+                          scrollEnabled={false}
+                          javaScriptEnabled
+                          domStorageEnabled
+                          bounces={false}
+                        />
+                        <View style={[styles.codeBlock, { backgroundColor: colors.surfaceDim, marginTop: 8 }]}>
+                          <Text style={{ fontFamily: "JetBrainsMono", fontSize: 13, lineHeight: 20, color: colors.onSurface }}>
+                            {ex}
+                          </Text>
+                        </View>
+                      </>
                     )}
                   </View>
                 ))}
@@ -482,7 +489,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   exampleWebView: {
-    height: 200,
+    height: 260,
     borderRadius: 8,
     overflow: "hidden",
   },
