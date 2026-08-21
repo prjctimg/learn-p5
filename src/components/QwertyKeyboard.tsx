@@ -3,9 +3,18 @@ import { View, Text, Pressable, ScrollView, StyleSheet, useWindowDimensions, Ges
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useThemeContext } from "./ThemeProvider";
-import { Colors } from "../constants/Colors";
-import { Typography } from "../constants/Typography";
+import { Colors, KeyboardColors } from "../constants/Colors";
 import { pairedSymbols, singleSymbols } from "../data/keyboardLayout";
+import {
+  KEYBOARD_ROWS,
+  LONG_PRESS_DELAY,
+  POPUP_DISMISS_DELAY,
+  ALT_CELL_WIDTH,
+  ALT_CELL_HEIGHT,
+  POPUP_TOP_OFFSET,
+  KeySpec,
+} from "../data/keyboardRedesignLayout";
+import { ShiftIcon, BackspaceIcon, EnterIcon, SpaceIcon } from "./KeyboardIcons";
 
 interface QwertyKeyboardProps {
   onInsert: (text: string, cursorOffset?: number) => void;
@@ -17,80 +26,23 @@ interface QwertyKeyboardProps {
   height?: number;
 }
 
-interface QwertyLetterKey {
-  type: "letter";
-  primary: string;
-  secondary?: string | string[];
+// Design-space ratios relative to 1U (= 90px on the 1000px reference canvas).
+const GAP_RATIO = 8 / 90;
+const VGAP_RATIO = 10 / 90;
+const PAD_RATIO = 12 / 90;
+const ROWS_HEIGHT_UNITS = KEYBOARD_ROWS.reduce((acc, r) => acc + r.keyHeight / 90, 0);
+const TOOLBAR_RESERVE = 58;
+
+const BACKSPACE_DELAY = 300;
+const BACKSPACE_INTERVAL = 60;
+
+function getAlternates(key: KeySpec): string[] {
+  return key.secondary ?? [];
 }
 
-// Normalize a key's alternates into an array. A scalar secondary (e.g. "1"
-// on the 'q' key) is treated as a single alternate; an array lets a single
-// key expose several long-press glyphs (iOS-keyboard style).
-function getAlternates(key: QwertyLetterKey): string[] {
-  if (!key.secondary) return [];
-  return Array.isArray(key.secondary) ? key.secondary : [key.secondary];
+function isLetter(primary: string) {
+  return /^[a-z]$/.test(primary);
 }
-
-interface QwertyActionKey {
-  type: "action";
-  action: "backspace" | "enter" | "shift";
-}
-
-type QwertyKey = QwertyLetterKey | QwertyActionKey;
-
-const ROW1: QwertyKey[] = [
-  { type: "letter", primary: "q", secondary: "1" },
-  { type: "letter", primary: "w", secondary: "2" },
-  { type: "letter", primary: "e", secondary: "3" },
-  { type: "letter", primary: "r", secondary: "4" },
-  { type: "letter", primary: "t", secondary: "5" },
-  { type: "letter", primary: "y", secondary: "6" },
-  { type: "letter", primary: "u", secondary: "7" },
-  { type: "letter", primary: "i", secondary: "8" },
-  { type: "letter", primary: "o", secondary: "9" },
-  { type: "letter", primary: "p", secondary: "0" },
-  { type: "action", action: "backspace" },
-];
-
-const ROW2: QwertyKey[] = [
-  { type: "letter", primary: "a", secondary: ["@", "&", "1"] },
-  { type: "letter", primary: "s", secondary: ["$", "%", "2"] },
-  { type: "letter", primary: "d" },
-  { type: "letter", primary: "f" },
-  { type: "letter", primary: "g" },
-  { type: "letter", primary: "h", secondary: ["#", "~", "3"] },
-  { type: "letter", primary: "j" },
-  { type: "letter", primary: "k" },
-  { type: "letter", primary: "l", secondary: [";", ":", "4"] },
-  { type: "action", action: "enter" },
-];
-
-const ROW3: QwertyKey[] = [
-  { type: "action", action: "shift" },
-  { type: "letter", primary: "z" },
-  { type: "letter", primary: "x", secondary: "*" },
-  { type: "letter", primary: "c", secondary: "(" },
-  { type: "letter", primary: "v", secondary: ")" },
-  { type: "letter", primary: "b", secondary: "[" },
-  { type: "letter", primary: "n", secondary: "]" },
-  { type: "letter", primary: "m", secondary: "-" },
-  { type: "letter", primary: ",", secondary: "<" },
-  { type: "letter", primary: ".", secondary: ">" },
-  { type: "letter", primary: "/", secondary: "?" },
-];
-
-const LONG_PRESS_DELAY = 280;
-const POPUP_DISMISS_DELAY = 1200;
-const ALT_CELL_WIDTH = 38;
-const ALT_CELL_HEIGHT = 58;
-const POPUP_TOP_OFFSET = 6;
-const CONTAINER_PADDING = 4;
-const KEY_GAP = 3;
-const ACTION_KEY_RATIO = 1.5;
-const ROW1_LETTER_COUNT = 10;
-const ROW1_UNITS = ROW1_LETTER_COUNT + ACTION_KEY_RATIO;
-const TOOLBAR_HEIGHT = 40;
-const BOTTOM_EXTRA = 4;
 
 export default function QwertyKeyboard({
   onInsert,
@@ -101,12 +53,19 @@ export default function QwertyKeyboard({
   onHideKeyboard,
   height = 300,
 }: QwertyKeyboardProps) {
-  const { colorScheme, derivedColors } = useThemeContext();
+  const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const kb = KeyboardColors[colorScheme === "dark" ? "dark" : "light"];
   const { width: screenWidth } = useWindowDimensions();
+
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressKey = useRef<string | null>(null);
   const popupDismissTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const backspaceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const backspaceInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+  const onBackspaceRef = useRef(onBackspace);
+  onBackspaceRef.current = onBackspace;
+
   const [longPressActive, setLongPressActive] = useState(false);
   const [popupKey, setPopupKey] = useState<string | null>(null);
   const [popupLayout, setPopupLayout] = useState<{ x: number; y: number } | null>(null);
@@ -114,103 +73,158 @@ export default function QwertyKeyboard({
   const [popupRowLeft, setPopupRowLeft] = useState(0);
   const [popupWidth, setPopupWidth] = useState(ALT_CELL_WIDTH);
   const [shifted, setShifted] = useState(false);
+  const [symPage, setSymPage] = useState(false);
   const [popupSelected, setPopupSelected] = useState(0);
-  const keyLayouts = useRef<Record<string, { x: number; y: number; w: number; h: number }>>({});
   const keyRefs = useRef<Record<string, View | null>>({});
   const containerRef = useRef<View>(null);
   const containerScreenXRef = useRef(0);
 
+  // All key dimensions scale linearly from the horizontal fit (10 units plus
+  // outer padding and 9 inter-key gaps span the full width), then shrink
+  // uniformly if the allotted height cannot fit the natural stack.
   const dims = useMemo(() => {
-    const availWidth = screenWidth - CONTAINER_PADDING * 2;
-    const keySize = Math.floor((availWidth - (ROW1_LETTER_COUNT + 1) * KEY_GAP) / ROW1_UNITS * 1.003);
-    const rowsArea = height - TOOLBAR_HEIGHT - BOTTOM_EXTRA;
-    const keyHeight = Math.max(44, Math.floor((rowsArea - KEY_GAP * 3) / 4 * 1.003));
+    const rawUnit = screenWidth / (10 + 2 * PAD_RATIO + 9 * GAP_RATIO);
+    const naturalRows = rawUnit * (ROWS_HEIGHT_UNITS + 4 * VGAP_RATIO);
+    const fit = Math.max(0.7, Math.min(1, (height - TOOLBAR_RESERVE) / naturalRows));
+    const u = rawUnit * fit;
+    const hGap = u * GAP_RATIO;
+    const vGap = u * VGAP_RATIO;
+    const padH = u * PAD_RATIO;
+    const contentW = screenWidth - 2 * padH;
+    const rowHeights = KEYBOARD_ROWS.map((r) => (r.keyHeight / 90) * u);
+    const sideActionW = (contentW - 7 * u - 8 * hGap) / 2;
+    const spaceW = contentW - 4 * hGap - (1.44 + 0.89 + 0.89 + 1.44) * u;
     return {
-      keySize,
-      actionKeyWidth: Math.floor(keySize * ACTION_KEY_RATIO),
-      keyHeight,
+      u,
+      hGap,
+      vGap,
+      padH,
+      rowHeights,
+      sideActionW,
+      spaceW,
+      midInset: 0.5 * (u + hGap),
+      radius: Math.max(3, Math.min(14, u * 0.115)),
+      keyFont: Math.max(13, Math.min(26, Math.round(u * 0.42))),
+      iconSize: Math.max(18, Math.min(34, Math.round(u * 0.5))),
+      smallFont: Math.max(11, Math.min(20, Math.round(u * 0.3))),
     };
   }, [screenWidth, height]);
 
-  const showPopup = useCallback((key: string) => {
-    const row1Key = ROW1.find((k) => k.type === "letter" && k.primary === key);
-    const row2Key = ROW2.find((k) => k.type === "letter" && k.primary === key);
-    const row3Key = ROW3.find((k) => k.type === "letter" && k.primary === key);
-    const found = (row1Key ?? row2Key ?? row3Key) as QwertyLetterKey | undefined;
-    const alts = found ? getAlternates(found) : [];
-    if (!found || alts.length === 0) return;
-    const keyRef = keyRefs.current[key];
-    const container = containerRef.current;
-    if (!keyRef || !container) return;
-    // Measure the keyboard container's screen-absolute x so finger pageX can
-    // be mapped onto the popup row regardless of how the keyboard is inset.
-    container.measure((_fx, _fy, _w, _h, px) => {
-      containerScreenXRef.current = px;
-    });
-    // Measure the key relative to the keyboard container so the popup can be
-    // positioned directly over the pressed key. onLayout would report coords
-    // relative to the key's wrapping View (always 0,0); measureLayout gives
-    // true container-relative {x,y,w,h}.
-    keyRef.measureLayout(
-      container,
-      (x, y, w, h) => {
-        const layout = { x, y, w, h };
-        keyLayouts.current[key] = layout;
-        const popupW = Math.min(screenWidth - 8, Math.max(ALT_CELL_WIDTH, alts.length * ALT_CELL_WIDTH));
-        const centerX = layout.x + layout.w / 2;
-        let left = centerX - popupW / 2;
-        if (left < 4) left = 4;
-        if (left + popupW > screenWidth - 4) left = screenWidth - popupW - 4;
-        setPopupKey(key);
-        setPopupLayout({ x: centerX, y: layout.y });
-        setPopupAlternates(alts);
-        setPopupRowLeft(left);
-        setPopupWidth(popupW);
-        setPopupSelected(0);
-        if (popupDismissTimer.current) clearTimeout(popupDismissTimer.current);
-        popupDismissTimer.current = setTimeout(() => {
-          setPopupKey(null);
-          setPopupLayout(null);
-          setPopupAlternates([]);
-        }, POPUP_DISMISS_DELAY);
-      },
-      () => {
-        // measureLayout failed (e.g. view not yet laid out) — bail out.
-      }
-    );
-  }, [screenWidth]);
-
-  const handlePressIn = useCallback((key: QwertyLetterKey) => {
-    longPressKey.current = key.primary;
-    longPressTimer.current = setTimeout(() => {
-      if (longPressKey.current === key.primary) {
-        const alts = getAlternates(key);
-        if (alts.length > 0) {
-          setLongPressActive(true);
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-          showPopup(key.primary);
-        }
-      }
-    }, LONG_PRESS_DELAY);
-  }, [showPopup]);
-
-  // While the popup is open and the finger is still down on the original
-  // key, Pressable keeps the touch responder (the gesture belongs to the
-  // view that received touchstart). Map pageX → alternate index so the user
-  // can slide their finger to pick a long-press glyph, iOS-style.
-  const handleTouchMove = useCallback((e: GestureResponderEvent) => {
-    if (!popupKey || popupAlternates.length <= 1) return;
-    const globalLeft = containerScreenXRef.current + popupRowLeft;
-    const idx = Math.floor((e.nativeEvent.pageX - globalLeft) / ALT_CELL_WIDTH);
-    const clamped = Math.max(0, Math.min(popupAlternates.length - 1, idx));
-    if (clamped !== popupSelected) {
-      Haptics.selectionAsync().catch(() => {});
-      setPopupSelected(clamped);
+  const findKeySpec = useCallback((primary: string): KeySpec | undefined => {
+    for (const row of KEYBOARD_ROWS) {
+      const found = row.keys.find((k) => k.primary === primary);
+      if (found) return found;
     }
-  }, [popupKey, popupAlternates, popupRowLeft, popupSelected]);
+    return undefined;
+  }, []);
+
+  const clearBackspaceRepeat = useCallback(() => {
+    if (backspaceTimer.current) clearTimeout(backspaceTimer.current);
+    if (backspaceInterval.current) clearInterval(backspaceInterval.current);
+    backspaceTimer.current = null;
+    backspaceInterval.current = null;
+  }, []);
+
+  const startBackspaceRepeat = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    onBackspaceRef.current?.();
+    backspaceTimer.current = setTimeout(() => {
+      backspaceInterval.current = setInterval(() => {
+        onBackspaceRef.current?.();
+      }, BACKSPACE_INTERVAL);
+    }, BACKSPACE_DELAY);
+  }, []);
+
+  const showPopup = useCallback(
+    (key: string) => {
+      const found = findKeySpec(key);
+      const alts = found ? getAlternates(found) : [];
+      if (!found || alts.length === 0) return;
+      const keyRef = keyRefs.current[key];
+      const container = containerRef.current;
+      if (!keyRef || !container) return;
+      container.measure((_fx, _fy, _w, _h, px) => {
+        containerScreenXRef.current = px;
+      });
+      keyRef.measureLayout(
+        container,
+        (x, y, w, h) => {
+          const popupW = Math.min(screenWidth - 8, Math.max(ALT_CELL_WIDTH, alts.length * ALT_CELL_WIDTH));
+          const centerX = x + w / 2;
+          let left = centerX - popupW / 2;
+          if (left < 4) left = 4;
+          if (left + popupW > screenWidth - 4) left = screenWidth - popupW - 4;
+          setPopupKey(key);
+          setPopupLayout({ x: centerX, y });
+          setPopupAlternates(alts);
+          setPopupRowLeft(left);
+          setPopupWidth(popupW);
+          setPopupSelected(0);
+          if (popupDismissTimer.current) clearTimeout(popupDismissTimer.current);
+          popupDismissTimer.current = setTimeout(() => {
+            setPopupKey(null);
+            setPopupLayout(null);
+            setPopupAlternates([]);
+          }, POPUP_DISMISS_DELAY);
+        },
+        () => {}
+      );
+    },
+    [findKeySpec, screenWidth]
+  );
+
+  const handlePressIn = useCallback(
+    (key: KeySpec) => {
+      longPressKey.current = key.primary;
+      longPressTimer.current = setTimeout(() => {
+        if (longPressKey.current === key.primary) {
+          const alts = getAlternates(key);
+          if (alts.length > 0) {
+            setLongPressActive(true);
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+            showPopup(key.primary);
+          }
+        }
+      }, LONG_PRESS_DELAY);
+    },
+    [showPopup]
+  );
+
+  const handleTouchMove = useCallback(
+    (e: GestureResponderEvent) => {
+      if (!popupKey || popupAlternates.length <= 1) return;
+      const globalLeft = containerScreenXRef.current + popupRowLeft;
+      const idx = Math.floor((e.nativeEvent.pageX - globalLeft) / ALT_CELL_WIDTH);
+      const clamped = Math.max(0, Math.min(popupAlternates.length - 1, idx));
+      if (clamped !== popupSelected) {
+        Haptics.selectionAsync().catch(() => {});
+        setPopupSelected(clamped);
+      }
+    },
+    [popupKey, popupAlternates, popupRowLeft, popupSelected]
+  );
+
+  // Resolve the glyph a character key produces given the current modifiers.
+  const resolveGlyph = useCallback(
+    (key: KeySpec) => {
+      const alt = key.secondary?.[0];
+      if (isLetter(key.primary)) {
+        if (symPage && alt) return alt;
+        return shifted ? key.primary.toUpperCase() : key.primary;
+      }
+      if ((shifted || symPage) && alt) return alt;
+      return key.primary;
+    },
+    [shifted, symPage]
+  );
+
+  const commitModifiers = useCallback(() => {
+    if (shifted) setShifted(false);
+    if (symPage) setSymPage(false);
+  }, [shifted, symPage]);
 
   const handlePressOut = useCallback(
-    (key: QwertyLetterKey) => {
+    (key: KeySpec) => {
       if (longPressTimer.current) {
         clearTimeout(longPressTimer.current);
         longPressTimer.current = null;
@@ -230,16 +244,29 @@ export default function QwertyKeyboard({
       if (isLong && alts.length > 0) {
         onInsert(alts[Math.min(selectedIdx, alts.length - 1)] ?? key.primary);
       } else {
-        onInsert(shifted ? key.primary.toUpperCase() : key.primary);
-        if (shifted) setShifted(false);
+        onInsert(resolveGlyph(key));
       }
+      commitModifiers();
     },
-    [longPressActive, onInsert, popupSelected, shifted]
+    [longPressActive, onInsert, popupSelected, resolveGlyph, commitModifiers]
   );
+
+  const handleShiftPress = useCallback(() => {
+    setShifted((s) => !s);
+    setSymPage(false);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+  }, []);
+
+  const handleSymToggle = useCallback(() => {
+    setSymPage((s) => !s);
+    setShifted(false);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+  }, []);
 
   const renderPopup = useCallback(() => {
     if (!popupKey || !popupLayout || popupAlternates.length === 0) return null;
     const top = popupLayout.y - ALT_CELL_HEIGHT - POPUP_TOP_OFFSET;
+    const rowH = dims.rowHeights[0];
 
     return (
       <View
@@ -247,12 +274,11 @@ export default function QwertyKeyboard({
           styles.popup,
           {
             left: popupRowLeft,
-            top: top > 0 ? top : popupLayout.y + dims.keyHeight + POPUP_TOP_OFFSET,
+            top: top > 0 ? top : popupLayout.y + rowH + POPUP_TOP_OFFSET,
             width: popupWidth,
             height: ALT_CELL_HEIGHT,
-            backgroundColor: colors.surfaceContainerHighest,
+            backgroundColor: kb.keyCapPressed,
             borderColor: colors.outlineVariant,
-            padding: 0,
           },
         ]}
         pointerEvents="none"
@@ -268,7 +294,7 @@ export default function QwertyKeyboard({
                   height: ALT_CELL_HEIGHT,
                   alignItems: "center",
                   justifyContent: "center",
-                  backgroundColor: isSelected ? derivedColors.primary : "transparent",
+                  backgroundColor: isSelected ? kb.accent : "transparent",
                 }}
               >
                 <Text
@@ -276,7 +302,7 @@ export default function QwertyKeyboard({
                     fontFamily: "JetBrainsMono",
                     fontSize: isSelected ? 26 : 22,
                     fontWeight: "700",
-                    color: isSelected ? colors.onPrimary : colors.onSurface,
+                    color: isSelected ? "#FFFFFF" : kb.text,
                   }}
                 >
                   {alt}
@@ -287,181 +313,207 @@ export default function QwertyKeyboard({
         </View>
       </View>
     );
-  }, [popupKey, popupLayout, popupAlternates, popupRowLeft, popupWidth, popupSelected,
-      dims.keyHeight, colors, derivedColors]);
+  }, [popupKey, popupLayout, popupAlternates, popupRowLeft, popupWidth, popupSelected, dims.rowHeights, kb, colors.outlineVariant]);
 
-  const renderLetterKey = useCallback(
-    (key: QwertyLetterKey) => {
+  const capStyle = useCallback(
+    (pressed: boolean, isActive: boolean) => ({
+      backgroundColor: pressed || isActive ? kb.keyCapPressed : kb.keyCap,
+    }),
+    [kb]
+  );
+
+  const renderCharKey = useCallback(
+    (key: KeySpec, rowHeight: number) => {
       const isActive = longPressActive && longPressKey.current === key.primary;
       const isPopup = popupKey === key.primary;
-      const primaryAlt = getAlternates(key)[0];
+      const glyph = resolveGlyph(key);
       return (
         <View
           key={key.primary}
-          ref={(r) => { keyRefs.current[key.primary] = r; }}
+          ref={(r) => {
+            keyRefs.current[key.primary] = r;
+          }}
         >
           <Pressable
             onPressIn={() => handlePressIn(key)}
             onPressOut={() => handlePressOut(key)}
             onTouchMove={handleTouchMove}
             style={({ pressed }) => [
+              styles.cap,
               {
-                width: dims.keySize,
-                height: dims.keyHeight,
-                borderRadius: 8,
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: pressed || isActive
-                  ? derivedColors.primaryContainer
-                  : isPopup
-                    ? derivedColors.primaryContainer + "66"
-                    : colors.surfaceContainerHigh,
+                width: key.widthUnits * dims.u,
+                height: rowHeight,
+                borderRadius: dims.radius,
+                ...capStyle(pressed, isActive || isPopup),
               },
             ]}
             accessibilityRole="button"
             accessibilityLabel={key.primary}
           >
-            {primaryAlt ? (
-              <View style={styles.keyContent}>
-                <Text style={[styles.keySuperscript, { color: colors.textSecondary }]}>
-                  {primaryAlt}
-                </Text>
-                <Text
-                  style={[
-                    styles.keyPrimary,
-                    { color: isActive ? derivedColors.primary : colors.onSurface },
-                  ]}
-                >
-                  {shifted ? key.primary.toUpperCase() : key.primary}
-                </Text>
-              </View>
-            ) : (
-              <Text
-                style={[
-                  styles.keyPrimary,
-                  { color: isActive ? derivedColors.primary : colors.onSurface },
-                ]}
-              >
-                {shifted ? key.primary.toUpperCase() : key.primary}
-              </Text>
-            )}
+            <Text style={{ fontFamily: "JetBrainsMono", fontSize: dims.keyFont, fontWeight: "400", color: kb.text }}>
+              {glyph}
+            </Text>
           </Pressable>
         </View>
       );
     },
-    [longPressActive, popupKey, colors, derivedColors, handlePressIn, handlePressOut, handleTouchMove, dims, shifted]
+    [longPressActive, popupKey, kb, dims, capStyle, handlePressIn, handlePressOut, handleTouchMove, resolveGlyph]
   );
 
-  const handleShiftPress = useCallback(() => {
-    setShifted((s) => !s);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-  }, []);
-
   const renderActionKey = useCallback(
-    (key: QwertyActionKey) => {
+    (key: KeySpec, rowHeight: number) => {
+      const width =
+        key.action === "space"
+          ? dims.spaceW
+          : key.action === "enter" || key.action === "symbolToggle"
+            ? 1.44 * dims.u
+            : dims.sideActionW;
+
       if (key.action === "shift") {
         return (
           <Pressable
-            key="shift"
+            key={key.primary}
             onPress={handleShiftPress}
             style={({ pressed }) => [
-              {
-                width: dims.actionKeyWidth,
-                height: dims.keyHeight,
-                borderRadius: 8,
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: pressed || shifted
-                  ? derivedColors.primary
-                  : colors.surfaceContainerHigh,
-              },
+              styles.cap,
+              { width, height: rowHeight, borderRadius: dims.radius, ...capStyle(pressed, false) },
             ]}
             accessibilityRole="button"
             accessibilityLabel={shifted ? "Shift (active)" : "Shift"}
           >
-            <MaterialCommunityIcons
-              name="arrow-up-bold"
-              size={20}
-              color={shifted ? colors.onPrimary : colors.onSurfaceVariant}
-            />
+            <ShiftIcon size={dims.iconSize} color={shifted ? kb.accent : kb.textMuted} />
           </Pressable>
         );
       }
-      const isBackspace = key.action === "backspace";
-      const onPress = isBackspace ? onBackspace : onNewline;
-      const iconName = isBackspace ? "backspace" : "keyboard-return";
-      const label = isBackspace ? "Backspace" : "Enter";
+
+      if (key.action === "backspace") {
+        return (
+          <Pressable
+            key={key.primary}
+            onPressIn={startBackspaceRepeat}
+            onPressOut={clearBackspaceRepeat}
+            style={({ pressed }) => [
+              styles.cap,
+              { width, height: rowHeight, borderRadius: dims.radius, ...capStyle(pressed, false) },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Backspace"
+          >
+            <BackspaceIcon size={dims.iconSize} color={kb.text} />
+          </Pressable>
+        );
+      }
+
+      if (key.action === "enter") {
+        return (
+          <Pressable
+            key={key.primary}
+            onPress={onNewline}
+            style={({ pressed }) => [
+              styles.cap,
+              { width, height: rowHeight, borderRadius: dims.radius, ...capStyle(pressed, false) },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Enter"
+          >
+            <EnterIcon size={dims.iconSize} color={kb.text} />
+          </Pressable>
+        );
+      }
+
+      if (key.action === "space") {
+        return (
+          <Pressable
+            key={key.primary}
+            onPress={() => onInsert(" ")}
+            style={({ pressed }) => [
+              styles.cap,
+              { width, height: rowHeight, borderRadius: dims.radius, ...capStyle(pressed, false) },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Space"
+          >
+            <SpaceIcon size={dims.iconSize - 2} color={kb.textMuted} />
+          </Pressable>
+        );
+      }
+
+      // symbolToggle (!#1)
       return (
         <Pressable
-          key={key.action}
-          onPress={onPress}
+          key={key.primary}
+          onPress={handleSymToggle}
           style={({ pressed }) => [
-            {
-              width: dims.actionKeyWidth,
-              height: dims.keyHeight,
-              borderRadius: 8,
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: pressed
-                ? derivedColors.primaryContainer
-                : colors.surfaceContainerHigh,
-            },
+            styles.cap,
+            { width, height: rowHeight, borderRadius: dims.radius, ...capStyle(pressed, false) },
           ]}
           accessibilityRole="button"
-          accessibilityLabel={label}
+          accessibilityLabel="Symbols"
         >
-          <MaterialCommunityIcons
-            name={iconName}
-            size={22}
-            color={colors.onSurfaceVariant}
-          />
+          <Text style={{ fontFamily: "JetBrainsMono", fontSize: dims.smallFont, fontWeight: "400", color: kb.text }}>
+            {key.primary}
+          </Text>
         </Pressable>
       );
     },
-    [onBackspace, onNewline, colors, derivedColors, dims, shifted, handleShiftPress]
+    [dims, kb, shifted, capStyle, handleShiftPress, handleSymToggle, startBackspaceRepeat, clearBackspaceRepeat, onNewline, onInsert]
   );
 
   const renderKey = useCallback(
-    (key: QwertyKey) => {
-      if (key.type === "action") return renderActionKey(key);
-      return renderLetterKey(key);
+    (key: KeySpec, rowHeight: number) => {
+      if (key.action) return renderActionKey(key, rowHeight);
+      return renderCharKey(key, rowHeight);
     },
-    [renderLetterKey, renderActionKey]
+    [renderCharKey, renderActionKey]
   );
 
-  const handleSymbolInsert = useCallback((sym: string) => {
-    onInsert(sym);
-  }, [onInsert]);
+  const handleSymbolInsert = useCallback(
+    (sym: string) => {
+      onInsert(sym);
+    },
+    [onInsert]
+  );
 
-  const handlePairedInsert = useCallback((open: string, close: string) => {
-    onInsert(open + close, 1);
-  }, [onInsert]);
+  const handlePairedInsert = useCallback(
+    (open: string, close: string) => {
+      onInsert(open + close, 1);
+    },
+    [onInsert]
+  );
 
   return (
     <View
       ref={containerRef}
       style={[
         styles.container,
-        { backgroundColor: colors.surfaceContainerLow, height },
+        { backgroundColor: kb.background, height, paddingHorizontal: dims.padH, gap: dims.vGap },
       ]}
     >
       {renderPopup()}
-      <View style={styles.toolbarRow}>
+
+      <View style={[styles.toolbarRow, { marginTop: 4 }]}>
         <View style={styles.toolbarFixed}>
           <Pressable
             onPress={onToggleProgramming}
             style={({ pressed }) => [
               styles.toolbarBtn,
-              { backgroundColor: pressed ? derivedColors.primaryContainer : derivedColors.primaryContainer + "33" },
+              { backgroundColor: pressed ? kb.toolbarKeyPressed : kb.toolbarKey },
             ]}
             accessibilityRole="button"
             accessibilityLabel="Switch to programming keyboard"
           >
-            <MaterialCommunityIcons
-              name="code-tags"
-              size={20}
-              color={derivedColors.primary}
-            />
+            <MaterialCommunityIcons name="code-tags" size={20} color={kb.accent} />
+          </Pressable>
+          <Pressable
+            onPress={() => onHideKeyboard?.()}
+            style={({ pressed }) => [
+              styles.toolbarBtn,
+              { backgroundColor: pressed ? kb.toolbarKeyPressed : kb.toolbarKey },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Hide keyboard"
+          >
+            <MaterialCommunityIcons name="chevron-down" size={20} color={kb.textMuted} />
           </Pressable>
         </View>
         <ScrollView
@@ -476,14 +528,12 @@ export default function QwertyKeyboard({
               onPress={() => handlePairedInsert(pair.open, pair.close)}
               style={({ pressed }) => [
                 styles.symbolButton,
-                { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainerHigh },
+                { backgroundColor: pressed ? kb.toolbarKeyPressed : kb.toolbarKey },
               ]}
               accessibilityRole="button"
               accessibilityLabel={pair.display}
             >
-              <Text style={[styles.symbolText, { color: colors.onSurfaceVariant }]}>
-                {pair.display}
-              </Text>
+              <Text style={[styles.symbolText, { color: kb.text }]}>{pair.display}</Text>
             </Pressable>
           ))}
           {singleSymbols.map((sym) => (
@@ -492,76 +542,30 @@ export default function QwertyKeyboard({
               onPress={() => handleSymbolInsert(sym)}
               style={({ pressed }) => [
                 styles.symbolButton,
-                { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainerHigh },
+                { backgroundColor: pressed ? kb.toolbarKeyPressed : kb.toolbarKey },
               ]}
               accessibilityRole="button"
               accessibilityLabel={sym}
             >
-              <Text style={[styles.symbolText, { color: colors.onSurfaceVariant }]}>
-                {sym}
-              </Text>
+              <Text style={[styles.symbolText, { color: kb.text }]}>{sym}</Text>
             </Pressable>
           ))}
         </ScrollView>
       </View>
 
-      <View style={styles.keysContainer}>
-        <View style={[styles.row, { gap: KEY_GAP }]}>
-          {ROW1.map(renderKey)}
-        </View>
-        <View style={[styles.row, { gap: KEY_GAP }, { paddingLeft: dims.keySize * 0.5 + KEY_GAP }]}>
-          {ROW2.map(renderKey)}
-        </View>
-        <View style={[styles.row, { gap: KEY_GAP }, { paddingLeft: dims.keySize * 0.3 + KEY_GAP }]}>
-          {ROW3.map(renderKey)}
-        </View>
-
-        <View style={[styles.bottomRow, { gap: KEY_GAP }]}>
-          <View style={{ width: dims.keySize + 8 }} />
-
-          <Pressable
-            onPress={() => onInsert(" ")}
-            style={({ pressed }) => [
-              styles.spaceBar,
-              {
-                height: dims.keyHeight,
-                backgroundColor: pressed
-                  ? derivedColors.primaryContainer
-                  : colors.surfaceContainerHigh,
-              },
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel="Space"
+      <View style={[styles.rowsArea, { gap: dims.vGap }]}>
+        {KEYBOARD_ROWS.map((row, rowIdx) => (
+          <View
+            key={`row-${rowIdx}`}
+            style={{
+              flexDirection: "row",
+              gap: dims.hGap,
+              paddingLeft: row.insetUnits ? row.insetUnits * dims.u + dims.hGap / 2 : undefined,
+            }}
           >
-            <Text style={[styles.spaceText, { color: colors.onSurfaceVariant }]}>
-              space
-            </Text>
-          </Pressable>
-
-          <Pressable
-            onPress={() => onHideKeyboard?.()}
-            style={({ pressed }) => [
-              {
-                width: dims.keySize + 8,
-                height: dims.keyHeight,
-                borderRadius: 8,
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: pressed
-                  ? derivedColors.primaryContainer
-                  : colors.surfaceContainerHigh,
-              },
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel="Hide keyboard"
-          >
-            <MaterialCommunityIcons
-              name="chevron-down"
-              size={22}
-              color={derivedColors.primary}
-            />
-          </Pressable>
-        </View>
+            {row.keys.map((key) => renderKey(key, dims.rowHeights[rowIdx]))}
+          </View>
+        ))}
       </View>
     </View>
   );
@@ -569,18 +573,18 @@ export default function QwertyKeyboard({
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 8,
+    paddingTop: 6,
+    paddingBottom: 6,
   },
   toolbarRow: {
     flexDirection: "row",
     position: "relative",
     alignItems: "stretch",
-    marginBottom: 6,
   },
   toolbarFixed: {
     flexDirection: "row",
     alignItems: "center",
-    paddingLeft: 8,
+    gap: 6,
     zIndex: 10,
   },
   toolbarBtn: {
@@ -610,55 +614,17 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   symbolText: {
-    ...Typography.mono,
-    fontSize: 18,
-  },
-  keysContainer: {
-    alignItems: "center",
-    paddingHorizontal: CONTAINER_PADDING,
-    gap: KEY_GAP,
-  },
-  row: {
-    flexDirection: "row",
-  },
-  bottomRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "100%",
-    paddingHorizontal: 4,
-  },
-  keyContent: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  keySuperscript: {
     fontFamily: "JetBrainsMono",
-    fontSize: 9,
-    fontWeight: "600",
-    lineHeight: 11,
-    marginBottom: -2,
+    fontSize: 17,
+    fontWeight: "400",
   },
-  keyPrimary: {
-    fontFamily: "JetBrainsMono",
-    fontSize: 16,
-    fontWeight: "500",
-  },
-  keySecondary: {
-    ...Typography.mono,
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  spaceBar: {
+  rowsArea: {
     flex: 1,
-    borderRadius: 8,
+    justifyContent: "flex-end",
+  },
+  cap: {
     alignItems: "center",
     justifyContent: "center",
-  },
-  spaceText: {
-    ...Typography.mono,
-    fontSize: 14,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
   },
   popup: {
     position: "absolute",
@@ -672,10 +638,5 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 6,
-  },
-  popupText: {
-    fontFamily: "JetBrainsMono",
-    fontSize: 24,
-    fontWeight: "700",
   },
 });

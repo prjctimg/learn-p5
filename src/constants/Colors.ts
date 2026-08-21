@@ -83,4 +83,33 @@ export const Colors = {
   },
 } as const;
 
+// Dedicated palette for the custom keyboards, kept separate from the flat
+// theme record so consumers that treat Colors[scheme] as Record<string,string>
+// stay type-safe. Light values invert the dark design; the blue accent is
+// shared by both modes.
+export const KeyboardColors = {
+  light: {
+    background: "#F5F5F5",
+    keyCap: "#E0E0E0",
+    keyCapPressed: "#CFCFCF",
+    text: "#1A1A1A",
+    textMuted: "#6B7280",
+    accent: "#2B82F6",
+    toolbarKey: "#E0E0E0",
+    toolbarKeyPressed: "#CFCFCF",
+  },
+  dark: {
+    background: "#121212",
+    keyCap: "#2A2A2E",
+    keyCapPressed: "#3A3A3E",
+    text: "#FFFFFF",
+    textMuted: "#9CA3AF",
+    accent: "#2B82F6",
+    toolbarKey: "#2A2A2E",
+    toolbarKeyPressed: "#3A3A3E",
+  },
+} as const;
+
+export type KeyboardColorScheme = keyof typeof KeyboardColors;
+
 export type ThemeColorScheme = keyof typeof Colors;

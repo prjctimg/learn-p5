@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { View, Text, Pressable, ScrollView, Modal, StyleSheet, Animated } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useThemeContext } from "./ThemeProvider";
-import { Colors } from "../constants/Colors";
+import { Colors, KeyboardColors } from "../constants/Colors";
 import { Spacing } from "../constants/Spacing";
 import { Typography } from "../constants/Typography";
 import { P5_SYMBOLS } from "../data/reference";
@@ -26,8 +26,9 @@ const BACKSPACE_DELAY = 300;
 const BACKSPACE_INTERVAL = 60;
 
 export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], onToggleKeyboard, onToggleQwerty, onBackspace, onNewline, onFormat, onOpenReference, keyboardVisible = true, usedFunctions = [], height = 280 }: ProgrammingKeyboardProps) {
- const { colorScheme, derivedColors } = useThemeContext();
+ const { colorScheme } = useThemeContext();
  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+ const kb = KeyboardColors[colorScheme === "dark" ? "dark" : "light"];
  const [hintType, setHintType] = useState<"string" | "array" | null>(null);
  const [popupSymbol, setPopupSymbol] = useState<string | null>(null);
  const popupAnim = useRef(new Animated.Value(0)).current;
@@ -110,44 +111,44 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
  }, []);
 
  return (
- <View style={[styles.container, { backgroundColor: colors.surfaceContainerLow, height }]}>
+ <View style={[styles.container, { backgroundColor: kb.background, height }]}>
  <View style={styles.toolbarRow}>
   <View style={styles.toolbarFixed}>
-  <Pressable
-  onPress={onToggleQwerty}
-  style={({ pressed }) => [
-  styles.keyboardIcon,
-  { backgroundColor: pressed ? derivedColors.primaryContainer : derivedColors.primaryContainer + "33" },
-  ]}
-  accessibilityRole="button"
-  accessibilityLabel="QWERTY keyboard"
-  >
-  <MaterialCommunityIcons name="keyboard" size={18} color={derivedColors.primary} />
-  </Pressable>
-  <Pressable
-  onPressIn={startBackspaceRepeat}
-  onPressOut={clearBackspaceRepeat}
-  style={({ pressed }) => [
-  styles.keyboardIcon,
-  { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
-  ]}
-  accessibilityRole="button"
-  accessibilityLabel="Backspace"
-  >
-  <MaterialCommunityIcons name="backspace" size={18} color={colors.onSurfaceVariant} />
-  </Pressable>
-  <Pressable
-  onPress={onNewline}
-  style={({ pressed }) => [
-  styles.keyboardIcon,
-  { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
-  ]}
-  accessibilityRole="button"
-  accessibilityLabel="New line"
-  >
-  <MaterialCommunityIcons name="keyboard-return" size={18} color={colors.onSurfaceVariant} />
-  </Pressable>
-  </View>
+   <Pressable
+   onPress={onToggleQwerty}
+   style={({ pressed }) => [
+   styles.keyboardIcon,
+   { backgroundColor: pressed ? kb.toolbarKeyPressed : kb.toolbarKey },
+   ]}
+   accessibilityRole="button"
+   accessibilityLabel="QWERTY keyboard"
+   >
+   <MaterialCommunityIcons name="keyboard" size={18} color={kb.accent} />
+   </Pressable>
+   <Pressable
+   onPressIn={startBackspaceRepeat}
+   onPressOut={clearBackspaceRepeat}
+   style={({ pressed }) => [
+   styles.keyboardIcon,
+   { backgroundColor: pressed ? kb.toolbarKeyPressed : kb.toolbarKey },
+   ]}
+   accessibilityRole="button"
+   accessibilityLabel="Backspace"
+   >
+   <MaterialCommunityIcons name="backspace" size={18} color={kb.textMuted} />
+   </Pressable>
+   <Pressable
+   onPress={onNewline}
+   style={({ pressed }) => [
+   styles.keyboardIcon,
+   { backgroundColor: pressed ? kb.toolbarKeyPressed : kb.toolbarKey },
+   ]}
+   accessibilityRole="button"
+   accessibilityLabel="New line"
+   >
+   <MaterialCommunityIcons name="keyboard-return" size={18} color={kb.textMuted} />
+   </Pressable>
+   </View>
  <ScrollView
  horizontal
  showsHorizontalScrollIndicator={false}
@@ -164,14 +165,14 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
  styles.symbolButton,
  {
  backgroundColor: hinted
- ? pressed ? derivedColors.primaryContainer : derivedColors.primaryContainer + "4D"
- : pressed ? colors.outlineVariant : colors.surfaceContainer,
+ ? kb.accent + "33"
+ : pressed ? kb.toolbarKeyPressed : kb.toolbarKey,
  },
  ]}
  accessibilityRole="button"
  accessibilityLabel={pair.display}
  >
- <Text style={[styles.symbolText, { color: hinted ? colors.primary : colors.onSurfaceVariant }]}>
+ <Text style={[styles.symbolText, { color: hinted ? kb.accent : kb.text }]}>
  {pair.display}
  </Text>
  </Pressable>
@@ -183,17 +184,34 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
  onPress={() => handleSinglePress(sym)}
  style={({ pressed }) => [
  styles.symbolButton,
- { backgroundColor: pressed ? colors.outlineVariant : colors.surfaceContainer },
+ { backgroundColor: pressed ? kb.toolbarKeyPressed : kb.toolbarKey },
  ]}
  accessibilityRole="button"
  accessibilityLabel={sym}
  >
- <Text style={[styles.symbolText, { color: colors.onSurfaceVariant }]}>
+ <Text style={[styles.symbolText, { color: kb.text }]}>
  {sym}
  </Text>
  </Pressable>
 ))}
  </ScrollView>
+ </View>
+
+ <View style={styles.numberRow}>
+ {["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"].map((digit) => (
+ <Pressable
+ key={digit}
+ onPress={() => handleSinglePress(digit)}
+ style={({ pressed }) => [
+ styles.numberKey,
+ { backgroundColor: pressed ? kb.keyCapPressed : kb.keyCap },
+ ]}
+ accessibilityRole="button"
+ accessibilityLabel={digit}
+ >
+ <Text style={[styles.numberKeyText, { color: kb.text }]}>{digit}</Text>
+ </Pressable>
+ ))}
  </View>
 
  {exerciseSymbols.length > 0 && (
@@ -205,12 +223,12 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
  onLongPress={() => handleExerciseLongPress(sym)}
  style={({ pressed }) => [
  styles.exerciseKey,
- { backgroundColor: pressed ? derivedColors.primaryContainer : colors.surfaceContainer },
+ { backgroundColor: pressed ? kb.keyCapPressed : kb.keyCap },
  ]}
  accessibilityRole="button"
  accessibilityLabel={sym}
  >
-  <Text style={[styles.exerciseKeyText, { color: derivedColors.primary }]}>
+  <Text style={[styles.exerciseKeyText, { color: kb.accent }]}>
  {sym}
  </Text>
  </Pressable>
@@ -231,17 +249,17 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
  styles.functionKey,
  {
  backgroundColor: isDisabled
- ? colors.surfaceContainerHigh
+ ? kb.keyCap
  : pressed
- ? derivedColors.primaryContainer
- : colors.surfaceContainerHigh,
+ ? kb.keyCapPressed
+ : kb.keyCap,
  opacity: isDisabled ? 0.4 : 1,
  },
  ]}
  accessibilityRole="button"
  accessibilityLabel={fn.label}
  >
- <Text style={[styles.functionKeyText, { color: isDisabled ? colors.onSurfaceVariant : derivedColors.primary }]}>
+ <Text style={[styles.functionKeyText, { color: isDisabled ? kb.textMuted : kb.accent }]}>
  {fn.label}
  </Text>
  </Pressable>
@@ -251,23 +269,23 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
 
   <Modal transparent visible={popupSymbol !== null} onRequestClose={() => setPopupSymbol(null)}>
   <Pressable style={styles.popupOverlay} onPress={() => setPopupSymbol(null)}>
-  <Animated.View style={[styles.popupCard, { backgroundColor: colors.surfaceContainerHigh, opacity: popupAnim, transform: [{ scale: popupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) }] }]} onStartShouldSetResponder={() => true}>
-  <ScrollView showsVerticalScrollIndicator={false} style={{ flexShrink: 1 }} contentContainerStyle={{ flexGrow: 0 }}>
-  {popupSymbol && (() => {
-  const ref = P5_SYMBOLS.find(s => s.name === popupSymbol);
-  return ref ? (
-  <>
-  <Text style={[popupTextStyles.popupTitle, { color: colors.onSurface, backgroundColor: colors.surfaceContainer, borderColor: colors.outlineVariant}]}>{ref.syntax}</Text>
-  <Text style={[popupTextStyles.popupDesc, { color: colors.onSurfaceVariant }]}>{ref.description}</Text>
-  {ref.parameters.map(p => (
-  <Text key={p.name} style={[popupTextStyles.popupParam, { color: colors.onSurfaceVariant }]}>
-    <Text style={{ fontFamily: "JetBrainsMono", color: derivedColors.primary, fontWeight: "700" }}>{p.name}</Text>
-    {' '}<Text style={{ fontFamily: "JetBrainsMono", fontSize: 11, color: derivedColors.primary }}>({p.type})</Text>: {p.description}
-  </Text>
+   <Animated.View style={[styles.popupCard, { backgroundColor: kb.keyCap, opacity: popupAnim, transform: [{ scale: popupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) }] }]} onStartShouldSetResponder={() => true}>
+   <ScrollView showsVerticalScrollIndicator={false} style={{ flexShrink: 1 }} contentContainerStyle={{ flexGrow: 0 }}>
+   {popupSymbol && (() => {
+   const ref = P5_SYMBOLS.find(s => s.name === popupSymbol);
+   return ref ? (
+   <>
+   <Text style={[popupTextStyles.popupTitle, { color: kb.text, backgroundColor: kb.toolbarKey, borderColor: colors.outlineVariant}]}>{ref.syntax}</Text>
+   <Text style={[popupTextStyles.popupDesc, { color: kb.textMuted }]}>{ref.description}</Text>
+   {ref.parameters.map(p => (
+   <Text key={p.name} style={[popupTextStyles.popupParam, { color: kb.textMuted }]}>
+     <Text style={{ fontFamily: "JetBrainsMono", color: kb.accent, fontWeight: "700" }}>{p.name}</Text>
+     {' '}<Text style={{ fontFamily: "JetBrainsMono", fontSize: 11, color: kb.accent }}>({p.type})</Text>: {p.description}
+   </Text>
 ))}
   </>
 ) : (
-  <Text style={[popupTextStyles.popupTitle, { color: colors.onSurface }]}>{popupSymbol}</Text>
+   <Text style={[popupTextStyles.popupTitle, { color: kb.text }]}>{popupSymbol}</Text>
 );
   })()}
   </ScrollView>
@@ -279,12 +297,12 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,
-    backgroundColor: pressed ? derivedColors.primaryContainer : colors.surfaceContainer,
+    backgroundColor: pressed ? kb.keyCapPressed : kb.toolbarKey,
   })}
   accessibilityRole="button"
   accessibilityLabel="Close reference"
   >
-  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 12, fontWeight: "700", color: derivedColors.primary }}>Close</Text>
+  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 12, fontWeight: "700", color: kb.accent }}>Close</Text>
   </Pressable>
   </Animated.View>
   </Pressable>
@@ -378,6 +396,22 @@ const styles = StyleSheet.create({
  symbolText: {
  ...Typography.mono,
  fontSize: 18,
+ },
+ numberRow: {
+ flexDirection: "row",
+ paddingHorizontal: Spacing.sm,
+ paddingTop: Spacing.xs,
+ gap: 6,
+ },
+ numberKey: {
+ flex: 1,
+ paddingVertical: 8,
+ alignItems: "center",
+ justifyContent: "center",
+ borderRadius: Spacing.sm,
+ },
+ numberKeyText: {
+ ...Typography.monoLabel,
  },
  exerciseRow: {
  flexDirection: "row",
