@@ -11,6 +11,7 @@ export const STORAGE_KEYS = {
   streakLastVisit: "streak_last_visit",
   streakLongest: "streak_longest",
   streakToastPending: "streak_toast_pending",
+  didYouKnowLastShown: "did_you_know_last_shown",
   settingCodeFontSize: "setting_codeFontSize",
   settingCtaColor: "setting_ctaColor",
   settingDisableSystemKeyboard: "setting_disableSystemKeyboard",

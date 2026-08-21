@@ -135,69 +135,84 @@ export default function StreakToast({
  const prevTier = tierIdx > 0 ? STREAK_TIERS[tierIdx - 1] : 0;
  const isMilestone = STREAK_TIERS.includes(streakCount);
 
- return (
- <Animated.View
- style={[
- styles.container,
- {
- backgroundColor: colors.surfaceContainerHighest,
- transform: [{ translateY }],
- opacity,
- paddingTop: insets.top + 8,
- },
- ]}
- >
- <View style={styles.content}>
- <MaterialCommunityIcons
- name={isMilestone ? "trophy" : "fire"}
- size={22}
- color={isMilestone ? colors.success : colors.cta}
- />
- <View style={styles.textWrap}>
- <Text style={[styles.title, { color: colors.onSurface }]}>
- {getMilestoneTitle(streakCount)}
- </Text>
- <Text style={[styles.subtitle, { color: colors.onSurfaceVariant }]}>
- {prevTier > 0 ? `${prevTier}+ days` : "Getting started"} ·{" "}
- <Text style={[styles.count, { color: derivedColors.primary }]}>
- {displayCount}
- </Text>
- {isMilestone && (
- <Text style={{ color: derivedColors.primary, fontWeight: "700" }}>
- {" "}✓
- </Text>
+  return (
+  <Animated.View
+  pointerEvents="box-none"
+  style={[
+  styles.wrap,
+  {
+  transform: [{ translateY }],
+  opacity,
+  },
+  ]}
+  >
+  <View
+  style={[
+  styles.card,
+  {
+  backgroundColor: colors.surfaceContainerHighest,
+  marginTop: insets.top + 8,
+  maxWidth: 480,
+  },
+  ]}
+  >
+  <View style={styles.content}>
+  <MaterialCommunityIcons
+  name={isMilestone ? "trophy" : "fire"}
+  size={22}
+  color={isMilestone ? colors.success : colors.cta}
+  />
+  <View style={styles.textWrap}>
+  <Text style={[styles.title, { color: colors.onSurface }]}>
+  {getMilestoneTitle(streakCount)}
+  </Text>
+  <Text style={[styles.subtitle, { color: colors.onSurfaceVariant }]}>
+  {prevTier > 0 ? `${prevTier}+ days` : "Getting started"} ·{" "}
+  <Text style={[styles.count, { color: derivedColors.primary }]}>
+  {displayCount}
+  </Text>
+  {isMilestone && (
+  <Text style={{ color: derivedColors.primary, fontWeight: "700" }}>
+  {" "}✓
+  </Text>
 )}
- </Text>
- </View>
- </View>
- <View style={[styles.progressOuter, { backgroundColor: colors.surfaceDim }]}>
- <Animated.View
- style={[
- styles.progressInner,
- { backgroundColor: derivedColors.primary, width: progressWidth },
- ]}
- />
- </View>
- </Animated.View>
+  </Text>
+  </View>
+  </View>
+  <View style={[styles.progressOuter, { backgroundColor: colors.surfaceDim }]}>
+  <Animated.View
+  style={[
+  styles.progressInner,
+  { backgroundColor: derivedColors.primary, width: progressWidth },
+  ]}
+  />
+  </View>
+  </View>
+  </Animated.View>
 );
 }
 
 const styles = StyleSheet.create({
- container: {
- position: "absolute",
- left: 0,
- right: 0,
- top: 0,
- flexDirection: "column",
- paddingHorizontal: 16,
- paddingBottom: 12,
- shadowColor: "#000",
- shadowOffset: { width: 0, height: 8 },
- shadowOpacity: 0.15,
- shadowRadius: 16,
- elevation: 8,
- zIndex: 1000,
- },
+  wrap: {
+  position: "absolute",
+  left: 0,
+  right: 0,
+  top: 0,
+  alignItems: "center",
+  zIndex: 1000,
+  },
+  card: {
+  width: "100%",
+  marginHorizontal: 16,
+  borderRadius: 16,
+  paddingHorizontal: 16,
+  paddingVertical: 14,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 8 },
+  shadowOpacity: 0.2,
+  shadowRadius: 16,
+  elevation: 8,
+  },
  content: {
  flexDirection: "row",
  alignItems: "center",

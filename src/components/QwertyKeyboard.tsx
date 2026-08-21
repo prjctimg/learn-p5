@@ -68,16 +68,17 @@ export default function QwertyKeyboard({
 
   const [longPressActive, setLongPressActive] = useState(false);
   const [popupKey, setPopupKey] = useState<string | null>(null);
-  const [popupLayout, setPopupLayout] = useState<{ x: number; y: number } | null>(null);
+  // Container-relative top/left used to render the popup, plus the global
+  // page-space left edge used to map finger position → alternate index.
+  const [popupLayout, setPopupLayout] = useState<{ top: number; left: number } | null>(null);
   const [popupAlternates, setPopupAlternates] = useState<string[]>([]);
-  const [popupRowLeft, setPopupRowLeft] = useState(0);
+  const [popupRowLeftGlobal, setPopupRowLeftGlobal] = useState(0);
   const [popupWidth, setPopupWidth] = useState(ALT_CELL_WIDTH);
   const [shifted, setShifted] = useState(false);
   const [symPage, setSymPage] = useState(false);
   const [popupSelected, setPopupSelected] = useState(0);
   const keyRefs = useRef<Record<string, View | null>>({});
   const containerRef = useRef<View>(null);
-  const containerScreenXRef = useRef(0);
 
   // All key dimensions scale linearly from the horizontal fit (10 units plus
   // outer padding and 9 inter-key gaps span the full width), then shrink
@@ -143,21 +144,29 @@ export default function QwertyKeyboard({
       const keyRef = keyRefs.current[key];
       const container = containerRef.current;
       if (!keyRef || !container) return;
-      container.measure((_fx, _fy, _w, _h, px) => {
-        containerScreenXRef.current = px;
-      });
-      keyRef.measureLayout(
-        container,
-        (x, y, w, h) => {
-          const popupW = Math.min(screenWidth - 8, Math.max(ALT_CELL_WIDTH, alts.length * ALT_CELL_WIDTH));
-          const centerX = x + w / 2;
-          let left = centerX - popupW / 2;
-          if (left < 4) left = 4;
-          if (left + popupW > screenWidth - 4) left = screenWidth - popupW - 4;
+
+      const popupW = Math.min(screenWidth - 8, Math.max(ALT_CELL_WIDTH, alts.length * ALT_CELL_WIDTH));
+
+      // Measure both views in window space so the popup can be placed
+      // directly above the pressed key regardless of where the keyboard is
+      // inset on screen. If there is no room above (key already near the top
+      // of the screen), fall back to below the key.
+      container.measureInWindow((cx, cy) => {
+        keyRef.measureInWindow((kx, ky, kw, kh) => {
+          const centerX = kx + kw / 2;
+          let leftGlobal = centerX - popupW / 2;
+          if (leftGlobal < 4) leftGlobal = 4;
+          if (leftGlobal + popupW > screenWidth - 4) leftGlobal = screenWidth - popupW - 4;
+
+          const roomAbove = ky - ALT_CELL_HEIGHT - POPUP_TOP_OFFSET >= 8;
+          const top = roomAbove
+            ? ky - cy - ALT_CELL_HEIGHT - POPUP_TOP_OFFSET
+            : ky - cy + kh + POPUP_TOP_OFFSET;
+
           setPopupKey(key);
-          setPopupLayout({ x: centerX, y });
+          setPopupLayout({ top, left: leftGlobal - cx });
           setPopupAlternates(alts);
-          setPopupRowLeft(left);
+          setPopupRowLeftGlobal(leftGlobal);
           setPopupWidth(popupW);
           setPopupSelected(0);
           if (popupDismissTimer.current) clearTimeout(popupDismissTimer.current);
@@ -166,9 +175,8 @@ export default function QwertyKeyboard({
             setPopupLayout(null);
             setPopupAlternates([]);
           }, POPUP_DISMISS_DELAY);
-        },
-        () => {}
-      );
+        });
+      });
     },
     [findKeySpec, screenWidth]
   );
@@ -193,15 +201,14 @@ export default function QwertyKeyboard({
   const handleTouchMove = useCallback(
     (e: GestureResponderEvent) => {
       if (!popupKey || popupAlternates.length <= 1) return;
-      const globalLeft = containerScreenXRef.current + popupRowLeft;
-      const idx = Math.floor((e.nativeEvent.pageX - globalLeft) / ALT_CELL_WIDTH);
+      const idx = Math.floor((e.nativeEvent.pageX - popupRowLeftGlobal) / ALT_CELL_WIDTH);
       const clamped = Math.max(0, Math.min(popupAlternates.length - 1, idx));
       if (clamped !== popupSelected) {
         Haptics.selectionAsync().catch(() => {});
         setPopupSelected(clamped);
       }
     },
-    [popupKey, popupAlternates, popupRowLeft, popupSelected]
+    [popupKey, popupAlternates, popupRowLeftGlobal, popupSelected]
   );
 
   // Resolve the glyph a character key produces given the current modifiers.
@@ -265,16 +272,14 @@ export default function QwertyKeyboard({
 
   const renderPopup = useCallback(() => {
     if (!popupKey || !popupLayout || popupAlternates.length === 0) return null;
-    const top = popupLayout.y - ALT_CELL_HEIGHT - POPUP_TOP_OFFSET;
-    const rowH = dims.rowHeights[0];
 
     return (
       <View
         style={[
           styles.popup,
           {
-            left: popupRowLeft,
-            top: top > 0 ? top : popupLayout.y + rowH + POPUP_TOP_OFFSET,
+            left: popupLayout.left,
+            top: popupLayout.top,
             width: popupWidth,
             height: ALT_CELL_HEIGHT,
             backgroundColor: kb.keyCapPressed,
@@ -313,7 +318,7 @@ export default function QwertyKeyboard({
         </View>
       </View>
     );
-  }, [popupKey, popupLayout, popupAlternates, popupRowLeft, popupWidth, popupSelected, dims.rowHeights, kb, colors.outlineVariant]);
+  }, [popupKey, popupLayout, popupAlternates, popupWidth, popupSelected, kb, colors.outlineVariant]);
 
   const capStyle = useCallback(
     (pressed: boolean, isActive: boolean) => ({

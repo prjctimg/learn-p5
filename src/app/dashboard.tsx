@@ -15,6 +15,9 @@ import { isExerciseLocked } from "../utils/isExerciseLocked";
 import { getStreakFromStorage, useStreak } from "../hooks/useStreak";
 import { useAchievements, ACHIEVEMENTS } from "../hooks/useAchievements";
 import AchievementBadgeModal from "../components/AchievementBadgeModal";
+import DidYouKnowModal from "../components/DidYouKnowModal";
+import { pickRandomAdvancedSymbol } from "../data/didYouKnow";
+import { P5Symbol } from "../data/reference";
 import { useShakeDetection } from "../hooks/useShakeDetection";
 import ReportErrorModal from "../components/ReportErrorModal";
 
@@ -55,8 +58,10 @@ const { unlocked: unlockedAchievements, unlockedAt, refresh: refreshAchievements
  const [animatedLevel, setAnimatedLevel] = useState(1);
  const [animatedCompleted, setAnimatedCompleted] = useState(0);
  const [animatedStreak, setAnimatedStreak] = useState(0);
- const [shakeModalVisible, setShakeModalVisible] = useState(false);
- const isFocused = useIsFocused();
+  const [shakeModalVisible, setShakeModalVisible] = useState(false);
+  const [dykVisible, setDykVisible] = useState(false);
+  const [dykSymbol, setDykSymbol] = useState<P5Symbol | null>(null);
+  const isFocused = useIsFocused();
 
  useShakeDetection(
   useCallback(() => setShakeModalVisible(true), []),
@@ -65,13 +70,24 @@ const { unlocked: unlockedAchievements, unlockedAt, refresh: refreshAchievements
 
  useFocusEffect(
  useCallback(() => {
- AsyncStorage.getItem(STORAGE_KEYS.completedLessons).then((val) => {
+ AsyncStorage.getItem(STORAGE_KEYS.completedLessons).then(async (val) => {
+ let arr: string[] = [];
  if (val) {
  try {
- setCompletedExercises(JSON.parse(val));
+ arr = JSON.parse(val);
  } catch {
- setCompletedExercises([]);
+ arr = [];
  }
+ setCompletedExercises(arr);
+ }
+ // "Did You Know": once per day, only after the learner has completed
+ // at least one exercise.
+ const today = new Date().toISOString().split("T")[0];
+ const lastShown = await AsyncStorage.getItem(STORAGE_KEYS.didYouKnowLastShown);
+ if (arr.length > 0 && lastShown !== today) {
+ setDykSymbol(pickRandomAdvancedSymbol());
+ setDykVisible(true);
+ await AsyncStorage.setItem(STORAGE_KEYS.didYouKnowLastShown, today);
  }
  });
  loadAllCourses().then(setCourses);
@@ -79,9 +95,9 @@ const { unlocked: unlockedAchievements, unlockedAt, refresh: refreshAchievements
  setStreakCount(count);
  setStreakLongest(longest);
  });
-refreshAchievements();
+ refreshAchievements();
  }, [])
-);
+ );
 
  useEffect(() => {
  streak.consumePendingToast().then((data) => {
@@ -577,6 +593,12 @@ progressBarOuter: {
   visible={shakeModalVisible}
   onDismiss={() => setShakeModalVisible(false)}
   route="/dashboard"
+  />
+  <DidYouKnowModal
+  visible={dykVisible}
+  symbol={dykSymbol}
+  onNext={() => setDykSymbol((prev) => pickRandomAdvancedSymbol(prev?.name))}
+  onDismiss={() => setDykVisible(false)}
   />
   </View>
 );

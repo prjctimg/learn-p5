@@ -17,6 +17,10 @@ interface ToastProps {
   tone?: "success" | "failure";
 }
 
+// Off-screen resting position for the drop-down animation. Must exceed the
+// tallest possible toast (status-bar inset + card height).
+const HIDDEN_Y = -160;
+
 export default function Toast({
   visible,
   message,
@@ -28,101 +32,132 @@ export default function Toast({
   iconColor,
   tone,
 }: ToastProps) {
-const translateY = useRef(new Animated.Value(-120)).current;
+  const translateY = useRef(new Animated.Value(HIDDEN_Y)).current;
   const insets = useSafeAreaInsets();
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
   const effectiveIconColor =
     iconColor ?? (tone === "failure" ? colors.error : colors.success);
+  // Success/info notifications render as a floating rounded card; failures
+  // keep the classic full-width banner treatment.
+  const isBanner = tone === "failure";
 
- useEffect(() => {
- if (visible) {
- Animated.spring(translateY, {
- toValue: 0,
- tension: 80,
- friction: 10,
- useNativeDriver: true,
- }).start();
+  useEffect(() => {
+    if (visible) {
+      Animated.spring(translateY, {
+        toValue: 0,
+        tension: 120,
+        friction: 8,
+        useNativeDriver: true,
+      }).start();
 
- const timer = setTimeout(() => {
- Animated.timing(translateY, {
- toValue: -120,
- duration: 200,
- useNativeDriver: true,
- }).start(() => onDismiss?.());
- }, duration);
+      const timer = setTimeout(() => {
+        Animated.spring(translateY, {
+          toValue: HIDDEN_Y,
+          tension: 200,
+          friction: 14,
+          useNativeDriver: true,
+        }).start(() => onDismiss?.());
+      }, duration);
 
- return () => clearTimeout(timer);
- } else {
- translateY.setValue(-120);
- }
- }, [visible]);
+      return () => clearTimeout(timer);
+    } else {
+      translateY.setValue(HIDDEN_Y);
+    }
+  }, [visible]);
 
- const handleAction = () => {
- Animated.timing(translateY, {
- toValue: -120,
- duration: 200,
- useNativeDriver: true,
- }).start(() => {
- onDismiss?.();
- onAction?.();
- });
- };
+  const handleAction = () => {
+    Animated.spring(translateY, {
+      toValue: HIDDEN_Y,
+      tension: 200,
+      friction: 14,
+      useNativeDriver: true,
+    }).start(() => {
+      onDismiss?.();
+      onAction?.();
+    });
+  };
 
- if (!visible) return null;
+  if (!visible) return null;
 
- return (
- <Animated.View
- style={[
- styles.container,
- {
-backgroundColor: colors.surfaceContainerHighest,
-  transform: [{ translateY }],
-  paddingTop: insets.top + 8,
-  shadowColor: colors.scrim,
-  },
-  ]}
-  >
-  <View style={styles.content}>
-     <MaterialCommunityIcons name={icon as any} size={20} color={effectiveIconColor} />
- <Text style={[styles.message, { color: colors.onSurface }]}>
- {message}
- </Text>
- </View>
- {actionLabel && (
- <Pressable onPress={handleAction} style={styles.actionBtn}>
- <Text style={[styles.actionLabel, { color: colors.primary }]}>
- {actionLabel}
- </Text>
- </Pressable>
-)}
- </Animated.View>
-);
+  return (
+    <Animated.View
+      pointerEvents="box-none"
+      style={[
+        styles.wrap,
+        { transform: [{ translateY }] },
+      ]}
+    >
+      <View
+        style={[
+          isBanner ? styles.banner : styles.card,
+          {
+            backgroundColor: colors.surfaceContainerHighest,
+            marginTop: insets.top + 8,
+            shadowColor: colors.scrim,
+          },
+          !isBanner && { maxWidth: 480 },
+        ]}
+      >
+        <View style={styles.content}>
+          <MaterialCommunityIcons name={icon as any} size={20} color={effectiveIconColor} />
+          <Text style={[styles.message, { color: colors.onSurface }]}>
+            {message}
+          </Text>
+        </View>
+        {actionLabel && (
+          <Pressable onPress={handleAction} style={styles.actionBtn}>
+            <Text style={[styles.actionLabel, { color: colors.primary }]}>
+              {actionLabel}
+            </Text>
+          </Pressable>
+        )}
+      </View>
+    </Animated.View>
+  );
 }
 
 const styles = StyleSheet.create({
- container: {
- position: "absolute",
- left: 0,
- right: 0,
- top: 0,
- flexDirection: "row",
- alignItems: "center",
- justifyContent: "space-between",
- paddingHorizontal: 16,
- paddingBottom: 12,
-shadowOffset: { width: 0, height: 8 },
-  shadowOpacity: 0.15,
-  shadowRadius: 16,
-  elevation: 8,
-  zIndex: 1000,
+  wrap: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    alignItems: "center",
+    zIndex: 1000,
   },
- content: {
- flexDirection: "row",
- alignItems: "center",
- gap: 8,
- flex: 1,
- },
+  card: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+    marginHorizontal: 16,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  banner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  content: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    flex: 1,
+  },
   message: {
     fontFamily: "JetBrainsMono",
     fontSize: 15,
@@ -135,8 +170,8 @@ shadowOffset: { width: 0, height: 8 },
   actionLabel: {
     fontFamily: "JetBrainsMono",
     fontSize: 13,
- fontWeight: "700",
- textTransform: "uppercase",
- letterSpacing: 0.5,
- },
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
 });
