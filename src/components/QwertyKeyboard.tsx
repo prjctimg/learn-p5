@@ -26,12 +26,16 @@ interface QwertyKeyboardProps {
   height?: number;
 }
 
-// Design-space ratios relative to 1U (= 90px on the 1000px reference canvas).
-const GAP_RATIO = 8 / 90;
-const VGAP_RATIO = 10 / 90;
-const PAD_RATIO = 12 / 90;
+// Design-space ratios relative to 1U (= 93px on the 1000px reference canvas:
+// (1000 − 2×8 outer − 9×6 gaps) / 10). The 6px gap / 8px row spacing / 8px
+// frame margin values come from the layout spec.
+const GAP_RATIO = 6 / 90;
+const VGAP_RATIO = 8 / 90;
+const PAD_RATIO = 8 / 90;
 const ROWS_HEIGHT_UNITS = KEYBOARD_ROWS.reduce((acc, r) => acc + r.keyHeight / 90, 0);
 const TOOLBAR_RESERVE = 58;
+// Key corner radius is 10px on the reference canvas.
+const RADIUS_RATIO = 10 / 93;
 
 const BACKSPACE_DELAY = 300;
 const BACKSPACE_INTERVAL = 60;
@@ -94,7 +98,7 @@ export default function QwertyKeyboard({
     const contentW = screenWidth - 2 * padH;
     const rowHeights = KEYBOARD_ROWS.map((r) => (r.keyHeight / 90) * u);
     const sideActionW = (contentW - 7 * u - 8 * hGap) / 2;
-    const spaceW = contentW - 4 * hGap - (1.44 + 0.89 + 0.89 + 1.44) * u;
+    const spaceW = contentW - 4 * hGap - (1.4 + 0.8 + 0.8 + 1.4) * u;
     return {
       u,
       hGap,
@@ -104,7 +108,7 @@ export default function QwertyKeyboard({
       sideActionW,
       spaceW,
       midInset: 0.5 * (u + hGap),
-      radius: Math.max(3, Math.min(14, u * 0.115)),
+      radius: Math.max(3, Math.min(14, u * RADIUS_RATIO)),
       keyFont: Math.max(13, Math.min(26, Math.round(u * 0.42))),
       iconSize: Math.max(18, Math.min(34, Math.round(u * 0.5))),
       smallFont: Math.max(11, Math.min(20, Math.round(u * 0.3))),
@@ -371,7 +375,7 @@ export default function QwertyKeyboard({
         key.action === "space"
           ? dims.spaceW
           : key.action === "enter" || key.action === "symbolToggle"
-            ? 1.44 * dims.u
+            ? 1.4 * dims.u
             : dims.sideActionW;
 
       if (key.action === "shift") {

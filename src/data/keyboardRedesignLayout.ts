@@ -21,9 +21,9 @@ export interface RowSpec {
 export const DESIGN = {
   canvasWidth: 1000,
   unit: 90,
-  hGap: 8,
-  vGap: 10,
-  outerPadding: 12,
+  hGap: 6,
+  vGap: 8,
+  outerPadding: 8,
 } as const;
 
 const U = 1;
@@ -98,11 +98,11 @@ export const KEYBOARD_ROWS: RowSpec[] = [
     // Row 5 — symbol toggle, comma, space, period, enter
     keyHeight: 110,
     keys: [
-      { primary: "!#1", widthUnits: 1.44, action: "symbolToggle" },
-      { primary: ",", secondary: ["<"], widthUnits: 0.89 },
-      { primary: "space", widthUnits: 5.22, action: "space" },
-      { primary: ".", secondary: [">"], widthUnits: 0.89 },
-      { primary: "enter", widthUnits: 1.44, action: "enter" },
+      { primary: "!#1", widthUnits: 1.4, action: "symbolToggle" },
+      { primary: ",", secondary: ["<"], widthUnits: 0.8 },
+      { primary: "space", widthUnits: 5.6, action: "space" },
+      { primary: ".", secondary: [">"], widthUnits: 0.8 },
+      { primary: "enter", widthUnits: 1.4, action: "enter" },
     ],
   },
 ];
