@@ -2,7 +2,7 @@
   "expo": {
     "name": "Learn P5",
     "slug": "learn-p5",
-    "version": "0.6.131",
+    "version": "0.6.132",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "learnp5",
@@ -12,7 +12,7 @@
     },
     "android": {
       "package": "com.learnp5",
-      "versionCode": 129,
+      "versionCode": 130,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

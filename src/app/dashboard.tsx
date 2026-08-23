@@ -108,25 +108,17 @@ const { unlocked: unlockedAchievements, unlockedAt, refresh: refreshAchievements
 refreshAchievements();
   }, []);
 
- useEffect(() => {
- const timer = setTimeout(async () => {
- const period = getPeriodKey();
- const lastPeriod = await AsyncStorage.getItem(LAST_GREETING_KEY);
- if (lastPeriod === period) return;
- const onboardingRaw = await AsyncStorage.getItem(STORAGE_KEYS.onboardingData);
- let name = "";
- if (onboardingRaw) {
- try {
- const data = JSON.parse(onboardingRaw);
- name = data.displayName || "";
- } catch {}
- }
- setGreetingMessage(`${getGreeting()}${name ? `, ${name}` : "!"}`);
- setGreetingToastVisible(true);
- await AsyncStorage.setItem(LAST_GREETING_KEY, period);
- }, 1000);
- return () => clearTimeout(timer);
- }, []);
+  useEffect(() => {
+  const timer = setTimeout(async () => {
+  const period = getPeriodKey();
+  const lastPeriod = await AsyncStorage.getItem(LAST_GREETING_KEY);
+  if (lastPeriod === period) return;
+  setGreetingMessage(`${getGreeting()}!`);
+  setGreetingToastVisible(true);
+  await AsyncStorage.setItem(LAST_GREETING_KEY, period);
+  }, 1000);
+  return () => clearTimeout(timer);
+  }, []);
 
  const nextExercise: (Exercise & { courseSlug: string; courseTitle: string }) | null = useMemo(() => {
  if (courses.length === 0) return null;

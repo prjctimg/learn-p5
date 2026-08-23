@@ -11,7 +11,6 @@ import { Colors } from "../../../constants/Colors";
 import { DEFAULTS } from "../../../constants/Defaults";
 import { STORAGE_KEYS } from "../../../constants/StorageKeys";
 import ProgrammingKeyboard from "../../../components/ProgrammingKeyboard";
-import QwertyKeyboard from "../../../components/QwertyKeyboard";
 
 import Toast from "../../../components/Toast";
 import Breadcrumbs from "../../../components/Breadcrumbs";
@@ -131,10 +130,9 @@ export default function Exercise() {
  const webViewRef = useRef<WebView>(null);
  const [webViewReady, setWebViewReady] = useState(false);
  const [editorViewReady, setEditorViewReady] = useState(false);
- const [keyboardVisible, setKeyboardVisible] = useState(true);
+  const [keyboardVisible, setKeyboardVisible] = useState(true);
 
- const [keyboardMode, setKeyboardMode] = useState<"programming" | "qwerty">("programming");
- const [codeSyncKey, setCodeSyncKey] = useState(0);
+  const [codeSyncKey, setCodeSyncKey] = useState(0);
  const codeRef = useRef(state.code);
  codeRef.current = state.code;
  const [editorTheme, setEditorTheme] = useState<string>("p5-learn");
@@ -552,13 +550,13 @@ export default function Exercise() {
  }
  }, [editorViewReady]);
 
- const handleToggleKeyboard = useCallback(() => {
- setKeyboardVisible((prev) => !prev);
- }, []);
+  const handleToggleKeyboard = useCallback(() => {
+  setKeyboardVisible((prev) => !prev);
+  }, []);
 
- const handleToggleKeyboardMode = useCallback(() => {
- setKeyboardMode((prev) => (prev === "programming" ? "qwerty" : "programming"));
- }, []);
+  const handleQwertyRequest = useCallback(() => {
+    showToast("Tap the code block to show the system keyboard");
+  }, [showToast]);
 
  const handleBackspace = useCallback(() => {
  if (webViewRef.current && editorViewReady) {
@@ -604,17 +602,11 @@ export default function Exercise() {
     }
   }, [handleRun]);
 
- const handleFormat = useCallback(() => {
- if (webViewRef.current && editorViewReady) {
- webViewRef.current.postMessage(JSON.stringify({ type: "format" }));
- }
- }, [editorViewReady]);
-
- const handleCursorMove = useCallback((direction: 'left' | 'right' | 'up' | 'down') => {
- if (webViewRef.current && editorViewReady) {
- webViewRef.current.postMessage(JSON.stringify({ type: "cursorMove", direction }));
- }
- }, [editorViewReady]);
+  const handleFormat = useCallback(() => {
+  if (webViewRef.current && editorViewReady) {
+  webViewRef.current.postMessage(JSON.stringify({ type: "format" }));
+  }
+  }, [editorViewReady]);
 
   useEffect(() => {
     streak.consumePendingToast().then((data) => {
@@ -1087,32 +1079,20 @@ return (
     onAdvance={handleToastNext}
   />
 
-  {!fullscreen && keyboardVisible && keyboardMode === "programming" && (
+  {!fullscreen && keyboardVisible && (
   <ProgrammingKeyboard
- onInsert={handleInsert}
- exerciseSymbols={exerciseSymbols}
- onToggleKeyboard={handleToggleKeyboard}
- onToggleQwerty={handleToggleKeyboardMode}
- onBackspace={handleBackspace}
- onNewline={handleNewline}
- onFormat={handleFormat}
- onOpenReference={(symbol) => router.push(`/ref?symbol=${symbol}`)}
- keyboardVisible={keyboardVisible}
- usedFunctions={usedFunctions}
- height={DEFAULTS.keyboardHeightPixels[keyboardHeight] ?? DEFAULTS.keyboardHeightPixels.medium}
- />
-)}
-
-  {!fullscreen && keyboardVisible && keyboardMode === "qwerty" && (
-  <QwertyKeyboard
- onInsert={handleInsert}
- onBackspace={handleBackspace}
- onNewline={handleNewline}
- onCursorMove={handleCursorMove}
- onToggleProgramming={handleToggleKeyboardMode}
- onHideKeyboard={handleToggleKeyboard}
- height={DEFAULTS.keyboardHeightPixels[keyboardHeight] ?? DEFAULTS.keyboardHeightPixels.medium}
- />
+  onInsert={handleInsert}
+  exerciseSymbols={exerciseSymbols}
+  onToggleKeyboard={handleToggleKeyboard}
+  onToggleQwerty={handleQwertyRequest}
+  onBackspace={handleBackspace}
+  onNewline={handleNewline}
+  onFormat={handleFormat}
+  onOpenReference={(symbol) => router.push(`/ref?symbol=${symbol}`)}
+  keyboardVisible={keyboardVisible}
+  usedFunctions={usedFunctions}
+  height={DEFAULTS.keyboardHeightPixels[keyboardHeight] ?? DEFAULTS.keyboardHeightPixels.medium}
+  />
 )}
 
   {!fullscreen && !keyboardVisible && (

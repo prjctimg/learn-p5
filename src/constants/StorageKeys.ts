@@ -1,8 +1,6 @@
 export const STORAGE_KEYS = {
   completedLessons: "completedLessons",
   completedCourses: "completedCourses",
-  onboardingData: "onboardingData",
-  hasCompletedOnboarding: "hasCompletedOnboarding",
   completionEvents: "completion_events",
   achievementsUnlocked: "achievements_unlocked",
   achievementsUnlockedAt: "achievements_unlocked_at",

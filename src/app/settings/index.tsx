@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { View, Text, TextInput, Switch, Pressable, ScrollView, StyleSheet } from "react-native";
+import { View, Text, Switch, Pressable, ScrollView, StyleSheet } from "react-native";
 import { useRouter, useIsFocused } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -68,15 +68,6 @@ const createStyles = (colors: Record<string, string>) =>
     flexChild: { flex: 1 },
     settingTitle: { fontFamily: "JetBrainsMono", fontSize: 14, fontWeight: "700", color: colors.onSurface },
     settingDescription: { fontFamily: "JetBrainsMono", fontSize: 11, marginTop: 2, color: colors.textSecondary },
-    nameInput: {
-      fontFamily: "JetBrainsMono",
-      fontSize: 14,
-      borderBottomWidth: 1,
-      paddingVertical: 6,
-      minWidth: 140,
-      marginLeft: 12,
-      textAlign: "right",
-    },
   });
 
 export default function Settings() {
@@ -92,7 +83,6 @@ export default function Settings() {
   const [keyboardHeight, setKeyboardHeight] = useState<string>(DEFAULTS.keyboardHeight);
   const [editorTheme, setEditorTheme] = useState<string>("p5-learn");
   const [wordWrap, setWordWrap] = useState(false);
-  const [displayName, setDisplayName] = useState("");
   const [showDrawerFab, setShowDrawerFab] = useState(true);
   const [showStatusBar, setShowStatusBar] = useState(true);
   const [disableSystemKeyboard, setDisableSystemKeyboard] = useState(false);
@@ -129,14 +119,6 @@ export default function Settings() {
       if (drawerFab[1] !== null) setShowDrawerFab(drawerFab[1] !== "false");
       if (statusBar[1] !== null) setShowStatusBar(statusBar[1] !== "false");
       setDisableSystemKeyboard(disableSysKb[1] === "true");
-    });
-    AsyncStorage.getItem(STORAGE_KEYS.onboardingData).then((val) => {
-      if (val) {
-        try {
-          const data = JSON.parse(val);
-          setDisplayName(data.displayName || "");
-        } catch {}
-      }
     });
   }, []);
 
@@ -204,15 +186,6 @@ export default function Settings() {
     await AsyncStorage.setItem(SETTINGS_KEYS.wordWrap, value.toString());
   };
 
-  const handleDisplayNameChange = useCallback(async (text: string) => {
-    setDisplayName(text);
-    AsyncStorage.getItem(STORAGE_KEYS.onboardingData).then((val) => {
-      const data = val ? JSON.parse(val) : {};
-      data.displayName = text;
-      AsyncStorage.setItem(STORAGE_KEYS.onboardingData, JSON.stringify(data));
-    });
-  }, []);
-
   const toggleShowDrawerFab = async (value: boolean) => {
     setShowDrawerFab(value);
     await AsyncStorage.setItem(SETTINGS_KEYS.showDrawerFab, value.toString());
@@ -246,25 +219,6 @@ export default function Settings() {
         style={styles.scrollContent}
         contentContainerStyle={{ paddingBottom: 32 }}
       >
-        {/* Profile */}
-        <SectionHeader icon="account-outline" label="Profile" color={derivedColors.primary} />
-        <View style={styles.card}>
-          <View style={styles.cardRow}>
-            <View style={styles.flexChild}>
-              <Text style={styles.settingTitle}>Display Name</Text>
-              <Text style={styles.settingDescription}>Used in greetings and notifications</Text>
-            </View>
-            <TextInput
-              style={[styles.nameInput, { color: derivedColors.primary, borderColor: colors.outlineVariant }]}
-              placeholder="Enter your name"
-              placeholderTextColor={colors.textSecondary}
-              value={displayName}
-              onChangeText={handleDisplayNameChange}
-              maxLength={30}
-            />
-          </View>
-        </View>
-
         {/* Appearance */}
         <SectionHeader icon="palette-outline" label="Appearance" color={derivedColors.primary} />
         <View style={styles.card}>
