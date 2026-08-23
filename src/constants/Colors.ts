@@ -85,28 +85,36 @@ export const Colors = {
 
 // Dedicated palette for the custom keyboards, kept separate from the flat
 // theme record so consumers that treat Colors[scheme] as Record<string,string>
-// stay type-safe. Light values invert the dark design; the blue accent is
-// shared by both modes.
+// stay type-safe. Values aligned to Stitch Virtual Keyboard UI
+// (projects/3964689377051300116/screens/41c14c27e617436dbed6c73430283862):
+// dark: container #111111, standard key #333333, special key #222222,
+// pressed #444444, text #FFFFFF, shift accent #60a5fa.
+// Light inverts the charcoal palette for a11y while keeping the same
+// blue accent and 8px radius.
 export const KeyboardColors = {
   light: {
     background: "#F5F5F5",
-    keyCap: "#E0E0E0",
-    keyCapPressed: "#CFCFCF",
-    text: "#1A1A1A",
+    keyCap: "#FFFFFF",
+    keyCapPressed: "#E5E5E5",
+    keyCapSpecial: "#E0E0E0",
+    keyCapSpecialPressed: "#D0D0D0",
+    text: "#111111",
     textMuted: "#6B7280",
-    accent: "#2B82F6",
-    toolbarKey: "#E0E0E0",
-    toolbarKeyPressed: "#CFCFCF",
+    accent: "#60a5fa",
+    toolbarKey: "#FFFFFF",
+    toolbarKeyPressed: "#E5E5E5",
   },
   dark: {
-    background: "#121212",
-    keyCap: "#2A2A2E",
-    keyCapPressed: "#3A3A3E",
+    background: "#111111",
+    keyCap: "#333333",
+    keyCapPressed: "#444444",
+    keyCapSpecial: "#222222",
+    keyCapSpecialPressed: "#333333",
     text: "#FFFFFF",
     textMuted: "#9CA3AF",
-    accent: "#2B82F6",
-    toolbarKey: "#2A2A2E",
-    toolbarKeyPressed: "#3A3A3E",
+    accent: "#60a5fa",
+    toolbarKey: "#222222",
+    toolbarKeyPressed: "#333333",
   },
 } as const;
 

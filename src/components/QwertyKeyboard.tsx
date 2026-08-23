@@ -6,6 +6,7 @@ import { useThemeContext } from "./ThemeProvider";
 import { Colors, KeyboardColors } from "../constants/Colors";
 import { pairedSymbols, singleSymbols } from "../data/keyboardLayout";
 import {
+  DESIGN,
   KEYBOARD_ROWS,
   LONG_PRESS_DELAY,
   POPUP_DISMISS_DELAY,
@@ -26,17 +27,18 @@ interface QwertyKeyboardProps {
   height?: number;
 }
 
-// Design-space ratios relative to 1U (= 93px on the 1000px reference canvas:
-// (1000 − 2×8 outer − 9×6 gaps) / 10). The 6px gap / 8px row spacing / 8px
-// frame margin values come from the layout spec.
-const GAP_RATIO = 6 / 90;
-const VGAP_RATIO = 8 / 90;
-const PAD_RATIO = 8 / 90;
-const ROWS_HEIGHT_UNITS = KEYBOARD_ROWS.reduce((acc, r) => acc + r.keyHeight / 90, 0);
-const TOOLBAR_RESERVE = 58;
-// Key corner radius is 10px on the reference canvas.
-const RADIUS_RATIO = 10 / 93;
-
+// Stitch Virtual Keyboard UI — projects/3964689377051300116/screens/41c14c27e617436dbed6c73430283862
+//   .keyboard-container { padding:8px, gap:12px, background:#111111, max-width:500px }
+//   .key-row { gap:6px }
+//   .key { background:#333333 / #222222 for specials, radius:8px, height:52px, font 22/18/16px, color:#fff }
+//   .key:active { background:#444444 }
+//   .key-shift svg stroke:#60a5fa
+const STITCH_GAP = DESIGN.hGap; // 6
+const STITCH_VGAP = DESIGN.vGap; // 12
+const STITCH_PAD = DESIGN.outerPadding; // 8
+const STITCH_RADIUS = DESIGN.keyRadius; // 8
+const STITCH_KEY_HEIGHT = DESIGN.keyHeight; // 52
+const MAX_CONTAINER_WIDTH = 500;
 const BACKSPACE_DELAY = 300;
 const BACKSPACE_INTERVAL = 60;
 
@@ -59,7 +61,10 @@ export default function QwertyKeyboard({
 }: QwertyKeyboardProps) {
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
-  const kb = KeyboardColors[colorScheme === "dark" ? "dark" : "light"];
+  const kb = KeyboardColors[colorScheme === "dark" ? "dark" : "light"] as typeof KeyboardColors.dark & {
+    keyCapSpecial: string;
+    keyCapSpecialPressed: string;
+  };
   const { width: screenWidth } = useWindowDimensions();
 
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -72,8 +77,6 @@ export default function QwertyKeyboard({
 
   const [longPressActive, setLongPressActive] = useState(false);
   const [popupKey, setPopupKey] = useState<string | null>(null);
-  // Container-relative top/left used to render the popup, plus the global
-  // page-space left edge used to map finger position → alternate index.
   const [popupLayout, setPopupLayout] = useState<{ top: number; left: number } | null>(null);
   const [popupAlternates, setPopupAlternates] = useState<string[]>([]);
   const [popupRowLeftGlobal, setPopupRowLeftGlobal] = useState(0);
@@ -84,36 +87,28 @@ export default function QwertyKeyboard({
   const keyRefs = useRef<Record<string, View | null>>({});
   const containerRef = useRef<View>(null);
 
-  // All key dimensions scale linearly from the horizontal fit (10 units plus
-  // outer padding and 9 inter-key gaps span the full width), then shrink
-  // uniformly if the allotted height cannot fit the natural stack.
+  // Stitch is flex-based; we keep a lightweight responsive scale for height / fonts
+  // so the 52px Stitch height feels consistent across phones vs tablets.
   const dims = useMemo(() => {
-    const rawUnit = screenWidth / (10 + 2 * PAD_RATIO + 9 * GAP_RATIO);
-    const naturalRows = rawUnit * (ROWS_HEIGHT_UNITS + 4 * VGAP_RATIO);
-    const fit = Math.max(0.7, Math.min(1, (height - TOOLBAR_RESERVE) / naturalRows));
-    const u = rawUnit * fit;
-    const hGap = u * GAP_RATIO;
-    const vGap = u * VGAP_RATIO;
-    const padH = u * PAD_RATIO;
-    const contentW = screenWidth - 2 * padH;
-    const rowHeights = KEYBOARD_ROWS.map((r) => (r.keyHeight / 90) * u);
-    const sideActionW = (contentW - 7 * u - 8 * hGap) / 2;
-    const spaceW = contentW - 4 * hGap - (1.4 + 0.8 + 0.8 + 1.4) * u;
+    // For very small screens, shrink slightly to avoid overflow of 10 keys + gaps.
+    const expectedW = 10 * 40 + 9 * STITCH_GAP + 2 * STITCH_PAD;
+    const fit = screenWidth < expectedW ? screenWidth / expectedW : 1;
+    const keyHeight = Math.round(STITCH_KEY_HEIGHT * Math.max(0.9, Math.min(1, fit)));
     return {
-      u,
-      hGap,
-      vGap,
-      padH,
-      rowHeights,
-      sideActionW,
-      spaceW,
-      midInset: 0.5 * (u + hGap),
-      radius: Math.max(3, Math.min(14, u * RADIUS_RATIO)),
-      keyFont: Math.max(13, Math.min(26, Math.round(u * 0.42))),
-      iconSize: Math.max(18, Math.min(34, Math.round(u * 0.5))),
-      smallFont: Math.max(11, Math.min(20, Math.round(u * 0.3))),
+      hGap: STITCH_GAP,
+      vGap: STITCH_VGAP,
+      padH: STITCH_PAD,
+      padV: STITCH_PAD,
+      keyHeight,
+      radius: STITCH_RADIUS,
+      // Stitch font system: standard 22px, symbol 18px, space 16px
+      keyFont: 22,
+      symbolFont: 18,
+      spaceFont: 16,
+      iconSize: 24,
+      containerMaxWidth: MAX_CONTAINER_WIDTH,
     };
-  }, [screenWidth, height]);
+  }, [screenWidth]);
 
   const findKeySpec = useCallback((primary: string): KeySpec | undefined => {
     for (const row of KEYBOARD_ROWS) {
@@ -151,10 +146,6 @@ export default function QwertyKeyboard({
 
       const popupW = Math.min(screenWidth - 8, Math.max(ALT_CELL_WIDTH, alts.length * ALT_CELL_WIDTH));
 
-      // Measure both views in window space so the popup can be placed
-      // directly above the pressed key regardless of where the keyboard is
-      // inset on screen. If there is no room above (key already near the top
-      // of the screen), fall back to below the key.
       container.measureInWindow((cx, cy) => {
         keyRef.measureInWindow((kx, ky, kw, kh) => {
           const centerX = kx + kw / 2;
@@ -215,7 +206,6 @@ export default function QwertyKeyboard({
     [popupKey, popupAlternates, popupRowLeftGlobal, popupSelected]
   );
 
-  // Resolve the glyph a character key produces given the current modifiers.
   const resolveGlyph = useCallback(
     (key: KeySpec) => {
       const alt = key.secondary?.[0];
@@ -276,7 +266,6 @@ export default function QwertyKeyboard({
 
   const renderPopup = useCallback(() => {
     if (!popupKey || !popupLayout || popupAlternates.length === 0) return null;
-
     return (
       <View
         style={[
@@ -304,12 +293,13 @@ export default function QwertyKeyboard({
                   alignItems: "center",
                   justifyContent: "center",
                   backgroundColor: isSelected ? kb.accent : "transparent",
+                  borderRadius: 6,
                 }}
               >
                 <Text
                   style={{
                     fontFamily: "JetBrainsMono",
-                    fontSize: isSelected ? 26 : 22,
+                    fontSize: isSelected ? 22 : 20,
                     fontWeight: "700",
                     color: isSelected ? "#FFFFFF" : kb.text,
                   }}
@@ -324,24 +314,30 @@ export default function QwertyKeyboard({
     );
   }, [popupKey, popupLayout, popupAlternates, popupWidth, popupSelected, kb, colors.outlineVariant]);
 
-  const capStyle = useCallback(
-    (pressed: boolean, isActive: boolean) => ({
-      backgroundColor: pressed || isActive ? kb.keyCapPressed : kb.keyCap,
-    }),
+  // Stitch palette: standard keys #333333/#FFFFFF pressed #444444; specials #222222 pressed #333333; shift accent #60a5fa
+  const getCapColors = useCallback(
+    (isSpecial: boolean, pressed: boolean, isActive: boolean) => {
+      if (isSpecial) {
+        return pressed || isActive ? kb.keyCapSpecialPressed : kb.keyCapSpecial;
+      }
+      return pressed || isActive ? kb.keyCapPressed : kb.keyCap;
+    },
     [kb]
   );
 
   const renderCharKey = useCallback(
-    (key: KeySpec, rowHeight: number) => {
+    (key: KeySpec) => {
       const isActive = longPressActive && longPressKey.current === key.primary;
       const isPopup = popupKey === key.primary;
       const glyph = resolveGlyph(key);
+      const isUpper = glyph !== key.primary && glyph.toLowerCase() === key.primary;
       return (
         <View
           key={key.primary}
           ref={(r) => {
             keyRefs.current[key.primary] = r;
           }}
+          style={{ flex: key.widthUnits, maxWidth: 40 * key.widthUnits }}
         >
           <Pressable
             onPressIn={() => handlePressIn(key)}
@@ -349,129 +345,182 @@ export default function QwertyKeyboard({
             onTouchMove={handleTouchMove}
             style={({ pressed }) => [
               styles.cap,
+              styles.capStandard,
               {
-                width: key.widthUnits * dims.u,
-                height: rowHeight,
+                height: dims.keyHeight,
                 borderRadius: dims.radius,
-                ...capStyle(pressed, isActive || isPopup),
+                backgroundColor: getCapColors(false, pressed, isActive || isPopup),
               },
             ]}
             accessibilityRole="button"
             accessibilityLabel={key.primary}
           >
-            <Text style={{ fontFamily: "JetBrainsMono", fontSize: dims.keyFont, fontWeight: "400", color: kb.text }}>
+            <Text
+              style={{
+                fontFamily: "JetBrainsMono",
+                fontSize: dims.keyFont,
+                fontWeight: "400",
+                color: kb.text,
+                textTransform: isUpper ? undefined : undefined,
+              }}
+            >
               {glyph}
             </Text>
           </Pressable>
         </View>
       );
     },
-    [longPressActive, popupKey, kb, dims, capStyle, handlePressIn, handlePressOut, handleTouchMove, resolveGlyph]
+    [longPressActive, popupKey, kb, dims, getCapColors, handlePressIn, handlePressOut, handleTouchMove, resolveGlyph]
   );
 
   const renderActionKey = useCallback(
-    (key: KeySpec, rowHeight: number) => {
-      const width =
-        key.action === "space"
-          ? dims.spaceW
-          : key.action === "enter" || key.action === "symbolToggle"
-            ? 1.4 * dims.u
-            : dims.sideActionW;
+    (key: KeySpec) => {
+      const isSpecial = true;
+      // Stitch flex values: shift/backspace/symbol/enter = 1.5, space = 5, comma/period handled as char keys
+      const flex = key.widthUnits;
 
       if (key.action === "shift") {
         return (
-          <Pressable
-            key={key.primary}
-            onPress={handleShiftPress}
-            style={({ pressed }) => [
-              styles.cap,
-              { width, height: rowHeight, borderRadius: dims.radius, ...capStyle(pressed, false) },
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel={shifted ? "Shift (active)" : "Shift"}
-          >
-            <ShiftIcon size={dims.iconSize} color={shifted ? kb.accent : kb.textMuted} />
-          </Pressable>
+          <View key={key.primary} style={{ flex, maxWidth: 55 * (flex / 1.5) }}>
+            <Pressable
+              onPress={handleShiftPress}
+              style={({ pressed }) => [
+                styles.cap,
+                styles.capSpecial,
+                {
+                  height: dims.keyHeight,
+                  borderRadius: dims.radius,
+                  backgroundColor: getCapColors(isSpecial, pressed, false),
+                },
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel={shifted ? "Shift (active)" : "Shift"}
+            >
+              <ShiftIcon size={dims.iconSize} color={shifted ? kb.accent : kb.text} />
+            </Pressable>
+          </View>
         );
       }
 
       if (key.action === "backspace") {
         return (
-          <Pressable
-            key={key.primary}
-            onPressIn={startBackspaceRepeat}
-            onPressOut={clearBackspaceRepeat}
-            style={({ pressed }) => [
-              styles.cap,
-              { width, height: rowHeight, borderRadius: dims.radius, ...capStyle(pressed, false) },
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel="Backspace"
-          >
-            <BackspaceIcon size={dims.iconSize} color={kb.text} />
-          </Pressable>
+          <View key={key.primary} style={{ flex, maxWidth: 55 * (flex / 1.5) }}>
+            <Pressable
+              onPressIn={startBackspaceRepeat}
+              onPressOut={clearBackspaceRepeat}
+              style={({ pressed }) => [
+                styles.cap,
+                styles.capSpecial,
+                {
+                  height: dims.keyHeight,
+                  borderRadius: dims.radius,
+                  backgroundColor: getCapColors(isSpecial, pressed, false),
+                },
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel="Backspace"
+            >
+              <BackspaceIcon size={dims.iconSize} color={kb.text} />
+            </Pressable>
+          </View>
         );
       }
 
       if (key.action === "enter") {
         return (
-          <Pressable
-            key={key.primary}
-            onPress={onNewline}
-            style={({ pressed }) => [
-              styles.cap,
-              { width, height: rowHeight, borderRadius: dims.radius, ...capStyle(pressed, false) },
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel="Enter"
-          >
-            <EnterIcon size={dims.iconSize} color={kb.text} />
-          </Pressable>
+          <View key={key.primary} style={{ flex, maxWidth: 60 * (flex / 1.5) }}>
+            <Pressable
+              onPress={onNewline}
+              style={({ pressed }) => [
+                styles.cap,
+                styles.capSpecial,
+                {
+                  height: dims.keyHeight,
+                  borderRadius: dims.radius,
+                  backgroundColor: getCapColors(isSpecial, pressed, false),
+                },
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel="Enter"
+            >
+              <EnterIcon size={dims.iconSize} color={kb.text} />
+            </Pressable>
+          </View>
         );
       }
 
       if (key.action === "space") {
         return (
-          <Pressable
-            key={key.primary}
-            onPress={() => onInsert(" ")}
-            style={({ pressed }) => [
-              styles.cap,
-              { width, height: rowHeight, borderRadius: dims.radius, ...capStyle(pressed, false) },
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel="Space"
-          >
-            <SpaceIcon size={dims.iconSize - 2} color={kb.textMuted} />
-          </Pressable>
+          <View key={key.primary} style={{ flex, maxWidth: 400 }}>
+            <Pressable
+              onPress={() => onInsert(" ")}
+              style={({ pressed }) => [
+                styles.cap,
+                {
+                  height: dims.keyHeight,
+                  borderRadius: dims.radius,
+                  backgroundColor: getCapColors(false, pressed, false),
+                },
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel="Space"
+            >
+              {/* Stitch shows "English (UK)" centered inside space; we keep SpaceIcon for a11y but mimic flex:5 size */}
+              <SpaceIcon size={dims.iconSize - 2} color={kb.textMuted} />
+            </Pressable>
+          </View>
         );
       }
 
-      // symbolToggle (!#1)
+      // symbolToggle (!#1) — Stitch .key-symbol: bg #222222, font 18
       return (
-        <Pressable
-          key={key.primary}
-          onPress={handleSymToggle}
-          style={({ pressed }) => [
-            styles.cap,
-            { width, height: rowHeight, borderRadius: dims.radius, ...capStyle(pressed, false) },
-          ]}
-          accessibilityRole="button"
-          accessibilityLabel="Symbols"
-        >
-          <Text style={{ fontFamily: "JetBrainsMono", fontSize: dims.smallFont, fontWeight: "400", color: kb.text }}>
-            {key.primary}
-          </Text>
-        </Pressable>
+        <View key={key.primary} style={{ flex, maxWidth: 60 * (flex / 1.5) }}>
+          <Pressable
+            onPress={handleSymToggle}
+            style={({ pressed }) => [
+              styles.cap,
+              styles.capSpecial,
+              {
+                height: dims.keyHeight,
+                borderRadius: dims.radius,
+                backgroundColor: getCapColors(isSpecial, pressed, false),
+              },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Symbols"
+          >
+            <Text
+              style={{
+                fontFamily: "JetBrainsMono",
+                fontSize: dims.symbolFont,
+                fontWeight: "400",
+                color: kb.text,
+              }}
+            >
+              {key.primary}
+            </Text>
+          </Pressable>
+        </View>
       );
     },
-    [dims, kb, shifted, capStyle, handleShiftPress, handleSymToggle, startBackspaceRepeat, clearBackspaceRepeat, onNewline, onInsert]
+    [
+      dims,
+      kb,
+      shifted,
+      getCapColors,
+      handleShiftPress,
+      handleSymToggle,
+      startBackspaceRepeat,
+      clearBackspaceRepeat,
+      onNewline,
+      onInsert,
+    ]
   );
 
   const renderKey = useCallback(
-    (key: KeySpec, rowHeight: number) => {
-      if (key.action) return renderActionKey(key, rowHeight);
-      return renderCharKey(key, rowHeight);
+    (key: KeySpec) => {
+      if (key.action) return renderActionKey(key);
+      return renderCharKey(key);
     },
     [renderCharKey, renderActionKey]
   );
@@ -495,18 +544,28 @@ export default function QwertyKeyboard({
       ref={containerRef}
       style={[
         styles.container,
-        { backgroundColor: kb.background, height, paddingHorizontal: dims.padH, gap: dims.vGap },
+        {
+          backgroundColor: kb.background,
+          height,
+          paddingHorizontal: dims.padH,
+          paddingVertical: dims.padV,
+          gap: dims.vGap,
+        },
       ]}
     >
       {renderPopup()}
 
-      <View style={[styles.toolbarRow, { marginTop: 4 }]}>
+      {/* Toolbar — kept for programming keyboard toggle + symbol chips, styled to match Stitch */}
+      <View style={styles.toolbarRow}>
         <View style={styles.toolbarFixed}>
           <Pressable
             onPress={onToggleProgramming}
             style={({ pressed }) => [
               styles.toolbarBtn,
-              { backgroundColor: pressed ? kb.toolbarKeyPressed : kb.toolbarKey },
+              {
+                backgroundColor: pressed ? kb.toolbarKeyPressed : kb.toolbarKey,
+                borderRadius: dims.radius,
+              },
             ]}
             accessibilityRole="button"
             accessibilityLabel="Switch to programming keyboard"
@@ -517,7 +576,10 @@ export default function QwertyKeyboard({
             onPress={() => onHideKeyboard?.()}
             style={({ pressed }) => [
               styles.toolbarBtn,
-              { backgroundColor: pressed ? kb.toolbarKeyPressed : kb.toolbarKey },
+              {
+                backgroundColor: pressed ? kb.toolbarKeyPressed : kb.toolbarKey,
+                borderRadius: dims.radius,
+              },
             ]}
             accessibilityRole="button"
             accessibilityLabel="Hide keyboard"
@@ -529,7 +591,7 @@ export default function QwertyKeyboard({
           horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.symbolsScroll}
-          contentContainerStyle={styles.symbolsContent}
+          contentContainerStyle={[styles.symbolsContent, { gap: dims.hGap }]}
         >
           {pairedSymbols.map((pair) => (
             <Pressable
@@ -537,7 +599,10 @@ export default function QwertyKeyboard({
               onPress={() => handlePairedInsert(pair.open, pair.close)}
               style={({ pressed }) => [
                 styles.symbolButton,
-                { backgroundColor: pressed ? kb.toolbarKeyPressed : kb.toolbarKey },
+                {
+                  backgroundColor: pressed ? kb.toolbarKeyPressed : kb.toolbarKey,
+                  borderRadius: dims.radius,
+                },
               ]}
               accessibilityRole="button"
               accessibilityLabel={pair.display}
@@ -551,7 +616,10 @@ export default function QwertyKeyboard({
               onPress={() => handleSymbolInsert(sym)}
               style={({ pressed }) => [
                 styles.symbolButton,
-                { backgroundColor: pressed ? kb.toolbarKeyPressed : kb.toolbarKey },
+                {
+                  backgroundColor: pressed ? kb.toolbarKeyPressed : kb.toolbarKey,
+                  borderRadius: dims.radius,
+                },
               ]}
               accessibilityRole="button"
               accessibilityLabel={sym}
@@ -562,19 +630,24 @@ export default function QwertyKeyboard({
         </ScrollView>
       </View>
 
-      <View style={[styles.rowsArea, { gap: dims.vGap }]}>
-        {KEYBOARD_ROWS.map((row, rowIdx) => (
-          <View
-            key={`row-${rowIdx}`}
-            style={{
-              flexDirection: "row",
-              gap: dims.hGap,
-              paddingLeft: row.insetUnits ? row.insetUnits * dims.u + dims.hGap / 2 : undefined,
-            }}
-          >
-            {row.keys.map((key) => renderKey(key, dims.rowHeights[rowIdx]))}
-          </View>
-        ))}
+      <View style={[styles.rowsArea, { gap: dims.vGap, maxWidth: dims.containerMaxWidth, alignSelf: "center", width: "100%" }]}>
+        {KEYBOARD_ROWS.map((row, rowIdx) => {
+          const isMiddleRow = rowIdx === 2;
+          return (
+            <View
+              key={`row-${rowIdx}`}
+              style={{
+                flexDirection: "row",
+                gap: dims.hGap,
+                // Stitch: middle row padded 0 10% — approximate with percentage padding
+                paddingHorizontal: isMiddleRow ? screenWidth * 0.05 : 0,
+                justifyContent: "center",
+              }}
+            >
+              {row.keys.map((key) => renderKey(key))}
+            </View>
+          );
+        })}
       </View>
     </View>
   );
@@ -582,13 +655,13 @@ export default function QwertyKeyboard({
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 6,
-    paddingBottom: 6,
+    // Stitch: background #111111, padding 8px, gap 12px
+    justifyContent: "flex-end",
   },
   toolbarRow: {
     flexDirection: "row",
-    position: "relative",
-    alignItems: "stretch",
+    alignItems: "center",
+    gap: 6,
   },
   toolbarFixed: {
     flexDirection: "row",
@@ -602,7 +675,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 8,
   },
   symbolsScroll: {
     maxHeight: 44,
@@ -612,7 +684,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 4,
-    gap: 6,
   },
   symbolButton: {
     flexShrink: 0,
@@ -620,7 +691,6 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 8,
   },
   symbolText: {
     fontFamily: "JetBrainsMono",
@@ -628,12 +698,23 @@ const styles = StyleSheet.create({
     fontWeight: "400",
   },
   rowsArea: {
-    flex: 1,
     justifyContent: "flex-end",
   },
   cap: {
     alignItems: "center",
     justifyContent: "center",
+    // Stitch: box-shadow 0 1px 2px rgba(0,0,0,0.2) — approximated via elevation for Android
+    elevation: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1,
+  },
+  capStandard: {
+    flex: 1,
+  },
+  capSpecial: {
+    flex: 1,
   },
   popup: {
     position: "absolute",

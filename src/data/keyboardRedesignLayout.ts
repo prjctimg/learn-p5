@@ -22,8 +22,14 @@ export const DESIGN = {
   canvasWidth: 1000,
   unit: 90,
   hGap: 6,
-  vGap: 8,
+  vGap: 12,
   outerPadding: 8,
+  keyRadius: 8,
+  keyHeight: 52,
+  // Sourced from Stitch Virtual Keyboard UI
+  // projects/3964689377051300116/screens/41c14c27e617436dbed6c73430283862
+  // keyboard-container gap 12px, key-row gap 6px, key border-radius 8px,
+  // key height 52px, container padding 8px, max-width 500px.
 } as const;
 
 const U = 1;
@@ -32,8 +38,8 @@ const letter = (primary: string, secondary?: string[]): KeySpec => ({ primary, s
 
 export const KEYBOARD_ROWS: RowSpec[] = [
   {
-    // Row 1 — numbers (10 keys)
-    keyHeight: 110,
+    // Row 1 — numbers (10 keys) — Stitch: key-standard flex 1, height 52
+    keyHeight: 52,
     keys: [
       num("1", ["!"]),
       num("2", ["@"]),
@@ -48,8 +54,8 @@ export const KEYBOARD_ROWS: RowSpec[] = [
     ],
   },
   {
-    // Row 2 — top letters (10 keys)
-    keyHeight: 125,
+    // Row 2 — top letters (10 keys) — Stitch QWERTY row
+    keyHeight: 52,
     keys: [
       letter("q"),
       letter("w"),
@@ -64,8 +70,8 @@ export const KEYBOARD_ROWS: RowSpec[] = [
     ],
   },
   {
-    // Row 3 — middle letters (9 keys, staggered by 0.5U)
-    keyHeight: 125,
+    // Row 3 — middle letters (9 keys) — Stitch: padding 0 10% (instead of 0.5U inset)
+    keyHeight: 52,
     insetUnits: 0.5,
     keys: [
       letter("a", ["@", "á", "à", "â", "ä", "ã"]),
@@ -80,10 +86,10 @@ export const KEYBOARD_ROWS: RowSpec[] = [
     ],
   },
   {
-    // Row 4 — shift + bottom letters + backspace
-    keyHeight: 125,
+    // Row 4 — shift + bottom letters + backspace — Stitch: shift/backspace flex 1.5, bg #222222
+    keyHeight: 52,
     keys: [
-      { primary: "shift", widthUnits: 1.33, action: "shift" },
+      { primary: "shift", widthUnits: 1.5, action: "shift" },
       letter("z"),
       letter("x", ["*"]),
       letter("c", ["ç", "("]),
@@ -91,18 +97,18 @@ export const KEYBOARD_ROWS: RowSpec[] = [
       letter("b", ["["]),
       letter("n", ["ñ", "]"]),
       letter("m", ["-"]),
-      { primary: "backspace", widthUnits: 1.33, action: "backspace" },
+      { primary: "backspace", widthUnits: 1.5, action: "backspace" },
     ],
   },
   {
-    // Row 5 — symbol toggle, comma, space, period, enter
-    keyHeight: 110,
+    // Row 5 — symbol toggle, comma, space, period, enter — Stitch: symbol/enter flex 1.5, space flex 5
+    keyHeight: 52,
     keys: [
-      { primary: "!#1", widthUnits: 1.4, action: "symbolToggle" },
-      { primary: ",", secondary: ["<"], widthUnits: 0.8 },
-      { primary: "space", widthUnits: 5.6, action: "space" },
-      { primary: ".", secondary: [">"], widthUnits: 0.8 },
-      { primary: "enter", widthUnits: 1.4, action: "enter" },
+      { primary: "!#1", widthUnits: 1.5, action: "symbolToggle" },
+      { primary: ",", secondary: ["<"], widthUnits: 1 },
+      { primary: "space", widthUnits: 5, action: "space" },
+      { primary: ".", secondary: [">"], widthUnits: 1 },
+      { primary: "enter", widthUnits: 1.5, action: "enter" },
     ],
   },
 ];
