@@ -65,7 +65,6 @@ export function getExerciseHtml(params: {
   wordWrap?: boolean;
   tasks?: ExerciseTask[];
   activeTaskIndex?: number;
-  disableSystemKeyboard?: boolean;
 }): string {
   const colors = Colors[params.colorScheme === "dark" ? "dark" : "light"];
   const ctaColor = params.ctaColor ?? colors.cta;
@@ -414,7 +413,7 @@ ${
 <script>${CODEMIRROR_BUNDLE}</script>
 <script>${VALIDATION_CORE}</script>
 <script>
- ${getBridgeScript(params.startingCode, params.solution, themeColors, params.colorScheme, params.exerciseNumber, ctaColor, params.wordWrap, tasksJson, activeTaskIdx, params.disableSystemKeyboard)}
+  ${getBridgeScript(params.startingCode, params.solution, themeColors, params.colorScheme, params.exerciseNumber, ctaColor, params.wordWrap, tasksJson, activeTaskIdx)}
 </script>
 
 ${params.exerciseNumber === 1 ? `
@@ -432,7 +431,7 @@ ${params.exerciseNumber === 1 ? `
 </html>`;
 }
 
-function getBridgeScript(startingCode: string, solution: string, theme: EditorThemeColors, colorScheme: "light" | "dark", exerciseNumber?: number, ctaColor?: string, wordWrap?: boolean, tasksJson?: string, activeTaskIdx?: number, disableSystemKeyboard?: boolean): string {
+function getBridgeScript(startingCode: string, solution: string, theme: EditorThemeColors, colorScheme: "light" | "dark", exerciseNumber?: number, ctaColor?: string, wordWrap?: boolean, tasksJson?: string, activeTaskIdx?: number): string {
   const codeArg = jsString(startingCode);
   const solutionArg = jsString(solution);
   const cta = ctaColor ?? '#FF69B4';
@@ -487,7 +486,6 @@ var prettierEstree = _CM.prettierPluginEstree;
 var prettierAcorn = _CM.prettierPluginAcorn;
 
 var WORD_WRAP = ${wordWrap ?? false};
-var DISABLE_SYSTEM_KEYBOARD = ${disableSystemKeyboard ? "true" : "false"};
 
 let view;
 const INITIAL_CODE = ${codeArg};
@@ -703,10 +701,6 @@ function initEditor() {
       if (editorEl) editorEl.style.maxHeight = maxH;
       var scroller = document.querySelector('.cm-scroller');
       if (scroller) scroller.style.maxHeight = maxH;
-    }
-    if (DISABLE_SYSTEM_KEYBOARD) {
-      var cmContent = document.querySelector('.cm-content');
-      if (cmContent) cmContent.setAttribute('inputmode', 'none');
     }
     postReady();
     postEditorReady();
@@ -939,27 +933,8 @@ function handleMessage(data) {
               } catch (e2) { console.warn('setWordWrap recovery failed:', e2); }
             }
           }
-          if (DISABLE_SYSTEM_KEYBOARD) {
-            var cmContent2 = document.querySelector('.cm-content');
-            if (cmContent2) cmContent2.setAttribute('inputmode', 'none');
-          }
-        }
-        break;
-      case 'setDisableSystemKeyboard':
-        DISABLE_SYSTEM_KEYBOARD = !!msg.disableSystemKeyboard;
-        var cmContentD = document.querySelector('.cm-content');
-        if (cmContentD) {
-          if (DISABLE_SYSTEM_KEYBOARD) {
-            cmContentD.setAttribute('inputmode', 'none');
-            // If the system keyboard is currently open because the editor was
-            // focused before the toggle took effect, blur to dismiss it.
-            if (view && view.hasFocus) view.contentDOM.blur();
-          } else {
-            cmContentD.removeAttribute('inputmode');
-          }
-        }
-        break;
-      case 'backspace':
+          break;
+        case 'backspace':
         if (view) {
           var cur = view.state.selection.main.head;
           var sel = view.state.selection.main;

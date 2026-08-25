@@ -131,17 +131,17 @@ export default function Exercise() {
  const [webViewReady, setWebViewReady] = useState(false);
  const [editorViewReady, setEditorViewReady] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(true);
+  const [useSystemKeyboard, setUseSystemKeyboard] = useState(false);
 
   const [codeSyncKey, setCodeSyncKey] = useState(0);
  const codeRef = useRef(state.code);
  codeRef.current = state.code;
  const [editorTheme, setEditorTheme] = useState<string>("p5-learn");
  const [codeFontSize, setCodeFontSize] = useState<number>(DEFAULTS.codeFontSize);
- const [keyboardHeight, setKeyboardHeight] = useState<string>(DEFAULTS.keyboardHeight);
- const [settingsMenuVisible, setSettingsMenuVisible] = useState(false);
- const [wordWrap, setWordWrap] = useState(false);
- const [disableSystemKeyboard, setDisableSystemKeyboard] = useState(false);
- const [toastKey, setToastKey] = useState(0);
+const [keyboardHeight, setKeyboardHeight] = useState<string>(DEFAULTS.keyboardHeight);
+  const [settingsMenuVisible, setSettingsMenuVisible] = useState(false);
+  const [wordWrap, setWordWrap] = useState(false);
+  const [toastKey, setToastKey] = useState(0);
  const [toastVisible, setToastVisible] = useState(false);
  const [toastMessage, setToastMessage] = useState("");
   const [toastActionLabel, setToastActionLabel] = useState<string | undefined>(undefined);
@@ -189,9 +189,8 @@ export default function Exercise() {
       wordWrap,
       tasks: state.exercise.tasks,
       activeTaskIndex: state.currentTaskIndex,
-      disableSystemKeyboard,
     });
-  }, [state.exercise, state.currentTaskIndex, colorScheme, id, editorTheme, codeFontSize, ctaColor, wordWrap, disableSystemKeyboard]);
+  }, [state.exercise, state.currentTaskIndex, colorScheme, id, editorTheme, codeFontSize, ctaColor, wordWrap]);
 
   const fullscreenPreviewHtml = useMemo(
     () => getFullscreenPreviewHtml(state.code, colorScheme === "dark" ? "dark" : "light"),
@@ -456,9 +455,11 @@ export default function Exercise() {
  case "editorReady":
  setEditorViewReady(msg.ready);
  break;
- case "editorTapped":
- setKeyboardVisible(true);
- break;
+case "editorTapped":
+  if (!useSystemKeyboard) {
+    setKeyboardVisible(true);
+  }
+  break;
  case "openRef":
  router.push(`/ref?symbol=${msg.symbol}`);
  break;
@@ -532,12 +533,6 @@ export default function Exercise() {
   }, [editorViewReady, wordWrap]);
 
   useEffect(() => {
-  if (editorViewReady && webViewRef.current) {
-  webViewRef.current.postMessage(JSON.stringify({ type: "setDisableSystemKeyboard", disableSystemKeyboard }));
-  }
-  }, [editorViewReady, disableSystemKeyboard]);
-
-  useEffect(() => {
   if (editorViewReady && pendingInserts.current.length > 0) {
  for (const item of pendingInserts.current) {
  if (webViewRef.current) {
@@ -552,11 +547,13 @@ export default function Exercise() {
 
   const handleToggleKeyboard = useCallback(() => {
   setKeyboardVisible((prev) => !prev);
+  setUseSystemKeyboard(false);
   }, []);
 
   const handleQwertyRequest = useCallback(() => {
-    showToast("Tap the code block to show the system keyboard");
-  }, [showToast]);
+    setUseSystemKeyboard(true);
+    setKeyboardVisible(false);
+  }, []);
 
  const handleBackspace = useCallback(() => {
  if (webViewRef.current && editorViewReady) {
@@ -668,9 +665,6 @@ export default function Exercise() {
   });
   AsyncStorage.getItem(STORAGE_KEYS.settingWordWrap).then((val) => {
   setWordWrap(val === "true");
-  });
-  AsyncStorage.getItem(STORAGE_KEYS.settingDisableSystemKeyboard).then((val) => {
-  setDisableSystemKeyboard(val === "true");
   });
   }, [])
 );
@@ -1089,7 +1083,7 @@ return (
   onNewline={handleNewline}
   onFormat={handleFormat}
   onOpenReference={(symbol) => router.push(`/ref?symbol=${symbol}`)}
-  keyboardVisible={keyboardVisible}
+  keyboardVisible={keyboardVisible && !useSystemKeyboard}
   usedFunctions={usedFunctions}
   height={DEFAULTS.keyboardHeightPixels[keyboardHeight] ?? DEFAULTS.keyboardHeightPixels.medium}
   />

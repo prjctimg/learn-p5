@@ -27,7 +27,6 @@ const SETTINGS_KEYS = {
   wordWrap: STORAGE_KEYS.settingWordWrap,
   showDrawerFab: STORAGE_KEYS.settingShowDrawerFab,
   showStatusBar: STORAGE_KEYS.settingShowStatusBar,
-  disableSystemKeyboard: STORAGE_KEYS.settingDisableSystemKeyboard,
 };
 
 const createStyles = (colors: Record<string, string>) =>
@@ -80,12 +79,10 @@ export default function Settings() {
   const [notificationMinute, setNotificationMinute] = useState(0);
   const [codeFontSize, setCodeFontSize] = useState(DEFAULTS.codeFontSize);
   const [codeBackground, setCodeBackground] = useState<string>(DEFAULTS.codeBackground);
-  const [keyboardHeight, setKeyboardHeight] = useState<string>(DEFAULTS.keyboardHeight);
   const [editorTheme, setEditorTheme] = useState<string>("p5-learn");
   const [wordWrap, setWordWrap] = useState(false);
   const [showDrawerFab, setShowDrawerFab] = useState(true);
   const [showStatusBar, setShowStatusBar] = useState(true);
-  const [disableSystemKeyboard, setDisableSystemKeyboard] = useState(false);
   const [shakeModalVisible, setShakeModalVisible] = useState(false);
   const isFocused = useIsFocused();
 
@@ -101,24 +98,20 @@ export default function Settings() {
       SETTINGS_KEYS.notificationMinute,
       SETTINGS_KEYS.codeFontSize,
       SETTINGS_KEYS.codeBackground,
-      SETTINGS_KEYS.keyboardHeight,
       SETTINGS_KEYS.editorTheme,
       SETTINGS_KEYS.wordWrap,
       SETTINGS_KEYS.showDrawerFab,
       SETTINGS_KEYS.showStatusBar,
-      SETTINGS_KEYS.disableSystemKeyboard,
-    ]).then(([reminder, hour, minute, fontSize, bg, kb, theme, wrap, drawerFab, statusBar, disableSysKb]) => {
+    ]).then(([reminder, hour, minute, fontSize, bg, theme, wrap, drawerFab, statusBar]) => {
       setDailyReminder(reminder[1] === "true");
       if (hour[1]) setNotificationHour(parseInt(hour[1], 10));
       if (minute[1]) setNotificationMinute(parseInt(minute[1], 10));
       if (fontSize[1]) setCodeFontSize(parseInt(fontSize[1], 10));
       if (bg[1]) setCodeBackground(bg[1]);
-      if (kb[1]) setKeyboardHeight(kb[1]);
       if (theme[1]) setEditorTheme(theme[1]);
       setWordWrap(wrap[1] === "true");
       if (drawerFab[1] !== null) setShowDrawerFab(drawerFab[1] !== "false");
       if (statusBar[1] !== null) setShowStatusBar(statusBar[1] !== "false");
-      setDisableSystemKeyboard(disableSysKb[1] === "true");
     });
   }, []);
 
@@ -171,11 +164,6 @@ export default function Settings() {
     await AsyncStorage.setItem(SETTINGS_KEYS.codeBackground, value);
   };
 
-  const changeKeyboardHeight = async (value: string) => {
-    setKeyboardHeight(value);
-    await AsyncStorage.setItem(SETTINGS_KEYS.keyboardHeight, value);
-  };
-
   const changeEditorTheme = async (value: string) => {
     setEditorTheme(value);
     await AsyncStorage.setItem(SETTINGS_KEYS.editorTheme, value);
@@ -194,11 +182,6 @@ export default function Settings() {
   const toggleShowStatusBar = async (value: boolean) => {
     setShowStatusBar(value);
     await AsyncStorage.setItem(SETTINGS_KEYS.showStatusBar, value.toString());
-  };
-
-  const toggleDisableSystemKeyboard = async (value: boolean) => {
-    setDisableSystemKeyboard(value);
-    await AsyncStorage.setItem(SETTINGS_KEYS.disableSystemKeyboard, value.toString());
   };
 
   function SectionHeader({ icon, label, color }: { icon: string; label: string; color: string }) {
@@ -438,55 +421,6 @@ export default function Settings() {
             <Switch
               value={wordWrap}
               onValueChange={changeWordWrap}
-              trackColor={{ false: "#767577", true: ctaColor }}
-              thumbColor="#ffffff"
-            />
-          </View>
-        </View>
-
-        {/* Keyboard */}
-        <SectionHeader icon="keyboard" label="Keyboard" color={derivedColors.primary} />
-        <View style={styles.card}>
-          <View style={styles.cardRow}>
-            <View style={styles.flexChild}>
-              <Text style={styles.settingTitle}>Keyboard Height</Text>
-              <Text style={styles.settingDescription}>
-                {keyboardHeight === "small" ? "230px — compact" : "280px — default"}
-              </Text>
-            </View>
-            <View style={{ flexDirection: "row", gap: 6 }}>
-              {["small", "medium"].map((opt) => (
-                <Pressable
-                  key={opt}
-                  onPress={() => changeKeyboardHeight(opt)}
-                  style={({ pressed }) => ({
-                    paddingHorizontal: 10,
-                    paddingVertical: 5,
-                    borderRadius: 6,
-                    minWidth: 36,
-                    alignItems: "center",
-                    borderBottomWidth: keyboardHeight === opt ? 2 : 0,
-                    borderBottomColor: keyboardHeight === opt ? derivedColors.primary : "transparent",
-                    backgroundColor: pressed ? derivedColors.primaryContainer + "33" : colors.surfaceContainerHigh,
-                  })}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${opt} keyboard`}
-                >
-                  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 10, fontWeight: "700", textTransform: "uppercase", letterSpacing: 0.5, color: colors.onSurfaceVariant }}>
-                    {opt === "small" ? "S" : "M"}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          </View>
-          <View style={[styles.cardRow, { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.outlineVariant }]}>
-            <View style={styles.flexChild}>
-              <Text style={styles.settingTitle}>Disable System Keyboard</Text>
-              <Text style={styles.settingDescription}>Prevent the OS keyboard from appearing in the exercise editor</Text>
-            </View>
-            <Switch
-              value={disableSystemKeyboard}
-              onValueChange={toggleDisableSystemKeyboard}
               trackColor={{ false: "#767577", true: ctaColor }}
               thumbColor="#ffffff"
             />

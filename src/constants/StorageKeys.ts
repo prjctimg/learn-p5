@@ -12,7 +12,6 @@ export const STORAGE_KEYS = {
   didYouKnowLastShown: "did_you_know_last_shown",
   settingCodeFontSize: "setting_codeFontSize",
   settingCtaColor: "setting_ctaColor",
-  settingDisableSystemKeyboard: "setting_disableSystemKeyboard",
   settingEditorTheme: "setting_editorTheme",
   settingKeyboardHeight: "setting_keyboardHeight",
   settingShowStatusBar: "setting_showStatusBar",
