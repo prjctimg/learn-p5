@@ -1,7 +1,7 @@
 {
   "name": "learn-p5",
   "main": "expo-router/entry",
-  "version": "0.6.134",
+  "version": "0.6.135",
   "scripts": {
     "postinstall": "npm run bundle-p5 && npm run bundle-validation && npm run gen-reference && npm run build-courses",
     "start": "npm run bundle-p5 && npm run bundle-validation && npm run gen-reference && npm run build-courses && npm run bundle-editor && expo start",
@@ -80,5 +80,19 @@
       "/node_modules/react-native-reanimated/plugin/"
     ]
   },
-  "private": true
+  "private": true,
+  "overrides": {
+    "react-native": {
+      "glob": "^13.0.6"
+    },
+    "@react-native/codegen": {
+      "glob": "^13.0.6"
+    },
+    "test-exclude": {
+      "glob": "^13.0.6"
+    },
+    "@react-native/dev-middleware": {
+      "chromium-edge-launcher": "^2.0.1"
+    }
+  }
 }
