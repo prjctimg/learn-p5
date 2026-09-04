@@ -93,10 +93,10 @@ export default function MinigameScreen() {
         <TouchableOpacity
           style={[styles.button, { backgroundColor: colors.primary }]}
           onPress={() => {
-            router.push(`/learn/${course}/unlock-${minigame.id}`);
+            router.push(`/learn/${course}`);
           }}
         >
-          <Text style={styles.buttonText}>Start Unlock Exercise</Text>
+          <Text style={styles.buttonText}>Practice the Concepts</Text>
         </TouchableOpacity>
         
         <TouchableOpacity

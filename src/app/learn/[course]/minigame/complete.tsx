@@ -5,15 +5,15 @@ import { loadMinigameForCourse } from "../../../../utils/courseLoader";
 import { Minigame } from "../../../../data/types";
 import { useThemeContext } from "../../../../components/ThemeProvider";
 import { Colors } from "../../../../constants/Colors";
-import { setHighScore } from "../../../../store/high-scores-store";
-import { getUnlockedAchievements, getUnlockedAchievementsAt } from "../../../../hooks/useAchievements";
+import { setHighScore, getHighScore } from "../../../../store/high-scores-store";
+import { grantAchievement } from "../../../../hooks/useAchievements";
 
 export default function MinigameCompleteScreen() {
   const { course, score } = useLocalSearchParams<{ course: string; score: string }>();
   const [minigame, setMinigame] = useState<Minigame | null>(null);
   const [loading, setLoading] = useState(true);
   const [isNewHigh, setIsNewHigh] = useState(false);
-  const [unlockedAchievements, setUnlockedAchievements] = useState<string[]>([]);
+  const [achievementEarned, setAchievementEarned] = useState(false);
   const { colorScheme, derivedColors } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
@@ -22,24 +22,28 @@ export default function MinigameCompleteScreen() {
       if (!course) return;
       const data = await loadMinigameForCourse(course);
       setMinigame(data);
-      
+
       if (data) {
         const finalScore = parseInt(score || "0", 10);
-        const prevHigh = await loadPreviousHigh(data.id);
-        if (finalScore > prevHigh) {
-          await setHighScore(data.id, finalScore);
-          setIsNewHigh(finalScore > prevHigh);
+        try {
+          const prevHigh = await getHighScore(data.id);
+          const isRecord = finalScore > prevHigh;
+          if (finalScore > 0) {
+            await setHighScore(data.id, finalScore);
+          }
+          setIsNewHigh(isRecord);
+        } catch {}
+
+        // Grant the minigame achievement when the target score is met.
+        if (finalScore >= data.targetScore) {
+          const granted = await grantAchievement(data.achievementId);
+          setAchievementEarned(granted);
         }
       }
       setLoading(false);
     }
     loadMinigameData();
   }, [course, score]);
-
-  async function loadPreviousHigh(minigameId: string): Promise<number> {
-    // Will be handled by the high-scores store directly
-    return 0;
-  }
 
   if (loading || !minigame) {
     return (
@@ -82,7 +86,7 @@ export default function MinigameCompleteScreen() {
           </View>
         )}
 
-        {passed && (
+        {achievementEarned && (
           <View style={[styles.achievementContainer, { backgroundColor: colors.surfaceDim, borderColor: colors.primary }]}>
             <Text style={[styles.achievementTitle, { color: colors.primary }]}>Achievement Unlocked!</Text>
             <Text style={[styles.achievementId, { color: colors.textSecondary }]}>{minigame.achievementId}</Text>

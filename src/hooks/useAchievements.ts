@@ -256,6 +256,28 @@ export async function getUnlockedAchievements(): Promise<string[]> {
   return raw ? JSON.parse(raw) : [];
 }
 
+/**
+ * Grant a specific achievement by id (idempotent). Used to unlock the
+ * per-minigame achievements once a player hits the target score.
+ */
+export async function grantAchievement(achievementId: string): Promise<boolean> {
+  if (!ACHIEVEMENTS.some((a) => a.id === achievementId)) return false;
+
+  const unlockedRaw = await AsyncStorage.getItem(UNLOCKED_KEY);
+  const unlocked: string[] = unlockedRaw ? JSON.parse(unlockedRaw) : [];
+  if (unlocked.includes(achievementId)) return false;
+
+  unlocked.push(achievementId);
+  await AsyncStorage.setItem(UNLOCKED_KEY, JSON.stringify(unlocked));
+
+  const unlockedAtRaw = await AsyncStorage.getItem(UNLOCKED_AT_KEY);
+  const unlockedAt: Record<string, string> = unlockedAtRaw ? JSON.parse(unlockedAtRaw) : {};
+  unlockedAt[achievementId] = new Date().toISOString();
+  await AsyncStorage.setItem(UNLOCKED_AT_KEY, JSON.stringify(unlockedAt));
+
+  return true;
+}
+
 export async function getUnlockedAchievementsAt(): Promise<Record<string, string>> {
   const raw = await AsyncStorage.getItem(UNLOCKED_AT_KEY);
   return raw ? JSON.parse(raw) : {};
