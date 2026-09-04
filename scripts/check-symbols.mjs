@@ -176,43 +176,64 @@ function report(file, exId, block, msg) {
   failures++;
 }
 
+function scanExercise(exId, ex, blocks, file) {
+  for (const [label, src] of blocks) {
+    if (!src) continue;
+    const code = stripIgnored(src);
+    const declared = declaredNames(code);
+    let m;
+    callRe.lastIndex = 0;
+    while ((m = callRe.exec(code)) !== null) {
+      const name = m[1];
+      if (!symbolSet.has(name) && !declared.has(name)) {
+        report(file, exId, label, `unknown function call ${name}()`);
+      }
+    }
+    memberRe.lastIndex = 0;
+    while ((m = memberRe.exec(code)) !== null) {
+      const name = m[1];
+      if (!symbolSet.has(name) && !MEMBER_ALLOWLIST.includes(name) && !declared.has(name)) {
+        report(file, exId, label, `unknown member .${name}`);
+      }
+    }
+    constRe.lastIndex = 0;
+    while ((m = constRe.exec(code)) !== null) {
+      const name = m[1];
+      if (!P5_CONSTANTS.includes(name) && !refSymbols.has(name) && !JS_GLOBALS.includes(name)) {
+        report(file, exId, label, `unknown constant ${name}`);
+      }
+    }
+  }
+}
+
 const yamlFiles = fs.readdirSync(COURSES_DIR).filter((f) => f.endsWith(".yaml") || f.endsWith(".yml"));
 
 for (const file of yamlFiles) {
-  const course = jsyaml.load(fs.readFileSync(path.join(COURSES_DIR, file), "utf8"));
+  const data = jsyaml.load(fs.readFileSync(path.join(COURSES_DIR, file), "utf8"));
+
+  // Minigame definition files expose their unlock exercises under `minigames`.
+  if (data && Array.isArray(data.minigames)) {
+    for (const mg of data.minigames) {
+      const ex = mg.unlockExercise;
+      const blocks = [
+        ["startingCode", ex.startingCode],
+        ["solution", ex.solution],
+        ...(ex.tasks ?? []).map((t) => [`task.${t.id}.solution`, t.solution]),
+      ];
+      // Reuse the per-exercise symbol scan via the shared helper below.
+      scanExercise(ex.id, ex, blocks, file);
+    }
+    continue;
+  }
+
+  const course = data;
   for (const ex of course.exercises ?? []) {
     const blocks = [
       ["startingCode", ex.startingCode],
       ["solution", ex.solution],
       ...(ex.tasks ?? []).map((t) => [`task.${t.id}.solution`, t.solution]),
     ];
-    for (const [label, src] of blocks) {
-      if (!src) continue;
-      const code = stripIgnored(src);
-      const declared = declaredNames(code);
-      let m;
-      callRe.lastIndex = 0;
-      while ((m = callRe.exec(code)) !== null) {
-        const name = m[1];
-        if (!symbolSet.has(name) && !declared.has(name)) {
-          report(file, ex.id, label, `unknown function call ${name}()`);
-        }
-      }
-      memberRe.lastIndex = 0;
-      while ((m = memberRe.exec(code)) !== null) {
-        const name = m[1];
-        if (!symbolSet.has(name) && !MEMBER_ALLOWLIST.includes(name) && !declared.has(name)) {
-          report(file, ex.id, label, `unknown member .${name}`);
-        }
-      }
-      constRe.lastIndex = 0;
-      while ((m = constRe.exec(code)) !== null) {
-        const name = m[1];
-        if (!P5_CONSTANTS.includes(name) && !refSymbols.has(name) && !JS_GLOBALS.includes(name)) {
-          report(file, ex.id, label, `unknown constant ${name}`);
-        }
-      }
-    }
+    scanExercise(ex.id, ex, blocks, file);
   }
 }
 

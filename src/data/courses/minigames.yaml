@@ -1,0 +1,1551 @@
+# Minigame Interludes
+# Optional Symbian-era minigames between courses
+# Each entry is a full Minigame plus its unlock exercise (2-3 tasks).
+
+minigames:
+  # 1. Snake Classic (after shapes)
+  - id: snake-classic
+    title: "Snake Classic"
+    description: "Guide the snake to eat food and grow longer. Don't hit the walls or yourself!"
+    courseSlug: shapes
+    gameType: "2d"
+    targetScore: 10
+    achievementId: snake-master
+    unlockExercise:
+      id: unlock-snake
+      title: "Snake Basics"
+      module: Shapes
+      description: "Learn the drawing concepts needed for Snake Classic"
+      instruction: |
+        Snake Classic uses rectangles for the snake and food.
+        Complete these tasks to unlock the game.
+      startingCode: |
+        function setup() {
+          createCanvas(400, 400);
+          background(0);
+        }
+
+        function draw() {
+          // Your code here
+        }
+      solution: |
+        function setup() {
+          createCanvas(400, 400);
+          background(0);
+        }
+
+        function draw() {
+          background(0);
+          drawGrid();
+          drawSnake();
+          drawFood();
+        }
+
+        function drawGrid() {
+          noStroke();
+          fill(20);
+          for (let x = 0; x < 400; x += 20) {
+            for (let y = 0; y < 400; y += 20) {
+              rect(x, y, 20, 20);
+            }
+          }
+        }
+
+        function drawSnake() {
+          noStroke();
+          fill(0, 255, 0);
+          rect(100, 100, 20, 20);
+        }
+
+        function drawFood() {
+          noStroke();
+          fill(255, 0, 0);
+          circle(200, 200, 15);
+        }
+      tasks:
+        - id: task-1
+          title: "Draw a Grid"
+          instruction: |
+            Draw a 20x20 grid on the canvas. Use rect() to lay out the grid cells.
+          validation:
+            - type: functionCall
+              name: rect
+              minArgs: 3
+          solution: |
+            function setup() {
+              createCanvas(400, 400);
+              background(0);
+            }
+
+            function draw() {
+              background(0);
+              noStroke();
+              fill(20);
+              for (let x = 0; x < 400; x += 20) {
+                rect(x, 0, 20, 20);
+              }
+            }
+        - id: task-2
+          title: "Draw a Snake Segment"
+          instruction: |
+            Draw a green rectangle at position (100, 100) with size 20x20.
+            This represents one segment of the snake.
+          validation:
+            - type: functionCall
+              name: rect
+              exactArgs: 4
+            - type: pixelMatch
+              x: 110
+              y: 110
+              expected: [0, 255, 0]
+              tolerance: 50
+          solution: |
+            function setup() {
+              createCanvas(400, 400);
+              background(0);
+            }
+
+            function draw() {
+              background(0);
+              noStroke();
+              fill(0, 255, 0);
+              rect(100, 100, 20, 20);
+            }
+        - id: task-3
+          title: "Draw Food"
+          instruction: |
+            Draw a red circle at position (200, 200) with diameter 15.
+            This represents the food the snake eats.
+          validation:
+            - type: functionCall
+              name: circle
+              exactArgs: 3
+            - type: pixelMatch
+              x: 200
+              y: 200
+              expected: [255, 0, 0]
+              tolerance: 50
+          solution: |
+            function setup() {
+              createCanvas(400, 400);
+              background(0);
+            }
+
+            function draw() {
+              background(0);
+              noStroke();
+              fill(255, 0, 0);
+              circle(200, 200, 15);
+            }
+
+  # 2. Bounce 2D (after color)
+  - id: bounce-2d
+    title: "Bounce 2D"
+    description: "Keep the ball bouncing! Use your mouse to control the paddle and prevent the ball from falling."
+    courseSlug: color
+    gameType: "2d"
+    targetScore: 5
+    achievementId: bounce-master-2d
+    unlockExercise:
+      id: unlock-bounce-2d
+      title: "Bounce 2D Basics"
+      module: Color
+      description: "Learn color and movement concepts for Bounce 2D"
+      instruction: |
+        Bounce 2D uses colors for the ball and paddle.
+        Complete these tasks to unlock the game.
+      startingCode: |
+        function setup() {
+          createCanvas(400, 400);
+        }
+
+        function draw() {
+          background(220);
+        }
+      solution: |
+        function setup() {
+          createCanvas(400, 400);
+        }
+
+        function draw() {
+          gradientBackground();
+          noStroke();
+          fill(30, 90, 220);
+          circle(200, 200, 40);
+        }
+
+        function gradientBackground() {
+          for (let y = 0; y < 400; y += 4) {
+            fill(20, 60, 120, 255);
+            rect(0, y, 400, 4);
+          }
+        }
+      tasks:
+        - id: task-1
+          title: "Colorful Ball"
+          instruction: |
+            Draw a blue ball at the center of the canvas.
+            Use fill() with RGB values to make it blue.
+          validation:
+            - type: functionCall
+              name: fill
+              minArgs: 3
+            - type: functionCall
+              name: circle
+              exactArgs: 3
+            - type: pixelMatch
+              x: 200
+              y: 200
+              expected: [0, 0, 255]
+              tolerance: 60
+          solution: |
+            function setup() {
+              createCanvas(400, 400);
+            }
+
+            function draw() {
+              background(220);
+              noStroke();
+              fill(0, 0, 255);
+              circle(200, 200, 100);
+            }
+        - id: task-2
+          title: "Fill Colors"
+          instruction: |
+            Use fill() at least twice with different RGB colors.
+            This shows how colors drive the ball and paddle in the game.
+          validation:
+            - type: functionCall
+              name: fill
+              minArgs: 3
+          solution: |
+            function setup() {
+              createCanvas(400, 400);
+            }
+
+            function draw() {
+              background(220);
+              noStroke();
+              fill(0, 0, 255);
+              circle(200, 200, 40);
+              fill(255, 100, 50);
+              rect(150, 350, 100, 20);
+            }
+
+  # 3. Space Impact (after transform)
+  - id: space-impact
+    title: "Space Impact"
+    description: "Navigate through space and destroy enemy ships! Use transformations to move and rotate."
+    courseSlug: transform
+    gameType: "2d"
+    targetScore: 15
+    achievementId: space-impact-master
+    unlockExercise:
+      id: unlock-space-impact
+      title: "Space Impact Basics"
+      module: Transform
+      description: "Learn transformation concepts for Space Impact"
+      instruction: |
+        Space Impact uses translate() and rotate() for ship movement.
+        Complete these tasks to unlock the game.
+      startingCode: |
+        function setup() {
+          createCanvas(400, 400);
+          background(0);
+        }
+
+        function draw() {
+          // Your code here
+        }
+      solution: |
+        function setup() {
+          createCanvas(400, 400);
+          background(0);
+        }
+
+        function draw() {
+          background(0);
+          drawShip();
+        }
+
+        function drawShip() {
+          push();
+          translate(200, 300);
+          rotate(radians(45));
+          fill(150, 150, 255);
+          triangle(-25, 20, 25, 20, 0, -30);
+          pop();
+        }
+      tasks:
+        - id: task-1
+          title: "Translate Ship"
+          instruction: |
+            Use translate() to move a triangle to position (200, 300).
+            Draw the triangle after translating.
+          validation:
+            - type: functionCall
+              name: translate
+              exactArgs: 2
+            - type: functionCall
+              name: triangle
+              exactArgs: 6
+          solution: |
+            function setup() {
+              createCanvas(400, 400);
+              background(0);
+            }
+
+            function draw() {
+              background(0);
+              push();
+              translate(200, 300);
+              fill(150, 150, 255);
+              triangle(-25, 20, 25, 20, 0, -30);
+              pop();
+            }
+        - id: task-2
+          title: "Rotate Ship"
+          instruction: |
+            Use rotate() to rotate a shape by 45 degrees.
+            Remember to use radians().
+          validation:
+            - type: functionCall
+              name: rotate
+              exactArgs: 1
+            - type: functionCall
+              name: radians
+              minArgs: 1
+          solution: |
+            function setup() {
+              createCanvas(400, 400);
+              background(0);
+            }
+
+            function draw() {
+              background(0);
+              push();
+              translate(200, 300);
+              rotate(radians(45));
+              fill(150, 150, 255);
+              triangle(-25, 20, 25, 20, 0, -30);
+              pop();
+            }
+
+  # 4. Frozen Bubble (after custom-shapes)
+  - id: frozen-bubble
+    title: "Frozen Bubble"
+    description: "Shoot bubbles and match colors to clear the board! Classic arcade puzzle."
+    courseSlug: custom-shapes
+    gameType: "2d"
+    targetScore: 20
+    achievementId: frozen-bubble-master
+    unlockExercise:
+      id: unlock-frozen-bubble
+      title: "Frozen Bubble Basics"
+      module: Custom Shapes
+      description: "Learn custom shape concepts for Frozen Bubble"
+      instruction: |
+        Frozen Bubble uses custom bubble shapes with beginShape()/endShape().
+        Complete these tasks to unlock the game.
+      startingCode: |
+        function setup() {
+          createCanvas(400, 400);
+          background(200, 220, 255);
+        }
+
+        function draw() {
+          // Your code here
+        }
+      solution: |
+        function setup() {
+          createCanvas(400, 400);
+          background(200, 220, 255);
+        }
+
+        function draw() {
+          drawBubble(200, 200, 50, 255, 0, 0);
+        }
+
+        function drawBubble(x, y, r, rcol, gcol, bcol) {
+          noStroke();
+          fill(rcol, gcol, bcol);
+          beginShape();
+          for (let a = 0; a <= TWO_PI; a += 0.1) {
+            vertex(x + r * cos(a), y + r * sin(a));
+          }
+          endShape(CLOSE);
+        }
+      tasks:
+        - id: task-1
+          title: "Draw a Bubble"
+          instruction: |
+            Use beginShape(), vertex(), and endShape() to draw a bubble-like shape.
+          validation:
+            - type: functionCall
+              name: beginShape
+            - type: functionCall
+              name: vertex
+              minArgs: 2
+            - type: functionCall
+              name: endShape
+          solution: |
+            function setup() {
+              createCanvas(400, 400);
+              background(200, 220, 255);
+            }
+
+            function draw() {
+              noStroke();
+              fill(255, 100, 50);
+              beginShape();
+              vertex(150, 200);
+              vertex(250, 200);
+              vertex(200, 300);
+              endShape(CLOSE);
+            }
+        - id: task-2
+          title: "Colored Bubbles"
+          instruction: |
+            Draw 3 different colored bubbles in a row using fill().
+          validation:
+            - type: functionCall
+              name: fill
+              minArgs: 3
+            - type: functionCall
+              name: beginShape
+          solution: |
+            function setup() {
+              createCanvas(400, 400);
+              background(200, 220, 255);
+            }
+
+            function draw() {
+              noStroke();
+              fill(255, 0, 0);
+              beginShape();
+              vertex(100, 200);
+              vertex(140, 200);
+              vertex(120, 260);
+              endShape(CLOSE);
+              fill(0, 255, 0);
+              beginShape();
+              vertex(200, 200);
+              vertex(240, 200);
+              vertex(220, 260);
+              endShape(CLOSE);
+              fill(0, 0, 255);
+              beginShape();
+              vertex(300, 200);
+              vertex(340, 200);
+              vertex(320, 260);
+              endShape(CLOSE);
+            }
+
+  # 5. Breakout/Arkanoid (after curves)
+  - id: breakout
+    title: "Breakout"
+    description: "Break all the bricks with your ball and paddle! Classic arcade action."
+    courseSlug: curves
+    gameType: "2d"
+    targetScore: 25
+    achievementId: breakout-master
+    unlockExercise:
+      id: unlock-breakout
+      title: "Breakout Basics"
+      module: Curves
+      description: "Learn curve concepts for Breakout"
+      instruction: |
+        Breakout uses arcs and bezier curves for decorative elements.
+        Complete these tasks to unlock the game.
+      startingCode: |
+        function setup() {
+          createCanvas(400, 400);
+          background(0);
+        }
+
+        function draw() {
+          // Your code here
+        }
+      solution: |
+        function setup() {
+          createCanvas(400, 400);
+          background(0);
+        }
+
+        function draw() {
+          background(0);
+          noFill();
+          stroke(255, 100, 50);
+          arc(200, 200, 100, 100, 0, PI);
+          stroke(50, 100, 255);
+          bezier(50, 300, 150, 250, 250, 350, 350, 300);
+        }
+      tasks:
+        - id: task-1
+          title: "Arc Brick"
+          instruction: |
+            Draw a curved arc using arc().
+            This will be used for decorative brick elements.
+          validation:
+            - type: functionCall
+              name: arc
+              minArgs: 5
+          solution: |
+            function setup() {
+              createCanvas(400, 400);
+              background(0);
+            }
+
+            function draw() {
+              background(0);
+              noFill();
+              stroke(255, 100, 50);
+              arc(200, 200, 100, 100, 0, PI);
+            }
+        - id: task-2
+          title: "Bezier Decoration"
+          instruction: |
+            Draw a decorative line using bezier().
+            This creates curved brick decorations.
+          validation:
+            - type: functionCall
+              name: bezier
+              exactArgs: 8
+          solution: |
+            function setup() {
+              createCanvas(400, 400);
+              background(0);
+            }
+
+            function draw() {
+              background(0);
+              noFill();
+              stroke(50, 100, 255);
+              bezier(50, 300, 150, 250, 250, 350, 350, 300);
+            }
+
+  # 6. Word Drop (after typography)
+  - id: word-drop
+    title: "Word Drop"
+    description: "Type the falling words before they reach the bottom! Test your typing speed."
+    courseSlug: typography
+    gameType: "2d"
+    targetScore: 30
+    achievementId: word-drop-master
+    unlockExercise:
+      id: unlock-word-drop
+      title: "Word Drop Basics"
+      module: Typography
+      description: "Learn typography concepts for Word Drop"
+      instruction: |
+        Word Drop uses text() and textSize() for falling words.
+        Complete these tasks to unlock the game.
+      startingCode: |
+        function setup() {
+          createCanvas(400, 400);
+          background(0);
+        }
+
+        function draw() {
+          // Your code here
+        }
+      solution: |
+        function setup() {
+          createCanvas(400, 400);
+          background(0);
+        }
+
+        function draw() {
+          background(0);
+          fill(255);
+          textSize(32);
+          textAlign(CENTER);
+          text("HELLO", 200, 200);
+        }
+      tasks:
+        - id: task-1
+          title: "Display Text"
+          instruction: |
+            Display the word "HELLO" at position (200, 200).
+            Use text() and textSize() to make it visible.
+          validation:
+            - type: functionCall
+              name: text
+              minArgs: 3
+            - type: functionCall
+              name: textSize
+              exactArgs: 1
+          solution: |
+            function setup() {
+              createCanvas(400, 400);
+              background(0);
+            }
+
+            function draw() {
+              background(0);
+              fill(255);
+              textSize(32);
+              text("HELLO", 200, 200);
+            }
+        - id: task-2
+          title: "Styled Text"
+          instruction: |
+            Display text with fill() color and textAlign() centered.
+          validation:
+            - type: functionCall
+              name: fill
+              minArgs: 3
+            - type: functionCall
+              name: textAlign
+              minArgs: 1
+          solution: |
+            function setup() {
+              createCanvas(400, 400);
+              background(0);
+            }
+
+            function draw() {
+              background(0);
+              fill(100, 200, 255);
+              textAlign(CENTER);
+              text("READY", 200, 200);
+            }
+
+  # 7. Memory Match (after image)
+  - id: memory-match
+    title: "Memory Match"
+    description: "Find all matching pairs! Flip cards to remember their positions."
+    courseSlug: image
+    gameType: "2d"
+    targetScore: 8
+    achievementId: memory-master
+    unlockExercise:
+      id: unlock-memory
+      title: "Memory Match Basics"
+      module: Image
+      description: "Learn image concepts for Memory Match"
+      instruction: |
+        Memory Match uses shapes for card faces.
+        Complete these tasks to unlock the game.
+      startingCode: |
+        function setup() {
+          createCanvas(400, 400);
+          background(0);
+        }
+
+        function draw() {
+          // Your code here
+        }
+      solution: |
+        function setup() {
+          createCanvas(400, 400);
+          background(0);
+        }
+
+        function draw() {
+          drawCardBack(50, 50, 80, 100);
+          fill(255, 255, 0);
+          circle(250, 100, 60);
+        }
+
+        function drawCardBack(x, y, w, h) {
+          fill(150, 50, 150);
+          rect(x, y, w, h);
+        }
+      tasks:
+        - id: task-1
+          title: "Draw Card Back"
+          instruction: |
+            Draw a card back using rect(). This will be shown for face-down cards.
+          validation:
+            - type: functionCall
+              name: rect
+              minArgs: 4
+            - type: functionCall
+              name: fill
+              minArgs: 3
+          solution: |
+            function setup() {
+              createCanvas(400, 400);
+              background(0);
+            }
+
+            function draw() {
+              background(0);
+              fill(150, 50, 150);
+              rect(50, 50, 80, 100);
+            }
+        - id: task-2
+          title: "Card Face"
+          instruction: |
+            Draw a distinct shape (like a circle) for a card face.
+            This will be flipped over when a pair is matched.
+          validation:
+            - type: functionCall
+              name: circle
+              minArgs: 3
+            - type: functionCall
+              name: fill
+              minArgs: 3
+          solution: |
+            function setup() {
+              createCanvas(400, 400);
+              background(0);
+            }
+
+            function draw() {
+              background(0);
+              fill(255, 255, 0);
+              circle(200, 200, 80);
+            }
+
+  # 8. Sudoku Lite (after math)
+  - id: sudoku-lite
+    title: "Sudoku Lite"
+    description: "Fill the grid with numbers 1-4! Simplified Sudoku for quick puzzles."
+    courseSlug: math
+    gameType: "2d"
+    targetScore: 5
+    achievementId: sudoku-master
+    unlockExercise:
+      id: unlock-sudoku
+      title: "Sudoku Lite Basics"
+      module: Math
+      description: "Learn math concepts for Sudoku Lite"
+      instruction: |
+        Sudoku Lite uses a grid and numbers for puzzle logic.
+        Complete these tasks to unlock the game.
+      startingCode: |
+        function setup() {
+          createCanvas(400, 400);
+          background(255);
+        }
+
+        function draw() {
+          // Your code here
+        }
+      solution: |
+        function setup() {
+          createCanvas(400, 400);
+          background(255);
+        }
+
+        function draw() {
+          drawGrid();
+          fill(0);
+          textSize(32);
+          textAlign(CENTER);
+          text("5", 200, 200);
+        }
+
+        function drawGrid() {
+          stroke(0);
+          strokeWeight(2);
+          for (let i = 0; i <= 400; i += 100) {
+            line(i, 0, i, 400);
+            line(0, i, 400, i);
+          }
+        }
+      tasks:
+        - id: task-1
+          title: "Draw Grid"
+          instruction: |
+            Draw a 4x4 grid using line() in a loop.
+          validation:
+            - type: functionCall
+              name: line
+              exactArgs: 4
+          solution: |
+            function setup() {
+              createCanvas(400, 400);
+              background(255);
+            }
+
+            function draw() {
+              background(255);
+              stroke(0);
+              for (let i = 0; i <= 400; i += 100) {
+                line(i, 0, i, 400);
+              }
+            }
+        - id: task-2
+          title: "Number Display"
+          instruction: |
+            Display the number 5 at position (200, 200) using text().
+          validation:
+            - type: functionCall
+              name: text
+              minArgs: 3
+            - type: functionCall
+              name: textSize
+              exactArgs: 1
+          solution: |
+            function setup() {
+              createCanvas(400, 400);
+              background(255);
+            }
+
+            function draw() {
+              background(255);
+              fill(0);
+              textSize(32);
+              text("5", 200, 200);
+            }
+
+  # 9. Asteroids (after vectors)
+  - id: asteroids
+    title: "Asteroids"
+    description: "Navigate your ship through asteroid fields! Use vector math for smooth movement."
+    courseSlug: vectors
+    gameType: "2d"
+    targetScore: 20
+    achievementId: asteroids-master
+    unlockExercise:
+      id: unlock-asteroids
+      title: "Asteroids Basics"
+      module: Vectors
+      description: "Learn vector concepts for Asteroids"
+      instruction: |
+        Asteroids uses createVector() and vector methods for ship movement.
+        Complete these tasks to unlock the game.
+      startingCode: |
+        function setup() {
+          createCanvas(400, 400);
+          background(0);
+        }
+
+        function draw() {
+          // Your code here
+        }
+      solution: |
+        function setup() {
+          createCanvas(400, 400);
+          background(0);
+        }
+
+        function draw() {
+          background(0);
+          let pos = createVector(200, 300);
+          let vel = createVector(1, -1);
+          pos.add(vel);
+          fill(150, 150, 255);
+          triangle(pos.x - 15, pos.y + 10, pos.x + 15, pos.y + 10, pos.x, pos.y - 20);
+        }
+      tasks:
+        - id: task-1
+          title: "Create Vector"
+          instruction: |
+            Create a vector using createVector(100, 100).
+          validation:
+            - type: functionCall
+              name: createVector
+              exactArgs: 2
+          solution: |
+            function setup() {
+              createCanvas(400, 400);
+              background(0);
+            }
+
+            function draw() {
+              background(0);
+              let pos = createVector(100, 100);
+              fill(150, 150, 255);
+              circle(pos.x, pos.y, 30);
+            }
+        - id: task-2
+          title: "Vector Math"
+          instruction: |
+            Use createVector() with .add() to move a shape.
+          validation:
+            - type: functionCall
+              name: createVector
+              minArgs: 2
+            - type: functionCall
+              name: add
+              minArgs: 1
+          solution: |
+            function setup() {
+              createCanvas(400, 400);
+              background(0);
+            }
+
+            function draw() {
+              background(0);
+              let pos = createVector(200, 300);
+              let vel = createVector(1, -1);
+              pos.add(vel);
+              fill(150, 150, 255);
+              circle(pos.x, pos.y, 30);
+            }
+
+  # 10. Perlin Maze (after random-noise)
+  - id: perlin-maze
+    title: "Perlin Maze"
+    description: "Navigate through procedurally generated mazes! Use noise for unique layouts."
+    courseSlug: random-noise
+    gameType: "2d"
+    targetScore: 3
+    achievementId: maze-master
+    unlockExercise:
+      id: unlock-perlin
+      title: "Perlin Maze Basics"
+      module: Random & Noise
+      description: "Learn noise concepts for Perlin Maze"
+      instruction: |
+        Perlin Maze uses noise() and map() for maze generation.
+        Complete these tasks to unlock the game.
+      startingCode: |
+        function setup() {
+          createCanvas(400, 400);
+          background(0);
+        }
+
+        function draw() {
+          // Your code here
+        }
+      solution: |
+        function setup() {
+          createCanvas(400, 400);
+          background(0);
+        }
+
+        function draw() {
+          background(0);
+          noStroke();
+          for (let x = 0; x < 400; x += 20) {
+            for (let y = 0; y < 400; y += 20) {
+              let n = noise(x * 0.05, y * 0.05);
+              let g = map(n, 0, 1, 0, 255);
+              if (n > 0.5) {
+                fill(g);
+                rect(x, y, 20, 20);
+              }
+            }
+          }
+        }
+      tasks:
+        - id: task-1
+          title: "Noise Grid"
+          instruction: |
+            Use noise() with map() to generate grayscale values.
+          validation:
+            - type: functionCall
+              name: noise
+              minArgs: 2
+            - type: functionCall
+              name: map
+              minArgs: 5
+          solution: |
+            function setup() {
+              createCanvas(400, 400);
+              background(0);
+            }
+
+            function draw() {
+              background(0);
+              let n = noise(100, 200);
+              let g = map(n, 0, 1, 0, 255);
+              fill(g);
+              rect(0, 0, 400, 400);
+            }
+        - id: task-2
+          title: "Maze Walls"
+          instruction: |
+            Draw maze walls using rect() based on noise thresholds.
+          validation:
+            - type: functionCall
+              name: rect
+              minArgs: 4
+            - type: functionCall
+              name: noise
+              minArgs: 2
+          solution: |
+            function setup() {
+              createCanvas(400, 400);
+              background(0);
+            }
+
+            function draw() {
+              background(0);
+              noStroke();
+              let n = noise(10, 20);
+              if (n > 0.5) {
+                fill(255);
+                rect(0, 0, 20, 20);
+              }
+            }
+
+  # 11. Tic-Tac-Toe AI (after dom)
+  - id: tic-tac-toe-ai
+    title: "Tic-Tac-Toe AI"
+    description: "Challenge the computer! Can you beat the unbeatable AI?"
+    courseSlug: dom
+    gameType: "2d"
+    targetScore: 3
+    achievementId: tictactoe-master
+    unlockExercise:
+      id: unlock-tictactoe
+      title: "Tic-Tac-Toe Basics"
+      module: DOM
+      description: "Learn game logic concepts for Tic-Tac-Toe AI"
+      instruction: |
+        Tic-Tac-Toe AI needs a grid board with X and O marks.
+        Complete these tasks to unlock the game.
+      startingCode: |
+        function setup() {
+          createCanvas(400, 400);
+          background(255);
+        }
+
+        function draw() {
+          // Your code here
+        }
+      solution: |
+        function setup() {
+          createCanvas(400, 400);
+          background(255);
+        }
+
+        function draw() {
+          background(255);
+          stroke(0);
+          strokeWeight(3);
+          line(133, 20, 133, 380);
+          line(266, 20, 266, 380);
+          line(20, 133, 380, 133);
+          line(20, 266, 380, 266);
+          noFill();
+          strokeWeight(4);
+          drawX(66, 66);
+          drawO(200, 66);
+        }
+
+        function drawX(x, y) {
+          line(x - 20, y - 20, x + 20, y + 20);
+          line(x + 20, y - 20, x - 20, y + 20);
+        }
+
+        function drawO(x, y) {
+          circle(x, y, 50);
+        }
+      tasks:
+        - id: task-1
+          title: "Draw Board"
+          instruction: |
+            Draw a 3x3 tic-tac-toe board using line().
+          validation:
+            - type: functionCall
+              name: line
+              minArgs: 4
+          solution: |
+            function setup() {
+              createCanvas(400, 400);
+              background(255);
+            }
+
+            function draw() {
+              background(255);
+              stroke(0);
+              strokeWeight(3);
+              line(133, 20, 133, 380);
+              line(266, 20, 266, 380);
+              line(20, 133, 380, 133);
+              line(20, 266, 380, 266);
+            }
+        - id: task-2
+          title: "X and O"
+          instruction: |
+            Draw an X using line() and an O using circle().
+          validation:
+            - type: functionCall
+              name: line
+              minArgs: 4
+            - type: functionCall
+              name: circle
+              minArgs: 3
+          solution: |
+            function setup() {
+              createCanvas(400, 400);
+              background(255);
+            }
+
+            function draw() {
+              background(255);
+              stroke(0);
+              strokeWeight(4);
+              noFill();
+              line(46, 46, 86, 86);
+              line(86, 46, 46, 86);
+              circle(200, 200, 60);
+            }
+
+  # 12. Whack-a-Mole (after events)
+  - id: whack-a-mole
+    title: "Whack-a-Mole"
+    description: "Whack the moles as they pop up! Test your reaction time."
+    courseSlug: events
+    gameType: "2d"
+    targetScore: 15
+    achievementId: whack-master
+    unlockExercise:
+      id: unlock-whack
+      title: "Whack-a-Mole Basics"
+      module: Events
+      description: "Learn event concepts for Whack-a-Mole"
+      instruction: |
+        Whack-a-Mole uses mousePressed() to detect hits.
+        Complete these tasks to unlock the game.
+      startingCode: |
+        function setup() {
+          createCanvas(400, 400);
+          background(0);
+        }
+
+        function draw() {
+          // Your code here
+        }
+      solution: |
+        function setup() {
+          createCanvas(400, 400);
+          background(0);
+        }
+
+        function draw() {
+          background(0);
+          noStroke();
+          fill(120, 70, 20);
+          ellipse(100, 300, 80, 30);
+          ellipse(200, 300, 80, 30);
+          ellipse(300, 300, 80, 30);
+        }
+
+        function mousePressed() {
+          // handle player clicks
+        }
+      tasks:
+        - id: task-1
+          title: "Click Detection"
+          instruction: |
+            Define a mousePressed() function to detect clicks.
+          validation:
+            - type: functionExists
+              name: mousePressed
+          solution: |
+            function setup() {
+              createCanvas(400, 400);
+              background(0);
+            }
+
+            function draw() {
+              background(0);
+            }
+
+            function mousePressed() {
+              // handle click
+            }
+        - id: task-2
+          title: "Mole Holes"
+          instruction: |
+            Draw 3 mole holes using ellipse().
+          validation:
+            - type: functionCall
+              name: ellipse
+              minArgs: 3
+          solution: |
+            function setup() {
+              createCanvas(400, 400);
+              background(0);
+            }
+
+            function draw() {
+              background(0);
+              noStroke();
+              fill(120, 70, 20);
+              ellipse(100, 300, 80, 30);
+              ellipse(200, 300, 80, 30);
+              ellipse(300, 300, 80, 30);
+            }
+
+  # 13. Reaction Timer (after time)
+  - id: reaction-timer
+    title: "Reaction Timer"
+    description: "How fast can you react? Click as soon as the screen changes color!"
+    courseSlug: time
+    gameType: "2d"
+    targetScore: 10
+    achievementId: reaction-master
+    unlockExercise:
+      id: unlock-reaction
+      title: "Reaction Timer Basics"
+      module: Time
+      description: "Learn time concepts for Reaction Timer"
+      instruction: |
+        Reaction Timer uses millis() and frameCount for timing.
+        Complete these tasks to unlock the game.
+      startingCode: |
+        function setup() {
+          createCanvas(400, 400);
+          background(0);
+        }
+
+        function draw() {
+          // Your code here
+        }
+      solution: |
+        function setup() {
+          createCanvas(400, 400);
+          background(0);
+        }
+
+        function draw() {
+          background(0);
+          fill(255);
+          textSize(24);
+          textAlign(CENTER);
+          text("Time: " + floor(millis() / 1000), 200, 200);
+          text("Frame: " + frameCount, 200, 240);
+        }
+      tasks:
+        - id: task-1
+          title: "Use millis()"
+          instruction: |
+            Display the elapsed time using millis() with text().
+          validation:
+            - type: functionCall
+              name: millis
+              exactArgs: 0
+            - type: functionCall
+              name: text
+              minArgs: 3
+          solution: |
+            function setup() {
+              createCanvas(400, 400);
+              background(0);
+            }
+
+            function draw() {
+              background(0);
+              fill(255);
+              textSize(24);
+              text("Time: " + floor(millis() / 1000), 200, 200);
+            }
+        - id: task-2
+          title: "Frame Counter"
+          instruction: |
+            Display frameCount on the canvas with text().
+          validation:
+            - type: functionCall
+              name: text
+              minArgs: 3
+          solution: |
+            function setup() {
+              createCanvas(400, 400);
+              background(0);
+            }
+
+            function draw() {
+              background(0);
+              fill(255);
+              textSize(24);
+              text("Frame: " + frameCount, 200, 200);
+            }
+
+  # 14. Simon Says (after io)
+  - id: simon-says
+    title: "Simon Says"
+    description: "Repeat the pattern! Watch, remember, and replay the sequence."
+    courseSlug: io
+    gameType: "2d"
+    targetScore: 8
+    achievementId: simon-master
+    unlockExercise:
+      id: unlock-simon
+      title: "Simon Says Basics"
+      module: I/O
+      description: "Learn I/O concepts for Simon Says"
+      instruction: |
+        Simon Says uses colored buttons and input handlers.
+        Complete these tasks to unlock the game.
+      startingCode: |
+        function setup() {
+          createCanvas(400, 400);
+          background(0);
+        }
+
+        function draw() {
+          // Your code here
+        }
+      solution: |
+        function setup() {
+          createCanvas(400, 400);
+          background(0);
+        }
+
+        function draw() {
+          background(0);
+          noStroke();
+          drawButton(60, 100, 255, 0, 0);
+          drawButton(60, 300, 0, 255, 0);
+          drawButton(260, 100, 0, 0, 255);
+          drawButton(260, 300, 255, 255, 0);
+        }
+
+        function drawButton(x, y, r, g, b) {
+          fill(r, g, b);
+          rect(x, y, 80, 80);
+        }
+
+        function keyPressed() {
+          // handle pattern input
+        }
+
+        function mousePressed() {
+          // handle pattern input
+        }
+      tasks:
+        - id: task-1
+          title: "Colored Buttons"
+          instruction: |
+            Draw colored buttons using fill() and rect().
+          validation:
+            - type: functionCall
+              name: fill
+              minArgs: 3
+            - type: functionCall
+              name: rect
+              minArgs: 4
+          solution: |
+            function setup() {
+              createCanvas(400, 400);
+              background(0);
+            }
+
+            function draw() {
+              background(0);
+              noStroke();
+              fill(255, 0, 0);
+              rect(60, 100, 80, 80);
+              fill(0, 255, 0);
+              rect(60, 300, 80, 80);
+            }
+        - id: task-2
+          title: "Input Detection"
+          instruction: |
+            Define keyPressed() and mousePressed() functions for input.
+          validation:
+            - type: functionExists
+              name: keyPressed
+            - type: functionExists
+              name: mousePressed
+          solution: |
+            function setup() {
+              createCanvas(400, 400);
+              background(0);
+            }
+
+            function draw() {
+              background(0);
+            }
+
+            function keyPressed() {
+              // handle pattern input
+            }
+
+            function mousePressed() {
+              // handle pattern input
+            }
+
+  # 15. Minesweeper (after data)
+  - id: minesweeper
+    title: "Minesweeper"
+    description: "Find all the mines! Use logic and numbers to clear the field safely."
+    courseSlug: data
+    gameType: "2d"
+    targetScore: 5
+    achievementId: minesweeper-master
+    unlockExercise:
+      id: unlock-minesweeper
+      title: "Minesweeper Basics"
+      module: Data
+      description: "Learn data concepts for Minesweeper"
+      instruction: |
+        Minesweeper uses arrays and counting logic for the minefield.
+        Complete these tasks to unlock the game.
+      startingCode: |
+        function setup() {
+          createCanvas(400, 400);
+          background(0);
+        }
+
+        function draw() {
+          // Your code here
+        }
+      solution: |
+        function setup() {
+          createCanvas(400, 400);
+          background(0);
+        }
+
+        let grid = [[0, 1, 0], [0, 0, 1], [1, 0, 0]];
+
+        function draw() {
+          background(0);
+          let count = 0;
+          for (let i = 0; i < grid.length; i++) {
+            for (let j = 0; j < grid[i].length; j++) {
+              if (grid[i][j] === 1) {
+                count++;
+              }
+            }
+          }
+          fill(255);
+          textSize(24);
+          textAlign(CENTER);
+          text("Mines: " + count, 200, 200);
+        }
+      tasks:
+        - id: task-1
+          title: "2D Array"
+          instruction: |
+            Create a 2D array with random mine placement values.
+          validation:
+            - type: functionCall
+              name: random
+              minArgs: 0
+            - type: functionCall
+              name: floor
+              minArgs: 1
+          solution: |
+            function setup() {
+              createCanvas(400, 400);
+              background(0);
+            }
+
+            let grid = [
+              [floor(random(2)), floor(random(2))],
+              [floor(random(2)), floor(random(2))],
+            ];
+
+            function draw() {
+              background(0);
+            }
+        - id: task-2
+          title: "Count Mines"
+          instruction: |
+            Define a countMines() function that returns the number of mines in the grid,
+            then display it with text().
+          validation:
+            - type: functionExists
+              name: countMines
+            - type: functionCall
+              name: text
+              minArgs: 3
+          solution: |
+            function setup() {
+              createCanvas(400, 400);
+              background(0);
+            }
+
+            let grid = [[0, 1, 0], [0, 0, 1], [1, 0, 0]];
+
+            function countMines() {
+              let total = 0;
+              for (let i = 0; i < grid.length; i++) {
+                for (let j = 0; j < grid[i].length; j++) {
+                  if (grid[i][j] === 1) {
+                    total++;
+                  }
+                }
+              }
+              return total;
+            }
+
+            function draw() {
+              background(0);
+              fill(255);
+              textSize(24);
+              text("Mines: " + countMines(), 200, 200);
+            }
+
+  # 16. Bounce 3D (after webgl)
+  - id: bounce-3d
+    title: "Bounce 3D"
+    description: "Experience Bounce in 3D! Use WebGL for stunning visual effects."
+    courseSlug: webgl
+    gameType: "webgl"
+    targetScore: 5
+    achievementId: bounce-master-3d
+    unlockExercise:
+      id: unlock-bounce-3d
+      title: "Bounce 3D Basics"
+      module: WebGL
+      description: "Learn WebGL concepts for Bounce 3D"
+      instruction: |
+        Bounce 3D uses WEBGL mode for 3D rendering.
+        Complete these tasks to unlock the game.
+      startingCode: |
+        function setup() {
+          createCanvas(400, 400, WEBGL);
+        }
+
+        function draw() {
+          background(0);
+        }
+      solution: |
+        function setup() {
+          createCanvas(400, 400, WEBGL);
+        }
+
+        function draw() {
+          background(0);
+          normalMaterial();
+          sphere(60);
+          rotateX(0.1);
+          rotateY(0.1);
+          box(40);
+        }
+      tasks:
+        - id: task-1
+          title: "3D Sphere"
+          instruction: |
+            Draw a 3D sphere using sphere().
+          validation:
+            - type: functionCall
+              name: sphere
+              minArgs: 1
+          solution: |
+            function setup() {
+              createCanvas(400, 400, WEBGL);
+            }
+
+            function draw() {
+              background(0);
+              normalMaterial();
+              sphere(60);
+            }
+        - id: task-2
+          title: "Rotate Object"
+          instruction: |
+            Use rotateX() and rotateY() with box() to create 3D effects.
+          validation:
+            - type: functionCall
+              name: rotateX
+              exactArgs: 1
+            - type: functionCall
+              name: rotateY
+              exactArgs: 1
+            - type: functionCall
+              name: box
+              minArgs: 1
+          solution: |
+            function setup() {
+              createCanvas(400, 400, WEBGL);
+            }
+
+            function draw() {
+              background(0);
+              normalMaterial();
+              rotateX(0.1);
+              rotateY(0.1);
+              box(40);
+            }
