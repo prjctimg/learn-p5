@@ -20,7 +20,7 @@ import SearchOverlay from "../../../components/SearchOverlay";
 import TaskCompletePulse from "../../../components/TaskCompletePulse";
 import NextExerciseOverlay from "../../../components/NextExerciseOverlay";
 import { loadExercise, loadCourse } from "../../../utils/courseLoader";
-import { Exercise as ExerciseType } from "../../../data/types";
+import { getExerciseCodeKey, exerciseReducer } from "../../../utils/exerciseState";
 import { P5_FUNCTION_NAMES, ONCE_ONLY_P5_FUNCTIONS } from "../../../data/reference";
 import { getExerciseHtml } from "../../../utils/editor/exerciseHtml";
 import { getFullscreenPreviewHtml } from "../../../utils/editor/fullscreenPreviewHtml";
@@ -29,86 +29,6 @@ import { useStreak } from "../../../hooks/useStreak";
 import { recordCompletion, ACHIEVEMENTS } from "../../../hooks/useAchievements";
 
 import { useShakeDetection } from "../../../hooks/useShakeDetection";
-
-const EXERCISE_CODE_PREFIX = "exerciseCode_";
-
-function getExerciseCodeKey(course: string, id: string): string {
- return `${EXERCISE_CODE_PREFIX}${course}_${id}`;
-}
-
-interface ExerciseState {
- exercise: ExerciseType | null;
- loading: boolean;
- code: string;
- startingCode: string;
- isRunning: boolean;
- completed: boolean;
- error: string | null;
- currentTaskIndex: number;
- completedTasks: number[];
-}
-
-type ExerciseAction =
- | { type: "LOAD_START" }
- | { type: "LOAD_DONE"; exercise: ExerciseType | null; course: string; id: string }
- | { type: "LOAD_ERROR"; error: string }
- | { type: "SET_CODE"; code: string }
- | { type: "RESET_CODE"; course: string; id: string }
- | { type: "APPEND_CODE"; text: string; cursorOffset?: number }
- | { type: "RUN_START" }
- | { type: "RUN_DONE" }
- | { type: "EXERCISE_COMPLETE" }
- | { type: "TASK_COMPLETE"; taskIndex: number };
-
-function exerciseReducer(state: ExerciseState, action: ExerciseAction): ExerciseState {
- switch (action.type) {
- case "LOAD_START":
- return { ...state, loading: true, error: null };
- case "LOAD_DONE": {
- const ex = action.exercise;
- const baseCode = ex?.startingCode ?? "";
- const hasSetup = /function\s+setup\s*\(/.test(baseCode);
- const hasDraw = /function\s+draw\s*\(/.test(baseCode);
- const startingCode = !hasSetup || !hasDraw
- ? 'function setup() {\n createCanvas(400, 400);\n}\n\nfunction draw() {\n background(20);\n}\n'
- : baseCode;
- return {
- ...state,
- loading: false,
- exercise: ex ? { ...ex, startingCode } : null,
- startingCode,
- code: startingCode,
- error: null,
- };
- }
- case "LOAD_ERROR":
- return { ...state, loading: false, error: action.error };
- case "SET_CODE":
- return { ...state, code: action.code };
- case "RESET_CODE":
- return { ...state, code: state.startingCode };
- case "APPEND_CODE":
- return { ...state, code: state.code + action.text };
- case "RUN_START":
- return { ...state, isRunning: true };
- case "RUN_DONE":
- return { ...state, isRunning: false };
- case "EXERCISE_COMPLETE":
- return { ...state, completed: true };
- case "TASK_COMPLETE": {
- const completedTasks = [...state.completedTasks, action.taskIndex];
- const hasMoreTasks = state.exercise?.tasks && action.taskIndex < state.exercise.tasks.length - 1;
- return {
- ...state,
- completedTasks,
- currentTaskIndex: hasMoreTasks ? action.taskIndex + 1 : state.currentTaskIndex,
- completed: !hasMoreTasks,
- };
- }
- default:
- return state;
- }
-}
 
 export default function Exercise() {
  const { course, id } = useLocalSearchParams<{ course: string; id: string }>();

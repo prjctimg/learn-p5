@@ -16,9 +16,14 @@ interface BundleExports {
   analyze: typeof src.analyze;
   evaluateRules: typeof src.evaluateRules;
   schemaErrors: typeof src.schemaErrors;
+  hasPixelRules: typeof src.hasPixelRules;
   pixelMatches: typeof src.pixelMatches;
   effectiveTolerance: typeof src.effectiveTolerance;
   effectiveMinPassFraction: typeof src.effectiveMinPassFraction;
+  stripIgnoredRegions: typeof src.stripIgnoredRegions;
+  stripCommentsAndStrings: typeof src.stripCommentsAndStrings;
+  normalizeForCompare: typeof src.normalizeForCompare;
+  codeMatchesSolution: typeof src.codeMatchesSolution;
   RULE_TYPES: readonly string[];
   RULE_SCHEMAS: Record<string, unknown>;
   PIXEL_DEFAULT_TOLERANCE: number;
@@ -97,9 +102,14 @@ describe("validation-core bundle parity", () => {
       "analyze",
       "evaluateRules",
       "schemaErrors",
+      "hasPixelRules",
       "pixelMatches",
       "effectiveTolerance",
       "effectiveMinPassFraction",
+      "stripIgnoredRegions",
+      "stripCommentsAndStrings",
+      "normalizeForCompare",
+      "codeMatchesSolution",
     ]) {
       expect(typeof (bundle as unknown as Record<string, unknown>)[key]).toBe("function");
     }
@@ -168,5 +178,29 @@ describe("validation-core bundle parity", () => {
     expect(bundle.effectiveMinPassFraction(0.25)).toBe(
       src.effectiveMinPassFraction(0.25)
     );
+  });
+
+  it("code comparison helpers agree with the source module", () => {
+    const codes = [
+      "circle(1, 2, 3);",
+      "function setup() {\n  createCanvas(400, 400); // comment\n}",
+      `text('keep/*not-a-comment*/', 0, 0);`,
+      "/* block */ let x = 'a b';",
+      "",
+    ];
+    for (const code of codes) {
+      expect(bundle.stripIgnoredRegions(code)).toBe(src.stripIgnoredRegions(code));
+      expect(bundle.stripCommentsAndStrings(code)).toBe(
+        src.stripCommentsAndStrings(code)
+      );
+      expect(bundle.normalizeForCompare(code)).toBe(src.normalizeForCompare(code));
+    }
+    for (const [a, b] of [
+      ["a + 1;", "a+1;"],
+      ["circle(1, 2);", "circle( 1, 2 );"],
+      ["a;", "b;"],
+    ]) {
+      expect(bundle.codeMatchesSolution(a, b)).toBe(src.codeMatchesSolution(a, b));
+    }
   });
 });

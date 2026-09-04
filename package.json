@@ -12,6 +12,7 @@
     "build-courses": "node scripts/build-courses.mjs",
     "check-exercises": "node scripts/check-exercises.mjs",
     "check-symbols": "node scripts/check-symbols.mjs",
+    "check": "npm run check-exercises && npm run check-symbols && npm test",
     "prepare": "husky",
     "android": "expo start --android",
     "web": "expo start --web",

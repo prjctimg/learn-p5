@@ -49,6 +49,13 @@ function checkExercise(ex) {
     const isFinal = ti === ex.tasks.length - 1;
     const taskSolution = task.solution ?? (isFinal ? solution : null);
 
+    // The shared core expects validation to be an array (see types.ts).
+    if (!Array.isArray(task.validation)) {
+      console.error(`  ✗ ${ex.id}/${task.id}: task.validation is missing or not an array`);
+      failures++;
+      continue;
+    }
+
     // Schema check: catch malformed rules (typos, unknown types, missing fields)
     const schemaProblems = VC.schemaErrors(task.validation);
     for (const p of schemaProblems) {

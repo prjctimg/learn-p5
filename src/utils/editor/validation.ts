@@ -317,26 +317,14 @@ export interface EvalResult {
   reason: string;
 }
 
-export function hasPixelRules(rules: ValidationRule[] | undefined | null): boolean {
-  return (rules ?? []).some(
+export function hasPixelRules(rules: ValidationRule[]): boolean {
+  return rules.some(
     (r) => r.type === "pixelMatch" || r.type === "expectedPixels"
   );
 }
 
-export function hasSyncRules(rules: ValidationRule[] | undefined | null): boolean {
-  return (rules ?? []).some(
-    (r) =>
-      r.type === "functionCall" ||
-      r.type === "functionExists" ||
-      r.type === "canvasSize"
-  );
-}
-
-export function evaluateRules(
-  analysis: Analysis,
-  rules: ValidationRule[] | undefined | null
-): EvalResult {
-  for (const rule of rules ?? []) {
+export function evaluateRules(analysis: Analysis, rules: ValidationRule[]): EvalResult {
+  for (const rule of rules) {
     switch (rule.type) {
       case "functionCall": {
         const matches = analysis.calls.filter((c) => c.name === rule.name);
@@ -446,8 +434,9 @@ function kindCheck(kind: FieldKind, value: unknown): string | null {
  */
 export function schemaErrors(rules: ValidationRule[] | undefined | null): string[] {
   const problems: string[] = [];
-  for (let i = 0; i < (rules ?? []).length; i++) {
-    const rule = (rules ?? [])[i];
+  const list = rules ?? [];
+  for (let i = 0; i < list.length; i++) {
+    const rule = list[i];
     if (!rule || typeof rule !== "object" || typeof rule.type !== "string") {
       problems.push(`rule[${i}]: missing a string 'type'`);
       continue;
@@ -512,4 +501,107 @@ export function effectiveMinPassFraction(minPassFraction?: number): number {
   return minPassFraction !== undefined
     ? minPassFraction
     : PIXEL_DEFAULT_MIN_PASS_FRACTION;
+}
+
+// ---------------------------------------------------------------------------
+// Solution code comparison (shared by the bridge fallback path, the dev
+// checks, and tests). Strips comments and string literals so that whitespace
+// and comment differences never count against the user.
+// ---------------------------------------------------------------------------
+
+export function stripIgnoredRegions(src: string): string {
+  let out = "";
+  let i = 0;
+  const n = src.length;
+  while (i < n) {
+    const c = src[i];
+    const c2 = src[i + 1];
+    if (c === "/" && c2 === "/") {
+      while (i < n && src[i] !== "\n") i++;
+      continue;
+    }
+    if (c === "/" && c2 === "*") {
+      i += 2;
+      while (i < n && !(src[i] === "*" && src[i + 1] === "/")) i++;
+      i += 2;
+      continue;
+    }
+    if (c === '"' || c === "'" || c === "`") {
+      const quote = c;
+      out += c;
+      i++;
+      while (i < n) {
+        if (src[i] === "\\") {
+          out += src[i];
+          if (i + 1 < n) out += src[i + 1];
+          i += 2;
+          continue;
+        }
+        if (src[i] === quote) {
+          out += src[i];
+          i++;
+          break;
+        }
+        out += src[i];
+        i++;
+      }
+      continue;
+    }
+    out += c;
+    i++;
+  }
+  return out;
+}
+
+/**
+ * Variant for symbol scans (check-symbols): drops comments AND string
+ * literals entirely so that code inside strings can't be mistaken for real
+ * function/member references.
+ */
+export function stripCommentsAndStrings(src: string): string {
+  let out = "";
+  let i = 0;
+  const n = src.length;
+  while (i < n) {
+    const c = src[i];
+    const c2 = src[i + 1];
+    if (c === "/" && c2 === "/") {
+      while (i < n && src[i] !== "\n") i++;
+      continue;
+    }
+    if (c === "/" && c2 === "*") {
+      i += 2;
+      while (i < n && !(src[i] === "*" && src[i + 1] === "/")) i++;
+      i += 2;
+      continue;
+    }
+    if (c === '"' || c === "'" || c === "`") {
+      const quote = c;
+      i++;
+      while (i < n) {
+        if (src[i] === "\\") {
+          i += 2;
+          continue;
+        }
+        if (src[i] === quote) {
+          i++;
+          break;
+        }
+        i++;
+      }
+      continue;
+    }
+    out += c;
+    i++;
+  }
+  return out;
+}
+
+export function normalizeForCompare(src: string): string {
+  return stripIgnoredRegions(src).replace(/\s+/g, " ").trim();
+}
+
+export function codeMatchesSolution(userCode: string, solutionCode: string): boolean {
+  if (!solutionCode) return true;
+  return normalizeForCompare(userCode) === normalizeForCompare(solutionCode);
 }
