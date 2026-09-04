@@ -6,13 +6,11 @@ import { loadMinigameForCourse } from "../../../../utils/courseLoader";
 import { Minigame } from "../../../../data/types";
 import { useThemeContext } from "../../../../components/ThemeProvider";
 import { Colors } from "../../../../constants/Colors";
-import { setHighScore, getHighScore } from "../../../../store/high-scores-store";
+import { setHighScore } from "../../../../store/high-scores-store";
 
 // Bounce 2D — Arkanoid-style: keep the ball in play, break colored bricks,
 // and use the colored ball/paddle themes from the Color module. Reaching the
 // target score clears the board; losing all lives ends the game.
-
-const BOUNCE_2D_ID = "bounce-2d";
 
 function buildBounce2DHtml(targetScore: number): string {
   return `
@@ -226,7 +224,7 @@ export default function MinigamePlayScreen() {
   const [loading, setLoading] = useState(true);
   const [restartKey, setRestartKey] = useState(0);
   const gameHandledRef = useRef(false);
-  const { colorScheme, derivedColors } = useThemeContext();
+  const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
   useEffect(() => {

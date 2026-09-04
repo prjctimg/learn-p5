@@ -14,7 +14,7 @@ export default function MinigameCompleteScreen() {
   const [loading, setLoading] = useState(true);
   const [isNewHigh, setIsNewHigh] = useState(false);
   const [achievementEarned, setAchievementEarned] = useState(false);
-  const { colorScheme, derivedColors } = useThemeContext();
+  const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
   useEffect(() => {
