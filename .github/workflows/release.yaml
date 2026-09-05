@@ -37,6 +37,9 @@ jobs:
       - name: Regenerate CodeMirror bundle
         run: npm run bundle-editor
 
+      - name: Run invariant checks and tests
+        run: npm run check
+
       - name: Setup JDK
         uses: actions/setup-java@v6
         with:

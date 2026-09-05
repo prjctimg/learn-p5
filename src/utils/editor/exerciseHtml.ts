@@ -65,6 +65,7 @@ export function getExerciseHtml(params: {
   wordWrap?: boolean;
   tasks?: ExerciseTask[];
   activeTaskIndex?: number;
+  disableSystemKeyboard?: boolean;
 }): string {
   const colors = Colors[params.colorScheme === "dark" ? "dark" : "light"];
   const ctaColor = params.ctaColor ?? colors.cta;
@@ -108,7 +109,11 @@ export function getExerciseHtml(params: {
     line-height: 22px;
     color: ${colors.onSurfaceVariant};
     white-space: pre-line;
-    /* Material 3 fade-through transition */
+    /* Material 3 Fade-through: 450ms envelope, Emphasized path (path easing
+       cannot be expressed as a single cubic-bezier, so we use the M3 Standard
+       cubic-bezier(0.2,0,0,1) as the accepted single-curve approximation).
+       Outgoing fades in the first 35% (~158ms), incoming fades + scales
+       0.92→1 in the last 65% (~293ms). */
     animation-fill-mode: both;
   }
   @keyframes task-fade-through-out {
@@ -413,7 +418,7 @@ ${
 <script>${CODEMIRROR_BUNDLE}</script>
 <script>${VALIDATION_CORE}</script>
 <script>
-  ${getBridgeScript(params.startingCode, params.solution, themeColors, params.colorScheme, params.exerciseNumber, ctaColor, params.wordWrap, tasksJson, activeTaskIdx)}
+ ${getBridgeScript(params.startingCode, params.solution, themeColors, params.colorScheme, params.exerciseNumber, ctaColor, params.wordWrap, tasksJson, activeTaskIdx, params.disableSystemKeyboard)}
 </script>
 
 ${params.exerciseNumber === 1 ? `
@@ -431,7 +436,7 @@ ${params.exerciseNumber === 1 ? `
 </html>`;
 }
 
-function getBridgeScript(startingCode: string, solution: string, theme: EditorThemeColors, colorScheme: "light" | "dark", exerciseNumber?: number, ctaColor?: string, wordWrap?: boolean, tasksJson?: string, activeTaskIdx?: number): string {
+function getBridgeScript(startingCode: string, solution: string, theme: EditorThemeColors, colorScheme: "light" | "dark", exerciseNumber?: number, ctaColor?: string, wordWrap?: boolean, tasksJson?: string, activeTaskIdx?: number, disableSystemKeyboard?: boolean): string {
   const codeArg = jsString(startingCode);
   const solutionArg = jsString(solution);
   const cta = ctaColor ?? '#FF69B4';
@@ -456,16 +461,7 @@ function getBridgeScript(startingCode: string, solution: string, theme: EditorTh
   } = theme;
 
   return `
-var _CM = typeof CM !== 'undefined' ? CM : null;
-if (!_CM) {
-  var editorEl = document.getElementById('editor');
-  if (editorEl) editorEl.innerHTML = '<div style="color:#FF4444;padding:16px;font-family:monospace">\\u26A0 CodeMirror failed to load. Run: npm run bundle-editor</div>';
-  if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'ready' }));
-    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'editorReady', ready: false }));
-  }
-  throw new Error('CodeMirror bundle not loaded — run: npm run bundle-editor');
-}
+var _CM = CM;
 var basicSetup = _CM.basicSetup;
 var EditorView = _CM.EditorView;
 var EditorState = _CM.EditorState;
@@ -474,7 +470,6 @@ var syntaxHighlighting = _CM.syntaxHighlighting;
 var HighlightStyle = _CM.HighlightStyle;
 var javascript = _CM.javascript;
 var tags = _CM.tags;
-var indentSelection = _CM.indentSelection;
 var syntaxTree = _CM.syntaxTree;
 var ViewPlugin = _CM.ViewPlugin;
 var Decoration = _CM.Decoration;
@@ -486,11 +481,11 @@ var prettierEstree = _CM.prettierPluginEstree;
 var prettierAcorn = _CM.prettierPluginAcorn;
 
 var WORD_WRAP = ${wordWrap ?? false};
+var DISABLE_SYSTEM_KEYBOARD = ${disableSystemKeyboard ? "true" : "false"};
 
 let view;
 const INITIAL_CODE = ${codeArg};
 const SOLUTION_CODE = ${solutionArg};
-const VALIDATION_RULES = [];
 const TASKS = ${tasksJson};
 var ACTIVE_TASK_INDEX = ${activeTaskIdx};
 var P5_COMPLETIONS = ${JSON.stringify(P5_FUNCTION_NAMES)};
@@ -701,6 +696,10 @@ function initEditor() {
       if (editorEl) editorEl.style.maxHeight = maxH;
       var scroller = document.querySelector('.cm-scroller');
       if (scroller) scroller.style.maxHeight = maxH;
+    }
+    if (DISABLE_SYSTEM_KEYBOARD) {
+      var cmContent = document.querySelector('.cm-content');
+      if (cmContent) cmContent.setAttribute('inputmode', 'none');
     }
     postReady();
     postEditorReady();
@@ -933,8 +932,27 @@ function handleMessage(data) {
               } catch (e2) { console.warn('setWordWrap recovery failed:', e2); }
             }
           }
-          break;
-        case 'backspace':
+          if (DISABLE_SYSTEM_KEYBOARD) {
+            var cmContent2 = document.querySelector('.cm-content');
+            if (cmContent2) cmContent2.setAttribute('inputmode', 'none');
+          }
+        }
+        break;
+      case 'setDisableSystemKeyboard':
+        DISABLE_SYSTEM_KEYBOARD = !!msg.disableSystemKeyboard;
+        var cmContentD = document.querySelector('.cm-content');
+        if (cmContentD) {
+          if (DISABLE_SYSTEM_KEYBOARD) {
+            cmContentD.setAttribute('inputmode', 'none');
+            // If the system keyboard is currently open because the editor was
+            // focused before the toggle took effect, blur to dismiss it.
+            if (view && view.hasFocus) view.contentDOM.blur();
+          } else {
+            cmContentD.removeAttribute('inputmode');
+          }
+        }
+        break;
+      case 'backspace':
         if (view) {
           var cur = view.state.selection.main.head;
           var sel = view.state.selection.main;
@@ -985,32 +1003,25 @@ function handleMessage(data) {
             var codeToFormat = view.state.doc.toString();
             // Use mobile-friendly printWidth (60) for better readability on small screens
             var pw = 60;
-            if (typeof prettierLib !== 'undefined' && prettierLib.format) {
-              prettierLib.format(codeToFormat, {
-                parser: 'acorn',
-                plugins: [prettierEstree, prettierAcorn],
-                printWidth: pw,
-                semi: true,
-                singleQuote: false,
-                trailingComma: 'es5',
-                bracketSpacing: true,
-                arrowParens: 'avoid',
-                endOfLine: 'lf',
-              }).then(function(formatted) {
-                // Also strip trailing whitespace from each line
-                var lines = formatted.split('\\n');
-                var cleaned = lines.map(function(line) { return line.replace(/\\s+$/, ''); }).join('\\n');
-                if (cleaned !== codeToFormat) {
-                  view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: cleaned } });
-                }
-                view.focus();
-              }).catch(function() { view.focus(); });
-            } else {
-              view.dispatch({ selection: { anchor: 0, head: view.state.doc.length } });
-              indentSelection({ state: view.state, dispatch: view.dispatch });
-              view.dispatch({ selection: { anchor: view.state.doc.length } });
+            prettierLib.format(codeToFormat, {
+              parser: 'acorn',
+              plugins: [prettierEstree, prettierAcorn],
+              printWidth: pw,
+              semi: true,
+              singleQuote: false,
+              trailingComma: 'es5',
+              bracketSpacing: true,
+              arrowParens: 'avoid',
+              endOfLine: 'lf',
+            }).then(function(formatted) {
+              // Also strip trailing whitespace from each line
+              var lines = formatted.split('\\n');
+              var cleaned = lines.map(function(line) { return line.replace(/\\s+$/, ''); }).join('\\n');
+              if (cleaned !== codeToFormat) {
+                view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: cleaned } });
+              }
               view.focus();
-            }
+            }).catch(function() { view.focus(); });
           } catch(e) { view.focus(); }
         }
         break;
@@ -1026,51 +1037,7 @@ function handleMessage(data) {
         renderSketch('user-sketch', userCode).then(function() {
           if (typeof window.__tutRun === 'function') window.__tutRun();
 
-          function stripIgnoredRegions(src) {
-            var out = '';
-            var i = 0;
-            var n = src.length;
-            while (i < n) {
-              var c2 = src[i];
-              var c3 = src[i + 1];
-              if (c2 === '/' && c3 === '/') {
-                while (i < n && src[i] !== '\\n') i++;
-                continue;
-              }
-              if (c2 === '/' && c3 === '*') {
-                i += 2;
-                while (i < n && !(src[i] === '*' && src[i + 1] === '/')) i++;
-                i += 2;
-                continue;
-              }
-              if (c2 === '"' || c2 === '\\'' || c2 === '\`') {
-                var quote = c2;
-                out += c2;
-                i++;
-                while (i < n) {
-                  if (src[i] === '\\\\') { out += src[i]; if (i + 1 < n) { out += src[i + 1]; } i += 2; continue; }
-                  if (src[i] === quote) { out += src[i]; i++; break; }
-                  out += src[i]; i++;
-                }
-                continue;
-              }
-              out += c2;
-              i++;
-            }
-            return out;
-          }
-          function normalizeForCompare(src) {
-            var stripped = stripIgnoredRegions(src);
-            return stripped.replace(/\\s+/g, ' ').trim();
-          }
-          function codeMatchesSolution(userCode, solutionCode) {
-            if (!solutionCode) return true;
-            return normalizeForCompare(userCode) === normalizeForCompare(solutionCode);
-          }
           function validateSync(code, rules) {
-            if (typeof __VAL_CORE === 'undefined') {
-              return { passed: false, reason: 'Validation engine failed to load' };
-            }
             // Reuse the live CodeMirror syntax tree — it always matches the
             // current document, so no re-parse is needed on the bridge.
             var tree = syntaxTree(view.state);
@@ -1084,24 +1051,16 @@ function handleMessage(data) {
           var syncResult = { passed: false, reason: '' };
           var hasPixelRules = false;
           var activeRules = TASKS.length > 0 && TASKS[ACTIVE_TASK_INDEX]
-            ? (TASKS[ACTIVE_TASK_INDEX].validation || [])
+            ? TASKS[ACTIVE_TASK_INDEX].validation
             : [];
-          if (typeof __VAL_CORE !== 'undefined' && __VAL_CORE.schemaErrors) {
-            var schemaIssues = __VAL_CORE.schemaErrors(activeRules);
-            if (schemaIssues.length > 0) {
-              if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-                window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'validationFailed', reason: 'Validation rules are misconfigured: ' + schemaIssues[0] }));
-              }
-              return;
-            }
-          }
           try {
             if (activeRules.length > 0) {
-              var nonPixelRules = activeRules.filter(function(r) { return r.type !== 'pixelMatch' && r.type !== 'expectedPixels'; });
-              hasPixelRules = activeRules.some(function(r) { return r.type === 'pixelMatch' || r.type === 'expectedPixels'; });
-              syncResult = validateSync(userCode, nonPixelRules);
+              // evaluateRules passes pixel rules through, so the full rule set
+              // can be checked synchronously in one pass.
+              hasPixelRules = __VAL_CORE.hasPixelRules(activeRules);
+              syncResult = validateSync(userCode, activeRules);
             } else if (SOLUTION_CODE) {
-              syncResult = { passed: codeMatchesSolution(userCode, SOLUTION_CODE), reason: '' };
+              syncResult = { passed: __VAL_CORE.codeMatchesSolution(userCode, SOLUTION_CODE), reason: '' };
             } else {
               syncResult = { passed: true, reason: '' };
             }
@@ -1141,9 +1100,6 @@ function handleMessage(data) {
               }
             }
           }
-          function frameCountOf(p5Inst) {
-            try { return typeof p5Inst.frameCount === 'function' ? p5Inst.frameCount() : p5Inst.frameCount; } catch(e) { return 0; }
-          }
           // Wait for the first drawn frame, then stop the loop and force exactly
           // one redraw at a reset frame counter. This makes the sampled frame
           // deterministic (the "first frame" rendering) instead of an arbitrary
@@ -1151,11 +1107,10 @@ function handleMessage(data) {
           function settleForValidation(p5Inst, cb) {
             var start = Date.now();
             function check() {
-              if (frameCountOf(p5Inst) > 0) {
-                var wasLooping = false;
-                try { wasLooping = typeof p5Inst.isLooping === 'function' ? p5Inst.isLooping() : !!p5Inst.isLooping; } catch(e) {}
-                try { p5Inst.noLoop(); } catch(e) {}
-                try { p5Inst.frameCount = 0; } catch(e) {}
+              if (p5Inst.frameCount > 0) {
+                var wasLooping = p5Inst.isLooping();
+                p5Inst.noLoop();
+                p5Inst.frameCount = 0;
                 Promise.resolve()
                   .then(function() { return p5Inst.redraw(); })
                   .then(function() { cb(true, wasLooping); })
@@ -1163,53 +1118,35 @@ function handleMessage(data) {
                 return;
               }
               if (Date.now() - start > 2000) { cb(false, false); return; }
-              if (typeof requestAnimationFrame === 'function') { requestAnimationFrame(check); } else { setTimeout(check, 32); }
+              requestAnimationFrame(check);
             }
             check();
           }
           function sampleAllPoints(p5Instance) {
-            var cnv = p5Instance.canvas;
-            if (!cnv) { postValidationFailed('Canvas not found'); return false; }
-            var ctx = cnv.getContext('2d');
-            if (!ctx) { postValidationFailed('Cannot read canvas pixels'); return false; }
-            if (!cnv.width || !cnv.height) { postValidationFailed('Canvas has no size'); return false; }
-            var d = (p5Instance.width && cnv.width) ? (cnv.width / p5Instance.width) : 1;
             function checkPoint(pt) {
-              var tol = (typeof __VAL_CORE !== 'undefined' && __VAL_CORE.effectiveTolerance)
-                ? __VAL_CORE.effectiveTolerance(pt)
-                : (pt.tolerance !== undefined ? pt.tolerance : 30);
-              var px = Math.min(Math.max(0, Math.floor(pt.x * d)), cnv.width - 1);
-              var py = Math.min(Math.max(0, Math.floor(pt.y * d)), cnv.height - 1);
-              var pixelData = ctx.getImageData(px, py, 1, 1).data;
+              // p5's get(x, y) handles pixel-density scaling and bounds
+              // internally and returns [r, g, b, a] — no raw 2d-context reads.
+              var c = p5Instance.get(pt.x, pt.y);
               var expected = [pt.expected[0], pt.expected[1], pt.expected[2]];
-              if (typeof __VAL_CORE !== 'undefined' && __VAL_CORE.pixelMatches) {
-                return __VAL_CORE.pixelMatches(pixelData, expected, tol);
-              }
-              return Math.abs(pixelData[0] - expected[0]) <= tol
-                && Math.abs(pixelData[1] - expected[1]) <= tol
-                && Math.abs(pixelData[2] - expected[2]) <= tol;
+              return __VAL_CORE.pixelMatches(c, expected, __VAL_CORE.effectiveTolerance(pt));
             }
             for (var pi = 0; pi < pixelMatches.length; pi++) {
               var pr = pixelMatches[pi];
               if (!checkPoint(pr)) {
-                var px2 = Math.min(Math.max(0, Math.floor(pr.x * d)), cnv.width - 1);
-                var py2 = Math.min(Math.max(0, Math.floor(pr.y * d)), cnv.height - 1);
-                var actual = ctx.getImageData(px2, py2, 1, 1).data;
+                var actual = p5Instance.get(pr.x, pr.y);
                 postValidationFailed('Color at (' + pr.x + ',' + pr.y + ') is wrong — expected rgb(' + pr.expected.join(',') + ') but got rgb(' + actual[0] + ',' + actual[1] + ',' + actual[2] + ')');
                 return false;
               }
             }
             for (var ei = 0; ei < expectedPixelsRules.length; ei++) {
               var er = expectedPixelsRules[ei];
-              var pts = er.points || [];
+              var pts = er.points;
               if (pts.length === 0) continue;
               var passed = 0;
               for (var pi2 = 0; pi2 < pts.length; pi2++) {
                 if (checkPoint(pts[pi2])) passed++;
               }
-              var minFrac = (typeof __VAL_CORE !== 'undefined' && __VAL_CORE.effectiveMinPassFraction)
-                ? __VAL_CORE.effectiveMinPassFraction(er.minPassFraction)
-                : (er.minPassFraction !== undefined ? er.minPassFraction : 0.9);
+              var minFrac = __VAL_CORE.effectiveMinPassFraction(er.minPassFraction);
               if (passed / pts.length < minFrac) {
                 postValidationFailed('Sketch output does not match (' + passed + '/' + pts.length + ' pixels matched)');
                 return false;
@@ -1226,9 +1163,7 @@ function handleMessage(data) {
             if (!rendered) { postValidationFailed('Sketch did not render in time — try again'); return; }
             try {
               var ok = sampleAllPoints(frameContainer.__p5);
-              if (wasLooping) {
-                try { frameContainer.__p5.loop(); } catch(e) {}
-              }
+              if (wasLooping) frameContainer.__p5.loop();
               if (ok) postSuccess();
             } catch(e) {
               console.error('Pixel validation error:', e);
@@ -1236,17 +1171,15 @@ function handleMessage(data) {
             }
           });
 
-          if (typeof prettierLib !== 'undefined' && prettierLib.format) {
-            var postCode = view.state.doc.toString();
-            var pw2 = 60;
-            prettierLib.format(postCode, { parser: 'acorn', plugins: [prettierEstree, prettierAcorn], printWidth: pw2, semi: true, singleQuote: false, trailingComma: 'es5', bracketSpacing: true, arrowParens: 'avoid', endOfLine: 'lf' }).then(function(formatted) {
-              var lines = formatted.split('\\n');
-              var cleaned = lines.map(function(line) { return line.replace(/\\s+$/, ''); }).join('\\n');
-              if (cleaned !== postCode) {
-                view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: cleaned } });
-              }
-            }).catch(function() {});
-          }
+          var postCode = view.state.doc.toString();
+          var pw2 = 60;
+          prettierLib.format(postCode, { parser: 'acorn', plugins: [prettierEstree, prettierAcorn], printWidth: pw2, semi: true, singleQuote: false, trailingComma: 'es5', bracketSpacing: true, arrowParens: 'avoid', endOfLine: 'lf' }).then(function(formatted) {
+            var lines = formatted.split('\\n');
+            var cleaned = lines.map(function(line) { return line.replace(/\\s+$/, ''); }).join('\\n');
+            if (cleaned !== postCode) {
+              view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: cleaned } });
+            }
+          }).catch(function() {});
           setTimeout(function() {
             var el = document.getElementById('user-sketch');
             if (el) smoothScrollTo(el, 600);

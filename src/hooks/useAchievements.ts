@@ -46,6 +46,119 @@ export const ACHIEVEMENTS: Achievement[] = [
     icon: "trophy",
     rule: "streak_count >= 7",
   },
+  // Minigame achievements
+  {
+    id: "snake-master",
+    title: "Snake Master",
+    subtitle: "Score 10+ in Snake Classic",
+    icon: "snake",
+    rule: "minigame:snake-classic score >= 10",
+  },
+  {
+    id: "bounce-master-2d",
+    title: "Bounce Master",
+    subtitle: "Score 5+ in Bounce 2D",
+    icon: "basketball",
+    rule: "minigame:bounce-2d score >= 5",
+  },
+  {
+    id: "space-impact-master",
+    title: "Space Impact Ace",
+    subtitle: "Score 15+ in Space Impact",
+    icon: "rocket",
+    rule: "minigame:space-impact score >= 15",
+  },
+  {
+    id: "frozen-bubble-master",
+    title: "Bubble Popper",
+    subtitle: "Score 20+ in Frozen Bubble",
+    icon: "bubble",
+    rule: "minigame:frozen-bubble score >= 20",
+  },
+  {
+    id: "breakout-master",
+    title: "Breakout Champion",
+    subtitle: "Score 25+ in Breakout",
+    icon: "view-split-vertical",
+    rule: "minigame:breakout score >= 25",
+  },
+  {
+    id: "word-drop-master",
+    title: "Speed Typist",
+    subtitle: "Score 30+ in Word Drop",
+    icon: "keyboard",
+    rule: "minigame:word-drop score >= 30",
+  },
+  {
+    id: "memory-master",
+    title: "Memory Wizard",
+    subtitle: "Score 8+ in Memory Match",
+    icon: "brain",
+    rule: "minigame:memory-match score >= 8",
+  },
+  {
+    id: "sudoku-master",
+    title: "Sudoku Solver",
+    subtitle: "Score 5+ in Sudoku Lite",
+    icon: "grid",
+    rule: "minigame:sudoku-lite score >= 5",
+  },
+  {
+    id: "asteroids-master",
+    title: "Asteroid Dodger",
+    subtitle: "Score 20+ in Asteroids",
+    icon: "space-invaders",
+    rule: "minigame:asteroids score >= 20",
+  },
+  {
+    id: "maze-master",
+    title: "Maze Navigator",
+    subtitle: "Score 3+ in Perlin Maze",
+    icon: "map",
+    rule: "minigame:perlin-maze score >= 3",
+  },
+  {
+    id: "tictactoe-master",
+    title: "Tic-Tac-Toe Genius",
+    subtitle: "Score 3+ in Tic-Tac-Toe AI",
+    icon: "grid",
+    rule: "minigame:tic-tac-toe-ai score >= 3",
+  },
+  {
+    id: "whack-master",
+    title: "Mole Whacker",
+    subtitle: "Score 15+ in Whack-a-Mole",
+    icon: "hammer",
+    rule: "minigame:whack-a-mole score >= 15",
+  },
+  {
+    id: "reaction-master",
+    title: "Lightning Reflexes",
+    subtitle: "Score 10+ in Reaction Timer",
+    icon: "flash",
+    rule: "minigame:reaction-timer score >= 10",
+  },
+  {
+    id: "simon-master",
+    title: "Simon Says Pro",
+    subtitle: "Score 8+ in Simon Says",
+    icon: "gamepad-variant",
+    rule: "minigame:simon-says score >= 8",
+  },
+  {
+    id: "minesweeper-master",
+    title: "Mine Detector",
+    subtitle: "Score 5+ in Minesweeper",
+    icon: "bomb",
+    rule: "minigame:minesweeper score >= 5",
+  },
+  {
+    id: "bounce-master-3d",
+    title: "3D Bounce Legend",
+    subtitle: "Score 5+ in Bounce 3D",
+    icon: "cube",
+    rule: "minigame:bounce-3d score >= 5",
+  },
 ];
 
 interface CompletionEvent {
@@ -141,6 +254,28 @@ export async function recordCompletion(
 export async function getUnlockedAchievements(): Promise<string[]> {
   const raw = await AsyncStorage.getItem(UNLOCKED_KEY);
   return raw ? JSON.parse(raw) : [];
+}
+
+/**
+ * Grant a specific achievement by id (idempotent). Used to unlock the
+ * per-minigame achievements once a player hits the target score.
+ */
+export async function grantAchievement(achievementId: string): Promise<boolean> {
+  if (!ACHIEVEMENTS.some((a) => a.id === achievementId)) return false;
+
+  const unlockedRaw = await AsyncStorage.getItem(UNLOCKED_KEY);
+  const unlocked: string[] = unlockedRaw ? JSON.parse(unlockedRaw) : [];
+  if (unlocked.includes(achievementId)) return false;
+
+  unlocked.push(achievementId);
+  await AsyncStorage.setItem(UNLOCKED_KEY, JSON.stringify(unlocked));
+
+  const unlockedAtRaw = await AsyncStorage.getItem(UNLOCKED_AT_KEY);
+  const unlockedAt: Record<string, string> = unlockedAtRaw ? JSON.parse(unlockedAtRaw) : {};
+  unlockedAt[achievementId] = new Date().toISOString();
+  await AsyncStorage.setItem(UNLOCKED_AT_KEY, JSON.stringify(unlockedAt));
+
+  return true;
 }
 
 export async function getUnlockedAchievementsAt(): Promise<Record<string, string>> {

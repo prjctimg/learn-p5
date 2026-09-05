@@ -6,7 +6,10 @@ import {
   effectiveTolerance,
   effectiveMinPassFraction,
   hasPixelRules,
-  hasSyncRules,
+  stripIgnoredRegions,
+  stripCommentsAndStrings,
+  normalizeForCompare,
+  codeMatchesSolution,
   PIXEL_DEFAULT_TOLERANCE,
   PIXEL_DEFAULT_MIN_PASS_FRACTION,
   RULE_SCHEMAS,
@@ -195,9 +198,8 @@ describe("evaluateRules", () => {
     expect(r.passed).toBe(true);
   });
 
-  it("passes empty and null rules", () => {
+  it("passes empty rules", () => {
     expect(evalRules("circle(1, 2, 3);", []).passed).toBe(true);
-    expect(evaluateRules(analyzeCode("x;"), null).passed).toBe(true);
   });
 });
 
@@ -312,22 +314,61 @@ describe("pixel helpers", () => {
 });
 
 describe("rule classification helpers", () => {
-  it("hasSyncRules / hasPixelRules split rule types correctly", () => {
+  it("hasPixelRules identifies pixel rule types", () => {
     const sync: ValidationRule[] = [{ type: "functionCall", name: "x" }];
     const pixel: ValidationRule[] = [
       { type: "pixelMatch", x: 0, y: 0, expected: [0, 0, 0] },
     ];
-    expect(hasSyncRules(sync)).toBe(true);
-    expect(hasSyncRules(pixel)).toBe(false);
     expect(hasPixelRules(pixel)).toBe(true);
     expect(hasPixelRules(sync)).toBe(false);
-    expect(hasSyncRules(null)).toBe(false);
-    expect(hasPixelRules(undefined)).toBe(false);
+    expect(hasPixelRules([])).toBe(false);
   });
 
   it("RULE_SCHEMAS covers every declared rule type", () => {
     for (const type of RULE_TYPES) {
       expect(RULE_SCHEMAS[type]).toBeDefined();
     }
+  });
+});
+
+describe("code comparison helpers", () => {
+  it("stripIgnoredRegions removes line and block comments", () => {
+    expect(stripIgnoredRegions("a + 1; // note\n/* multi\nline */ b;")).toBe(
+      "a + 1; \n b;"
+    );
+  });
+
+  it("stripIgnoredRegions preserves string literals and escapes", () => {
+    expect(stripIgnoredRegions(`text('hi/*x*/', 10, 20);`)).toBe(
+      `text('hi/*x*/', 10, 20);`
+    );
+  });
+
+  it("stripCommentsAndStrings removes string contents too", () => {
+    expect(stripCommentsAndStrings(`text('hi', 10); // c`)).toBe("text(, 10); ");
+  });
+
+  it("normalizeForCompare collapses whitespace", () => {
+    expect(normalizeForCompare("circle(1,\n  2, 3);  // x")).toBe("circle(1, 2, 3);");
+  });
+
+  it("codeMatchesSolution ignores whitespace and comments", () => {
+    expect(
+      codeMatchesSolution(
+        "function setup() {\n  createCanvas(400, 400); // fixed size\n}",
+        "function setup(){createCanvas(400,400);}"
+      )
+    ).toBe(true);
+  });
+
+  it("codeMatchesSolution still detects real differences", () => {
+    expect(
+      codeMatchesSolution("circle(200, 200, 100);", "ellipse(200, 200, 100, 100);")
+    ).toBe(false);
+    expect(codeMatchesSolution("a;", "b;")).toBe(false);
+  });
+
+  it("codeMatchesSolution treats a missing solution as a match", () => {
+    expect(codeMatchesSolution("anything();", "")).toBe(true);
   });
 });

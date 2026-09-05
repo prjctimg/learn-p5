@@ -14,7 +14,8 @@ import { timeCourse } from "../data/courses/time";
 import { ioCourse } from "../data/courses/io";
 import { dataCourse } from "../data/courses/data";
 import { webglCourse } from "../data/courses/webgl";
-import { Course, Exercise } from "../data/types";
+import { minigames } from "../data/courses/minigames";
+import { Course, Exercise, Minigame } from "../data/types";
 
 const COURSE_FILES = [
   shapesCourse,
@@ -57,4 +58,16 @@ export async function loadExercise(
   const course = await loadCourse(courseSlug);
   if (!course) return null;
   return course.exercises.find((l) => l.id === exerciseId) ?? null;
+}
+
+export async function loadMinigame(minigameId: string): Promise<Minigame | null> {
+  return minigames.find((m) => m.id === minigameId) ?? null;
+}
+
+export async function loadMinigameForCourse(courseSlug: string): Promise<Minigame | null> {
+  return minigames.find((m) => m.courseSlug === courseSlug) ?? null;
+}
+
+export async function loadAllMinigames(): Promise<Minigame[]> {
+  return minigames;
 }
