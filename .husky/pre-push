@@ -1,6 +1,8 @@
 #!/usr/bin/env sh
 # Enforce that a push to main bumps the version in package.json and
 # carries a matching vX.Y.Z tag.
+if command -v entire >/dev/null 2>&1; then entire hooks git pre-push "$1"; else :; fi
+
 while read -r local_ref local_sha remote_ref remote_sha; do
   [ "$local_ref" = "refs/heads/main" ] || continue
 

@@ -10,5 +10,10 @@
       },
       "oauth": false
     }
-  }
+  },
+  "plugin": ["./agents/opencode/plugins/entire.ts"],
+  "skills": {
+    "paths": ["./agents/skills"]
+  },
+  "instructions": ["AGENTS.md"]
 }
