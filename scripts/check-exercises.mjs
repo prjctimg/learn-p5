@@ -87,15 +87,6 @@ for (const file of yamlFiles) {
   const raw = fs.readFileSync(yamlPath, "utf8");
   const data = jsyaml.load(raw);
 
-  // Minigame definition files expose their unlock exercises under `minigames`.
-  if (data && Array.isArray(data.minigames)) {
-    console.log(`Checking minigames: ${file}`);
-    for (const mg of data.minigames) {
-      checkExercise(mg.unlockExercise);
-    }
-    continue;
-  }
-
   const course = data;
   console.log(`Checking course: ${course.slug}`);
   for (const ex of course.exercises ?? []) {

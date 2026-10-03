@@ -317,7 +317,7 @@ const [keyboardHeight, setKeyboardHeight] = useState<string>(DEFAULTS.keyboardHe
           loadExercise(course, id),
           loadCourse(course),
         ]);
-        dispatch({ type: "LOAD_DONE", exercise: ex, course, id });
+        dispatch({ type: "LOAD_DONE", exercise: ex });
         if (courseData) setCourseTitle(courseData.title);
         const saved = await AsyncStorage.getItem(getExerciseCodeKey(course, id));
  if (saved) {
@@ -348,7 +348,7 @@ const [keyboardHeight, setKeyboardHeight] = useState<string>(DEFAULTS.keyboardHe
  const handleReset = useCallback(() => {
  if (course && id) {
  AsyncStorage.removeItem(getExerciseCodeKey(course, id));
- dispatch({ type: "RESET_CODE", course, id });
+ dispatch({ type: "RESET_CODE" });
  if (webViewRef.current && editorViewReady) {
  webViewRef.current.postMessage(
  JSON.stringify({ type: "setCode", code: state.startingCode })

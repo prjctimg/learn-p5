@@ -32,23 +32,10 @@ export interface Exercise {
   tasks?: ExerciseTask[];
 }
 
-export interface Minigame {
-  id: string;
-  title: string;
-  description: string;
-  courseSlug: string;
-  unlockExercise: Exercise;
-  gameType: "2d" | "webgl";
-  targetScore: number;
-  achievementId: string;
-  assets?: string[];
-}
-
 export interface Course {
   slug: string;
   title: string;
   moduleName: string;
   description: string;
   exercises: Exercise[];
-  minigame?: string;
 }

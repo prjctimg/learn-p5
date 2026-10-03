@@ -1,5 +1,6 @@
 import { describe, it, expect, jest, afterEach, beforeEach } from "@jest/globals";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   recordCompletion,
   getUnlockedAchievements,
@@ -135,5 +136,20 @@ describe("recordCompletion", () => {
     const at = await getUnlockedAchievementsAt();
     expect(Object.keys(at)).toContain("first-strokes");
     expect(at["first-strokes"]).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+  });
+});
+
+describe("ACHIEVEMENTS", () => {
+  it("has unique ids", () => {
+    const ids = ACHIEVEMENTS.map((a) => a.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it("only references icons that exist in the icon set", () => {
+    // Guards the badge grid against rendering a blank glyph: the runtime cast
+    // to `any` would otherwise hide a bad name until a user unlocked the badge.
+    const glyphs = (MaterialCommunityIcons as any).glyphMap as Record<string, number>;
+    const missing = ACHIEVEMENTS.filter((a) => !(a.icon in glyphs)).map((a) => a.icon);
+    expect(missing).toEqual([]);
   });
 });

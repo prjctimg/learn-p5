@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { View, Text, Switch, Pressable, ScrollView, StyleSheet } from "react-native";
+import { View, Text, Switch, Pressable, ScrollView, StyleSheet, Alert } from "react-native";
 import { useRouter, useIsFocused } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -116,8 +116,14 @@ export default function Settings() {
   }, []);
 
   const scheduleNotification = useCallback(async (hour: number, minute: number) => {
+    // Reschedule only once permission is actually granted. Cancelling first
+    // and ignoring the result left the toggle silently on with no reminder
+    // scheduled when the user had denied permission.
+    const { status } = await Notifications.requestPermissionsAsync();
+    if (status !== "granted") {
+      throw new Error("Notification permission not granted");
+    }
     await Notifications.cancelAllScheduledNotificationsAsync();
-    await Notifications.requestPermissionsAsync();
     await Notifications.scheduleNotificationAsync({
       content: {
         title: "Time to code!",
@@ -132,13 +138,25 @@ export default function Settings() {
   }, []);
 
   const toggleDailyReminder = async (value: boolean) => {
-    setDailyReminder(value);
-    await AsyncStorage.setItem(SETTINGS_KEYS.dailyReminder, value.toString());
     if (value) {
-      await scheduleNotification(notificationHour, notificationMinute);
+      try {
+        await scheduleNotification(notificationHour, notificationMinute);
+      } catch {
+        // Permission denied or scheduling failed: leave the preference off
+        // rather than showing an enabled toggle that never fires.
+        setDailyReminder(false);
+        await AsyncStorage.setItem(SETTINGS_KEYS.dailyReminder, "false");
+        Alert.alert(
+          "Notifications unavailable",
+          "Allow notifications for Learn P5 in system settings to use the daily reminder."
+        );
+        return;
+      }
     } else {
       await Notifications.cancelAllScheduledNotificationsAsync();
     }
+    setDailyReminder(value);
+    await AsyncStorage.setItem(SETTINGS_KEYS.dailyReminder, value.toString());
   };
 
   const handleTimeChange = async (hour: number, minute: number) => {

@@ -98,7 +98,7 @@ export default function AchievementBadgeModal({
                   return (
                     <View style={[styles.page, { width: pageWidth }]}>
                       <View style={[styles.badgeCircle, { backgroundColor: derivedColors.primary, borderColor: colors.surface }]}>
-                        <MaterialCommunityIcons name={item.icon as any} size={56} color={colors.onPrimary} />
+                        <MaterialCommunityIcons name={item.icon} size={56} color={colors.onPrimary} />
                       </View>
                       <Text style={[styles.badgeTitle, { color: colors.onSurface }]}>
                         {item.title}

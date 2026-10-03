@@ -76,9 +76,9 @@ export const ONCE_ONLY_P5_FUNCTIONS: string[] = [
   "keyPressed",
   "keyReleased",
   "keyTyped",
-  "touchStarted",
-  "touchMoved",
-  "touchEnded",
+  // p5 2.0 removed the separate touch* handlers and routes touch through the
+  // pointer-backed mouse* events above, so touchStarted/touchMoved/touchEnded
+  // are deliberately absent — defining them on the vendored build does nothing.
   "deviceMoved",
   "deviceTurned",
   "deviceShaken",

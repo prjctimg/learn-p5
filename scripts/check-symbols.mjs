@@ -32,7 +32,7 @@ const stripIgnored = (src) => VC.stripCommentsAndStrings(src);
 // reference snapshot (which only contains a subset of symbols).
 const CORE_P5_SYMBOLS = [
   // structure / environment
-  "setup", "draw", "preload", "loop", "noLoop", "redraw", "frameRate",
+  "draw", "loop", "noLoop", "redraw", "frameRate",
   "millis", "second", "minute", "hour", "day", "month", "year",
   "push", "pop", "print", "clear", "remove",
   // rendering
@@ -48,30 +48,28 @@ const CORE_P5_SYMBOLS = [
   "textAlign", "textLeading", "textFont", "textWidth", "textAscent", "textDescent", "text",
   // curves & custom shapes
   "beginShape", "endShape", "beginContour", "endContour", "vertex",
-  "bezierVertex", "quadraticVertex", "curveVertex", "splineVertex",
-  "bezier", "bezierPoint", "bezierTangent", "bezierOrder", "curve",
-  "curvePoint", "curveTangent", "curveTightness", "spline",
+  "bezierVertex", "splineVertex",
+  "bezier", "bezierPoint", "bezierTangent", "bezierOrder",
   // math
   "map", "constrain", "lerp", "dist", "sq", "sqrt", "pow", "abs", "ceil", "floor",
-  "round", "min", "max", "norm", "exp", "log", "log10", "sin", "cos", "tan",
+  "round", "min", "max", "norm", "exp", "log", "sin", "cos", "tan",
   "asin", "acos", "atan", "atan2", "degrees", "radians", "angleMode",
   "random", "randomSeed", "randomGaussian", "noise", "noiseDetail", "noiseSeed",
   "createVector", "frameCount", "width", "height", "mouseX", "mouseY",
   "mouseIsPressed", "key", "keyCode", "keyIsPressed",
   // events
   "mousePressed", "mouseReleased", "mouseMoved", "mouseDragged", "mouseClicked",
-  "mouseWheel", "keyPressed", "keyReleased", "keyTyped", "keyIsDown", "touchStarted",
-  "touchMoved", "touchEnded", "deviceMoved", "deviceTurned", "deviceShaken",
+  "mouseWheel", "keyPressed", "keyReleased", "keyTyped", "keyIsDown", "deviceMoved", "deviceTurned", "deviceShaken",
   // image
   "createImage", "loadImage", "image", "tint", "filter", "get", "set",
   "loadPixels", "updatePixels", "loadPixels", "loadImage",
   // IO / data
   "loadJSON", "loadStrings", "loadXML", "loadTable", "loadBytes", "loadFont",
-  "loadSound", "httpGet", "httpPost", "getItem", "storeItem", "clearStorage",
+  "httpGet", "httpPost", "getItem", "storeItem", "clearStorage",
   "removeItem", "getURL", "getURLPath", "getURLParams",
   // transform
   "translate", "rotate", "rotateX", "rotateY", "rotateZ", "scale", "shearX",
-  "shearY", "applyMatrix", "resetMatrix", "printMatrix",
+  "shearY", "applyMatrix", "resetMatrix",
   // webgl / 3d
   "sphere", "box", "cone", "cylinder", "torus", "plane", "lights", "ambientLight",
   "directionalLight", "pointLight", "spotLight", "normalMaterial", "ambientMaterial",
@@ -210,21 +208,6 @@ const yamlFiles = fs.readdirSync(COURSES_DIR).filter((f) => f.endsWith(".yaml") 
 
 for (const file of yamlFiles) {
   const data = jsyaml.load(fs.readFileSync(path.join(COURSES_DIR, file), "utf8"));
-
-  // Minigame definition files expose their unlock exercises under `minigames`.
-  if (data && Array.isArray(data.minigames)) {
-    for (const mg of data.minigames) {
-      const ex = mg.unlockExercise;
-      const blocks = [
-        ["startingCode", ex.startingCode],
-        ["solution", ex.solution],
-        ...(ex.tasks ?? []).map((t) => [`task.${t.id}.solution`, t.solution]),
-      ];
-      // Reuse the per-exercise symbol scan via the shared helper below.
-      scanExercise(ex.id, ex, blocks, file);
-    }
-    continue;
-  }
 
   const course = data;
   for (const ex of course.exercises ?? []) {

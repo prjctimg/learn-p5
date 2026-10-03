@@ -4,9 +4,8 @@ import { useRouter, useIsFocused } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Header from "../../components/Header";
 import ExerciseCard from "../../components/ExerciseCard";
-import MinigameCard from "../../components/MinigameCard";
-import { loadAllCourses, loadAllMinigames } from "../../utils/courseLoader";
-import { Course, Minigame } from "../../data/types";
+import { loadAllCourses } from "../../utils/courseLoader";
+import { Course } from "../../data/types";
 import { useThemeContext } from "../../components/ThemeProvider";
 import { Colors } from "../../constants/Colors";
 import { STORAGE_KEYS } from "../../constants/StorageKeys";
@@ -17,7 +16,6 @@ import ReportErrorModal from "../../components/ReportErrorModal";
 export default function Learn() {
   const router = useRouter();
   const [courses, setCourses] = useState<Course[]>([]);
-  const [minigames, setMinigames] = useState<Minigame[]>([]);
   const [completedExercises, setCompletedExercises] = useState<string[]>([]);
   const [completedCourses, setCompletedCourses] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,13 +33,11 @@ export default function Learn() {
   useEffect(() => {
     Promise.all([
       loadAllCourses(),
-      loadAllMinigames(),
       AsyncStorage.getItem(STORAGE_KEYS.completedLessons),
       AsyncStorage.getItem(STORAGE_KEYS.completedCourses),
     ])
-      .then(([loaded, loadedMinigames, exercisesRaw, coursesRaw]) => {
+      .then(([loaded, exercisesRaw, coursesRaw]) => {
         setCourses(loaded);
-        setMinigames(loadedMinigames);
         if (exercisesRaw) {
           try {
             setCompletedExercises(JSON.parse(exercisesRaw));
@@ -67,11 +63,6 @@ export default function Learn() {
     return course.exercises.every((l) =>
       completedExercises.includes(`${course.slug}/${l.id}`)
     );
-  };
-
-  const isMinigameUnlocked = (minigame: Minigame): boolean => {
-    const course = courses.find((c) => c.slug === minigame.courseSlug);
-    return course ? isCourseCompleted(course) : false;
   };
 
   const currentSlug = useMemo(() => {
@@ -115,9 +106,7 @@ export default function Learn() {
           const completed = isCourseCompleted(item);
           const isCurrent = currentSlug === item.slug;
           const locked = !completed && !isCurrent;
-          const minigame = minigames.find((m) => m.courseSlug === item.slug);
-          const minigameUnlocked = minigame ? isMinigameUnlocked(minigame) : false;
-          
+
           return (
             <View style={styles.cardWrapper}>
               <ExerciseCard
@@ -131,13 +120,6 @@ export default function Learn() {
                 lockHint={locked && currentCourse ? currentCourse.title : undefined}
                 onContinue={() => router.push(`/learn/${item.slug}`)}
               />
-              {completed && minigame && (
-                <MinigameCard
-                  minigame={minigame}
-                  unlocked={minigameUnlocked}
-                  onPlay={() => router.push(`/learn/${item.slug}/minigame`)}
-                />
-              )}
             </View>
           );
         }}
