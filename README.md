@@ -29,6 +29,14 @@ Android APKs are published on the [releases page](https://github.com/prjctimg/le
 
 Open a thread in [GitHub Discussions](https://github.com/prjctimg/learn-p5/discussions).
 
+## Contributors
+
+<!-- CONTRIBUTORS -->
+<p align="left">
+  <a href="https://github.com/prjctimg"><img src="https://github.com/prjctimg.png?size=80" width="50" height="50" style="border-radius:50%;margin:4px;" alt="prjctimg"/></a>
+</p>
+<!-- /CONTRIBUTORS -->
+
 ## License
 
 Free software released under the [GPL-3.0 license](./LICENSE).
