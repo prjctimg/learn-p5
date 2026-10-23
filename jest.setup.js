@@ -2,8 +2,15 @@
 // Wired via `setupFilesAfterEnv` (not `setupFiles`) so jest-expo's own preset
 // setupFiles are preserved. Runs after the test framework is installed.
 
-require("react-native-reanimated").setUpTests();
-require("react-native-gesture-handler/jestSetup");
+try {
+  const reanimated = require("react-native-reanimated");
+  if (typeof reanimated.setUpTests === "function") {
+    reanimated.setUpTests();
+  }
+} catch {}
+try {
+  require("react-native-gesture-handler/jestSetup");
+} catch {}
 
 jest.mock("react-native-safe-area-context", () =>
   require("react-native-safe-area-context/jest/mock").default
