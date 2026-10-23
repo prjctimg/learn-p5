@@ -4,7 +4,7 @@ import { jest } from "@jest/globals";
 /**
  * Shared expo-router mock. Test files use it as:
  *
- *   jest.mock("expo-router", () => mockRouterModule);
+ *   jest.mock("expo-router", () => require("../test/expoRouterMock").mockRouterModule);
  *
  * The `mock`-prefix on the binding name satisfies babel-plugin-jest-hoist's
  * out-of-scope rule so the factory is allowed to reference it.

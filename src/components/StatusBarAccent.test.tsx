@@ -1,14 +1,15 @@
 import { describe, it, expect, jest, afterEach } from "@jest/globals";
 import { waitFor } from "@testing-library/react-native";
+import { StatusBar } from "expo-status-bar";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import StatusBarAccent from "./StatusBarAccent";
 import { renderWithProviders } from "../test/renderWithProviders";
 
-const mockStatusBar = jest.fn().mockImplementation(() => null);
-
 jest.mock("expo-status-bar", () => ({
-  StatusBar: mockStatusBar,
+  StatusBar: jest.fn(() => null),
 }));
+
+const mockStatusBar = jest.mocked(StatusBar);
 
 function lastStatusBarProps() {
   const calls = mockStatusBar.mock.calls;

@@ -58,8 +58,8 @@ export default function ThemeProvider({ children }: ThemeProviderProps) {
   }, [userScheme]);
 
   const toggleTheme = useCallback(() => {
-    setUserScheme((prev) => (prev === "light" ? "dark" : "light"));
-  }, []);
+    setUserScheme(colorScheme === "dark" ? "light" : "dark");
+  }, [colorScheme]);
 
   const setCtaColor = useCallback((color: string) => {
     setStoredCtaColor(color);

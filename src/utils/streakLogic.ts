@@ -27,7 +27,7 @@ export function getTierInfo(days: number): TierInfo {
   return {
     currentTier: idx >= 0 ? STREAK_TIERS[idx] : 0,
     nextTier,
-    tierProgress: nextTier > 0 ? days / nextTier : 1,
+    tierProgress: nextTier > 0 ? Math.min(1, days / nextTier) : 1,
   };
 }
 

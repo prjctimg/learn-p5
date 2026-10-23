@@ -116,7 +116,7 @@ export interface Analysis {
 }
 
 const FUNCTION_KINDS = new Set(["ArrowFunction", "FunctionExpression"]);
-const ARG_SEPARATORS = new Set(["(", ")", ","]);
+const ARG_IGNORED = new Set(["(", ")", ",", "...", "Spread"]);
 
 /**
  * Locate the callee expression of a call/new node. For a CallExpression the
@@ -143,7 +143,7 @@ function countArguments(cursor: TreeCursorLike): number {
   let count = 0;
   if (!cursor.firstChild()) return 0;
   do {
-    if (!ARG_SEPARATORS.has(cursor.type.name) && cursor.type.name !== "...") count++;
+    if (!ARG_IGNORED.has(cursor.type.name)) count++;
   } while (cursor.nextSibling());
   cursor.parent();
   return count;
@@ -601,7 +601,38 @@ export function normalizeForCompare(src: string): string {
   return stripIgnoredRegions(src).replace(/\s+/g, " ").trim();
 }
 
+/** Remove insignificant whitespace while preserving string literals and token boundaries. */
+function compactForCompare(src: string): string {
+  const code = stripIgnoredRegions(src);
+  let out = "";
+  let quote: string | null = null;
+  for (let i = 0; i < code.length; i++) {
+    const c = code[i];
+    if (quote) {
+      out += c;
+      if (c === "\\") {
+        out += code[++i] ?? "";
+      } else if (c === quote) {
+        quote = null;
+      }
+    } else if (c === '"' || c === "'" || c === "`") {
+      quote = c;
+      out += c;
+    } else if (/\s/.test(c)) {
+      let j = i + 1;
+      while (j < code.length && /\s/.test(code[j])) j++;
+      const prev = out[out.length - 1] ?? "";
+      const next = code[j] ?? "";
+      if (/[\w$]/.test(prev) && /[\w$]/.test(next)) out += " ";
+      i = j - 1;
+    } else {
+      out += c;
+    }
+  }
+  return out.trim();
+}
+
 export function codeMatchesSolution(userCode: string, solutionCode: string): boolean {
   if (!solutionCode) return true;
-  return normalizeForCompare(userCode) === normalizeForCompare(solutionCode);
+  return compactForCompare(userCode) === compactForCompare(solutionCode);
 }

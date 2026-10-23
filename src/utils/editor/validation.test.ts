@@ -416,6 +416,14 @@ describe("code comparison helpers", () => {
     expect(codeMatchesSolution("a;", "b;")).toBe(false);
   });
 
+  it("codeMatchesSolution preserves whitespace inside strings", () => {
+    expect(codeMatchesSolution("text('a b', 0, 0);", "text('ab', 0, 0);")).toBe(false);
+  });
+
+  it("codeMatchesSolution preserves token boundaries", () => {
+    expect(codeMatchesSolution("let a = 1;", "leta=1;")).toBe(false);
+  });
+
   it("codeMatchesSolution treats a missing solution as a match", () => {
     expect(codeMatchesSolution("anything();", "")).toBe(true);
   });

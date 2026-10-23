@@ -57,14 +57,24 @@ export default function ModuleCover({ slug, color, locked, completed }: ModuleCo
   if (locked) {
     return (
       <CoverShell color={color}>
-        <MaterialCommunityIcons name="lock" size={28} color={colors.textSecondary} />
+        <MaterialCommunityIcons
+          testID="module-cover-icon"
+          name="lock"
+          size={28}
+          color={colors.textSecondary}
+        />
       </CoverShell>
     );
   }
   if (completed) {
     return (
       <CoverShell color={color}>
-        <MaterialCommunityIcons name="check-circle" size={28} color={color} />
+        <MaterialCommunityIcons
+          testID="module-cover-icon"
+          name="check-circle"
+          size={28}
+          color={color}
+        />
       </CoverShell>
     );
   }

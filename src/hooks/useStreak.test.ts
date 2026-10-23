@@ -2,21 +2,10 @@ import { describe, it, expect, jest, afterEach, beforeEach } from "@jest/globals
 import { renderHook, waitFor } from "@testing-library/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useStreak, getStreakFromStorage } from "./useStreak";
-
-const RealDate = globalThis.Date;
-let clock: number;
-
-function mockClock(iso: string) {
-  clock = new RealDate(iso).getTime();
-}
+import { installMockDate } from "../test/mockDate";
 
 beforeEach(() => {
-  mockClock("2026-01-10T12:00:00.000Z");
-  jest.spyOn(globalThis, "Date").mockImplementation(
-    ((...args: unknown[]) =>
-      args.length === 0 ? new RealDate(clock) : new RealDate(...(args as []))) as unknown as typeof RealDate
-  );
-  jest.spyOn(globalThis.Date, "now").mockReturnValue(clock);
+  installMockDate("2026-01-10T12:00:00.000Z");
 });
 
 afterEach(async () => {

@@ -2,9 +2,9 @@ import { describe, it, expect, jest, beforeEach } from "@jest/globals";
 import { fireEvent } from "@testing-library/react-native";
 import Breadcrumbs from "./Breadcrumbs";
 import { renderWithProviders } from "../test/renderWithProviders";
-import { mockRouterModule, mockRouter } from "../test/expoRouterMock";
+import { mockRouter } from "../test/expoRouterMock";
 
-jest.mock("expo-router", () => mockRouterModule);
+jest.mock("expo-router", () => require("../test/expoRouterMock").mockRouterModule);
 
 describe("Breadcrumbs", () => {
   beforeEach(() => {

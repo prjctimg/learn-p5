@@ -4,9 +4,9 @@ import { Text } from "react-native";
 import Header from "./Header";
 import { useDrawerContext } from "../contexts/DrawerContext";
 import { renderWithProviders } from "../test/renderWithProviders";
-import { mockRouterModule, mockRouter } from "../test/expoRouterMock";
+import { mockRouter } from "../test/expoRouterMock";
 
-jest.mock("expo-router", () => mockRouterModule);
+jest.mock("expo-router", () => require("../test/expoRouterMock").mockRouterModule);
 
 function DrawerProbe() {
   const { isOpen } = useDrawerContext();
