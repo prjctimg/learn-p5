@@ -41,4 +41,4 @@ jobs:
         run: npm run bundle-editor
 
       - name: Run checks
-        run: npm run check
+        run: npm run check-exercises && npm run check-symbols
