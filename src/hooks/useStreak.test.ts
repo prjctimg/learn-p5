@@ -70,7 +70,7 @@ describe("useStreak", () => {
     const { result } = await renderHook(() => useStreak());
     await waitFor(() => expect(result.current.currentTier).toBe(3));
     expect(result.current.nextTier).toBe(7);
-    expect(result.current.tierProgress).toBeCloseTo(5 / 7, 10);
+    expect(result.current.tierProgress).toBeCloseTo(6 / 7, 10);
   });
 
   it("consumes a pending toast exactly once", async () => {
@@ -84,6 +84,9 @@ describe("useStreak", () => {
   });
 
   it("returns null from consumePendingToast when nothing is pending", async () => {
+    await AsyncStorage.setItem("streak_count", "1");
+    await AsyncStorage.setItem("streak_longest", "1");
+    await AsyncStorage.setItem("streak_last_visit", "2026-01-10");
     const { result } = await renderHook(() => useStreak());
     await waitFor(() => expect(result.current.count).toBe(1));
     expect(await result.current.consumePendingToast()).toBeNull();

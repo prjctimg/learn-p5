@@ -1,5 +1,5 @@
 import { describe, it, expect } from "@jest/globals";
-import { screen } from "@testing-library/react-native";
+import { screen, render } from "@testing-library/react-native";
 import ModuleCover from "./ModuleCover";
 import { renderWithProviders } from "../test/renderWithProviders";
 

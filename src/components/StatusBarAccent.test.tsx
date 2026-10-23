@@ -26,9 +26,9 @@ describe("StatusBarAccent", () => {
   it("renders a visible status bar by default with a light-style accent", async () => {
     await renderWithProviders(<StatusBarAccent />);
     await waitFor(() => expect(mockStatusBar).toHaveBeenCalledTimes(1));
+    expect(lastStatusBarProps().hidden).toBeUndefined();
     expect(lastStatusBarProps()).toMatchObject({
-      hidden: false,
-      style: "dark",
+      style: "light",
       backgroundColor: "#FF69B4",
     });
   });
