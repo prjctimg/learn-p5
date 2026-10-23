@@ -21,7 +21,6 @@ const SETTINGS_KEYS = {
   notificationHour: STORAGE_KEYS.settingNotificationHour,
   notificationMinute: STORAGE_KEYS.settingNotificationMinute,
   codeFontSize: STORAGE_KEYS.settingCodeFontSize,
-  codeBackground: STORAGE_KEYS.settingCodeBackground,
   keyboardHeight: STORAGE_KEYS.settingKeyboardHeight,
   editorTheme: STORAGE_KEYS.settingEditorTheme,
   wordWrap: STORAGE_KEYS.settingWordWrap,
@@ -78,7 +77,6 @@ export default function Settings() {
   const [notificationHour, setNotificationHour] = useState(18);
   const [notificationMinute, setNotificationMinute] = useState(0);
   const [codeFontSize, setCodeFontSize] = useState(DEFAULTS.codeFontSize);
-  const [codeBackground, setCodeBackground] = useState<string>(DEFAULTS.codeBackground);
   const [editorTheme, setEditorTheme] = useState<string>("p5-learn");
   const [wordWrap, setWordWrap] = useState(false);
   const [showDrawerFab, setShowDrawerFab] = useState(true);
@@ -97,17 +95,15 @@ export default function Settings() {
       SETTINGS_KEYS.notificationHour,
       SETTINGS_KEYS.notificationMinute,
       SETTINGS_KEYS.codeFontSize,
-      SETTINGS_KEYS.codeBackground,
       SETTINGS_KEYS.editorTheme,
       SETTINGS_KEYS.wordWrap,
       SETTINGS_KEYS.showDrawerFab,
       SETTINGS_KEYS.showStatusBar,
-    ]).then(([reminder, hour, minute, fontSize, bg, theme, wrap, drawerFab, statusBar]) => {
+    ]).then(([reminder, hour, minute, fontSize, theme, wrap, drawerFab, statusBar]) => {
       setDailyReminder(reminder[1] === "true");
       if (hour[1]) setNotificationHour(parseInt(hour[1], 10));
       if (minute[1]) setNotificationMinute(parseInt(minute[1], 10));
       if (fontSize[1]) setCodeFontSize(parseInt(fontSize[1], 10));
-      if (bg[1]) setCodeBackground(bg[1]);
       if (theme[1]) setEditorTheme(theme[1]);
       setWordWrap(wrap[1] === "true");
       if (drawerFab[1] !== null) setShowDrawerFab(drawerFab[1] !== "false");
@@ -175,11 +171,6 @@ export default function Settings() {
     const newSize = Math.min(DEFAULTS.codeFontSizeMax, Math.max(DEFAULTS.codeFontSizeMin, codeFontSize + delta));
     setCodeFontSize(newSize);
     await AsyncStorage.setItem(SETTINGS_KEYS.codeFontSize, newSize.toString());
-  };
-
-  const changeCodeBackground = async (value: string) => {
-    setCodeBackground(value);
-    await AsyncStorage.setItem(SETTINGS_KEYS.codeBackground, value);
   };
 
   const changeEditorTheme = async (value: string) => {
@@ -358,38 +349,6 @@ export default function Settings() {
               >
                 <Text style={{ fontSize: 16, fontWeight: "700", color: colors.onSurface }}>+</Text>
               </Pressable>
-            </View>
-          </View>
-
-          <View style={styles.cardDivider} />
-          <View style={styles.cardRow}>
-            <View style={styles.flexChild}>
-              <Text style={styles.settingTitle}>Code Background</Text>
-              <Text style={styles.settingDescription}>
-                {codeBackground === "auto" ? "Follow system theme" : codeBackground === "#FFFFFF" ? "Light background" : "Dark background"}
-              </Text>
-            </View>
-            <View style={{ flexDirection: "row", gap: 6 }}>
-              {["auto", "#FFFFFF", "#0D0E12"].map((opt) => (
-                <Pressable
-                  key={opt}
-                  onPress={() => changeCodeBackground(opt)}
-                  style={({ pressed }) => ({
-                    paddingHorizontal: 10,
-                    paddingVertical: 5,
-                    borderRadius: 6,
-                    borderBottomWidth: codeBackground === opt ? 2 : 0,
-                    borderBottomColor: codeBackground === opt ? derivedColors.primary : "transparent",
-                    backgroundColor: pressed ? derivedColors.primaryContainer + "33" : colors.surfaceContainerHigh,
-                  })}
-                  accessibilityRole="button"
-                  accessibilityLabel={opt === "auto" ? "Auto" : opt === "#FFFFFF" ? "Light" : "Dark"}
-                >
-                  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 10, fontWeight: "700", textTransform: "uppercase", letterSpacing: 0.5, color: colors.onSurfaceVariant }}>
-                    {opt === "auto" ? "Auto" : opt === "#FFFFFF" ? "Light" : "Dark"}
-                  </Text>
-                </Pressable>
-              ))}
             </View>
           </View>
 

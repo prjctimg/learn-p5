@@ -8,6 +8,8 @@ import {
   hasPixelRules,
   stripIgnoredRegions,
   stripCommentsAndStrings,
+  p5CallNames,
+  unexpectedCalls,
   normalizeForCompare,
   codeMatchesSolution,
   PIXEL_DEFAULT_TOLERANCE,
@@ -328,6 +330,52 @@ describe("rule classification helpers", () => {
     for (const type of RULE_TYPES) {
       expect(RULE_SCHEMAS[type]).toBeDefined();
     }
+  });
+});
+
+describe("unexpectedCalls", () => {
+  const p5Names = ["background", "circle", "createCanvas", "ellipse", "fill", "line"];
+
+  function allowedNames(...codes: string[]) {
+    const names = new Set<string>();
+    for (const code of codes) {
+      for (const name of p5CallNames(analyzeCode(code), p5Names)) names.add(name);
+    }
+    return names;
+  }
+
+  it("passes the task solution", () => {
+    const solution = "createCanvas(400, 400); background(0); circle(20, 20, 10);";
+    expect(unexpectedCalls(analyzeCode(solution), allowedNames(solution), p5Names)).toEqual([]);
+  });
+
+  it("rejects an extra p5 call from the solution", () => {
+    const solution = "createCanvas(400, 400); background(0); circle(20, 20, 10);";
+    const attempt = solution + " ellipse(20, 20, 10, 10);";
+    expect(unexpectedCalls(analyzeCode(attempt), allowedNames(solution), p5Names)).toEqual([
+      "ellipse",
+    ]);
+  });
+
+  it("allows calls that are part of the starting code", () => {
+    const starting = "createCanvas(400, 400); background(0);";
+    expect(unexpectedCalls(analyzeCode(starting), allowedNames(starting), p5Names)).toEqual([]);
+  });
+
+  it("allows functionCall rule names", () => {
+    const allowed = allowedNames("");
+    allowed.add("circle");
+    expect(unexpectedCalls(analyzeCode("circle(1, 2, 3);"), allowed, p5Names)).toEqual([]);
+  });
+
+  it("ignores member calls", () => {
+    const code = "const values = [1, 2]; values.map(Math.round);";
+    expect(unexpectedCalls(analyzeCode(code), allowedNames(""), p5Names)).toEqual([]);
+  });
+
+  it("ignores user-defined helper calls", () => {
+    const code = "function drawBall() {} drawBall();";
+    expect(unexpectedCalls(analyzeCode(code), allowedNames(""), p5Names)).toEqual([]);
   });
 });
 

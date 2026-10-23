@@ -88,8 +88,12 @@ Recoverable from git history if the feature is ever rebuilt.
 - The reference symbol count is not verifiable in-repo: `src/data/reference.ts`
   and `src/data/reference.generated.json` are gitignored build artifacts.
 
+## Planned / in progress
+
+- F-Droid listing (GPL-3.0-or-later, `NonFreeAssets` for p5.js reference/examples)
+
 ## Not planned
 
 - Playground, points/XP, leaderboards, cloud sync, analytics
-- iOS build, F-Droid / Play Store listing, export/import of progress
+- iOS build, Play Store listing, export/import of progress
 - Friendly Error System integration, landscape mode, sound effects

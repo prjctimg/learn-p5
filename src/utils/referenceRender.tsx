@@ -39,7 +39,6 @@ export function highlightSyntax(code: string, colorScheme?: "light" | "dark"): {
   const DECL_RE = /\b(let|const|var|static)\b/g;
   const LITERAL_RE = /\b(true|false|null|undefined|this|NaN|Infinity)\b/g;
   const P5_RE = new RegExp(`\\b(${P5_FUNCTION_NAMES.join("|")})\\b(?=\\s*\\()`, "g");
-  const P5_DOT_RE = new RegExp(`(?<=\\.)(${P5_FUNCTION_NAMES.join("|")})\\b(?=\\s*\\()`, "g");
   const CONST_RE = new RegExp(`\\b(${P5_CONSTANTS_PATTERN})\\b`, "g");
   const NUMBER_RE = /\b0[xX][0-9a-fA-F]+\b|\b\d+(\.\d+)?(?:[eE][+-]?\d+)?\b/g;
   const OP_RE = /(=>|<=|>=|===|!==|==|!=|&&|\|\||[-+*/%&|^!<>=]|[{[\]();,.])/g;
@@ -54,7 +53,6 @@ export function highlightSyntax(code: string, colorScheme?: "light" | "dark"): {
     [CONST_RE, theme.constant || theme.number],
     [NUMBER_RE, theme.number],
     [P5_RE, theme.function],
-    [P5_DOT_RE, theme.function],
     [OP_RE, theme.operator],
   ];
   for (const [re, color] of patterns) {
@@ -92,19 +90,6 @@ export function extractDescribeCaption(code: string): string | null {
 
 export function stripDescribe(code: string): string {
   return code.replace(DESCRIBE_RE, "").trim();
-}
-
-export function renderHighlightedCode(
-  code: string,
-  colorScheme: "light" | "dark",
-  style: object = {},
-): React.ReactNode {
-  const tokens = highlightSyntax(code, colorScheme);
-  return tokens.map((t, i) => (
-    <Text key={i} style={{ ...style, color: t.color }}>
-      {t.text}
-    </Text>
-  ));
 }
 
 export function parseDescription(

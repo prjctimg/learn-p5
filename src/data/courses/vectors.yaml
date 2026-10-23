@@ -44,6 +44,17 @@ exercises:
           - type: functionCall
             name: circle
             exactArgs: 3
+        solution: |
+          function setup() {
+            createCanvas(400, 400);
+          }
+
+          function draw() {
+            background(35);
+            fill(100, 220, 255);
+            let pos = createVector(200, 300);
+            circle(pos.x, pos.y, 60);
+          }
       - id: task-2
         title: "Access Properties"
         instruction: |
@@ -105,6 +116,19 @@ exercises:
           - type: functionCall
             name: mult
             minArgs: 1
+        solution: |
+          function setup() {
+            createCanvas(400, 400);
+          }
+
+          function draw() {
+            background(35);
+            fill(255, 200, 80);
+            let a = createVector(300, 200);
+            let b = createVector(100, 100);
+            a.sub(b);
+            a.mult(1.5);
+          }
       - id: task-2
         title: "Draw the Result"
         instruction: |
@@ -172,6 +196,22 @@ exercises:
           - type: functionCall
             name: setMag
             exactArgs: 1
+        solution: |
+          let pos;
+          let vel;
+
+          function setup() {
+            createCanvas(400, 400);
+            pos = createVector(50, 200);
+            vel = createVector(3, 4);
+          }
+
+          function draw() {
+            background(30);
+            fill(255, 150, 100);
+            vel.normalize();
+            vel.setMag(3);
+          }
       - id: task-2
         title: "Move and Draw"
         instruction: |
@@ -229,6 +269,18 @@ exercises:
           - type: functionCall
             name: heading
             minArgs: 0
+        solution: |
+          function setup() {
+            createCanvas(400, 400);
+          }
+
+          function draw() {
+            background(35);
+            fill(200, 130, 255);
+            noStroke();
+            let dir = createVector(mouseX - 200, mouseY - 200);
+            let angle = dir.heading();
+          }
       - id: task-2
         title: "Rotate and Draw"
         instruction: |

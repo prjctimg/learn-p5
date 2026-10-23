@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import os from "os";
 import jsyaml from "js-yaml";
+import { PINNED_P5_VERSION } from "./p5-version.mjs";
 
 const WEBSITE_REPO = "https://github.com/processing/p5.js-website.git";
 const REF_DIR = "src/content/reference/en";
@@ -80,7 +81,7 @@ function readP5Version() {
     const m = content.match(/p5Version\s*=\s*"([^"]+)"/);
     if (m) return m[1];
   } catch {}
-  return "2.3.0";
+  return PINNED_P5_VERSION;
 }
 
 const MDX_FRONTMATTER_RE = /^---\n([\s\S]*?)\n---/;

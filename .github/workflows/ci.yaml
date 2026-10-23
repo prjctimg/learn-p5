@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          NPM_INSTALLED=false
+          for i in 1 2 3; do
+            echo "Attempt $i to install npm dependencies..."
+            if npm ci; then
+              NPM_INSTALLED=true
+              break
+            fi
+            if [ "$i" -lt 3 ]; then sleep 10; fi
+          done
+          if [ "$NPM_INSTALLED" != "true" ]; then
+            echo "Failed to install npm dependencies after 3 attempts"
+            exit 1
+          fi
+
+      - name: Regenerate editor bundle
+        run: npm run bundle-editor
+
+      - name: Run checks
+        run: npm run check

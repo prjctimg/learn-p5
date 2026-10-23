@@ -489,6 +489,38 @@ const SOLUTION_CODE = ${solutionArg};
 const TASKS = ${tasksJson};
 var ACTIVE_TASK_INDEX = ${activeTaskIdx};
 var P5_COMPLETIONS = ${JSON.stringify(P5_FUNCTION_NAMES)};
+var jsParser = javascript().language.parser;
+
+function analyzeSource(code) {
+  var tree = jsParser.parse(code);
+  return __VAL_CORE.analyze({
+    cursor: function() { return tree.cursor(); },
+    slice: function(from, to) { return code.slice(from, to); }
+  });
+}
+
+function activeTask() {
+  return TASKS.length > 0 && TASKS[ACTIVE_TASK_INDEX] ? TASKS[ACTIVE_TASK_INDEX] : null;
+}
+
+function allowedCallNames() {
+  var task = activeTask();
+  var rules = task && task.validation ? task.validation : [];
+  var allowed = new Set();
+  [
+    task && task.startingCode != null ? task.startingCode : INITIAL_CODE,
+    task && task.solution ? task.solution : SOLUTION_CODE
+  ].forEach(function(code) {
+    if (!code) return;
+    __VAL_CORE.p5CallNames(analyzeSource(code), P5_COMPLETIONS).forEach(function(name) {
+      allowed.add(name);
+    });
+  });
+  for (var i = 0; i < rules.length; i++) {
+    if (rules[i].type === 'functionCall' && rules[i].name) allowed.add(rules[i].name);
+  }
+  return allowed;
+}
 
 function p5CompletionSource(context) {
   var word = context.matchBefore(/\\w*/);
@@ -1038,14 +1070,17 @@ function handleMessage(data) {
           if (typeof window.__tutRun === 'function') window.__tutRun();
 
           function validateSync(code, rules) {
-            // Reuse the live CodeMirror syntax tree — it always matches the
-            // current document, so no re-parse is needed on the bridge.
-            var tree = syntaxTree(view.state);
-            var adapter = {
-              cursor: function() { return tree.cursor(); },
-              slice: function(from, to) { return code.slice(from, to); }
-            };
-            return __VAL_CORE.evaluateRules(__VAL_CORE.analyze(adapter), rules);
+            var analysis = analyzeSource(code);
+            var result = __VAL_CORE.evaluateRules(analysis, rules);
+            if (!result.passed) return result;
+            var extra = __VAL_CORE.unexpectedCalls(analysis, allowedCallNames(), P5_COMPLETIONS);
+            if (extra.length > 0) {
+              return {
+                passed: false,
+                reason: 'Remove extra p5 calls: ' + extra.map(function(name) { return name + '()'; }).join(', ')
+              };
+            }
+            return result;
           }
 
           var syncResult = { passed: false, reason: '' };

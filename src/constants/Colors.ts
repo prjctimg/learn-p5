@@ -117,7 +117,3 @@ export const KeyboardColors = {
     toolbarKeyPressed: "#333333",
   },
 } as const;
-
-export type KeyboardColorScheme = keyof typeof KeyboardColors;
-
-export type ThemeColorScheme = keyof typeof Colors;

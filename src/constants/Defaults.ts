@@ -9,6 +9,5 @@ export const DEFAULTS = {
     medium: 280,
     tall: 360,
   } as Record<string, number>,
-  codeBackground: "auto",
   ctaColor: "#FF69B4",
 };

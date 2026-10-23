@@ -1,6 +1,6 @@
 # Learn P5
 
-[![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](./LICENSE)
+[![License: GPL-3.0-or-later](https://img.shields.io/badge/license-GPL--3.0--or--later-blue.svg)](./LICENSE)
 [![Android build](https://github.com/prjctimg/learn-p5/actions/workflows/release.yaml/badge.svg)](https://github.com/prjctimg/learn-p5/actions/workflows/release.yaml)
 [![GitHub release](https://img.shields.io/github/v/release/prjctimg/learn-p5)](https://github.com/prjctimg/learn-p5/releases)
 
@@ -18,7 +18,7 @@ Anyone who wants to learn p5.js at a relaxed pace, on the go, without a network 
 
 ## Try it
 
-Android APKs are published on the [releases page](https://github.com/prjctimg/learn-p5/releases).
+Android APKs are published on the [releases page](https://github.com/prjctimg/learn-p5/releases). F-Droid metadata is available in `fdroid/`.
 
 ## Documentation
 
@@ -39,4 +39,5 @@ Open a thread in [GitHub Discussions](https://github.com/prjctimg/learn-p5/discu
 
 ## License
 
-Free software released under the [GPL-3.0 license](./LICENSE).
+Free software released under the [GPL-3.0-or-later](./LICENSE). Third-party
+licenses and notices are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
