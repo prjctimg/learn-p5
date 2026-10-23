@@ -20,8 +20,15 @@ jobs:
           ref: ${{ github.event.repository.default_branch }}
           fetch-depth: 0
 
+      - name: Checkout automata scripts
+        uses: actions/checkout@v7
+        with:
+          repository: prjctimg/automata
+          path: automata
+          ref: main
+
       - name: Regenerate contributors in README
-        run: bash scripts/contributors.sh
+        run: bash automata/scripts/contributors.sh
 
       - name: Commit if changed
         run: |
