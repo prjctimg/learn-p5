@@ -23,7 +23,7 @@ export function rgbToHsl(r: number, g: number, b: number): { h: number; s: numbe
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
   const l = (max + min) / 2;
-  if (max === min) return { h: 0, s: 0, l };
+  if (max === min) return { h: 0, s: 0, l: l * 100 };
   const d = max - min;
   const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
   let h = 0;

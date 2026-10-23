@@ -14,6 +14,7 @@ import fs from "fs";
 import https from "https";
 import path from "path";
 import { fileURLToPath } from "url";
+import { PINNED_P5_VERSION } from "./p5-version.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
@@ -40,13 +41,6 @@ function fetchText(url, redirects = 0) {
     }).on("error", reject);
   });
 }
-
-// Pin the vendored p5 build. Resolving "latest" at build time made releases
-// non-reproducible: a p5 major release could break every exercise in a shipped
-// APK with no code change at all. Bump this constant deliberately, then re-run
-// `npm run check` against the new version. Override with P5_VERSION=... to try
-// a build without editing this file.
-const PINNED_P5_VERSION = "2.3.4";
 
 function resolveVersion() {
   const override = process.env.P5_VERSION;

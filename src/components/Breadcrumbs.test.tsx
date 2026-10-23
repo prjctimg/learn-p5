@@ -1,18 +1,18 @@
 import { describe, it, expect, jest, beforeEach } from "@jest/globals";
-import { render, fireEvent } from "@testing-library/react-native";
+import { fireEvent } from "@testing-library/react-native";
 import Breadcrumbs from "./Breadcrumbs";
 import { renderWithProviders } from "../test/renderWithProviders";
-import { mockRouterModule, mockRouter } from "../test/expoRouterMock";
+import { mockRouter } from "../test/expoRouterMock";
 
-jest.mock("expo-router", () => mockRouterModule);
+jest.mock("expo-router", () => require("../test/expoRouterMock").mockRouterModule);
 
 describe("Breadcrumbs", () => {
   beforeEach(() => {
     mockRouter.push.mockClear();
   });
 
-  it("renders every segment label", () => {
-    const { getByText } = renderWithProviders(
+  it("renders every segment label", async () => {
+    const { getByText } = await renderWithProviders(
       <Breadcrumbs
         segments={[
           { label: "Courses", href: "/" },
@@ -26,8 +26,8 @@ describe("Breadcrumbs", () => {
     expect(getByText("Circles")).toBeTruthy();
   });
 
-  it("navigates to a href when a non-last segment is pressed", () => {
-    const { getByLabelText } = renderWithProviders(
+  it("navigates to a href when a non-last segment is pressed", async () => {
+    const { getByLabelText } = await renderWithProviders(
       <Breadcrumbs
         segments={[
           { label: "Courses", href: "/" },
@@ -35,12 +35,12 @@ describe("Breadcrumbs", () => {
         ]}
       />
     );
-    fireEvent.press(getByLabelText("Go to Courses"));
+    await fireEvent.press(getByLabelText("Go to Courses"));
     expect(mockRouter.push).toHaveBeenCalledWith("/");
   });
 
-  it("does not make the last segment clickable", () => {
-    const { queryByLabelText } = renderWithProviders(
+  it("does not make the last segment clickable", async () => {
+    const { queryByLabelText } = await renderWithProviders(
       <Breadcrumbs
         segments={[
           { label: "Courses", href: "/" },

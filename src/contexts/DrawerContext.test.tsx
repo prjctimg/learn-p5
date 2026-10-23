@@ -15,7 +15,7 @@ function Probe() {
   );
 }
 
-function renderProbe() {
+async function renderProbe() {
   return render(
     <DrawerProvider>
       <Probe />
@@ -24,24 +24,24 @@ function renderProbe() {
 }
 
 describe("DrawerProvider", () => {
-  it("starts closed", () => {
-    const { getByTestId } = renderProbe();
+  it("starts closed", async () => {
+    const { getByTestId } = await renderProbe();
     expect(getByTestId("state").props.children).toBe("closed");
   });
 
-  it("openDrawer and closeDrawer update the state", () => {
-    const { getByTestId } = renderProbe();
-    fireEvent.press(getByTestId("open"));
+  it("openDrawer and closeDrawer update the state", async () => {
+    const { getByTestId } = await renderProbe();
+    await fireEvent.press(getByTestId("open"));
     expect(getByTestId("state").props.children).toBe("open");
-    fireEvent.press(getByTestId("close"));
+    await fireEvent.press(getByTestId("close"));
     expect(getByTestId("state").props.children).toBe("closed");
   });
 
-  it("toggleDrawer flips the state", () => {
-    const { getByTestId } = renderProbe();
-    fireEvent.press(getByTestId("toggle"));
+  it("toggleDrawer flips the state", async () => {
+    const { getByTestId } = await renderProbe();
+    await fireEvent.press(getByTestId("toggle"));
     expect(getByTestId("state").props.children).toBe("open");
-    fireEvent.press(getByTestId("toggle"));
+    await fireEvent.press(getByTestId("toggle"));
     expect(getByTestId("state").props.children).toBe("closed");
   });
 });

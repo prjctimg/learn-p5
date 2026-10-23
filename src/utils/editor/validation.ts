@@ -116,7 +116,7 @@ export interface Analysis {
 }
 
 const FUNCTION_KINDS = new Set(["ArrowFunction", "FunctionExpression"]);
-const ARG_SEPARATORS = new Set(["(", ")", ","]);
+const ARG_IGNORED = new Set(["(", ")", ",", "...", "Spread"]);
 
 /**
  * Locate the callee expression of a call/new node. For a CallExpression the
@@ -143,7 +143,7 @@ function countArguments(cursor: TreeCursorLike): number {
   let count = 0;
   if (!cursor.firstChild()) return 0;
   do {
-    if (!ARG_SEPARATORS.has(cursor.type.name) && cursor.type.name !== "...") count++;
+    if (!ARG_IGNORED.has(cursor.type.name)) count++;
   } while (cursor.nextSibling());
   cursor.parent();
   return count;
@@ -321,6 +321,41 @@ export function hasPixelRules(rules: ValidationRule[]): boolean {
   return rules.some(
     (r) => r.type === "pixelMatch" || r.type === "expectedPixels"
   );
+}
+
+/**
+ * Names of global p5 calls used by the code. Member calls such as
+ * `arr.map()` are ignored, and non-p5 helpers count as user code.
+ */
+export function p5CallNames(
+  analysis: Analysis,
+  p5Names: readonly string[]
+): Set<string> {
+  const known = new Set(p5Names);
+  const names = new Set<string>();
+  for (const call of analysis.calls) {
+    if (!call.member && known.has(call.name)) names.add(call.name);
+  }
+  return names;
+}
+
+/**
+ * Global p5 calls that are not part of `allowed`. Task solutions and starting
+ * code define the allowed set, so extra drawing calls cannot slip through.
+ */
+export function unexpectedCalls(
+  analysis: Analysis,
+  allowed: ReadonlySet<string>,
+  p5Names: readonly string[]
+): string[] {
+  const known = new Set(p5Names);
+  const extra = new Set<string>();
+  for (const call of analysis.calls) {
+    if (!call.member && known.has(call.name) && !allowed.has(call.name)) {
+      extra.add(call.name);
+    }
+  }
+  return [...extra].sort();
 }
 
 export function evaluateRules(analysis: Analysis, rules: ValidationRule[]): EvalResult {
@@ -509,7 +544,7 @@ export function effectiveMinPassFraction(minPassFraction?: number): number {
 // and comment differences never count against the user.
 // ---------------------------------------------------------------------------
 
-export function stripIgnoredRegions(src: string): string {
+function stripCode(src: string, keepStrings: boolean): string {
   let out = "";
   let i = 0;
   const n = src.length;
@@ -528,21 +563,20 @@ export function stripIgnoredRegions(src: string): string {
     }
     if (c === '"' || c === "'" || c === "`") {
       const quote = c;
-      out += c;
+      if (keepStrings) out += quote;
       i++;
       while (i < n) {
         if (src[i] === "\\") {
-          out += src[i];
-          if (i + 1 < n) out += src[i + 1];
+          if (keepStrings) out += src[i] + (src[i + 1] ?? "");
           i += 2;
           continue;
         }
         if (src[i] === quote) {
-          out += src[i];
+          if (keepStrings) out += quote;
           i++;
           break;
         }
-        out += src[i];
+        if (keepStrings) out += src[i];
         i++;
       }
       continue;
@@ -553,55 +587,52 @@ export function stripIgnoredRegions(src: string): string {
   return out;
 }
 
-/**
- * Variant for symbol scans (check-symbols): drops comments AND string
- * literals entirely so that code inside strings can't be mistaken for real
- * function/member references.
- */
+/** Strip comments while preserving string contents and delimiters. */
+export function stripIgnoredRegions(src: string): string {
+  return stripCode(src, true);
+}
+
+/** Strip comments and strings for symbol scans. */
 export function stripCommentsAndStrings(src: string): string {
-  let out = "";
-  let i = 0;
-  const n = src.length;
-  while (i < n) {
-    const c = src[i];
-    const c2 = src[i + 1];
-    if (c === "/" && c2 === "/") {
-      while (i < n && src[i] !== "\n") i++;
-      continue;
-    }
-    if (c === "/" && c2 === "*") {
-      i += 2;
-      while (i < n && !(src[i] === "*" && src[i + 1] === "/")) i++;
-      i += 2;
-      continue;
-    }
-    if (c === '"' || c === "'" || c === "`") {
-      const quote = c;
-      i++;
-      while (i < n) {
-        if (src[i] === "\\") {
-          i += 2;
-          continue;
-        }
-        if (src[i] === quote) {
-          i++;
-          break;
-        }
-        i++;
-      }
-      continue;
-    }
-    out += c;
-    i++;
-  }
-  return out;
+  return stripCode(src, false);
 }
 
 export function normalizeForCompare(src: string): string {
   return stripIgnoredRegions(src).replace(/\s+/g, " ").trim();
 }
 
+/** Remove insignificant whitespace while preserving string literals and token boundaries. */
+function compactForCompare(src: string): string {
+  const code = stripIgnoredRegions(src);
+  let out = "";
+  let quote: string | null = null;
+  for (let i = 0; i < code.length; i++) {
+    const c = code[i];
+    if (quote) {
+      out += c;
+      if (c === "\\") {
+        out += code[++i] ?? "";
+      } else if (c === quote) {
+        quote = null;
+      }
+    } else if (c === '"' || c === "'" || c === "`") {
+      quote = c;
+      out += c;
+    } else if (/\s/.test(c)) {
+      let j = i + 1;
+      while (j < code.length && /\s/.test(code[j])) j++;
+      const prev = out[out.length - 1] ?? "";
+      const next = code[j] ?? "";
+      if (/[\w$]/.test(prev) && /[\w$]/.test(next)) out += " ";
+      i = j - 1;
+    } else {
+      out += c;
+    }
+  }
+  return out.trim();
+}
+
 export function codeMatchesSolution(userCode: string, solutionCode: string): boolean {
   if (!solutionCode) return true;
-  return normalizeForCompare(userCode) === normalizeForCompare(solutionCode);
+  return compactForCompare(userCode) === compactForCompare(solutionCode);
 }

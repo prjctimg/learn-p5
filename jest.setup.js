@@ -2,6 +2,9 @@
 // Wired via `setupFilesAfterEnv` (not `setupFiles`) so jest-expo's own preset
 // setupFiles are preserved. Runs after the test framework is installed.
 
+jest.mock("react-native-worklets", () =>
+  require("react-native-worklets/lib/module/mock")
+);
 require("react-native-reanimated").setUpTests();
 require("react-native-gesture-handler/jestSetup");
 

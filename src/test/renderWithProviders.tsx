@@ -12,7 +12,7 @@ interface RenderWithProvidersOptions {
  * AsyncStorage (mocked in jest.setup.js) and derives colors, which most
  * components depend on via useThemeContext().
  */
-export function renderWithProviders(
+export async function renderWithProviders(
   ui: ReactElement,
   options: RenderWithProvidersOptions = {}
 ) {

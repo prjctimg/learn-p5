@@ -7,25 +7,10 @@ import {
   getUnlockedAchievementsAt,
   ACHIEVEMENTS,
 } from "./useAchievements";
-
-const RealDate = globalThis.Date;
-let clock: number;
-
-function setClock(iso: string) {
-  clock = new RealDate(iso).getTime();
-}
-
-function advanceMinutes(minutes: number) {
-  clock += minutes * 60 * 1000;
-}
+import { advanceMinutes, installMockDate } from "../test/mockDate";
 
 beforeEach(() => {
-  setClock("2026-01-10T12:00:00.000Z");
-  jest.spyOn(globalThis, "Date").mockImplementation(
-    ((...args: unknown[]) =>
-      args.length === 0 ? new RealDate(clock) : new RealDate(...(args as []))) as unknown as typeof RealDate
-  );
-  jest.spyOn(globalThis.Date, "now").mockReturnValue(clock);
+  installMockDate("2026-01-10T12:00:00.000Z");
 });
 
 afterEach(async () => {

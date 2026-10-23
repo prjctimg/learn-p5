@@ -1,7 +1,8 @@
 #!/bin/sh
 set -e
 
-# Bump the app version in app.json (expo.version) and package.json (version).
+# Bump the app version in app.json (expo.version), the Android versionCode,
+# and package.json (version).
 #
 # Usage:
 #   ./scripts/bump-version.sh          # auto-increment the patch (0.6.118 -> 0.6.119)
@@ -31,8 +32,13 @@ node -e "
 const fs = require('fs');
 const app = JSON.parse(fs.readFileSync('app.json', 'utf8'));
 app.expo.version = '$VERSION';
+if (app.expo.android && typeof app.expo.android.versionCode === 'number') {
+  app.expo.android.versionCode += 1;
+  console.log('  Updated app.json (versionCode ' + app.expo.android.versionCode + ')');
+} else {
+  console.log('  Updated app.json');
+}
 fs.writeFileSync('app.json', JSON.stringify(app, null, 2) + '\n');
-console.log('  Updated app.json');
 "
 
 # Update package.json

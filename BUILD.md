@@ -27,7 +27,7 @@ npm run web      # expo start --web
 | `bundle-editor` | Build the CodeMirror bundle into `codemirror-bundle.generated.ts` |
 | `bundle-validation` | Build the validation core into `validation-core.generated.ts` |
 | `build-courses` | Compile `src/data/courses/*.yaml` into `src/data/courses/*.ts` |
-| `check-exercises` | Validate exercise tasks against the shared validation core |
+| `check-exercises` | Validate exercise tasks against the shared validation core and block extra p5 calls |
 | `check-symbols` | Ensure exercise code references known p5 symbols |
 | `lint` | `expo lint` |
 | `test` | Jest |

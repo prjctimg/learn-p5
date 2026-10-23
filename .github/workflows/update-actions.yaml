@@ -16,7 +16,22 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Update actions
-        run: npx actions-up --yes --style preserve
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          UPDATED=false
+          for i in 1 2 3; do
+            echo "Attempt $i to update GitHub Actions..."
+            if npx --yes actions-up@2.0.0 --yes --style preserve; then
+              UPDATED=true
+              break
+            fi
+            if [ "$i" -lt 3 ]; then sleep 10; fi
+          done
+          if [ "$UPDATED" != "true" ]; then
+            echo "Failed to update GitHub Actions after 3 attempts"
+            exit 1
+          fi
 
       - name: Create pull request
         uses: peter-evans/create-pull-request@v8

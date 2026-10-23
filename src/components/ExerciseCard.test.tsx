@@ -1,5 +1,5 @@
 import { describe, it, expect, jest, beforeEach } from "@jest/globals";
-import { render, fireEvent } from "@testing-library/react-native";
+import { fireEvent } from "@testing-library/react-native";
 import ExerciseCard from "./ExerciseCard";
 import { renderWithProviders } from "../test/renderWithProviders";
 
@@ -10,8 +10,8 @@ describe("ExerciseCard", () => {
     onContinue.mockClear();
   });
 
-  it("renders title, module name and description", () => {
-    const { getByText } = renderWithProviders(
+  it("renders title, module name and description", async () => {
+    const { getByText } = await renderWithProviders(
       <ExerciseCard
         title="Circles"
         moduleName="Shapes"
@@ -23,8 +23,8 @@ describe("ExerciseCard", () => {
     expect(getByText("Draw a circle.")).toBeTruthy();
   });
 
-  it("fires onContinue when the unlocked card is pressed", () => {
-    const { getByText } = renderWithProviders(
+  it("fires onContinue when the unlocked card is pressed", async () => {
+    const { getByText } = await renderWithProviders(
       <ExerciseCard
         title="Circles"
         moduleName="Shapes"
@@ -32,12 +32,12 @@ describe("ExerciseCard", () => {
         onContinue={onContinue}
       />
     );
-    fireEvent.press(getByText("Circles"));
+    await fireEvent.press(getByText("Circles"));
     expect(onContinue).toHaveBeenCalledTimes(1);
   });
 
-  it("shows the Continue button only for the current unlocked exercise", () => {
-    const { getByText, rerender } = renderWithProviders(
+  it("shows the Continue button only for the current unlocked exercise", async () => {
+    const { getByText, rerender } = await renderWithProviders(
       <ExerciseCard
         title="Circles"
         moduleName="Shapes"
@@ -48,7 +48,7 @@ describe("ExerciseCard", () => {
     );
     expect(getByText("Continue")).toBeTruthy();
 
-    rerender(
+    await rerender(
       <ExerciseCard
         title="Circles"
         moduleName="Shapes"
@@ -59,8 +59,8 @@ describe("ExerciseCard", () => {
     expect(() => getByText("Continue")).toThrow();
   });
 
-  it("marks the card as locked and refuses presses", () => {
-    const { getByLabelText, getByText } = renderWithProviders(
+  it("marks the card as locked and refuses presses", async () => {
+    const { getByLabelText, getByText } = await renderWithProviders(
       <ExerciseCard
         title="Circles"
         moduleName="Shapes"
@@ -72,12 +72,12 @@ describe("ExerciseCard", () => {
     );
     expect(getByLabelText(/Circles \(locked/)).toBeTruthy();
     expect(getByText('Complete "Ellipses" to unlock this one.')).toBeTruthy();
-    fireEvent.press(getByLabelText(/Circles \(locked/));
+    await fireEvent.press(getByLabelText(/Circles \(locked/));
     expect(onContinue).not.toHaveBeenCalled();
   });
 
-  it("shows the generic lock message when no lock hint is given", () => {
-    const { getByText } = renderWithProviders(
+  it("shows the generic lock message when no lock hint is given", async () => {
+    const { getByText } = await renderWithProviders(
       <ExerciseCard
         title="Circles"
         moduleName="Shapes"

@@ -17,7 +17,6 @@ export const STORAGE_KEYS = {
   settingShowStatusBar: "setting_showStatusBar",
   settingWordWrap: "setting_wordWrap",
   settingShowDrawerFab: "setting_showDrawerFab",
-  settingCodeBackground: "setting_codeBackground",
   settingDailyReminder: "setting_dailyReminder",
   settingNotificationHour: "setting_notificationHour",
   settingNotificationMinute: "setting_notificationMinute",

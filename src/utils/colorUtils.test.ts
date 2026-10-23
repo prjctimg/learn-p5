@@ -42,7 +42,7 @@ describe("rgbToHsl round-trips through hslToRgb", () => {
     const rgb = hexToRgb("#ED225D");
     const { h, s, l } = rgbToHsl(rgb.r, rgb.g, rgb.b);
     const back = hslToRgb(h, s, l);
-    expect(rgbToHex(back.r, back.g, back.b)).toBe("ed225d");
+    expect(rgbToHex(back.r, back.g, back.b)).toBe("#ed225d");
   });
 
   it("treats pure gray as zero saturation", () => {
