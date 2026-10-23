@@ -26,7 +26,7 @@ afterEach(async () => {
 
 describe("useStreak", () => {
   it("starts a fresh streak and persists the visit", async () => {
-    const { result } = renderHook(() => useStreak());
+    const { result } = await renderHook(() => useStreak());
     await waitFor(() => expect(result.current.count).toBe(1));
     expect(result.current.longest).toBe(1);
     expect(result.current.isNewDay).toBe(true);
@@ -39,7 +39,7 @@ describe("useStreak", () => {
     await AsyncStorage.setItem("streak_count", "4");
     await AsyncStorage.setItem("streak_longest", "6");
     await AsyncStorage.setItem("streak_last_visit", "2026-01-09");
-    const { result } = renderHook(() => useStreak());
+    const { result } = await renderHook(() => useStreak());
     await waitFor(() => expect(result.current.count).toBe(5));
     expect(result.current.longest).toBe(6);
     expect(result.current.isNewDay).toBe(true);
@@ -49,7 +49,7 @@ describe("useStreak", () => {
     await AsyncStorage.setItem("streak_count", "6");
     await AsyncStorage.setItem("streak_longest", "6");
     await AsyncStorage.setItem("streak_last_visit", "2026-01-09");
-    const { result } = renderHook(() => useStreak());
+    const { result } = await renderHook(() => useStreak());
     await waitFor(() => expect(result.current.count).toBe(7));
     expect(result.current.longest).toBe(7);
   });
@@ -58,7 +58,7 @@ describe("useStreak", () => {
     await AsyncStorage.setItem("streak_count", "4");
     await AsyncStorage.setItem("streak_longest", "4");
     await AsyncStorage.setItem("streak_last_visit", "2026-01-10");
-    const { result } = renderHook(() => useStreak());
+    const { result } = await renderHook(() => useStreak());
     await waitFor(() => expect(result.current.count).toBe(4));
     expect(result.current.isNewDay).toBe(false);
     expect(await AsyncStorage.getItem("streak_last_visit")).toBe("2026-01-10");
@@ -68,7 +68,7 @@ describe("useStreak", () => {
     await AsyncStorage.setItem("streak_count", "9");
     await AsyncStorage.setItem("streak_longest", "30");
     await AsyncStorage.setItem("streak_last_visit", "2026-01-05");
-    const { result } = renderHook(() => useStreak());
+    const { result } = await renderHook(() => useStreak());
     await waitFor(() => expect(result.current.count).toBe(1));
     expect(result.current.longest).toBe(30);
     expect(result.current.isNewDay).toBe(true);
@@ -78,7 +78,7 @@ describe("useStreak", () => {
     await AsyncStorage.setItem("streak_count", "5");
     await AsyncStorage.setItem("streak_longest", "5");
     await AsyncStorage.setItem("streak_last_visit", "2026-01-09");
-    const { result } = renderHook(() => useStreak());
+    const { result } = await renderHook(() => useStreak());
     await waitFor(() => expect(result.current.currentTier).toBe(3));
     expect(result.current.nextTier).toBe(7);
     expect(result.current.tierProgress).toBeCloseTo(5 / 7, 10);
@@ -86,7 +86,7 @@ describe("useStreak", () => {
 
   it("consumes a pending toast exactly once", async () => {
     await AsyncStorage.setItem("streak_toast_pending", "true");
-    const { result } = renderHook(() => useStreak());
+    const { result } = await renderHook(() => useStreak());
     await waitFor(() => expect(result.current.count).toBe(1));
     const toast = await result.current.consumePendingToast();
     expect(toast?.count).toBe(1);
@@ -95,7 +95,7 @@ describe("useStreak", () => {
   });
 
   it("returns null from consumePendingToast when nothing is pending", async () => {
-    const { result } = renderHook(() => useStreak());
+    const { result } = await renderHook(() => useStreak());
     await waitFor(() => expect(result.current.count).toBe(1));
     expect(await result.current.consumePendingToast()).toBeNull();
   });

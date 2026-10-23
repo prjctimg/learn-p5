@@ -18,7 +18,7 @@ Anyone who wants to learn p5.js at a relaxed pace, on the go, without a network 
 
 ## Try it
 
-Android APKs are published on the [releases page](https://github.com/prjctimg/learn-p5/releases). F-Droid metadata is available in `fdroid/`.
+Android APKs are published on the [releases page](https://github.com/prjctimg/learn-p5/releases).
 
 ## Documentation
 

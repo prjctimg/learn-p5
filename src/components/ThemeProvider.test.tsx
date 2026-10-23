@@ -19,7 +19,7 @@ function Probe() {
   );
 }
 
-function renderProbe() {
+async function renderProbe() {
   return render(
     <ThemeProvider>
       <Probe />
@@ -33,24 +33,24 @@ afterEach(async () => {
 });
 
 describe("ThemeProvider", () => {
-  it("provides light scheme with the default accent by default", () => {
-    const { getByTestId } = renderProbe();
+  it("provides light scheme with the default accent by default", async () => {
+    const { getByTestId } = await renderProbe();
     expect(getByTestId("scheme").props.children).toBe("light");
     expect(getByTestId("cta").props.children).toBe(DEFAULTS.ctaColor);
     expect(getByTestId("primary").props.children).toBe(DEFAULTS.ctaColor);
   });
 
-  it("toggles the color scheme", () => {
-    const { getByTestId } = renderProbe();
-    fireEvent.press(getByTestId("toggle"));
+  it("toggles the color scheme", async () => {
+    const { getByTestId } = await renderProbe();
+    await fireEvent.press(getByTestId("toggle"));
     expect(getByTestId("scheme").props.children).toBe("dark");
-    fireEvent.press(getByTestId("toggle"));
+    await fireEvent.press(getByTestId("toggle"));
     expect(getByTestId("scheme").props.children).toBe("light");
   });
 
   it("persists the accent color to AsyncStorage", async () => {
-    const { getByTestId } = renderProbe();
-    fireEvent.press(getByTestId("setcolor"));
+    const { getByTestId } = await renderProbe();
+    await fireEvent.press(getByTestId("setcolor"));
     expect(getByTestId("cta").props.children).toBe("#123456");
     await waitFor(() =>
       expect(AsyncStorage.getItem("setting_ctaColor")).resolves.toBe("#123456")
@@ -59,7 +59,7 @@ describe("ThemeProvider", () => {
 
   it("restores a persisted color scheme", async () => {
     await AsyncStorage.setItem("userColorScheme", "dark");
-    const { getByTestId } = renderProbe();
+    const { getByTestId } = await renderProbe();
     await waitFor(() =>
       expect(getByTestId("scheme").props.children).toBe("dark")
     );
@@ -67,7 +67,7 @@ describe("ThemeProvider", () => {
 
   it("restores a persisted accent color", async () => {
     await AsyncStorage.setItem("setting_ctaColor", "#ABCDEF");
-    const { getByTestId } = renderProbe();
+    const { getByTestId } = await renderProbe();
     await waitFor(() =>
       expect(getByTestId("cta").props.children).toBe("#ABCDEF")
     );
