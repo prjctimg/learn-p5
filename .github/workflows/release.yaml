@@ -11,22 +11,8 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-      KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
     steps:
       - uses: actions/checkout@v7
-
-      - name: Verify release signing secrets
-        run: |
-          for name in KEYSTORE_BASE64 KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
-            if [ -z "${!name}" ]; then
-              echo "::error::Missing release signing secret: $name"
-              exit 1
-            fi
-          done
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -117,46 +103,8 @@ jobs:
       - name: Build release APKs (per ABI)
         run: cd android && ./gradlew assembleRelease
 
-      - name: Setup keystore for signing
-        run: |
-          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.keystore"
-          echo "KEYSTORE_PATH=$RUNNER_TEMP/release.keystore" >> "$GITHUB_ENV"
-
-      - name: Sign and verify APKs
-        run: |
-          APKSIGNER=$(find "$ANDROID_SDK_ROOT/build-tools" -type f -name apksigner | sort -V | tail -1)
-          if [ -z "$APKSIGNER" ]; then
-            echo "::error::apksigner not found in Android SDK"
-            exit 1
-          fi
-          for apk in android/app/build/outputs/apk/release/*.apk; do
-            echo "Signing $apk"
-            "$APKSIGNER" sign \
-              --ks "$KEYSTORE_PATH" \
-              --ks-pass "pass:$KEYSTORE_PASSWORD" \
-              --ks-key-alias "$KEY_ALIAS" \
-              --key-pass "pass:$KEY_PASSWORD" \
-              --v4-signing-enabled false \
-              --out "${apk%.apk}-signed.apk" \
-              "$apk"
-            mv "${apk%.apk}-signed.apk" "$apk"
-            "$APKSIGNER" verify --print-certs "$apk"
-          done
-
-      - name: List split APKs
+      - name: List APKs
         run: find android -name "*.apk" -type f
-
-      - name: Rename APKs for F-Droid (learn-p5-{versionName}-{arch}.apk)
-        run: |
-          VERSION_NAME="${{ github.ref_name }}"
-          VERSION_NAME="${VERSION_NAME#v}"
-          for apk in android/app/build/outputs/apk/release/*.apk; do
-            dir=$(dirname "$apk")
-            base=$(basename "$apk")
-            arch=$(echo "$base" | sed -n 's/.*\(arm64-v8a\|armeabi-v7a\).*/\1/p')
-            [ -z "$arch" ] && arch=universal
-            mv "$apk" "$dir/learn-p5-${VERSION_NAME}-${arch}.apk"
-          done
 
       - name: Upload split APKs to release
         uses: softprops/action-gh-release@v3
