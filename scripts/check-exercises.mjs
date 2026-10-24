@@ -119,6 +119,13 @@ function checkExercise(ex) {
   }
 }
 
+if (!fs.existsSync(COURSES_DIR)) {
+  console.error(
+    "Error: src/data/courses directory is missing. Course data must come from the downloadable content pack."
+  );
+  process.exit(1);
+}
+
 const yamlFiles = fs
   .readdirSync(COURSES_DIR)
   .filter((f) => f.endsWith(".yaml") || f.endsWith(".yml"));
