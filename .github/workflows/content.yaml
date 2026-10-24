@@ -19,6 +19,9 @@ on:
 permissions:
   contents: write
 
+env:
+  CONTENT_REPO: prjctimg/learn-p5-content
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -51,9 +54,10 @@ jobs:
           CONTENT_VERSION: ${{ inputs.content_version }}
         run: npm run build-content
 
-      - name: Publish content pack to release
+      - name: Publish content pack to content repo
         uses: softprops/action-gh-release@v3
         with:
+          repository: ${{ env.CONTENT_REPO }}
           tag_name: content-latest
           name: Learn P5 Content
           body: Downloadable course content for Learn P5.
@@ -64,3 +68,5 @@ jobs:
           files: |
             content/manifest.json
             content/pack.json
+          token: ${{ secrets.CONTENT_REPO_TOKEN }}
+

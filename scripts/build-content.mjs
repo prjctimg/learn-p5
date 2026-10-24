@@ -42,7 +42,7 @@ function main() {
   try {
     require.resolve("../src/data/reference.generated.json");
   } catch {
-    run("node scripts/gen-reference.mjs");
+    run("node scripts/generate-reference.mjs");
   }
 
   const { loadAllCoursesFromFiles } = awaitImport("./build-content-courses.mjs");

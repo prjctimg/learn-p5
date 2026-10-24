@@ -17,7 +17,10 @@ function substituteAssetPlaceholders(code: string): string {
   const p5Assets = getP5Assets();
   return code.replace(ASSET_PLACEHOLDER_RE, (full, name) => {
     const uri = p5Assets[`__P5_ASSET__${name}__P5_ASSET__`];
-    return uri ?? full;
+    if (uri) return uri;
+    // Leave placeholders in place if assets aren't available yet; the
+    // content pack should provide them and the app gates on load.
+    return full;
   });
 }
 
