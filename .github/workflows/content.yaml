@@ -1,0 +1,66 @@
+name: Publish Content Pack
+
+on:
+  workflow_dispatch:
+    inputs:
+      content_version:
+        description: Content version (optional)
+        required: false
+        type: string
+  push:
+    branches: [main]
+    paths:
+      - "src/data/courses/**"
+      - "scripts/build-content*.mjs"
+      - "scripts/generate-reference.mjs"
+      - "scripts/bundle-p5.mjs"
+      - "scripts/p5-version.mjs"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build CodeMirror bundle
+        run: npm run bundle-editor
+
+      - name: Bundle validation core
+        run: npm run bundle-validation
+
+      - name: Generate reference data
+        run: npm run gen-reference
+
+      - name: Bundle p5.js
+        run: npm run bundle-p5
+
+      - name: Build content pack
+        env:
+          CONTENT_VERSION: ${{ inputs.content_version }}
+        run: npm run build-content
+
+      - name: Publish content pack to release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: content-latest
+          name: Learn P5 Content
+          body: Downloadable course content for Learn P5.
+          make_latest: false
+          draft: false
+          prerelease: false
+          overwrite_files: true
+          files: |
+            content/manifest.json
+            content/pack.json

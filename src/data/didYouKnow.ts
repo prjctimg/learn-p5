@@ -1,4 +1,4 @@
-import { P5_SYMBOLS, P5Symbol } from "./reference";
+import { getP5Symbols, P5Symbol } from "./reference";
 
 // Intro-course vocabulary excluded from "Did You Know" picks so the modal
 // only surfaces rarely used or advanced library symbols.
@@ -150,13 +150,10 @@ function isAdvancedSymbol(sym: P5Symbol): boolean {
   );
 }
 
-const ADVANCED_POOL: P5Symbol[] = P5_SYMBOLS.filter(isAdvancedSymbol);
-
 export function pickRandomAdvancedSymbol(exclude?: string): P5Symbol | null {
-  if (ADVANCED_POOL.length === 0) return null;
-  const filtered = exclude
-    ? ADVANCED_POOL.filter((s) => s.name !== exclude)
-    : ADVANCED_POOL;
-  const list = filtered.length > 0 ? filtered : ADVANCED_POOL;
+  const pool = getP5Symbols().filter(isAdvancedSymbol);
+  if (pool.length === 0) return null;
+  const filtered = exclude ? pool.filter((s) => s.name !== exclude) : pool;
+  const list = filtered.length > 0 ? filtered : pool;
   return list[Math.floor(Math.random() * list.length)];
 }

@@ -1,11 +1,15 @@
 import { Text } from "react-native";
-import { P5_FUNCTION_NAMES } from "../data/reference";
+import { getP5FunctionNames } from "../data/reference";
 import { getEditorTheme } from "./editor/themes";
 
-const SYMBOL_PATTERN = new RegExp(
-  `\\b(${P5_FUNCTION_NAMES.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b(?=\\()`,
-  "g"
-);
+function buildSymbolPattern(): RegExp | null {
+  const names = getP5FunctionNames();
+  if (names.length === 0) return null;
+  return new RegExp(
+    `\\b(${names.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b(?=\\()`,
+    "g"
+  );
+}
 
 const P5_CONSTANTS = [
   "WIDTH", "HEIGHT", "PI", "TWO_PI", "HALF_PI", "QUARTER_PI", "TAU", "EPSILON",
@@ -38,7 +42,10 @@ export function highlightSyntax(code: string, colorScheme?: "light" | "dark"): {
   const KEYWORD_RE = /\b(function|if|else|for|while|do|switch|case|break|continue|return|new|delete|typeof|instanceof|in|of|class|extends|super|try|catch|finally|throw)\b/g;
   const DECL_RE = /\b(let|const|var|static)\b/g;
   const LITERAL_RE = /\b(true|false|null|undefined|this|NaN|Infinity)\b/g;
-  const P5_RE = new RegExp(`\\b(${P5_FUNCTION_NAMES.join("|")})\\b(?=\\s*\\()`, "g");
+  const functionNames = getP5FunctionNames();
+  const P5_RE = functionNames.length
+    ? new RegExp(`\\b(${functionNames.join("|")})\\b(?=\\s*\\()`, "g")
+    : /$^/g;
   const CONST_RE = new RegExp(`\\b(${P5_CONSTANTS_PATTERN})\\b`, "g");
   const NUMBER_RE = /\b0[xX][0-9a-fA-F]+\b|\b\d+(\.\d+)?(?:[eE][+-]?\d+)?\b/g;
   const OP_RE = /(=>|<=|>=|===|!==|==|!=|&&|\|\||[-+*/%&|^!<>=]|[{[\]();,.])/g;
@@ -104,10 +111,19 @@ export function parseDescription(
   let lastIndex = 0;
   let match: RegExpExecArray | null;
   const seenSymbols = new Set<string>();
+  const symbolPattern = buildSymbolPattern();
 
-  SYMBOL_PATTERN.lastIndex = 0;
+  if (!symbolPattern) {
+    return [
+      <Text key="full" style={{ color: colors.textSecondary }}>
+        {text}
+      </Text>,
+    ];
+  }
 
-  while ((match = SYMBOL_PATTERN.exec(text)) !== null) {
+  symbolPattern.lastIndex = 0;
+
+  while ((match = symbolPattern.exec(text)) !== null) {
     if (match.index > lastIndex) {
       parts.push(
         <Text key={`txt-${lastIndex}`} style={{ color: colors.textSecondary }}>

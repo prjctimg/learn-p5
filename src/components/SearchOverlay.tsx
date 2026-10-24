@@ -4,7 +4,7 @@ import { WebView } from "react-native-webview";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useThemeContext } from "./ThemeProvider";
 import { Colors } from "../constants/Colors";
-import { P5_SYMBOLS, P5_SYMBOLS_BY_NAME, P5Symbol } from "../data/reference";
+import { getP5Symbols, getP5SymbolsByName, P5Symbol } from "../data/reference";
 import { getExampleHtml } from "../utils/editor/exampleHtml";
 import { highlightSyntax, parseDescription, extractDescribeCaption, stripDescribe } from "../utils/referenceRender";
 import Fuse from "fuse.js";
@@ -26,9 +26,12 @@ export default function SearchOverlay({ visible, onClose, inline = false, onSele
   const [selected, setSelected] = useState<P5Symbol | null>(null);
   const inputRef = useRef<TextInput>(null);
 
+  const symbols = useMemo(() => getP5Symbols(), []);
+  const symbolsByName = useMemo(() => getP5SymbolsByName(), []);
+
   const fuse = useMemo(
     () =>
-      new Fuse(P5_SYMBOLS, {
+      new Fuse(symbols, {
         keys: [
           { name: "name", weight: 2 },
           { name: "description", weight: 1 },
@@ -37,13 +40,13 @@ export default function SearchOverlay({ visible, onClose, inline = false, onSele
         threshold: 0.4,
         includeScore: true,
       }),
-    []
+    [symbols]
   );
 
   const results = useMemo(() => {
-    if (!query.trim()) return P5_SYMBOLS.slice(0, 20);
+    if (!query.trim()) return symbols.slice(0, 20);
     return fuse.search(query.trim()).map((r) => r.item);
-  }, [query, fuse]);
+  }, [query, fuse, symbols]);
 
   const handleClose = useCallback(() => {
     setQuery("");
@@ -78,7 +81,7 @@ export default function SearchOverlay({ visible, onClose, inline = false, onSele
   }, [visible]);
 
   function handleSymbolPress(name: string) {
-    const sym = P5_SYMBOLS_BY_NAME[name];
+    const sym = symbolsByName[name];
     if (sym) handleSelect(sym);
   }
 

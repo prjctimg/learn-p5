@@ -41,3 +41,10 @@ Open a thread in [GitHub Discussions](https://github.com/prjctimg/learn-p5/discu
 
 Free software released under the [GPL-3.0-or-later](./LICENSE). Third-party
 licenses and notices are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+Course content, reference examples and the p5.js runtime are downloaded on
+first run and can be updated without reinstalling the app. GNU Lesser General
+Public License 2.1 (p5.js) and Creative Commons Attribution-NonCommercial-
+ShareAlike 4.0 International (p5.js reference/examples) apply to downloaded
+content. When distributed via F-Droid, non-free assets are declared with the
+`NonFreeAssets` anti-feature.

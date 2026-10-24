@@ -9,6 +9,8 @@ import StatusBarAccent from "../components/StatusBarAccent";
 import DrawerProvider from "../contexts/DrawerContext";
 import SideDrawer from "../components/SideDrawer";
 import DrawerFab from "../components/DrawerFab";
+import ContentProvider from "../contexts/ContentContext";
+import ContentUpdateToast from "../components/ContentUpdateToast";
 import { DEFAULTS } from "../constants/Defaults";
 import { STORAGE_KEYS } from "../constants/StorageKeys";
 
@@ -40,10 +42,13 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <DrawerProvider>
         <ThemeProvider>
-          <StatusBarAccent />
-          <Stack screenOptions={{ headerShown: false, animation: "slide_from_right", animationDuration: 500 }} />
-          <SideDrawer />
-          <DrawerFab />
+          <ContentProvider>
+            <StatusBarAccent />
+            <Stack screenOptions={{ headerShown: false, animation: "slide_from_right", animationDuration: 500 }} />
+            <SideDrawer />
+            <DrawerFab />
+            <ContentUpdateToast />
+          </ContentProvider>
         </ThemeProvider>
       </DrawerProvider>
     </GestureHandlerRootView>

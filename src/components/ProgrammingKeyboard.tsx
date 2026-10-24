@@ -5,8 +5,8 @@ import { useThemeContext } from "./ThemeProvider";
 import { Colors, KeyboardColors } from "../constants/Colors";
 import { Spacing } from "../constants/Spacing";
 import { Typography } from "../constants/Typography";
-import { P5_SYMBOLS } from "../data/reference";
-import { p5Functions, p5FunctionLabels, pairedSymbols, singleSymbols, P5FunctionDef, PairedSymbol } from "../data/keyboardLayout";
+import { getP5Symbols } from "../data/reference";
+import { getP5Functions, getP5FunctionLabels, pairedSymbols, singleSymbols, P5FunctionDef, PairedSymbol } from "../data/keyboardLayout";
 
 interface ProgrammingKeyboardProps {
  onInsert: (text: string, cursorOffset?: number) => void;
@@ -216,7 +216,7 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
 
  {exerciseSymbols.length > 0 && (
  <View style={styles.exerciseRow}>
- {exerciseSymbols.filter(sym => !p5FunctionLabels.has(sym)).map((sym) => (
+ {exerciseSymbols.filter(sym => !getP5FunctionLabels().has(sym)).map((sym) => (
  <Pressable
  key={sym}
  onPress={() => handleExercisePress(sym)}
@@ -237,7 +237,7 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
 )}
 
  <View style={styles.functionsContainer}>
- {p5Functions.map((fn) => {
+ {getP5Functions().map((fn) => {
  const isDisabled = fn.disabled || usedFunctions.includes(fn.label);
  return (
  <Pressable
@@ -272,7 +272,7 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
    <Animated.View style={[styles.popupCard, { backgroundColor: kb.keyCap, opacity: popupAnim, transform: [{ scale: popupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) }] }]} onStartShouldSetResponder={() => true}>
    <ScrollView showsVerticalScrollIndicator={false} style={{ flexShrink: 1 }} contentContainerStyle={{ flexGrow: 0 }}>
    {popupSymbol && (() => {
-   const ref = P5_SYMBOLS.find(s => s.name === popupSymbol);
+   const ref = getP5Symbols().find(s => s.name === popupSymbol);
    return ref ? (
    <>
    <Text style={[popupTextStyles.popupTitle, { color: kb.text, backgroundColor: kb.toolbarKey, borderColor: colors.outlineVariant}]}>{ref.syntax}</Text>

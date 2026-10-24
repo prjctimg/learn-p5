@@ -12,6 +12,7 @@ import { DEFAULTS } from "../../constants/Defaults";
 import { STORAGE_KEYS } from "../../constants/StorageKeys";
 import { useShakeDetection } from "../../hooks/useShakeDetection";
 import ReportErrorModal from "../../components/ReportErrorModal";
+import { useContent } from "../../contexts/ContentContext";
 
 import { EDITOR_THEMES, getThemeSwatches } from "../../utils/editor/themes";
 import { PROCESSING_COLOR_HEX } from "../../constants/ProcessingColors";
@@ -73,6 +74,7 @@ export default function Settings() {
   const router = useRouter();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
   const styles = createStyles(colors);
+  const { contentVersion, p5Version, refreshing, checkForUpdates } = useContent();
   const [dailyReminder, setDailyReminder] = useState(false);
   const [notificationHour, setNotificationHour] = useState(18);
   const [notificationMinute, setNotificationMinute] = useState(0);
@@ -402,6 +404,35 @@ export default function Settings() {
               thumbColor="#ffffff"
             />
           </View>
+        </View>
+
+        {/* Content */}
+        <SectionHeader icon="download-outline" label="Content" color={derivedColors.primary} />
+        <View style={styles.card}>
+          <View style={styles.cardRow}>
+            <View style={styles.flexChild}>
+              <Text style={styles.settingTitle}>Content Pack</Text>
+              <Text style={styles.settingDescription}>
+                v{contentVersion} • p5.js v{p5Version}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.cardDivider} />
+          <Pressable
+            onPress={checkForContentUpdates}
+            disabled={refreshing}
+            style={({ pressed }) => [styles.cardRow, pressed && !refreshing && { opacity: 0.7 }]}
+            accessibilityRole="button"
+            accessibilityLabel="Check for content updates"
+          >
+            <View style={styles.flexChild}>
+              <Text style={styles.settingTitle}>Check for updates</Text>
+              <Text style={styles.settingDescription}>
+                {refreshing ? "Checking..." : "Download updates without reinstalling"}
+              </Text>
+            </View>
+            <MaterialCommunityIcons name="refresh" size={20} color={colors.textSecondary} />
+          </Pressable>
         </View>
 
         {/* About */}
