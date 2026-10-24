@@ -95,22 +95,33 @@ svgMock.TSpan = Text;
 svgMock.default = View;
 jest.mock("react-native-svg", () => svgMock);
 
-// Add courses to test content pack
-const { getContentPack, setContentPack } = require("./src/content/store");
-const pack = getContentPack();
-if (pack) {
-  const fs = require('fs');
-  const path = require('path');
-  const jsyaml = require('js-yaml');
-  const coursesDir = path.resolve(__dirname, 'src/data/courses');
-  const yamlFiles = fs.readdirSync(coursesDir).filter(f => f.endsWith('.yaml') || f.endsWith('.yml'));
-  const courses = [];
-  for (const file of yamlFiles) {
-    const raw = fs.readFileSync(path.join(coursesDir, file), 'utf8');
-    const data = jsyaml.load(raw);
-    if (data && data.slug) courses.push(data);
+
+// Add courses to test content pack (safe)
+try {
+  const store = require("./src/content/store");
+  const getContentPack = store.getContentPack;
+  const setContentPack = store.setContentPack;
+  if (getContentPack && setContentPack) {
+    const pack = getContentPack();
+    if (pack) {
+      const fs = require("fs");
+      const path = require("path");
+      const jsyaml = require("js-yaml");
+      const coursesDir = path.resolve(__dirname, "src/data/courses");
+      if (fs.existsSync(coursesDir)) {
+        const yamlFiles = fs
+          .readdirSync(coursesDir)
+          .filter((f) => f.endsWith(".yaml") || f.endsWith(".yml"));
+        const courses = [];
+        for (const file of yamlFiles) {
+          const raw = fs.readFileSync(path.join(coursesDir, file), "utf8");
+          const data = jsyaml.load(raw);
+          if (data && data.slug) courses.push(data);
+        }
+        if (courses.length > 0) {
+          setContentPack(Object.assign({}, pack, { courses }));
+        }
+      }
+    }
   }
-  if (courses.length > 0) {
-    setContentPack({ ...pack, courses });
-  }
-}
+} catch {}
