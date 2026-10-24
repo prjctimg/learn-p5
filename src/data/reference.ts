@@ -1,31 +1,9 @@
-import generated from "./reference.generated.json";
+import type { ContentReference, ContentSymbol } from "../content/types";
+import { requireContentPack } from "../content/store";
 
-export interface GeneratedSymbol {
-  name: string;
-  module: string;
-  submodule: string | null;
-  class: string;
-  itemtype: "method" | "property" | "type";
-  description: string;
-  syntax: string;
-  params: { name: string; type: string; optional: boolean; description: string }[];
-  overloads?: { params: { name: string; type: string; optional: boolean; description: string }[]; chainable: boolean }[];
-  chainable: boolean;
-  isConstructor: boolean;
-  examples?: string[];
-}
+export type GeneratedSymbol = ContentSymbol;
 
-interface ReferenceData {
-  byName: Record<string, GeneratedSymbol>;
-  byModule: Record<string, string[]>;
-  byClass: Record<string, string[]>;
-  classes: string[];
-  keyboardFunctions: { label: string; insert: string; paramTypes: string[] }[];
-  functionNames: string[];
-  metadata: { generatedAt: string; p5Version: string; symbolCount: number };
-}
-
-const data = generated as ReferenceData;
+export type ReferenceData = ContentReference;
 
 export type P5Symbol = {
   name: string;
@@ -36,6 +14,10 @@ export type P5Symbol = {
   examples?: string[];
   norender?: boolean;
 };
+
+let cachedReference: ReferenceData | null = null;
+let cachedSymbols: P5Symbol[] = [];
+let cachedByName: Record<string, P5Symbol> = {};
 
 function toP5Symbol(sym: GeneratedSymbol): P5Symbol {
   return {
@@ -53,14 +35,34 @@ function toP5Symbol(sym: GeneratedSymbol): P5Symbol {
   };
 }
 
-export const P5_SYMBOLS: P5Symbol[] = Object.values(data.byName).map(toP5Symbol);
-
-export const P5_SYMBOLS_BY_NAME: Record<string, P5Symbol> = {};
-for (const view of P5_SYMBOLS) {
-  P5_SYMBOLS_BY_NAME[view.name] = view;
+function ensureReferenceCache(): void {
+  const data = requireContentPack().reference;
+  if (data === cachedReference) return;
+  cachedReference = data;
+  cachedSymbols = Object.values(data.byName).map(toP5Symbol);
+  cachedByName = {};
+  for (const view of cachedSymbols) {
+    cachedByName[view.name] = view;
+  }
 }
 
-export const P5_FUNCTION_NAMES: string[] = data.functionNames;
+export function getReferenceData(): ReferenceData {
+  return requireContentPack().reference;
+}
+
+export function getP5Symbols(): P5Symbol[] {
+  ensureReferenceCache();
+  return cachedSymbols;
+}
+
+export function getP5SymbolsByName(): Record<string, P5Symbol> {
+  ensureReferenceCache();
+  return cachedByName;
+}
+
+export function getP5FunctionNames(): string[] {
+  return getReferenceData().functionNames;
+}
 
 export const ONCE_ONLY_P5_FUNCTIONS: string[] = [
   "preload",
@@ -76,14 +78,10 @@ export const ONCE_ONLY_P5_FUNCTIONS: string[] = [
   "keyPressed",
   "keyReleased",
   "keyTyped",
-  // p5 2.0 removed the separate touch* handlers and routes touch through the
-  // pointer-backed mouse* events above, so touchStarted/touchMoved/touchEnded
-  // are deliberately absent — defining them on the vendored build does nothing.
+  // p5 2.0 routes touch through the pointer-backed mouse* events, so touch*
+  // handlers are deliberately absent.
   "deviceMoved",
   "deviceTurned",
   "deviceShaken",
   "windowResized",
 ];
-
-// Raw access to the full generated data (for new code)
-export const GENERATED_REFERENCE = data;

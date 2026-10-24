@@ -1,4 +1,4 @@
-import { p5Source } from "../p5Source";
+import { getP5Source } from "../../content/store";
 
 function stripDescribe(code: string): string {
   return code
@@ -52,7 +52,7 @@ export function getFullscreenPreviewHtml(code: string, colorScheme?: "light" | "
 </head>
 <body>
 <div id="sketch"></div>
-<script>${p5Source.replace(/<\/script>/gi, "<\\/script>")}</script>
+<script>${getP5Source().replace(/<\/script>/gi, "<\\/script>")}</script>
 <script>
 (function() {
   var userCode = ${JSON.stringify(sketch)};

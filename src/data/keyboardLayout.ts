@@ -1,4 +1,4 @@
-import { GENERATED_REFERENCE } from "./reference";
+import { getReferenceData } from "./reference";
 
 export type PairedSymbol = {
   open: string;
@@ -68,16 +68,35 @@ const KEYBOARD_FUNCTIONS: FunctionSpec[] = [
   { label: "noStroke", insert: "noStroke()", params: [] },
 ];
 
-export const p5Functions: P5FunctionDef[] = KEYBOARD_FUNCTIONS.map((spec) => {
-  const ref = GENERATED_REFERENCE.byName[spec.label];
-  if (ref && spec.params) {
-    const paramTypes = spec.params.map((pname) => {
-      const p = ref.params.find((rp) => rp.name === pname);
-      return p ? refTypeToKeyboardType(p.type) : "number";
-    });
-    return { label: spec.label, insert: spec.insert, paramTypes };
-  }
-  return { label: spec.label, insert: spec.insert, paramTypes: [] };
-});
+let cachedReference: ReturnType<typeof getReferenceData> | null = null;
+let cachedFunctions: P5FunctionDef[] = [];
+let cachedLabels = new Set<string>();
 
-export const p5FunctionLabels = new Set(p5Functions.map((f) => f.label));
+function ensureKeyboardCache(): void {
+  const reference = getReferenceData();
+  if (reference === cachedReference) return;
+  cachedReference = reference;
+
+  cachedFunctions = KEYBOARD_FUNCTIONS.map((spec) => {
+    const ref = reference.byName[spec.label];
+    if (ref && spec.params) {
+      const paramTypes = spec.params.map((pname) => {
+        const p = ref.params.find((rp) => rp.name === pname);
+        return p ? refTypeToKeyboardType(p.type) : "number";
+      });
+      return { label: spec.label, insert: spec.insert, paramTypes };
+    }
+    return { label: spec.label, insert: spec.insert, paramTypes: [] };
+  });
+  cachedLabels = new Set(cachedFunctions.map((f) => f.label));
+}
+
+export function getP5Functions(): P5FunctionDef[] {
+  ensureKeyboardCache();
+  return cachedFunctions;
+}
+
+export function getP5FunctionLabels(): Set<string> {
+  ensureKeyboardCache();
+  return cachedLabels;
+}

@@ -1,10 +1,10 @@
-import { p5Source } from "../p5Source";
+import { getP5Source } from "../../content/store";
+import { getP5Assets } from "../../content/store";
 import { Colors } from "../../constants/Colors";
 import {
   JETBRAINS_MONO_REGULAR_BASE64,
   JETBRAINS_MONO_BOLD_BASE64,
 } from "../../constants/fontBase64.generated";
-import p5Assets from "../../data/p5Assets.generated.json";
 
 // Placeholders inserted by scripts/generate-reference.mjs look like
 // __P5_ASSET__<basename>__P5_ASSET__. At render time we swap them for the
@@ -14,8 +14,9 @@ const ASSET_PLACEHOLDER_RE = /__P5_ASSET__([^'"\\\s)]+?)__P5_ASSET__/g;
 
 function substituteAssetPlaceholders(code: string): string {
   if (!code.includes("__P5_ASSET__")) return code;
+  const p5Assets = getP5Assets();
   return code.replace(ASSET_PLACEHOLDER_RE, (full, name) => {
-    const uri = (p5Assets as Record<string, string>)[`__P5_ASSET__${name}__P5_ASSET__`];
+    const uri = p5Assets[`__P5_ASSET__${name}__P5_ASSET__`];
     return uri ?? full;
   });
 }
@@ -59,7 +60,7 @@ canvas { display: block; max-width: 100%; height: auto; }
 </style>
 </head>
 <body>
-<script>${p5Source}<\/script>
+<script>${getP5Source()}<\/script>
 <script>${sketch}<\/script>
 </body>
 </html>`;

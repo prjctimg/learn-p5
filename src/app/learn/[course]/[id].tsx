@@ -21,7 +21,7 @@ import TaskCompletePulse from "../../../components/TaskCompletePulse";
 import NextExerciseOverlay from "../../../components/NextExerciseOverlay";
 import { loadExercise, loadCourse } from "../../../utils/courseLoader";
 import { getExerciseCodeKey, exerciseReducer } from "../../../utils/exerciseState";
-import { P5_FUNCTION_NAMES, ONCE_ONLY_P5_FUNCTIONS } from "../../../data/reference";
+import { getP5FunctionNames, ONCE_ONLY_P5_FUNCTIONS } from "../../../data/reference";
 import { getExerciseHtml } from "../../../utils/editor/exerciseHtml";
 import { getFullscreenPreviewHtml } from "../../../utils/editor/fullscreenPreviewHtml";
 import { EDITOR_THEMES, getThemeSwatches } from "../../../utils/editor/themes";
@@ -697,7 +697,7 @@ case "editorTapped":
   if (!state.exercise) return [];
   const taskSolution = state.exercise.tasks?.[state.currentTaskIndex]?.solution ?? state.exercise.solution ?? "";
   const code = (state.exercise.startingCode + " " + taskSolution).toLowerCase();
-  return P5_FUNCTION_NAMES.filter((fn) => code.includes(fn.toLowerCase()));
+  return getP5FunctionNames().filter((fn) => code.includes(fn.toLowerCase()));
   }, [state.exercise, state.currentTaskIndex]);
 
  const usedFunctions = useMemo(() => {

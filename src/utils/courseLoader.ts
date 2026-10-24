@@ -1,47 +1,72 @@
-import { shapesCourse } from "../data/courses/shapes";
-import { colorCourse } from "../data/courses/color";
-import { transformCourse } from "../data/courses/transform";
-import { customShapesCourse } from "../data/courses/custom-shapes";
-import { curvesCourse } from "../data/courses/curves";
-import { typographyCourse } from "../data/courses/typography";
-import { imageCourse } from "../data/courses/image";
-import { mathCourse } from "../data/courses/math";
-import { vectorsCourse } from "../data/courses/vectors";
-import { randomNoiseCourse } from "../data/courses/random-noise";
-import { domCourse } from "../data/courses/dom";
-import { eventsCourse } from "../data/courses/events";
-import { timeCourse } from "../data/courses/time";
-import { ioCourse } from "../data/courses/io";
-import { dataCourse } from "../data/courses/data";
-import { webglCourse } from "../data/courses/webgl";
 import { Course, Exercise } from "../data/types";
-
-const COURSE_FILES = [
-  shapesCourse,
-  colorCourse,
-  transformCourse,
-  customShapesCourse,
-  curvesCourse,
-  typographyCourse,
-  imageCourse,
-  mathCourse,
-  vectorsCourse,
-  randomNoiseCourse,
-  domCourse,
-  eventsCourse,
-  timeCourse,
-  ioCourse,
-  dataCourse,
-  webglCourse,
-];
+import { getContentPack } from "../content/store";
 
 let cachedCourses: Course[] | null = null;
+let cachedPackRef: object | null = null;
+
+function loadCoursesFromYamlFallback(): Course[] {
+  const fs = require("fs");
+  const path = require("path");
+  const jsyaml = require("js-yaml");
+  const coursesDir = path.resolve("src/data/courses");
+  const yamlFiles = fs
+    .readdirSync(coursesDir)
+    .filter((f: string) => f.endsWith(".yaml") || f.endsWith(".yml"));
+  const courses: Course[] = [];
+  for (const file of yamlFiles) {
+    const raw = fs.readFileSync(path.join(coursesDir, file), "utf8");
+    const data = jsyaml.load(raw) as Course;
+    if (data && data.slug) courses.push(data);
+  }
+  const order = [
+    "shapes",
+    "color",
+    "transform",
+    "custom-shapes",
+    "curves",
+    "typography",
+    "image",
+    "math",
+    "vectors",
+    "random-noise",
+    "dom",
+    "events",
+    "time",
+    "io",
+    "data",
+    "webgl",
+  ];
+  courses.sort((a, b) => {
+    const ai = order.indexOf(a.slug);
+    const bi = order.indexOf(b.slug);
+    if (ai === -1 && bi === -1) return a.slug.localeCompare(b.slug);
+    if (ai === -1) return 1;
+    if (bi === -1) return -1;
+    return ai - bi;
+  });
+  return courses;
+}
 
 export async function loadAllCourses(): Promise<Course[]> {
+  const pack = getContentPack();
+  if (pack) {
+    if (cachedCourses && cachedPackRef === pack) {
+      return cachedCourses;
+    }
+    cachedPackRef = pack;
+    cachedCourses = pack.courses;
+    return cachedCourses;
+  }
+
   if (cachedCourses) {
     return cachedCourses;
   }
-  cachedCourses = COURSE_FILES;
+
+  try {
+    cachedCourses = loadCoursesFromYamlFallback();
+  } catch {
+    cachedCourses = [];
+  }
   return cachedCourses;
 }
 

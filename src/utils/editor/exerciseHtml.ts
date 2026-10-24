@@ -1,7 +1,7 @@
 import { CODEMIRROR_BUNDLE } from "./codemirror-bundle.generated";
 import { VALIDATION_CORE } from "./validation-core.generated";
-import { p5Source } from "../p5Source";
-import { P5_FUNCTION_NAMES } from "../../data/reference";
+import { getP5Source } from "../../content/store";
+import { getP5FunctionNames } from "../../data/reference";
 import { Colors } from "../../constants/Colors";
 import { getEditorTheme, EditorThemeColors } from "./themes";
 import { ExerciseTask } from "../../data/types";
@@ -10,20 +10,27 @@ import {
   JETBRAINS_MONO_BOLD_BASE64,
 } from "../../constants/fontBase64.generated";
 
-const SYMBOL_PATTERN = new RegExp(
-  `\\b(${P5_FUNCTION_NAMES.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b(?=\\()`,
-  "g"
-);
+function buildSymbolPattern(): RegExp | null {
+  const names = getP5FunctionNames();
+  if (names.length === 0) return null;
+  return new RegExp(
+    `\\b(${names.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b(?=\\()`,
+    "g"
+  );
+}
 
 function parseInstructionHtml(text: string): string {
   if (!text) return "";
   let html = "";
   let lastIndex = 0;
   let match: RegExpExecArray | null;
+  const symbolPattern = buildSymbolPattern();
 
-  SYMBOL_PATTERN.lastIndex = 0;
+  if (!symbolPattern) return escapeHtml(text);
 
-  while ((match = SYMBOL_PATTERN.exec(text)) !== null) {
+  symbolPattern.lastIndex = 0;
+
+  while ((match = symbolPattern.exec(text)) !== null) {
     if (match.index > lastIndex) {
       html += escapeHtml(text.slice(lastIndex, match.index));
     }
@@ -414,7 +421,7 @@ ${
 </div>
 
 
-<script>${p5Source}</script>
+<script>${getP5Source()}</script>
 <script>${CODEMIRROR_BUNDLE}</script>
 <script>${VALIDATION_CORE}</script>
 <script>
@@ -488,7 +495,7 @@ const INITIAL_CODE = ${codeArg};
 const SOLUTION_CODE = ${solutionArg};
 const TASKS = ${tasksJson};
 var ACTIVE_TASK_INDEX = ${activeTaskIdx};
-var P5_COMPLETIONS = ${JSON.stringify(P5_FUNCTION_NAMES)};
+var P5_COMPLETIONS = ${JSON.stringify(getP5FunctionNames())};
 var jsParser = javascript().language.parser;
 
 function analyzeSource(code) {
@@ -560,7 +567,7 @@ function computeP5Decos(v) {
         var callee = n.node.firstChild;
         if (callee && callee.name === 'Identifier') {
           var name = v.state.sliceDoc(callee.from, callee.to);
-          if (${JSON.stringify(P5_FUNCTION_NAMES)}.indexOf(name) >= 0) {
+          if (${JSON.stringify(getP5FunctionNames())}.indexOf(name) >= 0) {
             decos.push(p5FnMark.range(callee.from, callee.to));
           }
         }

@@ -5,7 +5,7 @@ import { View, Text, FlatList, ScrollView, Pressable, StyleSheet, Linking } from
 import { WebView } from "react-native-webview";
 import Header from "../../components/Header";
 import Breadcrumbs from "../../components/Breadcrumbs";
-import { P5_SYMBOLS_BY_NAME, P5_SYMBOLS, P5Symbol } from "../../data/reference";
+import { getP5Symbols, getP5SymbolsByName, P5Symbol } from "../../data/reference";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useThemeContext } from "../../components/ThemeProvider";
 import { Colors } from "../../constants/Colors";
@@ -15,24 +15,28 @@ import SearchOverlay from "../../components/SearchOverlay";
 import { getExampleHtml } from "../../utils/editor/exampleHtml";
 import { highlightSyntax, parseDescription, extractDescribeCaption, stripDescribe } from "../../utils/referenceRender";
 
-const MODULE_GROUPS = P5_SYMBOLS.reduce<{ module: string; symbols: P5Symbol[] }[]>((acc, sym) => {
-  const existing = acc.find((g) => g.module === sym.module);
-  if (existing) {
-  existing.symbols.push(sym);
-  } else {
-  acc.push({ module: sym.module, symbols: [sym] });
-  }
-  return acc;
-}, []);
+function buildModuleGroups(symbols: P5Symbol[]) {
+  return symbols.reduce<{ module: string; symbols: P5Symbol[] }[]>((acc, sym) => {
+    const existing = acc.find((g) => g.module === sym.module);
+    if (existing) {
+      existing.symbols.push(sym);
+    } else {
+      acc.push({ module: sym.module, symbols: [sym] });
+    }
+    return acc;
+  }, []);
+}
 
- function SymbolDetail({ symbol, onOpenSearch }: { symbol: string; onOpenSearch: () => void }) {
+function SymbolDetail({ symbol, onOpenSearch }: { symbol: string; onOpenSearch: () => void }) {
   const router = useRouter();
-  const sym = P5_SYMBOLS_BY_NAME[symbol];
+  const symbolsByName = useMemo(() => getP5SymbolsByName(), []);
+  const symbols = useMemo(() => getP5Symbols(), []);
+  const sym = symbolsByName[symbol];
   const { colorScheme, derivedColors } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
-  const currentIndex = sym ? P5_SYMBOLS.indexOf(sym) : -1;
-  const prevSym = currentIndex > 0 ? P5_SYMBOLS[currentIndex - 1] : null;
-  const nextSym = currentIndex >= 0 && currentIndex < P5_SYMBOLS.length - 1 ? P5_SYMBOLS[currentIndex + 1] : null;
+  const currentIndex = sym ? symbols.indexOf(sym) : -1;
+  const prevSym = currentIndex > 0 ? symbols[currentIndex - 1] : null;
+  const nextSym = currentIndex >= 0 && currentIndex < symbols.length - 1 ? symbols[currentIndex + 1] : null;
 
   const handleSymbolPress = (name: string) => {
     router.push(`/ref?symbol=${name}`);
@@ -260,10 +264,11 @@ export default function Reference() {
   const router = useRouter();
   const { colorScheme, derivedColors } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
-   const [searchVisible, setSearchVisible] = useState(false);
-   const [shakeModalVisible, setShakeModalVisible] = useState(false);
-   const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>({});
-   const isFocused = useIsFocused();
+  const moduleGroups = useMemo(() => buildModuleGroups(getP5Symbols()), []);
+  const [searchVisible, setSearchVisible] = useState(false);
+  const [shakeModalVisible, setShakeModalVisible] = useState(false);
+  const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>({});
+  const isFocused = useIsFocused();
 
    const toggleModule = useCallback((module: string) => {
      setExpandedModules((prev) => ({ ...prev, [module]: !prev[module] }));
@@ -307,7 +312,7 @@ export default function Reference() {
      ListHeaderComponent={
        <View style={{ marginBottom: 12 }} />
      }
-   data={MODULE_GROUPS}
+   data={moduleGroups}
    keyExtractor={(item) => item.module}
    renderItem={({ item: group }) => {
    const isExpanded = expandedModules[group.module] ?? false;
