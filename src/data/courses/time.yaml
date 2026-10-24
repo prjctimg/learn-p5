@@ -1,0 +1,135 @@
+slug: time
+title: Time & Date
+moduleName: Utility
+description: "Use time functions to create animations and display clocks."
+exercises:
+  - id: exercise-1
+    title: "Millisecond Counter"
+    module: Time & Date
+    description: "Display elapsed time using millis()."
+    instruction: |
+      Use text() to display the elapsed milliseconds on screen.
+      Use text("Time: " + millis(), 50, 200) to show a running timer.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        fill(0);
+        textSize(24);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        fill(0);
+        textSize(24);
+        text("Time: " + millis(), 50, 200);
+      }
+    tasks:
+      - id: task-1
+        title: "Show Millis"
+        instruction: |
+          Add text("Time: " + millis(), 50, 200) to display the running timer.
+        validation:
+          - type: functionCall
+            name: text
+            minArgs: 3
+          - type: functionCall
+            name: millis
+            exactArgs: 0
+  - id: exercise-2
+    title: "Pulsing Circle"
+    module: Time & Date
+    description: "Create a pulsing circle using sin() with millis()."
+    instruction: |
+      Use sin(millis() / 500) to create a pulsing effect.
+      Map the result to a diameter between 50 and 200 using map().
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        fill(100, 200, 255);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        let pulse = sin(millis() / 500);
+        let d = map(pulse, -1, 1, 50, 200);
+        fill(100, 200, 255);
+        circle(200, 200, d);
+      }
+    tasks:
+      - id: task-1
+        title: "Pulsing Effect"
+        instruction: |
+          Use let pulse = sin(millis() / 500) and let d = map(pulse, -1, 1, 50, 200) to animate circle size.
+        validation:
+          - type: functionCall
+            name: sin
+            exactArgs: 1
+          - type: functionCall
+            name: millis
+            exactArgs: 0
+          - type: functionCall
+            name: map
+            exactArgs: 5
+  - id: exercise-3
+    title: "Frame Counter"
+    module: Time & Date
+    description: "Display the frame count and create frame-based animation."
+    instruction: |
+      Display frameCount as text on screen.
+      Also use frameCount to rotate a rectangle: rotate(frameCount * 0.02).
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        fill(0);
+        textSize(18);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        fill(0);
+        textSize(18);
+        text("Frame: " + frameCount, 50, 50);
+        push();
+        translate(200, 200);
+        rotate(frameCount * 0.02);
+        fill(255, 100, 50);
+        rectMode(CENTER);
+        rect(0, 0, 100, 100);
+        pop();
+      }
+    tasks:
+      - id: task-1
+        title: "Frame-Based Rotation"
+        instruction: |
+          Show frameCount with text() and use it to rotate a rectangle with push/pop, translate, and rotate.
+        validation:
+          - type: functionCall
+            name: text
+            minArgs: 3
+          - type: functionCall
+            name: rotate
+            exactArgs: 1

@@ -1,0 +1,213 @@
+slug: typography
+title: Typography
+moduleName: Drawing
+description: "Learn to draw and style text on the canvas using p5.js typography functions."
+
+exercises:
+  - id: exercise-1
+    title: "Hello World"
+    module: Typography
+    description: "Display text on the canvas for the first time."
+    instruction: |
+      Draw the word "Hello" at the center of the 400x400 canvas.
+      Use text(str, x, y) with x=200, y=200.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        fill(0);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        fill(0);
+        text("Hello", 200, 200);
+      }
+    tasks:
+      - id: task-1
+        title: "Draw Text"
+        instruction: |
+          Draw the word "Hello" at coordinates (200, 200).
+          Use text(str, x, y).
+        validation:
+          - type: functionCall
+            name: text
+            exactArgs: 3
+
+  - id: exercise-2
+    title: "Size Matters"
+    module: Typography
+    description: "Control the size of your text."
+    instruction: |
+      Make the text larger by setting the text size.
+      Use textSize(size) before your text() call.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        fill(0);
+        text("Hello", 200, 200);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        fill(0);
+        textSize(64);
+        text("Hello", 200, 200);
+      }
+    tasks:
+      - id: task-1
+        title: "Set Text Size"
+        instruction: |
+          Set the text size to 64 using textSize(64) before the text() call.
+        validation:
+          - type: functionCall
+            name: textSize
+            exactArgs: 1
+          - type: functionCall
+            name: text
+            exactArgs: 3
+
+  - id: exercise-3
+    title: "Style Points"
+    module: Typography
+    description: "Apply bold and italic styles to your text."
+    instruction: |
+      Make the text bold using textStyle().
+      Use textStyle(BOLD) before the text() call.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        fill(0);
+        textSize(48);
+        text("Hello", 200, 200);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        fill(0);
+        textSize(48);
+        textStyle(BOLD);
+        text("Hello", 200, 200);
+      }
+    tasks:
+      - id: task-1
+        title: "Bold Text"
+        instruction: |
+          Set the text style to BOLD using textStyle(BOLD) before text().
+        validation:
+          - type: functionCall
+            name: textStyle
+            exactArgs: 1
+          - type: functionCall
+            name: text
+            exactArgs: 3
+
+  - id: exercise-4
+    title: "Align Right"
+    module: Typography
+    description: "Control how text is aligned relative to its position."
+    instruction: |
+      Right-align text on the canvas.
+      Use textAlign(RIGHT) before the text() call.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        fill(0);
+        textSize(32);
+        text("Hello", 300, 200);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        fill(0);
+        textSize(32);
+        textAlign(RIGHT);
+        text("Hello", 300, 200);
+      }
+    tasks:
+      - id: task-1
+        title: "Right Align"
+        instruction: |
+          Set text alignment to RIGHT using textAlign(RIGHT) before text().
+        validation:
+          - type: functionCall
+            name: textAlign
+            exactArgs: 1
+          - type: functionCall
+            name: text
+            exactArgs: 3
+
+  - id: exercise-5
+    title: "Leading Lines"
+    module: Typography
+    description: "Control the spacing between lines of multi-line text."
+    instruction: |
+      Draw multi-line text with custom line spacing.
+      Use textLeading(n) to set the distance between lines,
+      then pass a string with \n to text().
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        fill(0);
+        textSize(24);
+        text("Line one\nLine two\nLine three", 200, 150);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400);
+      }
+
+      function draw() {
+        background(240);
+        fill(0);
+        textSize(24);
+        textLeading(40);
+        text("Line one\nLine two\nLine three", 200, 150);
+      }
+    tasks:
+      - id: task-1
+        title: "Set Line Spacing"
+        instruction: |
+          Set the line spacing to 40 using textLeading(40) before the text() call.
+        validation:
+          - type: functionCall
+            name: textLeading
+            exactArgs: 1
+          - type: functionCall
+            name: text
+            exactArgs: 3

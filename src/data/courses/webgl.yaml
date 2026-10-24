@@ -1,0 +1,148 @@
+slug: webgl
+title: WebGL Basics
+moduleName: 3D
+description: "Enter the third dimension — draw 3D shapes and control the camera."
+exercises:
+  - id: exercise-1
+    title: "Hello 3D"
+    module: WebGL Basics
+    description: "Create a WebGL canvas and draw a rotating box."
+    instruction: |
+      Change createCanvas(400, 400, WEBGL) to use WebGL mode.
+      Use rotateX(frameCount * 0.01) and rotateY(frameCount * 0.01) to spin a box.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400, WEBGL);
+      }
+
+      function draw() {
+        background(240);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400, WEBGL);
+      }
+
+      function draw() {
+        background(240);
+        rotateX(frameCount * 0.01);
+        rotateY(frameCount * 0.01);
+        box(100);
+      }
+    tasks:
+      - id: task-1
+        title: "Spinning Box"
+        instruction: |
+          Add rotateX(frameCount * 0.01), rotateY(frameCount * 0.01), and box(100) in draw().
+        validation:
+          - type: functionCall
+            name: rotateX
+            exactArgs: 1
+          - type: functionCall
+            name: rotateY
+            exactArgs: 1
+          - type: functionCall
+            name: box
+            exactArgs: 1
+  - id: exercise-2
+    title: "Orbit Control"
+    module: WebGL Basics
+    description: "Let the user orbit around a 3D shape with mouse/touch."
+    instruction: |
+      Add orbitControl() in draw() to let the user drag to rotate the view.
+      Draw a sphere() with normalMaterial() for colorful shading.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400, WEBGL);
+      }
+
+      function draw() {
+        background(240);
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400, WEBGL);
+      }
+
+      function draw() {
+        background(240);
+        orbitControl();
+        normalMaterial();
+        sphere(100);
+      }
+    tasks:
+      - id: task-1
+        title: "Interactive 3D"
+        instruction: |
+          Add orbitControl(), normalMaterial(), and sphere(100) in draw().
+        validation:
+          - type: functionCall
+            name: orbitControl
+            exactArgs: 0
+          - type: functionCall
+            name: sphere
+            exactArgs: 1
+          - type: functionCall
+            name: normalMaterial
+            exactArgs: 0
+  - id: exercise-3
+    title: "3D Primitives"
+    module: WebGL Basics
+    description: "Draw multiple 3D primitives in a scene with lighting."
+    instruction: |
+      Add lights() for default lighting.
+      Draw a cone(), cylinder(), and torus() side by side using translate().
+      Use push/pop to isolate each shape's position.
+    startingCode: |
+      function setup() {
+        createCanvas(400, 400, WEBGL);
+      }
+
+      function draw() {
+        background(30);
+        orbitControl();
+      }
+    solution: |
+      function setup() {
+        createCanvas(400, 400, WEBGL);
+      }
+
+      function draw() {
+        background(30);
+        orbitControl();
+        lights();
+        push();
+        translate(-120, 0, 0);
+        fill(255, 100, 100);
+        cone(50, 100);
+        pop();
+        push();
+        translate(0, 0, 0);
+        fill(100, 255, 100);
+        cylinder(40, 100);
+        pop();
+        push();
+        translate(120, 0, 0);
+        fill(100, 100, 255);
+        torus(50, 20);
+        pop();
+      }
+    tasks:
+      - id: task-1
+        title: "Three 3D Shapes"
+        instruction: |
+          Use push/pop with translate to draw cone(-120,0,0), cylinder(0,0,0), and torus(120,0,0).
+          Add lights() and orbitControl() for interactivity.
+        validation:
+          - type: functionCall
+            name: lights
+            exactArgs: 0
+          - type: functionCall
+            name: cone
+            exactArgs: 2
+          - type: functionCall
+            name: cylinder
+            exactArgs: 2
+          - type: functionCall
+            name: torus
+            exactArgs: 2
