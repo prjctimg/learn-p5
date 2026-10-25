@@ -19,29 +19,23 @@ function ensureDir(dir) {
 
 function readP5Source() {
   const src = fs.readFileSync(path.resolve("src/utils/p5Source.ts"), "utf8");
-  const match = src.match(/export const p5Source: string = (_p\.join\(["'][^"']*["']\)|(?:.|\n)*?)\n/s);
-  // The generated file uses _p array joined; reconstruct by evaluating.
-  // Simpler: extract array content and join.
-  const arrayMatch = src.match(/const _p = \[([\s\S]*?)\];/);
-  if (!arrayMatch) throw new Error("Could not parse p5Source.ts");
-  // Use node to eval safely.
-  const joined = execSync(`node -e ${JSON.stringify(`const _p=[${arrayMatch[1]}];console.log(_p.join(""));`)}`, { encoding: "utf8" });
-  return joined;
+  const start = src.indexOf("const _p = [");
+  const end = src.indexOf("\n];", start);
+  if (start === -1 || end === -1) {
+    throw new Error("Could not parse p5Source.ts");
+  }
+  const body = src.slice(start + "const _p = [".length, end);
+  return JSON.parse(`[${body}]`).join("");
 }
 
 function main() {
   ensureDir(OUT_DIR);
 
   // Ensure artifacts exist.
-  try {
-    require.resolve("../src/utils/p5Source.ts");
-  } catch {
+  if (!fs.existsSync(path.resolve("src/utils/p5Source.ts"))) {
     run("node scripts/bundle-p5.mjs");
   }
-
-  try {
-    require.resolve("../src/data/reference.generated.json");
-  } catch {
+  if (!fs.existsSync(path.resolve("src/data/reference.generated.json"))) {
     run("node scripts/generate-reference.mjs");
   }
 
@@ -80,7 +74,7 @@ function main() {
     contentVersion,
     generatedAt: pack.generatedAt,
     p5Version: PINNED_P5_VERSION,
-    packUrl: "content.json",
+    packUrl: "pack.json",
     packSize: Buffer.byteLength(packJson),
     packSha256: sha256,
     courseCount: Array.isArray(courses) ? courses.length : 0,
