@@ -1,4 +1,5 @@
 import { describe, it, expect } from "@jest/globals";
+import { getContentPack, setContentPack } from "../../content/store";
 import { getExampleHtml } from "./exampleHtml";
 
 describe("getExampleHtml", () => {
@@ -35,5 +36,24 @@ describe("getExampleHtml", () => {
   it("does not substitute placeholders when the code has none", () => {
     const html = getExampleHtml("ellipse(0, 0, 10);");
     expect(html).not.toContain("__P5_ASSET__");
+  });
+
+  it("declares UTF-8 and escapes closing script tags in embedded source", () => {
+    const pack = getContentPack();
+    expect(pack).not.toBeNull();
+    try {
+      setContentPack({
+        ...pack!,
+        p5: {
+          ...pack!.p5,
+          source: "/*! p5.js v2.4.0-rc.1 */\nvar p5=function(){};\n</script>",
+        },
+      });
+      const html = getExampleHtml("fill(0);");
+      expect(html).toContain('<meta charset="utf-8">');
+      expect(html).toContain("<\\/script>");
+    } finally {
+      setContentPack(pack);
+    }
   });
 });

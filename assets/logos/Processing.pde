@@ -35,13 +35,14 @@ void draw() {
   strokeCap(SQUARE);
   strokeWeight(1.5 * u);
 
-  stroke(5, 100, 255);
+  // Official Processing logo palette (processing.org/favicon.svg).
+  stroke(4, 104, 255);
   bezier(4 * u, 1 * u, 7 * u, 1 * u, 7 * u, 5 * u, 4 * u, 5 * u);
 
-  stroke(30, 50, 170);
+  stroke(31, 52, 171);
   line(1 * u, 6 * u, 4 * u, 2 * u);
 
-  stroke(130, 175, 255);
+  stroke(133, 174, 255);
   line(1 * u, 3 * u, 2 * u, 5 * u);
 
   // This is for saving as a PNG

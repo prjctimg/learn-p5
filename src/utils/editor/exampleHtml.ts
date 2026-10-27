@@ -2,6 +2,10 @@ import { getP5Source } from "../../content/store";
 import { getP5Assets } from "../../content/store";
 import { Colors } from "../../constants/Colors";
 import {
+  escapeScriptContent,
+  P5_COMPAT_POLYFILL,
+} from "./p5Html";
+import {
   JETBRAINS_MONO_REGULAR_BASE64,
   JETBRAINS_MONO_BOLD_BASE64,
 } from "../../constants/fontBase64.generated";
@@ -39,10 +43,14 @@ export function getExampleHtml(code: string, colorScheme?: "light" | "dark"): st
     );
   }
 
+  const p5Source = escapeScriptContent(getP5Source());
+  const safeSketch = escapeScriptContent(sketch);
+
   return `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <style>
 @font-face {
@@ -63,8 +71,9 @@ canvas { display: block; max-width: 100%; height: auto; }
 </style>
 </head>
 <body>
-<script>${getP5Source()}<\/script>
-<script>${sketch}<\/script>
+${P5_COMPAT_POLYFILL}
+<script>${p5Source}<\/script>
+<script>${safeSketch}<\/script>
 </body>
 </html>`;
 }

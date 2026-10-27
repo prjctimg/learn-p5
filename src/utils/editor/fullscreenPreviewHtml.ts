@@ -1,4 +1,10 @@
 import { getP5Source } from "../../content/store";
+import {
+  escapeScriptContent,
+  P5_COMPAT_POLYFILL,
+  P5_GLOBAL_FUNCTIONS,
+  safeJson,
+} from "./p5Html";
 
 function stripDescribe(code: string): string {
   return code
@@ -18,6 +24,9 @@ export function getFullscreenPreviewHtml(code: string, colorScheme?: "light" | "
   const isDark = colorScheme === "dark";
   const bodyBg = isDark ? "#000000" : "#111111";
   const sketch = wrapSketch(stripDescribe(code ?? ""));
+  const p5Source = escapeScriptContent(getP5Source());
+  const userCode = safeJson(sketch);
+  const globalFunctions = JSON.stringify(P5_GLOBAL_FUNCTIONS);
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -52,18 +61,39 @@ export function getFullscreenPreviewHtml(code: string, colorScheme?: "light" | "
 </head>
 <body>
 <div id="sketch"></div>
-<script>${getP5Source().replace(/<\/script>/gi, "<\\/script>")}</script>
+${P5_COMPAT_POLYFILL}
+<script>${p5Source}</script>
 <script>
 (function() {
-  var userCode = ${JSON.stringify(sketch)};
-  var script = document.createElement('script');
-  script.textContent = userCode;
-  document.body.appendChild(script);
+  var P5 = window.p5;
+  var userCode = ${userCode};
+  var globalFunctions = ${globalFunctions};
   var container = document.getElementById('sketch');
+
+  function showError(message) {
+    container.innerHTML = '';
+    var error = document.createElement('div');
+    error.id = 'error';
+    error.textContent = message;
+    container.appendChild(error);
+  }
+
+  if (typeof P5 !== 'function') {
+    showError('p5.js could not start on this device. Update Android System WebView (or iOS) and try again.');
+    return;
+  }
+
   try {
-    container.__p5 = new p5(undefined, container);
+    var expose = '';
+    for (var i = 0; i < globalFunctions.length; i++) {
+      var name = globalFunctions[i];
+      expose += 'if (typeof ' + name + ' === "function") window.' + name + ' = ' + name + ';\\n';
+    }
+    var runUserCode = new Function('p5', userCode + '\\n' + expose);
+    runUserCode.call(window, P5);
+    container.__p5 = new P5(undefined, container);
   } catch (e) {
-    container.innerHTML = '<div id="error">' + ((e && e.message) ? e.message : String(e)) + '</div>';
+    showError((e && e.message) ? e.message : String(e));
   }
 })();
 </script>

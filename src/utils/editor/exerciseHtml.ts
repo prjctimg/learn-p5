@@ -6,6 +6,12 @@ import { Colors } from "../../constants/Colors";
 import { getEditorTheme, EditorThemeColors } from "./themes";
 import { ExerciseTask } from "../../data/types";
 import {
+  escapeScriptContent,
+  P5_COMPAT_POLYFILL,
+  P5_GLOBAL_FUNCTIONS,
+  safeJson,
+} from "./p5Html";
+import {
   JETBRAINS_MONO_REGULAR_BASE64,
   JETBRAINS_MONO_BOLD_BASE64,
 } from "../../constants/fontBase64.generated";
@@ -55,7 +61,7 @@ function escapeHtml(text: string): string {
 }
 
 function jsString(s: string): string {
-  return JSON.stringify(s.replace(/<\/script>/gi, "<\\/script>"));
+  return safeJson(s);
 }
 
 export function getExerciseHtml(params: {
@@ -83,8 +89,9 @@ export function getExerciseHtml(params: {
   const editorBg = themeColors.bg;
   const fontSize = params.codeFontSize ?? 22;
   const instructionHtml = parseInstructionHtml(params.instruction);
-  const tasksJson = JSON.stringify(params.tasks ?? []);
+  const tasksJson = safeJson(params.tasks ?? []);
   const activeTaskIdx = params.activeTaskIndex ?? 0;
+  const p5Source = escapeScriptContent(getP5Source());
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -421,7 +428,8 @@ ${
 </div>
 
 
-<script>${getP5Source()}</script>
+${P5_COMPAT_POLYFILL}
+<script>${p5Source}</script>
 <script>${CODEMIRROR_BUNDLE}</script>
 <script>${VALIDATION_CORE}</script>
 <script>
@@ -486,6 +494,9 @@ var lineWrapping = _CM.EditorView.lineWrapping;
 var prettierLib = _CM.prettier;
 var prettierEstree = _CM.prettierPluginEstree;
 var prettierAcorn = _CM.prettierPluginAcorn;
+
+var P5_CTOR = window.p5;
+var P5_GLOBAL_FUNCTIONS = ${JSON.stringify(P5_GLOBAL_FUNCTIONS)};
 
 var WORD_WRAP = ${wordWrap ?? false};
 var DISABLE_SYSTEM_KEYBOARD = ${disableSystemKeyboard ? "true" : "false"};
@@ -800,20 +811,37 @@ async function renderSketch(containerId, code) {
 
   if (!code) return;
 
+  if (typeof P5_CTOR !== 'function') {
+    var missingMessage = 'p5.js could not start on this device. Update Android System WebView (or iOS) and try again.';
+    console.error(missingMessage);
+    container.innerHTML = '<div style="color:${cta};padding:16px;font-family:\\"JetBrains Mono\\",monospace">\\u26A0 ' + missingMessage + '</div>';
+    if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+      window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'sketchError', error: missingMessage, container: containerId }));
+    }
+    return;
+  }
+
   var tagId = 'sketch-script-' + containerId;
   var oldScript = document.getElementById(tagId);
   if (oldScript) oldScript.remove();
 
-  delete window.setup;
-  delete window.draw;
-
-  var script = document.createElement('script');
-  script.id = tagId;
-  script.textContent = code;
-  document.body.appendChild(script);
+  for (var i = 0; i < P5_GLOBAL_FUNCTIONS.length; i++) {
+    try { delete window[P5_GLOBAL_FUNCTIONS[i]]; } catch (ignored) {}
+  }
 
   try {
-    container.__p5 = new p5(undefined, container);
+    // Run learner code in its own scope with the p5 constructor as a local
+    // binding. This prevents a top-level "var p5 = new p5(...)" from replacing
+    // the global constructor before the bridge creates its own instance.
+    var expose = '';
+    for (var j = 0; j < P5_GLOBAL_FUNCTIONS.length; j++) {
+      var name = P5_GLOBAL_FUNCTIONS[j];
+      expose += 'if (typeof ' + name + ' === "function") window.' + name + ' = ' + name + ';\\n';
+    }
+    var runUserCode = new Function('p5', code + '\\n' + expose);
+    runUserCode.call(window, P5_CTOR);
+
+    container.__p5 = new P5_CTOR(undefined, container);
     var cnv = container.querySelector('canvas');
     if (cnv) {
       cnv.style.touchAction = 'pan-y';
