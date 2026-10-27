@@ -50,6 +50,7 @@ const CORE_P5_SYMBOLS = [
   "beginShape", "endShape", "beginContour", "endContour", "vertex",
   "bezierVertex", "splineVertex",
   "bezier", "bezierPoint", "bezierTangent", "bezierOrder",
+  "spline", "splinePoint", "splineTangent",
   // math
   "map", "constrain", "lerp", "dist", "sq", "sqrt", "pow", "abs", "ceil", "floor",
   "round", "min", "max", "norm", "exp", "log", "sin", "cos", "tan",

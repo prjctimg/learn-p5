@@ -9,7 +9,11 @@ export function installMockDate(iso: string): void {
   const DateMock = function (...args: unknown[]) {
     return args.length === 0 ? new RealDate(clock) : new RealDate(...(args as []));
   } as unknown as typeof RealDate;
-  const dateSpy = jest.spyOn(globalThis, "Date").mockImplementation(DateMock);
+  const dateSpy = jest
+    .spyOn(globalThis, "Date")
+    .mockImplementation(
+      DateMock as unknown as (value: string | number | Date) => Date
+    );
   Object.assign(dateSpy, {
     now: () => clock,
     parse: RealDate.parse,
