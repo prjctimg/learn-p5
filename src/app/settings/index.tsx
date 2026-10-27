@@ -113,6 +113,23 @@ export default function Settings() {
     });
   }, []);
 
+  const handleContentUpdateCheck = useCallback(async () => {
+    try {
+      const result = await checkForUpdates();
+      Alert.alert(
+        "Content update",
+        result === "updated"
+          ? "The latest course content has been downloaded."
+          : "You already have the latest course content."
+      );
+    } catch (error) {
+      Alert.alert(
+        "Content update failed",
+        error instanceof Error ? error.message : "Could not check for content updates."
+      );
+    }
+  }, [checkForUpdates]);
+
   const scheduleNotification = useCallback(async (hour: number, minute: number) => {
     // Reschedule only once permission is actually granted. Cancelling first
     // and ignoring the result left the toggle silently on with no reminder
@@ -419,7 +436,7 @@ export default function Settings() {
           </View>
           <View style={styles.cardDivider} />
           <Pressable
-            onPress={checkForContentUpdates}
+            onPress={handleContentUpdateCheck}
             disabled={refreshing}
             style={({ pressed }) => [styles.cardRow, pressed && !refreshing && { opacity: 0.7 }]}
             accessibilityRole="button"

@@ -28,7 +28,19 @@ function readP5Source() {
   return JSON.parse(`[${body}]`).join("");
 }
 
-function main() {
+function validateP5Source(source) {
+  if (source.length < 100_000) {
+    throw new Error(`p5 source is incomplete (${source.length} chars)`);
+  }
+  if (!source.startsWith(`/*! p5.js v${PINNED_P5_VERSION}`)) {
+    throw new Error(`p5 source does not match pinned version ${PINNED_P5_VERSION}`);
+  }
+  if (!source.trimEnd().endsWith(");")) {
+    throw new Error("p5 source is truncated");
+  }
+}
+
+async function main() {
   ensureDir(OUT_DIR);
 
   // Ensure artifacts exist.
@@ -39,13 +51,14 @@ function main() {
     run("node scripts/generate-reference.mjs");
   }
 
-  const { loadAllCoursesFromFiles } = awaitImport("./build-content-courses.mjs");
+  const { loadAllCoursesFromFiles } = await awaitImport("./build-content-courses.mjs");
   const courses = loadAllCoursesFromFiles();
   const reference = JSON.parse(fs.readFileSync(path.resolve("src/data/reference.generated.json"), "utf8"));
   const p5Assets = fs.existsSync(path.resolve("src/data/p5Assets.generated.json"))
     ? JSON.parse(fs.readFileSync(path.resolve("src/data/p5Assets.generated.json"), "utf8"))
     : {};
   const p5Source = readP5Source();
+  validateP5Source(p5Source);
 
   const contentVersion =
     process.env.CONTENT_VERSION ||

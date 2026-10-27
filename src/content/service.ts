@@ -5,7 +5,6 @@ import {
   CONTENT_SCHEMA_VERSION,
 } from "../constants/Content";
 import { CONTENT_MANIFEST_URL } from "../constants/Content";
-import { parseContentPack } from "./parse";
 import { readCachedContent, writeCachedContent } from "./storage";
 import { setContentPack } from "./store";
 import type { ContentManifest, ContentPack } from "./types";
@@ -122,8 +121,11 @@ async function downloadPack(
   onProgress?: ContentProgress
 ): Promise<ContentPack> {
   const raw = await fetchPackText(manifest, onProgress);
-  parseContentPack(raw);
-  return writeCachedContent(raw);
+  return writeCachedContent(raw, {
+    contentVersion: manifest.contentVersion,
+    p5Version: manifest.p5Version,
+    packSha256: manifest.packSha256 ?? "",
+  });
 }
 
 export async function bootstrapContent(
@@ -145,7 +147,8 @@ export async function bootstrapContent(
   if (
     cached &&
     cached.contentVersion === manifest.contentVersion &&
-    cached.p5.version === manifest.p5Version
+    cached.p5.version === manifest.p5Version &&
+    (!manifest.packSha256 || cached.packSha256 === manifest.packSha256)
   ) {
     setContentPack(cached);
     return { pack: cached, updated: false };
@@ -171,7 +174,8 @@ export async function checkForContentUpdate(
   const manifest = await fetchContentManifest();
   if (
     manifest.contentVersion === current.contentVersion &&
-    manifest.p5Version === current.p5.version
+    manifest.p5Version === current.p5.version &&
+    (!manifest.packSha256 || current.packSha256 === manifest.packSha256)
   ) {
     return null;
   }

@@ -32,6 +32,18 @@ export interface ContentPack {
   p5Assets: Record<string, string>;
   courses: Course[];
   reference: ContentReference;
+  /**
+   * Manifest hash that produced this pack. It is attached at runtime and is
+   * not part of the downloaded JSON. Keeping it lets the app notice when a
+   * re-uploaded pack reuses the same contentVersion.
+   */
+  packSha256?: string;
+}
+
+export interface ContentCacheMeta {
+  contentVersion: string;
+  p5Version: string;
+  packSha256: string;
 }
 
 export interface ContentManifest {
