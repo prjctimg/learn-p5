@@ -72,18 +72,6 @@ function writeAssetMap(assetMap) {
   console.log(`  ${Object.keys(assetMap).length} bundled assets`);
 }
 
-// p5 version stamp: read from the bundle-p5 generated artefact so the
-// reference metadata always matches the p5 version actually bundled.
-function readP5Version() {
-  const versionFile = path.resolve("src/utils/p5Version.ts");
-  try {
-    const content = fs.readFileSync(versionFile, "utf-8");
-    const m = content.match(/p5Version\s*=\s*"([^"]+)"/);
-    if (m) return m[1];
-  } catch {}
-  return PINNED_P5_VERSION;
-}
-
 const MDX_FRONTMATTER_RE = /^---\n([\s\S]*?)\n---/;
 
 function parseMdxFrontmatter(content) {
@@ -165,7 +153,7 @@ function buildOutput(byName, byModule, byClass) {
     functionNames,
     metadata: {
       generatedAt: new Date().toISOString(),
-      p5Version: readP5Version(),
+      p5Version: PINNED_P5_VERSION,
       symbolCount: Object.keys(byName).length,
     },
   };

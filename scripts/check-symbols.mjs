@@ -6,6 +6,7 @@
 import fs from "fs";
 import path from "path";
 import jsyaml from "js-yaml";
+import { PINNED_P5_VERSION } from "./p5-version.mjs";
 
 const COURSES_DIR = path.resolve("src/data/courses");
 const REF_FILE = path.resolve("src/data/reference.generated.json");
@@ -107,6 +108,17 @@ const JS_GLOBALS = [
   "requestAnimationFrame", "require", "module", "exports", "process",
 ];
 
+// p5 v1 curve helpers were renamed in p5 v2. Do not let course material drift
+// back to the v1 API even if an outdated reference snapshot contains them.
+const P5_V1_ONLY_SYMBOLS = new Map([
+  ["curve", "spline"],
+  ["curvePoint", "splinePoint"],
+  ["curveTangent", "splineTangent"],
+  ["curveTightness", "splineProperty"],
+  ["curveVertex", "splineVertex"],
+  ["curveDetail", "splineProperty"],
+]);
+
 const JS_KEYWORDS = [
   "if", "else", "for", "while", "do", "return", "function", "let", "const",
   "var", "new", "true", "false", "null", "undefined", "this", "typeof",
@@ -140,6 +152,12 @@ let symbolSet = new Set([...CORE_P5_SYMBOLS, ...JS_GLOBALS, ...JS_KEYWORDS]);
 let refSymbols = new Set();
 try {
   const ref = JSON.parse(fs.readFileSync(REF_FILE, "utf-8"));
+  if (ref.metadata?.p5Version && ref.metadata.p5Version !== PINNED_P5_VERSION) {
+    console.error(
+      `[check-symbols] reference data is for p5 ${ref.metadata.p5Version}, expected ${PINNED_P5_VERSION}.`
+    );
+    process.exit(1);
+  }
   if (ref.byName) {
     refSymbols = new Set(Object.keys(ref.byName));
     symbolSet = new Set([...symbolSet, ...refSymbols]);
@@ -184,7 +202,15 @@ function scanExercise(exId, ex, blocks, file) {
     callRe.lastIndex = 0;
     while ((m = callRe.exec(code)) !== null) {
       const name = m[1];
-      if (!symbolSet.has(name) && !declared.has(name)) {
+      const replacement = P5_V1_ONLY_SYMBOLS.get(name);
+      if (replacement) {
+        report(
+          file,
+          exId,
+          label,
+          `p5 v1 symbol ${name}() is not part of p5 ${PINNED_P5_VERSION}; use ${replacement}()`
+        );
+      } else if (!symbolSet.has(name) && !declared.has(name)) {
         report(file, exId, label, `unknown function call ${name}()`);
       }
     }

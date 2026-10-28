@@ -8,7 +8,8 @@ Expo SDK 55 project. Do not edit generated artifacts directly; regenerate them (
 npm install
 ```
 
-`postinstall` runs the build generators (p5.js bundle, validation core, reference data, courses).
+`postinstall` runs the app build generators (validation core and reference data).
+The p5.js runtime and course content ship in the separate content pack.
 
 ## Run
 
@@ -23,10 +24,8 @@ npm run web      # expo start --web
 | Script | Purpose |
 |---|---|
 | `gen-reference` | Scrape p5js.org into `src/data/reference.generated.json` (`--stub` for offline) |
-| `bundle-p5` | Vendor p5.js into `src/utils/p5Source.ts` + `p5Version.ts` |
 | `bundle-editor` | Build the CodeMirror bundle into `codemirror-bundle.generated.ts` |
 | `bundle-validation` | Build the validation core into `validation-core.generated.ts` |
-| `build-courses` | Compile `src/data/courses/*.yaml` into `src/data/courses/*.ts` |
 | `check-exercises` | Validate exercise tasks against the shared validation core and block extra p5 calls |
 | `check-symbols` | Ensure exercise code references known p5 symbols |
 | `lint` | `expo lint` |
@@ -37,7 +36,7 @@ Run `check-exercises` and `check-symbols` after editing course YAML.
 ## Generated artifacts
 
 The following are build outputs and are never edited by hand:
-`src/data/courses/*.ts`, `src/utils/p5Source.ts`, `src/utils/p5Version.ts`, `src/data/*.generated.json`, `src/utils/editor/*.generated.ts`, `src/constants/fontBase64.generated.ts`.
+`src/data/*.generated.json`, `src/utils/editor/*.generated.ts`, `src/constants/fontBase64.generated.ts`.
 
 ## Validation core
 

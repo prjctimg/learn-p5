@@ -7,6 +7,10 @@ import type { ContentPack } from "./types";
 // with an opaque "p5 is not a constructor" error. Keep this check deliberately
 // strict so a bad cache is rejected and can be downloaded again.
 const MIN_P5_SOURCE_LENGTH = 100_000;
+// The content pack must carry the ES2015-transpiled runtime and its ES5 shim.
+// This marker prevents an old, ES2022-only pack from being cached or run on
+// WebViews that cannot parse it.
+const P5_RUNTIME_COMPAT_MARKER = "learn-p5-runtime-compat:start";
 
 function validateP5Source(pack: ContentPack): void {
   const p5 = pack.p5;
@@ -25,6 +29,10 @@ function validateP5Source(pack: ContentPack): void {
   }
   if (header[1] !== p5.version) {
     throw new Error("The downloaded content pack has a mismatched p5.js version.");
+  }
+
+  if (!source.includes(P5_RUNTIME_COMPAT_MARKER)) {
+    throw new Error("The downloaded content pack contains an unsupported p5.js runtime.");
   }
 
   if (!source.trimEnd().endsWith(");")) {

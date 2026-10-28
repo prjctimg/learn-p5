@@ -32,9 +32,6 @@ coverage
 # Generated artifacts (never commit)
 src/data/reference.generated.json
 src/data/p5Assets.generated.json
-src/data/courses/*.ts
-src/utils/p5Source.ts
-src/utils/p5Version.ts
 
 # Agent local state
 .opencode/

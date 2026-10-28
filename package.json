@@ -1,16 +1,13 @@
 {
   "name": "learn-p5",
   "main": "expo-router/entry",
-  "version": "0.6.142",
+  "version": "0.6.143",
   "scripts": {
     "postinstall": "npm run bundle-validation && npm run gen-reference",
     "start": "npm run bundle-validation && npm run bundle-editor && expo start",
     "gen-reference": "node scripts/generate-reference.mjs",
-    "bundle-p5": "node scripts/bundle-p5.mjs",
     "bundle-editor": "node scripts/bundle-editor.mjs",
     "bundle-validation": "node scripts/bundle-validation.mjs",
-    "build-courses": "node scripts/build-courses.mjs",
-    "build-content": "node scripts/build-content.mjs",
     "check-exercises": "node scripts/check-exercises.mjs",
     "check-symbols": "node scripts/check-symbols.mjs",
     "typecheck": "tsc --noEmit",

@@ -34,8 +34,8 @@
 - Keyboard height presets, cursor movement keys, in-editor formatting
 
 ### Offline-first
-- Vendored p5.js, **pinned** to an exact version in `scripts/bundle-p5.mjs` and
-  inlined into every WebView that needs it — no CDN at runtime
+- Content-pack p5.js, **pinned** to `2.4.0-rc.1`, transpiled to ES2015 with an
+  ES5 compatibility shim, and inlined into every WebView — no CDN at runtime
 - Embedded reference data and fonts; all user data in AsyncStorage
 
 ### Settings, navigation & UI
@@ -47,8 +47,7 @@
 
 ### Tooling
 - Jest test suite (19 files), `expo lint`
-- Build-time generators: reference data, p5.js bundle, CodeMirror bundle,
-  validation core, courses
+- Build-time generators: reference data, CodeMirror bundle, validation core
 - GitHub Actions release workflow; husky pre-push hook enforces a version bump
   and matching tag
 

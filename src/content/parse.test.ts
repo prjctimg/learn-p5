@@ -10,7 +10,8 @@ function validPack(overrides: Partial<ContentPack> = {}): ContentPack {
     p5: {
       version: "2.4.0-rc.1",
       source:
-        "/*! p5.js v2.4.0-rc.1 October 20, 2026 */\nvar p5=(function(){\n" +
+        "/*! p5.js v2.4.0-rc.1 October 20, 2026 */\n" +
+        "/* learn-p5-runtime-compat:start */\nvar p5=(function(){\n" +
         "x".repeat(100_000) +
         "\nreturn p5;})();",
     },
@@ -39,9 +40,21 @@ describe("parseContentPack", () => {
   it("rejects a truncated p5 runtime", () => {
     const pack = validPack();
     pack.p5.source =
-      "/*! p5.js v2.4.0-rc.1 October 20, 2026 */\nvar p5=(function(){\n" +
+      "/*! p5.js v2.4.0-rc.1 October 20, 2026 */\n" +
+      "/* learn-p5-runtime-compat:start */\nvar p5=(function(){\n" +
       "x".repeat(100_000);
     expect(() => parseContentPack(JSON.stringify(pack))).toThrow(/truncated p5\.js runtime/i);
+  });
+
+  it("rejects a runtime without the compatibility shim", () => {
+    const pack = validPack();
+    pack.p5.source = pack.p5.source.replace(
+      "/* learn-p5-runtime-compat:start */\n",
+      ""
+    );
+    expect(() => parseContentPack(JSON.stringify(pack))).toThrow(
+      /unsupported p5\.js runtime/i
+    );
   });
 
   it("rejects a runtime whose header does not match the declared version", () => {
