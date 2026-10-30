@@ -73,6 +73,22 @@ export async function readCachedContent(): Promise<ContentPack | null> {
       }
     }
 
+    if (!raw) {
+      // Try to load bundled dev pack
+      try {
+        // @ts-ignore
+        const data = require("./pack.json");
+        raw = typeof data === "string" ? data : JSON.stringify(data);
+      } catch {}
+      if (!raw) {
+        try {
+          // @ts-ignore
+          const data = require("../assets/content/pack.json");
+          raw = typeof data === "string" ? data : JSON.stringify(data);
+        } catch {}
+      }
+    }
+
     if (!raw) return null;
     const pack = parseContentPack(raw);
     const meta = await readCachedMeta();
@@ -82,6 +98,8 @@ export async function readCachedContent(): Promise<ContentPack | null> {
       meta.p5Version === pack.p5.version
     ) {
       pack.packSha256 = meta.packSha256;
+    } else if (!pack.packSha256) {
+      pack.packSha256 = "dev-local";
     }
     return pack;
   } catch {

@@ -57,6 +57,17 @@ describe("parseContentPack", () => {
     );
   });
 
+  it("rejects a runtime with regex syntax older WebViews cannot parse", () => {
+    const pack = validPack();
+    pack.p5.source = pack.p5.source.replace(
+      "var p5=(function(){",
+      "var typePattern=/^(?<type>x)$/;\nvar p5=(function(){"
+    );
+    expect(() => parseContentPack(JSON.stringify(pack))).toThrow(
+      /unsupported p5\.js runtime/i
+    );
+  });
+
   it("rejects a runtime whose header does not match the declared version", () => {
     const pack = validPack();
     pack.p5.source = pack.p5.source.replace("v2.4.0-rc.1", "v2.3.0");

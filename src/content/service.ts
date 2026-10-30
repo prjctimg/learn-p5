@@ -8,6 +8,32 @@ import { CONTENT_MANIFEST_URL } from "../constants/Content";
 import { readCachedContent, writeCachedContent } from "./storage";
 import { setContentPack } from "./store";
 import type { ContentManifest, ContentPack } from "./types";
+async function loadLocalDevPack(): Promise<ContentPack | null> {
+  try {
+    // Try direct require as object (Metro can bundle JSON)
+    try {
+      // @ts-ignore
+      const data = require("./pack.json");
+      const raw = typeof data === "string" ? data : JSON.stringify(data);
+      const { parseContentPack } = await import("./parse");
+      const pack = parseContentPack(raw);
+      pack.packSha256 = "dev-local";
+      return pack;
+    } catch {}
+    try {
+      // @ts-ignore
+      const data = require("../assets/content/pack.json");
+      const raw = typeof data === "string" ? data : JSON.stringify(data);
+      const { parseContentPack } = await import("./parse");
+      const pack = parseContentPack(raw);
+      pack.packSha256 = "dev-local";
+      return pack;
+    } catch {}
+  } catch (e) {
+    // ignore
+  }
+  return null;
+}
 
 export type ContentProgress = (fraction: number) => void;
 
@@ -141,6 +167,19 @@ export async function bootstrapContent(
       setContentPack(cached);
       return { pack: cached, updated: false };
     }
+    // Try local dev pack as fallback
+    const localPack = await loadLocalDevPack();
+    if (localPack) {
+      try {
+        await writeCachedContent(JSON.stringify(localPack), {
+          contentVersion: localPack.contentVersion,
+          p5Version: localPack.p5.version,
+          packSha256: localPack.packSha256 || "dev-local",
+        });
+      } catch {}
+      setContentPack(localPack);
+      return { pack: localPack, updated: false };
+    }
     throw error;
   }
 
@@ -162,6 +201,19 @@ export async function bootstrapContent(
     if (cached) {
       setContentPack(cached);
       return { pack: cached, updated: false };
+    }
+    // Try local dev pack as fallback
+    const localPack = await loadLocalDevPack();
+    if (localPack) {
+      try {
+        await writeCachedContent(JSON.stringify(localPack), {
+          contentVersion: localPack.contentVersion,
+          p5Version: localPack.p5.version,
+          packSha256: localPack.packSha256 || "dev-local",
+        });
+      } catch {}
+      setContentPack(localPack);
+      return { pack: localPack, updated: false };
     }
     throw error;
   }

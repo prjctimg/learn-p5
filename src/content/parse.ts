@@ -11,6 +11,10 @@ const MIN_P5_SOURCE_LENGTH = 100_000;
 // This marker prevents an old, ES2022-only pack from being cached or run on
 // WebViews that cannot parse it.
 const P5_RUNTIME_COMPAT_MARKER = "learn-p5-runtime-compat:start";
+// The ES2015 transpiler does not rewrite regular-expression features. Reject
+// runtimes that still contain named capture groups, named backreferences, or
+// Unicode property escapes, because older WebViews fail while parsing them.
+const P5_UNSUPPORTED_REGEX_SYNTAX = /\(\?<[A-Za-z]|\\[pP]\{|\\k</;
 
 function validateP5Source(pack: ContentPack): void {
   const p5 = pack.p5;
@@ -32,6 +36,10 @@ function validateP5Source(pack: ContentPack): void {
   }
 
   if (!source.includes(P5_RUNTIME_COMPAT_MARKER)) {
+    throw new Error("The downloaded content pack contains an unsupported p5.js runtime.");
+  }
+
+  if (P5_UNSUPPORTED_REGEX_SYNTAX.test(source)) {
     throw new Error("The downloaded content pack contains an unsupported p5.js runtime.");
   }
 
