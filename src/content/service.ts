@@ -10,29 +10,18 @@ import { setContentPack } from "./store";
 import type { ContentManifest, ContentPack } from "./types";
 async function loadLocalDevPack(): Promise<ContentPack | null> {
   try {
-    // Try direct require as object (Metro can bundle JSON)
-    try {
-      // @ts-ignore
-      const data = require("./pack.json");
-      const raw = typeof data === "string" ? data : JSON.stringify(data);
-      const { parseContentPack } = await import("./parse");
-      const pack = parseContentPack(raw);
-      pack.packSha256 = "dev-local";
-      return pack;
-    } catch {}
-    try {
-      // @ts-ignore
-      const data = require("../assets/content/pack.json");
-      const raw = typeof data === "string" ? data : JSON.stringify(data);
-      const { parseContentPack } = await import("./parse");
-      const pack = parseContentPack(raw);
-      pack.packSha256 = "dev-local";
-      return pack;
-    } catch {}
-  } catch (e) {
-    // ignore
+    // Bundled fallback package (same layout as the downloaded pack) so the
+    // app works on first run and on older devices without network.
+    // @ts-ignore
+    const data = require("./pack.json");
+    const raw = typeof data === "string" ? data : JSON.stringify(data);
+    const { parseContentPack } = await import("./parse");
+    const pack = parseContentPack(raw);
+    pack.packSha256 = "fallback";
+    return pack;
+  } catch {
+    return null;
   }
-  return null;
 }
 
 export type ContentProgress = (fraction: number) => void;

@@ -74,19 +74,13 @@ export async function readCachedContent(): Promise<ContentPack | null> {
     }
 
     if (!raw) {
-      // Try to load bundled dev pack
+      // Bundled fallback pack (offline-first). Metro inlines this JSON
+      // module; the downloaded cache takes precedence when present.
       try {
         // @ts-ignore
         const data = require("./pack.json");
         raw = typeof data === "string" ? data : JSON.stringify(data);
       } catch {}
-      if (!raw) {
-        try {
-          // @ts-ignore
-          const data = require("../assets/content/pack.json");
-          raw = typeof data === "string" ? data : JSON.stringify(data);
-        } catch {}
-      }
     }
 
     if (!raw) return null;
