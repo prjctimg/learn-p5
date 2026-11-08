@@ -13,12 +13,29 @@ const baseParams = {
 };
 
 describe("getExerciseHtml", () => {
-  it("declares UTF-8 and captures the p5 constructor before learner code runs", () => {
+  it("declares UTF-8 and resolves the p5 constructor before learner code runs", () => {
     const html = getExerciseHtml(baseParams);
     expect(html).toContain('<meta charset="utf-8">');
-    expect(html).toContain("var P5_CTOR = window.p5;");
+    expect(html).toContain("function getP5Constructor()");
     expect(html).toContain("var runUserCode = new Function('p5'");
-    expect(html).toContain("new P5_CTOR(undefined, container)");
+    expect(html).toContain("new p5Ctor(undefined, container)");
+    expect(html).toContain("case 'p5Runtime':");
+  });
+
+  it("omits the runtime script tag when injection is requested", () => {
+    const pack = getContentPack();
+    expect(pack).not.toBeNull();
+    try {
+      setContentPack({
+        ...pack!,
+        p5FileUri: "file:///data/user/0/com.learnp5/files/content/p5.min.js",
+      });
+      const html = getExerciseHtml({ ...baseParams, injectP5Runtime: true });
+      expect(html).not.toContain('<script src="file:///data/user/0/com.learnp5/files/content/p5.min.js"></script>');
+      expect(html).not.toContain("var p5=function(){}");
+    } finally {
+      setContentPack(pack);
+    }
   });
 
   it("escapes closing script tags in the inlined p5 runtime", () => {

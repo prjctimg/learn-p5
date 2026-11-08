@@ -80,6 +80,7 @@ export function getExerciseHtml(params: {
   tasks?: ExerciseTask[];
   activeTaskIndex?: number;
   disableSystemKeyboard?: boolean;
+  injectP5Runtime?: boolean;
 }): string {
   const colors = Colors[params.colorScheme === "dark" ? "dark" : "light"];
   const ctaColor = params.ctaColor ?? colors.cta;
@@ -92,7 +93,9 @@ export function getExerciseHtml(params: {
   const instructionHtml = parseInstructionHtml(params.instruction);
   const tasksJson = safeJson(params.tasks ?? []);
   const activeTaskIdx = params.activeTaskIndex ?? 0;
-  const p5Script = p5RuntimeScript({ scriptUri: getP5ScriptUri(), inlineSource: getP5InlineSource() });
+  const p5Script = params.injectP5Runtime
+    ? ""
+    : p5RuntimeScript({ scriptUri: getP5ScriptUri(), inlineSource: getP5InlineSource() });
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -496,7 +499,13 @@ var prettierLib = _CM.prettier;
 var prettierEstree = _CM.prettierPluginEstree;
 var prettierAcorn = _CM.prettierPluginAcorn;
 
-var P5_CTOR = window.p5;
+var P5_CTOR;
+function getP5Constructor() {
+  if (typeof window.p5 === 'function') {
+    P5_CTOR = window.p5;
+  }
+  return P5_CTOR;
+}
 var P5_GLOBAL_FUNCTIONS = ${JSON.stringify(P5_GLOBAL_FUNCTIONS)};
 
 var WORD_WRAP = ${wordWrap ?? false};
@@ -812,7 +821,8 @@ async function renderSketch(containerId, code) {
 
   if (!code) return;
 
-  if (typeof P5_CTOR !== 'function') {
+  var p5Ctor = getP5Constructor();
+  if (typeof p5Ctor !== 'function') {
     var missingMessage = 'p5.js could not start on this device. Update Android System WebView (or iOS) and try again.';
     console.error(missingMessage);
     container.innerHTML = '<div style="color:${cta};padding:16px;font-family:\\"JetBrains Mono\\",monospace">\\u26A0 ' + missingMessage + '</div>';
@@ -840,9 +850,9 @@ async function renderSketch(containerId, code) {
       expose += 'if (typeof ' + name + ' === "function") window.' + name + ' = ' + name + ';\\n';
     }
     var runUserCode = new Function('p5', code + '\\n' + expose);
-    runUserCode.call(window, P5_CTOR);
+    runUserCode.call(window, p5Ctor);
 
-    container.__p5 = new P5_CTOR(undefined, container);
+    container.__p5 = new p5Ctor(undefined, container);
     var cnv = container.querySelector('canvas');
     if (cnv) {
       cnv.style.touchAction = 'pan-y';
@@ -878,6 +888,29 @@ function handleMessage(data) {
   try {
     var msg = typeof data === 'string' ? JSON.parse(data) : data;
     switch (msg.type) {
+      case 'p5Runtime':
+        try {
+          if (typeof msg.source === 'string' && msg.source.length > 0) {
+            var runtimeScript = document.createElement('script');
+            runtimeScript.textContent = msg.source;
+            document.head.appendChild(runtimeScript);
+          }
+          P5_CTOR = window.p5;
+          if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+            window.ReactNativeWebView.postMessage(JSON.stringify({
+              type: 'p5RuntimeReady',
+              ready: typeof P5_CTOR === 'function',
+            }));
+          }
+        } catch (e) {
+          if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+            window.ReactNativeWebView.postMessage(JSON.stringify({
+              type: 'p5RuntimeError',
+              error: e && e.message ? String(e.message) : 'p5.js could not start.',
+            }));
+          }
+        }
+        break;
       case 'setCode':
         if (view && msg.code !== view.state.doc.toString()) {
           view.dispatch({

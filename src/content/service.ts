@@ -7,10 +7,50 @@ import {
 import { CONTENT_MANIFEST_URL } from "../constants/Content";
 import { parseContentPack, validateP5Source } from "./parse";
 import { CONTENT_DIR, P5_SCRIPT_FILE, P5_TEMP_FILE, readCachedContent, writeCachedContent } from "./storage";
-import { setContentPack } from "./store";
+import { requireContentPack, setContentPack } from "./store";
 import type { ContentManifest, ContentPack } from "./types";
 
 export type ContentProgress = (fraction: number) => void;
+
+let cachedP5RuntimeSource: { key: string; source: string } | null = null;
+
+/**
+ * Read the validated runtime artifact text so previews can inject it into
+ * the WebView without relying on a `file://` script subresource being
+ * loadable from an in-memory document.
+ */
+export async function loadP5RuntimeSource(): Promise<string> {
+  const pack = requireContentPack();
+  const cacheKey = [
+    pack.contentVersion,
+    pack.p5Sha256 ?? pack.p5Version ?? pack.p5FileUri ?? "",
+  ].join(":");
+  if (cachedP5RuntimeSource?.key === cacheKey) {
+    return cachedP5RuntimeSource.source;
+  }
+
+  let source: string;
+  const inlineSource = pack.p5?.source;
+  if (typeof inlineSource === "string" && !pack.p5FileUri) {
+    source = inlineSource;
+  } else if (pack.p5FileUri) {
+    if (Platform.OS === "web") {
+      const response = await fetch(pack.p5FileUri);
+      if (!response.ok) {
+        throw new Error(`p5.js runtime download failed (${response.status}).`);
+      }
+      source = await response.text();
+    } else {
+      source = await FileSystem.readAsStringAsync(pack.p5FileUri);
+    }
+  } else {
+    throw new Error("p5.js runtime has not been downloaded.");
+  }
+
+  validateP5Source(source, pack.p5Version ?? pack.p5?.version ?? "");
+  cachedP5RuntimeSource = { key: cacheKey, source };
+  return source;
+}
 
 export interface BootstrapResult {
   pack: ContentPack;

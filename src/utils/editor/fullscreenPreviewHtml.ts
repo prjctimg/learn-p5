@@ -20,11 +20,34 @@ function wrapSketch(code: string): string {
   return code;
 }
 
-export function getFullscreenPreviewHtml(code: string, colorScheme?: "light" | "dark"): string {
+export function getFullscreenPreviewHtml(
+  code: string,
+  colorScheme?: "light" | "dark",
+  options?: { deferP5Runtime?: boolean }
+): string {
   const isDark = colorScheme === "dark";
   const bodyBg = isDark ? "#000000" : "#111111";
   const sketch = wrapSketch(stripDescribe(code ?? ""));
-  const p5Script = p5RuntimeScript({ scriptUri: getP5ScriptUri(), inlineSource: getP5InlineSource() });
+  const p5Script = options?.deferP5Runtime
+    ? ""
+    : p5RuntimeScript({ scriptUri: getP5ScriptUri(), inlineSource: getP5InlineSource() });
+  const deferP5Runtime = options?.deferP5Runtime ?? false;
+  const p5RuntimeLoader = deferP5Runtime
+    ? `<script>
+window.addEventListener('message', function(event) {
+  try {
+    var msg = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+    if (!msg || msg.type !== 'p5Runtime' || typeof msg.source !== 'string') return;
+    var script = document.createElement('script');
+    script.textContent = msg.source;
+    document.head.appendChild(script);
+    window.dispatchEvent(new Event('p5RuntimeReady'));
+  } catch (e) {
+    window.dispatchEvent(new Event('p5RuntimeError'));
+  }
+});
+</script>`
+    : "";
   const userCode = safeJson(sketch);
   const globalFunctions = JSON.stringify(P5_GLOBAL_FUNCTIONS);
 
@@ -63,12 +86,13 @@ export function getFullscreenPreviewHtml(code: string, colorScheme?: "light" | "
 <div id="sketch"></div>
 ${P5_COMPAT_POLYFILL}
 ${p5Script}
+${p5RuntimeLoader}
 <script>
 (function() {
-  var P5 = window.p5;
   var userCode = ${userCode};
   var globalFunctions = ${globalFunctions};
   var container = document.getElementById('sketch');
+  var started = false;
 
   function showError(message) {
     container.innerHTML = '';
@@ -78,22 +102,33 @@ ${p5Script}
     container.appendChild(error);
   }
 
-  if (typeof P5 !== 'function') {
-    showError('p5.js could not start on this device. Update Android System WebView (or iOS) and try again.');
-    return;
+  function startSketch() {
+    if (started) return;
+    started = true;
+    var P5 = window.p5;
+    if (typeof P5 !== 'function') {
+      showError('p5.js could not start on this device. Update Android System WebView (or iOS) and try again.');
+      return;
+    }
+
+    try {
+      var expose = '';
+      for (var i = 0; i < globalFunctions.length; i++) {
+        var name = globalFunctions[i];
+        expose += 'if (typeof ' + name + ' === "function") window.' + name + ' = ' + name + ';\\n';
+      }
+      var runUserCode = new Function('p5', userCode + '\\n' + expose);
+      runUserCode.call(window, P5);
+      container.__p5 = new P5(undefined, container);
+    } catch (e) {
+      showError((e && e.message) ? e.message : String(e));
+    }
   }
 
-  try {
-    var expose = '';
-    for (var i = 0; i < globalFunctions.length; i++) {
-      var name = globalFunctions[i];
-      expose += 'if (typeof ' + name + ' === "function") window.' + name + ' = ' + name + ';\\n';
-    }
-    var runUserCode = new Function('p5', userCode + '\\n' + expose);
-    runUserCode.call(window, P5);
-    container.__p5 = new P5(undefined, container);
-  } catch (e) {
-    showError((e && e.message) ? e.message : String(e));
+  if (typeof window.p5 === 'function') {
+    startSketch();
+  } else {
+    window.addEventListener('p5RuntimeReady', startSketch);
   }
 })();
 </script>
