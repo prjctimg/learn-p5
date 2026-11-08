@@ -1,8 +1,9 @@
-- fix the 'p5 is not a constructor' error when you open an exercise
-- fix the settings crashing when you open the
-- find and identify any other broken routes and asset paths and fix them.
-- the processing logo was updates, find the new code for the logo and update it.
-  if you cannot find it, let me know.
-
-verify each assumption with a criticizing agent before starting work and treat
-each as a fix and cut a new release when all the work is done and verified
+- go through each module and find any patterns that show repetition, verbose
+  declarations (e.g using the long way of declaring objects instead of the short
+  literal way) and find ways to simplify functions and reduce code duplication.
+- study the content repo and analyze the current limitations or issues it has
+  and ensure that ALL the media included or referred to in the code examples and
+  docs.
+- ensure that all tasks build on the code of the previous task in that exercise
+  instead of resetting back to the starter code when the user progresses on to
+  the next task.

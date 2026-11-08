@@ -8,36 +8,6 @@ import { CONTENT_MANIFEST_URL } from "../constants/Content";
 import { readCachedContent, writeCachedContent } from "./storage";
 import { setContentPack } from "./store";
 import type { ContentManifest, ContentPack } from "./types";
-async function loadLocalDevPack(): Promise<ContentPack | null> {
-  try {
-    // Bundled fallback package (same layout as the downloaded pack) so the
-    // app works on first run and on older devices without network.
-    // @ts-ignore
-    const data = require("./pack.json");
-    const raw = typeof data === "string" ? data : JSON.stringify(data);
-    const { parseContentPack } = await import("./parse");
-    const pack = parseContentPack(raw);
-    pack.packSha256 = "fallback";
-    return pack;
-  } catch {
-    return null;
-  }
-}
-
-/** Cache and activate the bundled dev/fallback pack, if present. */
-async function applyLocalDevFallback(): Promise<ContentPack | null> {
-  const localPack = await loadLocalDevPack();
-  if (!localPack) return null;
-  try {
-    await writeCachedContent(JSON.stringify(localPack), {
-      contentVersion: localPack.contentVersion,
-      p5Version: localPack.p5.version,
-      packSha256: localPack.packSha256 || "dev-local",
-    });
-  } catch {}
-  setContentPack(localPack);
-  return localPack;
-}
 
 export type ContentProgress = (fraction: number) => void;
 
@@ -171,11 +141,6 @@ export async function bootstrapContent(
       setContentPack(cached);
       return { pack: cached, updated: false };
     }
-    // Try local dev pack as fallback
-    const localPack = await applyLocalDevFallback();
-    if (localPack) {
-      return { pack: localPack, updated: false };
-    }
     throw error;
   }
 
@@ -197,11 +162,6 @@ export async function bootstrapContent(
     if (cached) {
       setContentPack(cached);
       return { pack: cached, updated: false };
-    }
-    // Try local dev pack as fallback
-    const localPack = await applyLocalDevFallback();
-    if (localPack) {
-      return { pack: localPack, updated: false };
     }
     throw error;
   }
