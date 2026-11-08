@@ -15,15 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # Course content lives in the separate learn-p5-content repo (the app
-      # downloads the published pack at runtime). The exercise/symbol checks
-      # validate that content, so check them out alongside this repo.
-      - name: Check out content repo
-        uses: actions/checkout@v7
-        with:
-          repository: prjctimg/learn-p5-content
-          path: ../learn-p5-content
-
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:

@@ -84,8 +84,9 @@ Recoverable from git history if the feature is ever rebuilt.
 
 ## Known gaps
 
-- The reference symbol count is not verifiable in-repo: `src/data/reference.ts`
-  and `src/data/reference.generated.json` are gitignored build artifacts.
+- The reference symbol count is not verifiable in-repo: the reference is
+  loaded from the downloaded content pack (`src/data/reference.ts` reads the
+  active pack at runtime), so its size is only visible in the published pack.
 
 ## Planned / in progress
 

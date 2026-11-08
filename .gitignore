@@ -30,8 +30,8 @@ coverage
 .eslintcache
 
 # Generated artifacts (never commit)
-src/data/reference.generated.json
-src/data/p5Assets.generated.json
+src/utils/editor/validation-core.generated.ts
+src/utils/editor/codemirror-bundle.generated.ts
 
 # Agent local state
 .opencode/

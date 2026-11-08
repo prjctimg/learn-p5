@@ -10,7 +10,7 @@ import {
   JETBRAINS_MONO_BOLD_BASE64,
 } from "../../constants/fontBase64.generated";
 
-// Placeholders inserted by scripts/generate-reference.mjs look like
+// Placeholders inserted by the content repo's generate-reference.mjs look like
 // __P5_ASSET__<basename>__P5_ASSET__. At render time we swap them for the
 // real data: URI from the asset map, so the p5.js load*() calls inside the
 // example WebView resolve to bundled base64 blobs (offline-safe, no CORS).

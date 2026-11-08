@@ -96,7 +96,7 @@ Removes line and block comments while preserving string literals (including thei
 
 ### `stripCommentsAndStrings(src)` — `src/utils/editor/validation.ts:561`
 
-Variant for symbol scans: drops comments **and** string literals entirely so text inside strings can't be mistaken for real function/member references. Used by `scripts/check-symbols.mjs`.
+Variant for symbol scans: drops comments **and** string literals entirely so text inside strings can't be mistaken for real function/member references. Used by `check-symbols.mjs` in the learn-p5-content repo.
 
 ### `normalizeForCompare(src)` — `src/utils/editor/validation.ts:600`
 
@@ -127,6 +127,5 @@ True when both inputs normalize to the same string. An empty/missing `solutionCo
 ## Integration Points
 
 - **WebView bridge** (`src/utils/editor/exerciseHtml.ts`): injects the IIFE bundle as `<script>${VALIDATION_CORE}</script>` so `__VAL_CORE` is globally available. Uses `__VAL_CORE.analyze` + `__VAL_CORE.evaluateRules` for sync validation, `__VAL_CORE.hasPixelRules` to gate pixel sampling, `__VAL_CORE.schemaErrors` to fail loudly on malformed rules, and `__VAL_CORE.codeMatchesSolution` for the solution-comparison fallback.
-- **Dev checks** (`scripts/check-exercises.mjs`): uses the shared core via the IIFE bundle, runs `schemaErrors` on every task's rules before evaluating them.
-- **Dev checks** (`scripts/check-symbols.mjs`): uses `__VAL_CORE.stripCommentsAndStrings` for its tokenizer so symbol scanning matches the bridge's understanding of code.
+- **Dev checks** (`check-exercises.mjs` / `check-symbols.mjs` in the learn-p5-content repo): use the shared core via the IIFE bundle, run `schemaErrors` on every task's rules before evaluating them.
 - **Build** (`scripts/bundle-validation.mjs`): produces the IIFE bundle (`src/utils/editor/validation-core.generated.ts`), wired into `postinstall` and `start` in `package.json`.

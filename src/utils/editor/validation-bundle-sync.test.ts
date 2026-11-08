@@ -7,9 +7,10 @@ import type { PixelSample } from "./validation";
 
 /**
  * Guard against a stale `validation-core.generated.ts`. The bundle is the
- * artifact that runs inside the exercise WebView and is what check-exercises
- * loads, so it must stay behaviorally identical to the source module. If this
- * file is regenerated, re-run `node scripts/bundle-validation.mjs`.
+ * artifact that runs inside the exercise WebView and is what the content
+ * repo's check-exercises loads, so it must stay behaviorally identical to the
+ * source module. If this file is regenerated, re-run
+ * `node scripts/bundle-validation.mjs`.
  */
 
 interface BundleExports {
@@ -32,7 +33,7 @@ interface BundleExports {
 
 function loadBundle(): BundleExports {
   const sandbox: { __VAL_CORE?: BundleExports } = {};
-  // Matches how scripts/check-exercises.mjs executes the artifact.
+  // Matches how the content repo's check-exercises.mjs executes the artifact.
   // eslint-disable-next-line no-new-func
   new Function("globalThis", VALIDATION_CORE)(sandbox);
   return sandbox.__VAL_CORE as BundleExports;
