@@ -45,13 +45,29 @@ describe("getExampleHtml", () => {
       setContentPack({
         ...pack!,
         p5: {
-          ...pack!.p5,
+          version: "2.4.0-rc.1",
           source: "/*! p5.js v2.4.0-rc.1 */\nvar p5=function(){};\n</script>",
         },
       });
       const html = getExampleHtml("fill(0);");
       expect(html).toContain('<meta charset="utf-8">');
       expect(html).toContain("<\\/script>");
+    } finally {
+      setContentPack(pack);
+    }
+  });
+
+  it("loads p5 from a file script tag when a script URI is present", () => {
+    const pack = getContentPack();
+    expect(pack).not.toBeNull();
+    try {
+      setContentPack({
+        ...pack!,
+        p5FileUri: "file:///data/user/0/com.learnp5/files/content/p5.min.js",
+      });
+      const html = getExampleHtml("fill(0);");
+      expect(html).toContain('<script src="file:///data/user/0/com.learnp5/files/content/p5.min.js"></script>');
+      expect(html).not.toContain("var p5=function(){}");
     } finally {
       setContentPack(pack);
     }

@@ -6,12 +6,14 @@ import type { ContentCacheMeta, ContentPack } from "./types";
 
 const WEB_PACK_KEY = "content_pack_data_v1";
 const WEB_META_KEY = "content_pack_meta_v1";
-const CONTENT_DIR = FileSystem.documentDirectory
+export const CONTENT_DIR = FileSystem.documentDirectory
   ? `${FileSystem.documentDirectory}content/`
   : null;
 const PACK_FILE = CONTENT_DIR ? `${CONTENT_DIR}pack.json` : null;
 const TEMP_FILE = CONTENT_DIR ? `${CONTENT_DIR}pack.tmp.json` : null;
 const META_FILE = CONTENT_DIR ? `${CONTENT_DIR}pack.meta.json` : null;
+export const P5_SCRIPT_FILE = CONTENT_DIR ? `${CONTENT_DIR}p5.min.js` : null;
+export const P5_TEMP_FILE = CONTENT_DIR ? `${CONTENT_DIR}p5.min.js.tmp` : null;
 
 function useWebStorage(): boolean {
   return Platform.OS === "web" || !CONTENT_DIR || !PACK_FILE || !TEMP_FILE || !META_FILE;
@@ -35,6 +37,15 @@ async function readCachedMeta(): Promise<ContentCacheMeta | null> {
       typeof meta?.p5Version !== "string" ||
       typeof meta?.packSha256 !== "string"
     ) {
+      return null;
+    }
+    if (meta.packSha256 !== undefined && typeof meta.packSha256 !== "string") {
+      return null;
+    }
+    if (meta.p5Sha256 !== undefined && typeof meta.p5Sha256 !== "string") {
+      return null;
+    }
+    if (meta.p5FileUri !== undefined && typeof meta.p5FileUri !== "string") {
       return null;
     }
     return meta;
@@ -76,14 +87,23 @@ export async function readCachedContent(): Promise<ContentPack | null> {
     if (!raw) return null;
     const pack = parseContentPack(raw);
     const meta = await readCachedMeta();
-    if (
-      meta &&
-      meta.contentVersion === pack.contentVersion &&
-      meta.p5Version === pack.p5.version
-    ) {
+    if (meta && meta.contentVersion === pack.contentVersion) {
       pack.packSha256 = meta.packSha256;
-    } else if (!pack.packSha256) {
+      pack.p5Sha256 = meta.p5Sha256;
+      if (meta.p5FileUri) pack.p5FileUri = meta.p5FileUri;
+      if (meta.p5Version) pack.p5Version = meta.p5Version;
+    }
+    if (!pack.p5Version && pack.p5?.version) {
+      pack.p5Version = pack.p5.version;
+    }
+    if (!pack.packSha256) {
       pack.packSha256 = "dev-local";
+    }
+    if (!pack.p5FileUri && P5_SCRIPT_FILE && !useWebStorage()) {
+      const p5Info = await FileSystem.getInfoAsync(P5_SCRIPT_FILE);
+      if (p5Info.exists && !p5Info.isDirectory) {
+        pack.p5FileUri = P5_SCRIPT_FILE;
+      }
     }
     return pack;
   } catch {
@@ -102,6 +122,9 @@ export async function writeCachedContent(
 ): Promise<ContentPack> {
   const pack = parseContentPack(raw);
   pack.packSha256 = meta.packSha256;
+  pack.p5Sha256 = meta.p5Sha256;
+  pack.p5Version = meta.p5Version;
+  pack.p5FileUri = meta.p5FileUri;
 
   if (useWebStorage()) {
     await AsyncStorage.setItem(WEB_PACK_KEY, raw);
@@ -126,5 +149,7 @@ export async function clearCachedContent(): Promise<void> {
 
   await FileSystem.deleteAsync(PACK_FILE!, { idempotent: true });
   await FileSystem.deleteAsync(TEMP_FILE!, { idempotent: true });
+  await FileSystem.deleteAsync(P5_SCRIPT_FILE!, { idempotent: true });
+  await FileSystem.deleteAsync(P5_TEMP_FILE!, { idempotent: true });
   await clearCachedMeta();
 }

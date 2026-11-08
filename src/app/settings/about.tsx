@@ -8,10 +8,10 @@ import { Typography } from "../../constants/Typography";
 import Header from "../../components/Header";
 import { useThemeContext } from "../../components/ThemeProvider";
 import { APP_VERSION } from "../../constants/Version";
-import { getP5Source } from "../../content/store";
+import { getP5InlineSource, getP5ScriptUri } from "../../content/store";
 import { getReferenceData } from "../../data/reference";
 import {
-  escapeScriptContent,
+  p5RuntimeScript,
   P5_COMPAT_POLYFILL,
 } from "../../utils/editor/p5Html";
 
@@ -33,7 +33,8 @@ const p5LogoPaths = [
 ];
 
 function buildProcessingHtml(): string {
- return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><style>*{margin:0;padding:0;box-sizing:border-box}html,body{width:100%;height:100%;overflow:hidden;background:transparent;display:flex;align-items:center;justify-content:center}canvas{display:block}</style></head><body>' + P5_COMPAT_POLYFILL + '<script>' + escapeScriptContent(getP5Source()) + '<\/script><script>new p5(function(p){p.setup=function(){p.createCanvas(250,250)};var t=0;p.draw=function(){p.clear();var u=p.width/8;p.strokeCap(p.SQUARE);p.strokeWeight(1.5*u);p.stroke(' + PROCESSING_LOGO_COLORS.blue + ');var off=p.sin(t)*u*0.3;p.bezier(4*u,1*u,7*u+off,1*u+off,7*u,5*u,4*u,5*u);p.stroke(' + PROCESSING_LOGO_COLORS.darkBlue + ');p.line(1*u,6*u,4*u,2*u);p.stroke(' + PROCESSING_LOGO_COLORS.lightBlue + ');p.line(1*u,3*u,2*u,5*u);t+=0.03}})<\/script></body></html>';
+  const p5Script = p5RuntimeScript({ scriptUri: getP5ScriptUri(), inlineSource: getP5InlineSource() });
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><style>*{margin:0;padding:0;box-sizing:border-box}html,body{width:100%;height:100%;overflow:hidden;background:transparent;display:flex;align-items:center;justify-content:center}canvas{display:block}</style></head><body>' + P5_COMPAT_POLYFILL + p5Script + '<script>new p5(function(p){p.setup=function(){p.createCanvas(250,250)};var t=0;p.draw=function(){p.clear();var u=p.width/8;p.strokeCap(p.SQUARE);p.strokeWeight(1.5*u);p.stroke(' + PROCESSING_LOGO_COLORS.blue + ');var off=p.sin(t)*u*0.3;p.bezier(4*u,1*u,7*u+off,1*u+off,7*u,5*u,4*u,5*u);p.stroke(' + PROCESSING_LOGO_COLORS.darkBlue + ');p.line(1*u,6*u,4*u,2*u);p.stroke(' + PROCESSING_LOGO_COLORS.lightBlue + ');p.line(1*u,3*u,2*u,5*u);t+=0.03}})<\/script></body></html>';
 }
 
 export default function About() {
@@ -85,6 +86,9 @@ export default function About() {
  source={{ html: sketchHtml }}
  style={styles.sketchBox}
  javaScriptEnabled
+ allowFileAccess
+ allowFileAccessFromFileURLs
+ allowUniversalAccessFromFileURLs
  scrollEnabled={false}
  bounces={false}
  pointerEvents="none"

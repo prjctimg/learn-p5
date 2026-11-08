@@ -1,12 +1,13 @@
 import { CODEMIRROR_BUNDLE } from "./codemirror-bundle.generated";
 import { VALIDATION_CORE } from "./validation-core.generated";
-import { getP5Source } from "../../content/store";
+import { getP5InlineSource, getP5ScriptUri } from "../../content/store";
 import { getP5FunctionNames } from "../../data/reference";
 import { Colors } from "../../constants/Colors";
 import { getEditorTheme, EditorThemeColors } from "./themes";
 import { ExerciseTask } from "../../data/types";
 import {
   escapeScriptContent,
+  p5RuntimeScript,
   P5_COMPAT_POLYFILL,
   P5_GLOBAL_FUNCTIONS,
   safeJson,
@@ -91,7 +92,7 @@ export function getExerciseHtml(params: {
   const instructionHtml = parseInstructionHtml(params.instruction);
   const tasksJson = safeJson(params.tasks ?? []);
   const activeTaskIdx = params.activeTaskIndex ?? 0;
-  const p5Source = escapeScriptContent(getP5Source());
+  const p5Script = p5RuntimeScript({ scriptUri: getP5ScriptUri(), inlineSource: getP5InlineSource() });
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -429,7 +430,7 @@ ${
 
 
 ${P5_COMPAT_POLYFILL}
-<script>${p5Source}</script>
+${p5Script}
 <script>${CODEMIRROR_BUNDLE}</script>
 <script>${VALIDATION_CORE}</script>
 <script>

@@ -38,6 +38,30 @@ export function safeJson(value: unknown): string {
   return escapeScriptContent(JSON.stringify(value));
 }
 
+export function escapeHtmlAttribute(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+/**
+ * Load p5 as its own script file instead of inlining the runtime string into
+ * every preview document. On older Android WebViews, shrinking the HTML
+ * payload and loading the runtime through the WebView's normal script loader
+ * avoids the resource failures seen with the old inline approach.
+ */
+export function p5RuntimeScript({ scriptUri, inlineSource }: { scriptUri?: string | null; inlineSource?: string | null }): string {
+  if (scriptUri) {
+    return `<script src="${escapeHtmlAttribute(scriptUri)}"></script>`;
+  }
+  if (typeof inlineSource === "string" && inlineSource.length > 0) {
+    return `<script>${escapeScriptContent(inlineSource)}</script>`;
+  }
+  return "";
+}
+
 /**
  * The p5 runtime in the content pack is transpiled to ES2015, but it still uses
  * a few browser APIs that are missing from older Android WebViews and iOS

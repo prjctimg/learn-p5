@@ -96,7 +96,7 @@ export default function ContentProvider({ children }: { children: ReactNode }) {
     <ContentContext.Provider
       value={{
         contentVersion: state.pack.contentVersion,
-        p5Version: state.pack.p5.version,
+        p5Version: state.pack.p5Version ?? state.pack.p5?.version ?? "",
         refreshing,
         updatedVersion: state.updatedVersion,
         dismissUpdate: () =>

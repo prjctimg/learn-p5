@@ -2,10 +2,11 @@ import * as FileSystem from "expo-file-system/legacy";
 import { Platform } from "react-native";
 import {
   CONTENT_MANIFEST_TIMEOUT_MS,
-  CONTENT_SCHEMA_VERSION,
+  SUPPORTED_CONTENT_SCHEMA_VERSIONS,
 } from "../constants/Content";
 import { CONTENT_MANIFEST_URL } from "../constants/Content";
-import { readCachedContent, writeCachedContent } from "./storage";
+import { parseContentPack, validateP5Source } from "./parse";
+import { CONTENT_DIR, P5_SCRIPT_FILE, P5_TEMP_FILE, readCachedContent, writeCachedContent } from "./storage";
 import { setContentPack } from "./store";
 import type { ContentManifest, ContentPack } from "./types";
 
@@ -20,12 +21,36 @@ function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "Unknown error";
 }
 
-function resolvePackUrl(packUrl: string): string {
-  if (/^https?:\/\//i.test(packUrl)) return packUrl;
+function resolveContentUrl(url: string): string {
+  if (/^https?:\/\//i.test(url)) return url;
   try {
-    return new URL(packUrl, CONTENT_MANIFEST_URL).toString();
+    return new URL(url, CONTENT_MANIFEST_URL).toString();
   } catch {
-    return `${CONTENT_MANIFEST_URL.replace(/[^/]*$/, "")}${packUrl}`;
+    return `${CONTENT_MANIFEST_URL.replace(/[^/]*$/, "")}${url}`;
+  }
+}
+
+function validateManifest(manifest: ContentManifest): void {
+  if (!SUPPORTED_CONTENT_SCHEMA_VERSIONS.includes(manifest?.schemaVersion as 1 | 2)) {
+    throw new Error("This app version cannot read the latest content.");
+  }
+  if (
+    typeof manifest.contentVersion !== "string" ||
+    typeof manifest.p5Version !== "string" ||
+    typeof manifest.packUrl !== "string" ||
+    typeof manifest.packSize !== "number" ||
+    typeof manifest.packSha256 !== "string"
+  ) {
+    throw new Error("The content manifest is incomplete.");
+  }
+  if (manifest.schemaVersion === 2) {
+    if (
+      typeof manifest.p5Url !== "string" ||
+      typeof manifest.p5Size !== "number" ||
+      typeof manifest.p5Sha256 !== "string"
+    ) {
+      throw new Error("The content manifest has no p5.js runtime.");
+    }
   }
 }
 
@@ -45,16 +70,7 @@ export async function fetchContentManifest(): Promise<ContentManifest> {
     }
 
     const manifest = (await response.json()) as ContentManifest;
-    if (manifest?.schemaVersion !== CONTENT_SCHEMA_VERSION) {
-      throw new Error("This app version cannot read the latest content.");
-    }
-    if (
-      typeof manifest.contentVersion !== "string" ||
-      typeof manifest.packUrl !== "string" ||
-      typeof manifest.packSize !== "number"
-    ) {
-      throw new Error("The content manifest is incomplete.");
-    }
+    validateManifest(manifest);
     return manifest;
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {
@@ -70,7 +86,7 @@ async function fetchPackText(
   manifest: ContentManifest,
   onProgress?: ContentProgress
 ): Promise<string> {
-  const packUrl = resolvePackUrl(manifest.packUrl);
+  const packUrl = resolveContentUrl(manifest.packUrl);
   const cacheDirectory = FileSystem.cacheDirectory;
   const useFileSystem = Platform.OS !== "web" && !!cacheDirectory;
 
@@ -116,16 +132,118 @@ async function fetchPackText(
   }
 }
 
-async function downloadPack(
+async function downloadP5Runtime(
+  manifest: ContentManifest,
+  onProgress?: ContentProgress
+): Promise<string> {
+  if (
+    typeof manifest.p5Url !== "string" ||
+    typeof manifest.p5Size !== "number" ||
+    typeof manifest.p5Sha256 !== "string"
+  ) {
+    throw new Error("The content manifest has no p5.js runtime.");
+  }
+
+  const p5Url = resolveContentUrl(manifest.p5Url);
+
+  if (Platform.OS === "web") {
+    const response = await fetch(p5Url);
+    if (!response.ok) {
+      throw new Error(`p5.js runtime download failed (${response.status}).`);
+    }
+    const source = await response.text();
+    validateP5Source(source, manifest.p5Version);
+    onProgress?.(1);
+    return p5Url;
+  }
+
+  if (!FileSystem.documentDirectory || !P5_SCRIPT_FILE || !P5_TEMP_FILE) {
+    throw new Error("p5.js runtime storage is unavailable.");
+  }
+
+  await FileSystem.makeDirectoryAsync(CONTENT_DIR!, { intermediates: true });
+  await FileSystem.deleteAsync(P5_TEMP_FILE, { idempotent: true });
+
+  try {
+    const download = FileSystem.createDownloadResumable(
+      p5Url,
+      P5_TEMP_FILE,
+      {},
+      ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
+        if (totalBytesExpectedToWrite > 0) {
+          onProgress?.(totalBytesWritten / totalBytesExpectedToWrite);
+        }
+      }
+    );
+    const result = await download.downloadAsync();
+    if (!result) throw new Error("p5.js runtime download was interrupted.");
+
+    const info = await FileSystem.getInfoAsync(result.uri);
+    if (!info.exists || info.isDirectory) {
+      throw new Error("p5.js runtime download did not produce a file.");
+    }
+    if (manifest.p5Size > 0 && info.size !== manifest.p5Size) {
+      throw new Error("p5.js runtime download was incomplete.");
+    }
+
+    const source = await FileSystem.readAsStringAsync(result.uri);
+    validateP5Source(source, manifest.p5Version);
+
+    await FileSystem.deleteAsync(P5_SCRIPT_FILE, { idempotent: true });
+    await FileSystem.moveAsync({ from: P5_TEMP_FILE, to: P5_SCRIPT_FILE });
+    return P5_SCRIPT_FILE;
+  } finally {
+    await FileSystem.deleteAsync(P5_TEMP_FILE, { idempotent: true });
+  }
+}
+
+function isCachedContentCurrent(
+  cached: ContentPack | null,
+  manifest: ContentManifest
+): cached is ContentPack {
+  return Boolean(
+    cached &&
+      cached.contentVersion === manifest.contentVersion &&
+      cached.p5FileUri &&
+      (!manifest.packSha256 || cached.packSha256 === manifest.packSha256) &&
+      (!manifest.p5Sha256 || cached.p5Sha256 === manifest.p5Sha256)
+  );
+}
+
+function hasUsableCachedContent(cached: ContentPack | null): cached is ContentPack {
+  return Boolean(
+    cached &&
+      (cached.p5FileUri ||
+        // Legacy schema 1 caches keep the runtime inline and remain usable
+        // offline while the separate download is prepared.
+        (cached.schemaVersion === 1 && typeof cached.p5?.source === "string"))
+  );
+}
+
+async function downloadAndCommitContent(
   manifest: ContentManifest,
   onProgress?: ContentProgress
 ): Promise<ContentPack> {
-  const raw = await fetchPackText(manifest, onProgress);
-  return writeCachedContent(raw, {
+  // Fetch and validate both downloads before writing either, so a failure
+  // leaves the previously working cache untouched.
+  const rawPack = await fetchPackText(manifest, (fraction) =>
+    onProgress?.(fraction * 0.5)
+  );
+  parseContentPack(rawPack);
+  const p5FileUri = await downloadP5Runtime(manifest, (fraction) =>
+    onProgress?.(0.5 + fraction * 0.5)
+  );
+  const pack = await writeCachedContent(rawPack, {
     contentVersion: manifest.contentVersion,
     p5Version: manifest.p5Version,
     packSha256: manifest.packSha256 ?? "",
+    p5Sha256: manifest.p5Sha256 ?? "",
+    p5FileUri,
   });
+  pack.p5FileUri = p5FileUri;
+  pack.p5Sha256 = manifest.p5Sha256;
+  pack.p5Version = manifest.p5Version;
+  return pack;
 }
 
 export async function bootstrapContent(
@@ -137,29 +255,24 @@ export async function bootstrapContent(
   try {
     manifest = await fetchContentManifest();
   } catch (error) {
-    if (cached) {
+    if (hasUsableCachedContent(cached)) {
       setContentPack(cached);
       return { pack: cached, updated: false };
     }
     throw error;
   }
 
-  if (
-    cached &&
-    cached.contentVersion === manifest.contentVersion &&
-    cached.p5.version === manifest.p5Version &&
-    (!manifest.packSha256 || cached.packSha256 === manifest.packSha256)
-  ) {
+  if (isCachedContentCurrent(cached, manifest)) {
     setContentPack(cached);
     return { pack: cached, updated: false };
   }
 
   try {
-    const pack = await downloadPack(manifest, onProgress);
+    const pack = await downloadAndCommitContent(manifest, onProgress);
     setContentPack(pack);
     return { pack, updated: !!cached };
   } catch (error) {
-    if (cached) {
+    if (hasUsableCachedContent(cached)) {
       setContentPack(cached);
       return { pack: cached, updated: false };
     }
@@ -172,15 +285,11 @@ export async function checkForContentUpdate(
   onProgress?: ContentProgress
 ): Promise<ContentPack | null> {
   const manifest = await fetchContentManifest();
-  if (
-    manifest.contentVersion === current.contentVersion &&
-    manifest.p5Version === current.p5.version &&
-    (!manifest.packSha256 || current.packSha256 === manifest.packSha256)
-  ) {
+  if (isCachedContentCurrent(current, manifest)) {
     return null;
   }
 
-  const pack = await downloadPack(manifest, onProgress);
+  const pack = await downloadAndCommitContent(manifest, onProgress);
   setContentPack(pack);
   return pack;
 }

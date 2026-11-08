@@ -838,6 +838,9 @@ return (
    javaScriptEnabled
    domStorageEnabled
    originWhitelist={["*"]}
+   allowFileAccess
+   allowFileAccessFromFileURLs
+   allowUniversalAccessFromFileURLs
    bounces={false}
    {...({
      hideKeyboardAccessoryView: true,
@@ -860,6 +863,9 @@ return (
         javaScriptEnabled
         domStorageEnabled
         originWhitelist={["*"]}
+        allowFileAccess
+        allowFileAccessFromFileURLs
+        allowUniversalAccessFromFileURLs
         scrollEnabled={false}
         bounces={false}
       />

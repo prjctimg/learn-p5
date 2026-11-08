@@ -1,6 +1,6 @@
-import { getP5Source } from "../../content/store";
+import { getP5InlineSource, getP5ScriptUri } from "../../content/store";
 import {
-  escapeScriptContent,
+  p5RuntimeScript,
   P5_COMPAT_POLYFILL,
   P5_GLOBAL_FUNCTIONS,
   safeJson,
@@ -24,7 +24,7 @@ export function getFullscreenPreviewHtml(code: string, colorScheme?: "light" | "
   const isDark = colorScheme === "dark";
   const bodyBg = isDark ? "#000000" : "#111111";
   const sketch = wrapSketch(stripDescribe(code ?? ""));
-  const p5Source = escapeScriptContent(getP5Source());
+  const p5Script = p5RuntimeScript({ scriptUri: getP5ScriptUri(), inlineSource: getP5InlineSource() });
   const userCode = safeJson(sketch);
   const globalFunctions = JSON.stringify(P5_GLOBAL_FUNCTIONS);
 
@@ -62,7 +62,7 @@ export function getFullscreenPreviewHtml(code: string, colorScheme?: "light" | "
 <body>
 <div id="sketch"></div>
 ${P5_COMPAT_POLYFILL}
-<script>${p5Source}</script>
+${p5Script}
 <script>
 (function() {
   var P5 = window.p5;

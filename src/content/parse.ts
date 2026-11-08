@@ -1,11 +1,14 @@
-import { CONTENT_SCHEMA_VERSION } from "../constants/Content";
+import {
+  SUPPORTED_CONTENT_SCHEMA_VERSIONS,
+} from "../constants/Content";
 import type { ContentPack } from "./types";
 
-// The content pack carries the full p5.js runtime so exercises can run without
-// a network connection. A pack with a missing or truncated runtime is worse
-// than no pack at all: it renders a broken editor and makes `new p5()` fail
-// with an opaque "p5 is not a constructor" error. Keep this check deliberately
-// strict so a bad cache is rejected and can be downloaded again.
+// Schema 1 packs carry the full p5.js runtime as a string so exercises can
+// run without a network connection. A pack with a missing or truncated
+// runtime is worse than no pack at all: it renders a broken editor and makes
+// `new p5()` fail with an opaque "p5 is not a constructor" error. Keep this
+// check deliberately strict so a bad cache is rejected and can be downloaded
+// again.
 const MIN_P5_SOURCE_LENGTH = 100_000;
 // The content pack must carry the ES2015-transpiled runtime and its ES5 shim.
 // This marker prevents an old, ES2022-only pack from being cached or run on
@@ -16,13 +19,11 @@ const P5_RUNTIME_COMPAT_MARKER = "learn-p5-runtime-compat:start";
 // Unicode property escapes, because older WebViews fail while parsing them.
 const P5_UNSUPPORTED_REGEX_SYNTAX = /\(\?<[A-Za-z]|\\[pP]\{|\\k</;
 
-function validateP5Source(pack: ContentPack): void {
-  const p5 = pack.p5;
-  if (!p5 || typeof p5.version !== "string" || typeof p5.source !== "string") {
+export function validateP5Source(source: string, version: string): void {
+  if (typeof source !== "string" || typeof version !== "string") {
     throw new Error("The downloaded content pack is incomplete.");
   }
 
-  const source = p5.source;
   if (source.length < MIN_P5_SOURCE_LENGTH) {
     throw new Error("The downloaded content pack contains an incomplete p5.js runtime.");
   }
@@ -31,7 +32,7 @@ function validateP5Source(pack: ContentPack): void {
   if (!header) {
     throw new Error("The downloaded content pack contains an invalid p5.js runtime.");
   }
-  if (header[1] !== p5.version) {
+  if (header[1] !== version) {
     throw new Error("The downloaded content pack has a mismatched p5.js version.");
   }
 
@@ -48,22 +49,34 @@ function validateP5Source(pack: ContentPack): void {
   }
 }
 
+function validateInlineP5Source(pack: ContentPack): void {
+  const p5 = pack.p5;
+  if (!p5 || typeof p5.version !== "string" || typeof p5.source !== "string") {
+    throw new Error("The downloaded content pack is incomplete.");
+  }
+
+  validateP5Source(p5.source, p5.version);
+}
+
 export function parseContentPack(raw: string): ContentPack {
   const pack = JSON.parse(raw) as ContentPack;
 
-  if (!pack || pack.schemaVersion !== CONTENT_SCHEMA_VERSION) {
+  if (!pack || !SUPPORTED_CONTENT_SCHEMA_VERSIONS.includes(pack.schemaVersion as 1 | 2)) {
     throw new Error("This content pack needs a newer app version.");
   }
   if (
     typeof pack.contentVersion !== "string" ||
     !Array.isArray(pack.courses) ||
     !pack.reference?.byName ||
-    !Array.isArray(pack.reference.functionNames) ||
-    typeof pack.p5?.source !== "string"
+    !Array.isArray(pack.reference.functionNames)
   ) {
     throw new Error("The downloaded content pack is incomplete.");
   }
 
-  validateP5Source(pack);
+  // Schema 1 packs carry the runtime inline. Schema 2+ packs ship it as a
+  // separate p5.min.js download that gets cached and loaded by file.
+  if (pack.schemaVersion === 1) {
+    validateInlineP5Source(pack);
+  }
   return pack;
 }

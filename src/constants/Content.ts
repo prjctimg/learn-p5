@@ -4,5 +4,6 @@
 export const CONTENT_MANIFEST_URL =
   "https://github.com/prjctimg/learn-p5-content/releases/download/content-latest/manifest.json";
 
-export const CONTENT_SCHEMA_VERSION = 1;
+export const CONTENT_SCHEMA_VERSION = 2;
+export const SUPPORTED_CONTENT_SCHEMA_VERSIONS = [1, 2] as const;
 export const CONTENT_MANIFEST_TIMEOUT_MS = 10_000;

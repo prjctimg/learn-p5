@@ -1,8 +1,9 @@
-import { getP5Source } from "../../content/store";
+import { getP5InlineSource, getP5ScriptUri } from "../../content/store";
 import { getP5Assets } from "../../content/store";
 import { Colors } from "../../constants/Colors";
 import {
   escapeScriptContent,
+  p5RuntimeScript,
   P5_COMPAT_POLYFILL,
 } from "./p5Html";
 import {
@@ -43,7 +44,7 @@ export function getExampleHtml(code: string, colorScheme?: "light" | "dark"): st
     );
   }
 
-  const p5Source = escapeScriptContent(getP5Source());
+  const p5Script = p5RuntimeScript({ scriptUri: getP5ScriptUri(), inlineSource: getP5InlineSource() });
   const safeSketch = escapeScriptContent(sketch);
 
   return `
@@ -72,7 +73,7 @@ canvas { display: block; max-width: 100%; height: auto; }
 </head>
 <body>
 ${P5_COMPAT_POLYFILL}
-<script>${p5Source}<\/script>
+${p5Script}
 <script>${safeSketch}<\/script>
 </body>
 </html>`;

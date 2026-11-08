@@ -28,7 +28,12 @@ export interface ContentPack {
   schemaVersion: number;
   contentVersion: string;
   generatedAt: string;
-  p5: { version: string; source: string };
+  /**
+   * Inline runtime source in packs with schema 1. Newer packs ship the
+   * runtime as the separate `p5.min.js` artifact instead and only carry
+   * this object as optional metadata (if at all).
+   */
+  p5?: { version: string; source: string };
   p5Assets: Record<string, string>;
   courses: Course[];
   reference: ContentReference;
@@ -38,12 +43,21 @@ export interface ContentPack {
    * re-uploaded pack reuses the same contentVersion.
    */
   packSha256?: string;
+  /**
+   * Runtime-only fields describing the separately downloaded p5 file.
+   * `p5FileUri` is never persisted in the pack JSON.
+   */
+  p5FileUri?: string;
+  p5Sha256?: string;
+  p5Version?: string;
 }
 
 export interface ContentCacheMeta {
   contentVersion: string;
   p5Version: string;
   packSha256: string;
+  p5Sha256?: string;
+  p5FileUri?: string;
 }
 
 export interface ContentManifest {
@@ -51,6 +65,9 @@ export interface ContentManifest {
   contentVersion: string;
   generatedAt: string;
   p5Version: string;
+  p5Url?: string;
+  p5Size?: number;
+  p5Sha256?: string;
   packUrl: string;
   packSize: number;
   packSha256: string;
