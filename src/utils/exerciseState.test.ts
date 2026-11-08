@@ -3,6 +3,7 @@ import {
   exerciseReducer,
   getExerciseCodeKey,
   initialExerciseState,
+  resolveNextTaskCode,
   ExerciseState,
 } from "./exerciseState";
 import { Exercise } from "../data/types";
@@ -170,6 +171,18 @@ describe("exerciseReducer", () => {
   it("stops the spinner when a task validates", () => {
     const running = exerciseReducer(loaded(makeExercise()), { type: "RUN_START" });
     expect(exerciseReducer(running, { type: "TASK_COMPLETE", taskIndex: 0 }).isRunning).toBe(false);
+  });
+
+  it("resolveNextTaskCode keeps the learner code when the task defines no startingCode", () => {
+    expect(resolveNextTaskCode(undefined, "circle(1,2,3);")).toBe("circle(1,2,3);");
+  });
+
+  it("resolveNextTaskCode prefers the task startingCode when one is defined", () => {
+    expect(resolveNextTaskCode("// seed\n", "circle(1,2,3);")).toBe("// seed\n");
+  });
+
+  it("resolveNextTaskCode treats an empty-string seed as defined", () => {
+    expect(resolveNextTaskCode("", "circle(1,2,3);")).toBe("");
   });
 
   it("handles a missing exercise without throwing", () => {

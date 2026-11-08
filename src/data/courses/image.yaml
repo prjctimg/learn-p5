@@ -223,6 +223,18 @@ exercises:
           - type: functionCall
             name: filter
             exactArgs: 1
+        startingCode: |
+          function setup() {
+            createCanvas(400, 400);
+          }
+
+          function draw() {
+            background(240);
+            fill(255, 0, 0);
+            noStroke();
+            circle(200, 200, 200);
+            filter(GRAY);
+          }
 
   - id: exercise-4
     title: "Pixel Peek"

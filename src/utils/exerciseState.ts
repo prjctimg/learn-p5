@@ -20,6 +20,21 @@ export function getExerciseCodeKey(courseSlug: string, exerciseId: string): stri
   return `${CODE_KEY_PREFIX}:${courseSlug}/${exerciseId}`;
 }
 
+/**
+ * Resolve which code the editor should show for a task on entry.
+ *
+ * A task that defines its own `startingCode` opens fresh with that seed
+ * (canonical reset, discarding the learner's edits). A task without one
+ * carries the learner's current code forward, so sub-tasks build on each
+ * other. Pure helper so the rule is unit-testable and shared by callers.
+ */
+export function resolveNextTaskCode(
+  taskStartingCode: string | undefined,
+  currentCode: string
+): string {
+  return taskStartingCode ?? currentCode;
+}
+
 export interface ExerciseState {
   /** The loaded exercise, or null while loading / after a load failure. */
   exercise: Exercise | null;

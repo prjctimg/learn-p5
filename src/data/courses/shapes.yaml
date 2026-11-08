@@ -145,6 +145,16 @@ exercises:
             y: 200
             expected: [100, 200, 255]
             tolerance: 120
+        startingCode: |
+          function setup() {
+            createCanvas(400, 400);
+          }
+
+          function draw() {
+            background(30);
+            fill(100, 200, 255);
+            rect(100, 100, 200, 200);
+          }
 
   - id: exercise-3
     title: "Elliptical Motion"

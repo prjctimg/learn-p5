@@ -20,7 +20,7 @@ import SearchOverlay from "../../../components/SearchOverlay";
 import TaskCompletePulse from "../../../components/TaskCompletePulse";
 import NextExerciseOverlay from "../../../components/NextExerciseOverlay";
 import { loadExercise, loadCourse } from "../../../utils/courseLoader";
-import { getExerciseCodeKey, exerciseReducer } from "../../../utils/exerciseState";
+import { getExerciseCodeKey, exerciseReducer, resolveNextTaskCode } from "../../../utils/exerciseState";
 import { getP5FunctionNames, ONCE_ONLY_P5_FUNCTIONS } from "../../../data/reference";
 import { getExerciseHtml } from "../../../utils/editor/exerciseHtml";
 import { getFullscreenPreviewHtml } from "../../../utils/editor/fullscreenPreviewHtml";
@@ -29,6 +29,24 @@ import { useStreak } from "../../../hooks/useStreak";
 import { recordCompletion, ACHIEVEMENTS } from "../../../hooks/useAchievements";
 
 import { useShakeDetection } from "../../../hooks/useShakeDetection";
+
+/** Advance to the next exercise in the course, or back to the course list. */
+function advanceToNextExercise(
+  course: string,
+  id: string,
+  router: ReturnType<typeof useRouter>
+) {
+  loadCourse(course).then((courseData) => {
+    if (!courseData) return;
+    const currentIndex = courseData.exercises.findIndex((l) => l.id === id);
+    if (currentIndex >= 0 && currentIndex < courseData.exercises.length - 1) {
+      const nextExercise = courseData.exercises[currentIndex + 1];
+      router.replace(`/learn/${course}/${nextExercise.id}`);
+    } else {
+      router.replace(`/learn/${course}`);
+    }
+  });
+}
 
 export default function Exercise() {
  const { course, id } = useLocalSearchParams<{ course: string; id: string }>();
@@ -412,16 +430,7 @@ case "editorTapped":
      });
      break;
     case "goToNextExercise":
-    loadCourse(course).then((courseData) => {
-   if (!courseData) return;
-   const currentIndex = courseData.exercises.findIndex((l) => l.id === id);
-   if (currentIndex >= 0 && currentIndex < courseData.exercises.length - 1) {
-   const nextExercise = courseData.exercises[currentIndex + 1];
-   router.replace(`/learn/${course}/${nextExercise.id}`);
-   } else {
-   router.replace(`/learn/${course}`);
-   }
-   });
+    advanceToNextExercise(course, id, router);
   break;
  }
  } catch {}
@@ -551,12 +560,12 @@ case "editorTapped":
           .replace(/&/g, "&amp;")
           .replace(/</g, "&lt;")
           .replace(/>/g, "&gt;");
-        // Always reset the codeblock with the next task's starter code instead
-        // of persisting the previous task's editor contents across the
-        // transition. Per-task starter wins if defined; otherwise fall back to
-        // the exercise-level startingCode. Dispatch SET_CODE so React's state
-        // mirrors the editor and the draft-save effect persists the new starter.
-        const nextCode = task.startingCode ?? state.startingCode;
+        // Task transitions preserve the learner's code so sub-tasks can
+        // build on each other. Only a task that defines its own startingCode
+        // replaces the editor contents with that seed; otherwise the current
+        // editor code is carried forward. Dispatching SET_CODE keeps React's
+        // state (and the draft-save effect) in sync when a seed applies.
+        const nextCode = resolveNextTaskCode(task.startingCode, state.code);
         if (nextCode != null && nextCode !== state.code) {
           dispatch({ type: "SET_CODE", code: nextCode });
         }
@@ -621,16 +630,7 @@ case "editorTapped":
  const handleToastNext = useCallback(() => {
   setToastVisible(false);
   if (!state.exercise) return;
-  loadCourse(course).then((courseData) => {
-  if (!courseData) return;
-  const currentIndex = courseData.exercises.findIndex((l) => l.id === id);
-  if (currentIndex >= 0 && currentIndex < courseData.exercises.length - 1) {
-  const nextExercise = courseData.exercises[currentIndex + 1];
-  router.replace(`/learn/${course}/${nextExercise.id}`);
-  } else {
-  router.replace(`/learn/${course}`);
-  }
-  });
+  advanceToNextExercise(course, id, router);
   }, [state.exercise, course, id, router]);
 
   useEffect(() => {

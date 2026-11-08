@@ -24,6 +24,21 @@ async function loadLocalDevPack(): Promise<ContentPack | null> {
   }
 }
 
+/** Cache and activate the bundled dev/fallback pack, if present. */
+async function applyLocalDevFallback(): Promise<ContentPack | null> {
+  const localPack = await loadLocalDevPack();
+  if (!localPack) return null;
+  try {
+    await writeCachedContent(JSON.stringify(localPack), {
+      contentVersion: localPack.contentVersion,
+      p5Version: localPack.p5.version,
+      packSha256: localPack.packSha256 || "dev-local",
+    });
+  } catch {}
+  setContentPack(localPack);
+  return localPack;
+}
+
 export type ContentProgress = (fraction: number) => void;
 
 export interface BootstrapResult {
@@ -157,16 +172,8 @@ export async function bootstrapContent(
       return { pack: cached, updated: false };
     }
     // Try local dev pack as fallback
-    const localPack = await loadLocalDevPack();
+    const localPack = await applyLocalDevFallback();
     if (localPack) {
-      try {
-        await writeCachedContent(JSON.stringify(localPack), {
-          contentVersion: localPack.contentVersion,
-          p5Version: localPack.p5.version,
-          packSha256: localPack.packSha256 || "dev-local",
-        });
-      } catch {}
-      setContentPack(localPack);
       return { pack: localPack, updated: false };
     }
     throw error;
@@ -192,16 +199,8 @@ export async function bootstrapContent(
       return { pack: cached, updated: false };
     }
     // Try local dev pack as fallback
-    const localPack = await loadLocalDevPack();
+    const localPack = await applyLocalDevFallback();
     if (localPack) {
-      try {
-        await writeCachedContent(JSON.stringify(localPack), {
-          contentVersion: localPack.contentVersion,
-          p5Version: localPack.p5.version,
-          packSha256: localPack.packSha256 || "dev-local",
-        });
-      } catch {}
-      setContentPack(localPack);
       return { pack: localPack, updated: false };
     }
     throw error;

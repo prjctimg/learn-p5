@@ -162,6 +162,18 @@ exercises:
             y: 200
             expected: [50, 150, 255]
             tolerance: 120
+        startingCode: |
+          function setup() {
+            createCanvas(400, 400);
+          }
+
+          function draw() {
+            background(255);
+            noFill();
+            stroke(0);
+            strokeWeight(3);
+            circle(130, 200, 120);
+          }
   - id: exercise-4
     title: "Color Mode Explorer"
     module: Color

@@ -886,10 +886,11 @@ function handleMessage(data) {
         break;
       case 'setActiveTask':
         ACTIVE_TASK_INDEX = typeof msg.taskIndex === 'number' ? msg.taskIndex : 0;
-        // Replace the editor document with the next task's starter code so the
-        // codeblock resets across task transitions (rather than persisting the
-        // previous task's editor contents). Done inside the fade-out handler
-        // so the swap lands during the opacity dip (no visible flash).
+        // The native side resolves the transition code: a task that defines
+        // its own startingCode replaces the document with that seed; otherwise
+        // the learner's code is carried forward unchanged. Done inside the
+        // fade-out handler so the swap lands during the opacity dip (no
+        // visible flash).
         var applyTaskCode = function() {
           if (msg.code != null && view && msg.code !== view.state.doc.toString()) {
             view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: msg.code } });
