@@ -33,6 +33,7 @@ coverage
 src/utils/editor/validation-core.generated.ts
 src/utils/editor/codemirror-bundle.generated.ts
 src/utils/editor/p5-runtime.generated.ts
+src/utils/editor/polyfill.generated.ts
 
 # Agent local state
 .opencode/

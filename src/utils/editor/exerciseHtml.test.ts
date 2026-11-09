@@ -1,6 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
 import { getExerciseHtml } from "./exerciseHtml";
 import { P5_RUNTIME_SOURCE, P5_RUNTIME_VERSION } from "./p5-runtime.generated";
+import { CORE_JS_BUNDLE } from "./polyfill.generated";
 
 const baseParams = {
   title: "Test",
@@ -28,9 +29,9 @@ describe("getExerciseHtml", () => {
     expect(html).not.toContain('<script src="file://');
     expect(html).not.toContain("case 'p5Runtime':");
     expect(html).not.toContain("p5RuntimeReady");
-    // The ES5 polyfill runs before the runtime so older WebViews can parse it.
-    expect(html.indexOf("learn-p5-runtime-compat")).toBeGreaterThan(-1);
-    expect(html.indexOf("learn-p5-runtime-compat")).toBeLessThan(
+    // The core-js polyfill runs before the runtime so built-ins are available.
+    expect(html.indexOf(CORE_JS_BUNDLE.slice(0, 100))).toBeGreaterThan(-1);
+    expect(html.indexOf(CORE_JS_BUNDLE.slice(0, 100))).toBeLessThan(
       html.indexOf(P5_RUNTIME_SOURCE.slice(0, 200))
     );
   });

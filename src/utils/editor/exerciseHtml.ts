@@ -7,7 +7,7 @@ import { getEditorTheme, EditorThemeColors } from "./themes";
 import { ExerciseTask } from "../../data/types";
 import {
   p5RuntimeScript,
-  P5_COMPAT_POLYFILL,
+  polyfillScript,
   P5_GLOBAL_FUNCTIONS,
   safeJson,
 } from "./p5Html";
@@ -92,6 +92,7 @@ export function getExerciseHtml(params: {
   const tasksJson = safeJson(params.tasks ?? []);
   const activeTaskIdx = params.activeTaskIndex ?? 0;
   const p5Script = p5RuntimeScript({ inlineSource: P5_RUNTIME_SOURCE });
+  const polyfill = polyfillScript();
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -428,7 +429,7 @@ ${
 </div>
 
 
-${P5_COMPAT_POLYFILL}
+${polyfill}
 ${p5Script}
 <script>${CODEMIRROR_BUNDLE}</script>
 <script>${VALIDATION_CORE}</script>

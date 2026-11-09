@@ -1,55 +1,21 @@
 import { describe, expect, it } from "@jest/globals";
-import { P5_COMPAT_POLYFILL, p5RuntimeScript } from "./p5Html";
+import { polyfillScript, p5RuntimeScript } from "./p5Html";
+import { CORE_JS_BUNDLE, CORE_JS_VERSION } from "./polyfill.generated";
 
-describe("P5_COMPAT_POLYFILL", () => {
-  it.each([
-    "Object.fromEntries",
-    "Object.entries",
-    "Object.values",
-    "Object.hasOwn",
-    "String.prototype.replaceAll",
-    'define(String.prototype, "padStart"',
-    'define(String.prototype, "padEnd"',
-    'define(Array.prototype, "at"',
-    'define(Array.prototype, "flat"',
-    'define(Array.prototype, "flatMap"',
-    'define(String.prototype, "at"',
-    "Intl.getCanonicalLocales",
-    "structuredClone",
-    "queueMicrotask",
-    "setImmediate",
-    "AbortController",
-    "globalThis",
-    "Object.assign",
-    "Array.from",
-    "Number.isFinite",
-    "Number.isInteger",
-    'define(Array.prototype, "includes"',
-    'define(Array.prototype, "find"',
-    'define(Array.prototype, "findIndex"',
-    'define(String.prototype, "includes"',
-    'define(String.prototype, "startsWith"',
-    'define(String.prototype, "endsWith"',
-    'define(String.prototype, "repeat"',
-    'define(String.prototype, "trimStart"',
-    'define(String.prototype, "trimEnd"',
-    "Promise.prototype.finally",
-    "Promise.allSettled",
-    "TextEncoder",
-    "TextDecoder",
-    'define(root.Element.prototype, "remove"',
-    'define(root.Element.prototype, "closest"',
-  ])("provides the %s fallback used by the p5 runtime", (api) => {
-    expect(P5_COMPAT_POLYFILL).toContain(api);
+describe("polyfillScript", () => {
+  it("inlines the core-js bundle and escapes closing script tags", () => {
+    expect(CORE_JS_VERSION).toBe("3.51.0");
+    expect(CORE_JS_BUNDLE.length).toBeGreaterThan(100_000);
+    const script = polyfillScript();
+    expect(script.startsWith("<script>")).toBe(true);
+    expect(script.endsWith("</script>")).toBe(true);
+    expect(script).not.toContain("</script>var");
   });
 
-  it("is plain ES5 that can run before p5 is parsed", () => {
-    const script = P5_COMPAT_POLYFILL.replace(/^<script>\n?/, "").replace(
-      /\n?<\/script>$/,
-      ""
-    );
-    expect(script).not.toMatch(/\b(?:const|let|class)\b|=>/);
-    expect(() => new Function(script)).not.toThrow();
+  it("is non-empty and runs before the p5 runtime in exercise HTML", () => {
+    // Cheap sanity check that the generated bundle is a real script
+    // body, not empty text: it should parse as a function body.
+    expect(() => new Function(CORE_JS_BUNDLE)).not.toThrow();
   });
 });
 

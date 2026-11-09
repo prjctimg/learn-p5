@@ -1,7 +1,7 @@
 import { P5_RUNTIME_SOURCE } from "./p5-runtime.generated";
 import {
   p5RuntimeScript,
-  P5_COMPAT_POLYFILL,
+  polyfillScript,
   P5_GLOBAL_FUNCTIONS,
   safeJson,
 } from "./p5Html";
@@ -28,6 +28,7 @@ export function getFullscreenPreviewHtml(
   const bodyBg = isDark ? "#000000" : "#111111";
   const sketch = wrapSketch(stripDescribe(code ?? ""));
   const p5Script = p5RuntimeScript({ inlineSource: P5_RUNTIME_SOURCE });
+  const polyfill = polyfillScript();
   const userCode = safeJson(sketch);
   const globalFunctions = JSON.stringify(P5_GLOBAL_FUNCTIONS);
 
@@ -64,7 +65,7 @@ export function getFullscreenPreviewHtml(
 </head>
 <body>
 <div id="sketch"></div>
-${P5_COMPAT_POLYFILL}
+${polyfill}
 ${p5Script}
 <script>
 (function() {

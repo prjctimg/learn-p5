@@ -1,6 +1,7 @@
 import { describe, it, expect } from "@jest/globals";
 import { getExampleHtml } from "./exampleHtml";
 import { P5_RUNTIME_SOURCE } from "./p5-runtime.generated";
+import { CORE_JS_BUNDLE } from "./polyfill.generated";
 
 describe("getExampleHtml", () => {
   it("embeds the sketch between the script tags", () => {
@@ -42,6 +43,10 @@ describe("getExampleHtml", () => {
     const html = getExampleHtml("fill(0);");
     expect(html).toContain('<meta charset="utf-8">');
     expect(html).toContain(P5_RUNTIME_SOURCE.slice(0, 200));
+    expect(html).toContain(CORE_JS_BUNDLE.slice(0, 100));
+    expect(html.indexOf(CORE_JS_BUNDLE.slice(0, 100))).toBeLessThan(
+      html.indexOf(P5_RUNTIME_SOURCE.slice(0, 200))
+    );
     expect(html).not.toContain('<script src="file://');
   });
 });

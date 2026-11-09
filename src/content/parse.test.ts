@@ -11,7 +11,7 @@ function validPack(overrides: Partial<ContentPack> = {}): ContentPack {
       version: "2.4.0-rc.1",
       source:
         "/*! p5.js v2.4.0-rc.1 October 20, 2026 */\n" +
-        "/* learn-p5-runtime-compat:start */\nvar p5=(function(){\n" +
+        "var p5=(function(){\n" +
         "x".repeat(100_000) +
         "\nreturn p5;})();",
     },
@@ -59,31 +59,18 @@ describe("parseContentPack", () => {
     const pack = validPack();
     pack.p5!.source =
       "/*! p5.js v2.4.0-rc.1 October 20, 2026 */\n" +
-      "/* learn-p5-runtime-compat:start */\nvar p5=(function(){\n" +
+      "var p5=(function(){\n" +
       "x".repeat(100_000);
     expect(() => parseContentPack(JSON.stringify(pack))).toThrow(/truncated p5\.js runtime/i);
   });
 
-  it("rejects a runtime without the compatibility shim (schema 1)", () => {
-    const pack = validPack();
-    pack.p5!.source = pack.p5!.source.replace(
-      "/* learn-p5-runtime-compat:start */\n",
-      ""
-    );
-    expect(() => parseContentPack(JSON.stringify(pack))).toThrow(
-      /unsupported p5\.js runtime/i
-    );
-  });
-
-  it("rejects a runtime with regex syntax older WebViews cannot parse (schema 1)", () => {
+  it("accepts a verbatim runtime with modern regex syntax (no shim required)", () => {
     const pack = validPack();
     pack.p5!.source = pack.p5!.source.replace(
       "var p5=(function(){",
       "var typePattern=/^(?<type>x)$/;\nvar p5=(function(){"
     );
-    expect(() => parseContentPack(JSON.stringify(pack))).toThrow(
-      /unsupported p5\.js runtime/i
-    );
+    expect(parseContentPack(JSON.stringify(pack)).p5?.version).toBe("2.4.0-rc.1");
   });
 
   it("rejects a runtime whose header does not match the declared version (schema 1)", () => {

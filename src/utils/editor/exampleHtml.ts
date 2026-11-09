@@ -4,7 +4,7 @@ import { Colors } from "../../constants/Colors";
 import {
   escapeScriptContent,
   p5RuntimeScript,
-  P5_COMPAT_POLYFILL,
+  polyfillScript,
 } from "./p5Html";
 import {
   JETBRAINS_MONO_REGULAR_BASE64,
@@ -45,6 +45,7 @@ export function getExampleHtml(code: string, colorScheme?: "light" | "dark"): st
   }
 
   const p5Script = p5RuntimeScript({ inlineSource: P5_RUNTIME_SOURCE });
+  const polyfill = polyfillScript();
   const safeSketch = escapeScriptContent(sketch);
 
   return `
@@ -72,7 +73,7 @@ canvas { display: block; max-width: 100%; height: auto; }
 </style>
 </head>
 <body>
-${P5_COMPAT_POLYFILL}
+${polyfill}
 ${p5Script}
 <script>${safeSketch}<\/script>
 </body>
