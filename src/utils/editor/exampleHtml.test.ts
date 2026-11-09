@@ -1,6 +1,6 @@
 import { describe, it, expect } from "@jest/globals";
-import { getContentPack, setContentPack } from "../../content/store";
 import { getExampleHtml } from "./exampleHtml";
+import { P5_RUNTIME_SOURCE } from "./p5-runtime.generated";
 
 describe("getExampleHtml", () => {
   it("embeds the sketch between the script tags", () => {
@@ -38,38 +38,10 @@ describe("getExampleHtml", () => {
     expect(html).not.toContain("__P5_ASSET__");
   });
 
-  it("declares UTF-8 and escapes closing script tags in embedded source", () => {
-    const pack = getContentPack();
-    expect(pack).not.toBeNull();
-    try {
-      setContentPack({
-        ...pack!,
-        p5: {
-          version: "2.4.0-rc.1",
-          source: "/*! p5.js v2.4.0-rc.1 */\nvar p5=function(){};\n</script>",
-        },
-      });
-      const html = getExampleHtml("fill(0);");
-      expect(html).toContain('<meta charset="utf-8">');
-      expect(html).toContain("<\\/script>");
-    } finally {
-      setContentPack(pack);
-    }
-  });
-
-  it("loads p5 from a file script tag when a script URI is present", () => {
-    const pack = getContentPack();
-    expect(pack).not.toBeNull();
-    try {
-      setContentPack({
-        ...pack!,
-        p5FileUri: "file:///data/user/0/com.learnp5/files/content/p5.min.js",
-      });
-      const html = getExampleHtml("fill(0);");
-      expect(html).toContain('<script src="file:///data/user/0/com.learnp5/files/content/p5.min.js"></script>');
-      expect(html).not.toContain("var p5=function(){}");
-    } finally {
-      setContentPack(pack);
-    }
+  it("declares UTF-8 and inlines the bundled p5 runtime", () => {
+    const html = getExampleHtml("fill(0);");
+    expect(html).toContain('<meta charset="utf-8">');
+    expect(html).toContain(P5_RUNTIME_SOURCE.slice(0, 200));
+    expect(html).not.toContain('<script src="file://');
   });
 });

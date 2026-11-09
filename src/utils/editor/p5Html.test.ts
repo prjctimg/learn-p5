@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@jest/globals";
-import { P5_COMPAT_POLYFILL } from "./p5Html";
+import { P5_COMPAT_POLYFILL, p5RuntimeScript } from "./p5Html";
 
 describe("P5_COMPAT_POLYFILL", () => {
   it.each([
@@ -20,6 +20,25 @@ describe("P5_COMPAT_POLYFILL", () => {
     "setImmediate",
     "AbortController",
     "globalThis",
+    "Object.assign",
+    "Array.from",
+    "Number.isFinite",
+    "Number.isInteger",
+    'define(Array.prototype, "includes"',
+    'define(Array.prototype, "find"',
+    'define(Array.prototype, "findIndex"',
+    'define(String.prototype, "includes"',
+    'define(String.prototype, "startsWith"',
+    'define(String.prototype, "endsWith"',
+    'define(String.prototype, "repeat"',
+    'define(String.prototype, "trimStart"',
+    'define(String.prototype, "trimEnd"',
+    "Promise.prototype.finally",
+    "Promise.allSettled",
+    "TextEncoder",
+    "TextDecoder",
+    'define(root.Element.prototype, "remove"',
+    'define(root.Element.prototype, "closest"',
   ])("provides the %s fallback used by the p5 runtime", (api) => {
     expect(P5_COMPAT_POLYFILL).toContain(api);
   });
@@ -31,5 +50,17 @@ describe("P5_COMPAT_POLYFILL", () => {
     );
     expect(script).not.toMatch(/\b(?:const|let|class)\b|=>/);
     expect(() => new Function(script)).not.toThrow();
+  });
+});
+
+describe("p5RuntimeScript", () => {
+  it("inlines the bundled runtime and escapes closing script tags", () => {
+    const html = p5RuntimeScript({ inlineSource: "var p5=function(){};\n</script>" });
+    expect(html).toBe("<script>var p5=function(){};\n<\\/script></script>");
+  });
+
+  it("returns an empty string when no runtime source is given", () => {
+    expect(p5RuntimeScript({ inlineSource: null })).toBe("");
+    expect(p5RuntimeScript({})).toBe("");
   });
 });

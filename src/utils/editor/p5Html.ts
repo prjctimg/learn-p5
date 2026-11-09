@@ -47,15 +47,13 @@ export function escapeHtmlAttribute(value: string): string {
 }
 
 /**
- * Load p5 as its own script file instead of inlining the runtime string into
- * every preview document. On older Android WebViews, shrinking the HTML
- * payload and loading the runtime through the WebView's normal script loader
- * avoids the resource failures seen with the old inline approach.
+ * Inline the bundled p5 runtime into the preview document. The runtime
+ * ships with the app (see scripts/bundle-p5.mjs), so previews never fetch
+ * it from the content pack, a CDN, or a `file://` script tag (which
+ * WebViews loading an in-memory document refuse to load), and never send
+ * ~1 MB of source through the WebView postMessage bridge.
  */
-export function p5RuntimeScript({ scriptUri, inlineSource }: { scriptUri?: string | null; inlineSource?: string | null }): string {
-  if (scriptUri) {
-    return `<script src="${escapeHtmlAttribute(scriptUri)}"></script>`;
-  }
+export function p5RuntimeScript({ inlineSource }: { inlineSource?: string | null }): string {
   if (typeof inlineSource === "string" && inlineSource.length > 0) {
     return `<script>${escapeScriptContent(inlineSource)}</script>`;
   }
@@ -63,14 +61,16 @@ export function p5RuntimeScript({ scriptUri, inlineSource }: { scriptUri?: strin
 }
 
 /**
- * The p5 runtime in the content pack is transpiled to ES2015, but it still uses
- * a few browser APIs that are missing from older Android WebViews and iOS
- * versions. These polyfills are ES5 so they can run before p5 is parsed.
- *
- * The content pack carries the same shim so already-installed app versions
- * recover from an updated pack without waiting for a new APK.
+ * The bundled p5 runtime is transpiled to ES2015, but transpiling only
+ * rewrites syntax: p5 still calls runtime APIs from ES2016-ES2023 and
+ * newer DOM APIs that are missing from older Android WebViews (which can
+ * lag the Android version by years on devices that never update System
+ * WebView) and older iOS versions. These polyfills are ES5 so they can
+ * run before p5 is parsed. Each one only fills in a missing API, so
+ * newer WebViews keep their native implementation.
  */
 export const P5_COMPAT_POLYFILL = `<script>
+/* learn-p5-runtime-compat:start */
 (function () {
   var root = typeof window !== "undefined" ? window : this;
   var hasAbortController = typeof root.AbortController !== "undefined";
@@ -199,6 +199,67 @@ export const P5_COMPAT_POLYFILL = `<script>
     };
   }
 
+  if (typeof Object.assign !== "function") {
+    Object.assign = function (target) {
+      if (target == null) {
+        throw new TypeError("Object.assign target cannot be null or undefined");
+      }
+      var to = Object(target);
+      for (var i = 1; i < arguments.length; i++) {
+        var from = arguments[i];
+        if (from == null) continue;
+        var keys = Object.keys(Object(from));
+        for (var j = 0; j < keys.length; j++) {
+          to[keys[j]] = from[keys[j]];
+        }
+        if (typeof Symbol === "function" && typeof Symbol.getOwnPropertySymbols === "function") {
+          var symbols = Symbol.getOwnPropertySymbols(Object(from));
+          for (var k = 0; k < symbols.length; k++) {
+            if (Object.prototype.propertyIsEnumerable.call(from, symbols[k])) {
+              to[symbols[k]] = from[symbols[k]];
+            }
+          }
+        }
+      }
+      return to;
+    };
+  }
+
+  if (typeof Array.from !== "function") {
+    Array.from = function (arrayLike, mapFn, thisArg) {
+      var result = [];
+      if (arrayLike == null) return result;
+      var iteratorSymbol = typeof Symbol === "function" && Symbol.iterator;
+      if (iteratorSymbol && typeof arrayLike[iteratorSymbol] === "function") {
+        var iterator = arrayLike[iteratorSymbol]();
+        var step;
+        var index = 0;
+        while (!(step = iterator.next()).done) {
+          result.push(mapFn ? mapFn.call(thisArg, step.value, index) : step.value);
+          index++;
+        }
+        return result;
+      }
+      var length = Math.max(0, Math.min(Number(arrayLike.length) || 0, 9007199254740991));
+      for (var i = 0; i < length; i++) {
+        result.push(mapFn ? mapFn.call(thisArg, arrayLike[i], i) : arrayLike[i]);
+      }
+      return result;
+    };
+  }
+
+  if (typeof Number.isFinite !== "function") {
+    Number.isFinite = function (value) {
+      return typeof value === "number" && isFinite(value);
+    };
+  }
+
+  if (typeof Number.isInteger !== "function") {
+    Number.isInteger = function (value) {
+      return typeof value === "number" && isFinite(value) && Math.floor(value) === value;
+    };
+  }
+
   if (typeof String.prototype.replaceAll !== "function") {
     define(String.prototype, "replaceAll", function (search, replacement) {
       var value = String(this);
@@ -275,6 +336,185 @@ export const P5_COMPAT_POLYFILL = `<script>
     return flattenInto(this.map(callback, thisArg), 1, []);
   });
 
+  define(Array.prototype, "includes", function (searchElement, fromIndex) {
+    var start = fromIndex === undefined ? 0 : Number(fromIndex);
+    if (start !== start) start = 0;
+    if (start < 0) start = Math.max(0, this.length + start);
+    for (var i = start; i < this.length; i++) {
+      if (this[i] === searchElement || (searchElement !== searchElement && this[i] !== this[i])) {
+        return true;
+      }
+    }
+    return false;
+  });
+
+  define(Array.prototype, "find", function (predicate, thisArg) {
+    if (typeof predicate !== "function") {
+      throw new TypeError("Array.prototype.find requires a predicate function");
+    }
+    for (var i = 0; i < this.length; i++) {
+      if (predicate.call(thisArg, this[i], i, this)) return this[i];
+    }
+    return undefined;
+  });
+
+  define(Array.prototype, "findIndex", function (predicate, thisArg) {
+    if (typeof predicate !== "function") {
+      throw new TypeError("Array.prototype.findIndex requires a predicate function");
+    }
+    for (var i = 0; i < this.length; i++) {
+      if (predicate.call(thisArg, this[i], i, this)) return i;
+    }
+    return -1;
+  });
+
+  define(String.prototype, "includes", function (searchString, position) {
+    if (searchString instanceof RegExp) {
+      throw new TypeError("String.prototype.includes cannot take a RegExp");
+    }
+    var start = position === undefined ? 0 : Number(position);
+    if (start !== start) start = 0;
+    return String(this).indexOf(String(searchString), start) !== -1;
+  });
+
+  define(String.prototype, "startsWith", function (searchString, position) {
+    if (searchString instanceof RegExp) {
+      throw new TypeError("String.prototype.startsWith cannot take a RegExp");
+    }
+    var start = position === undefined ? 0 : Number(position);
+    if (start !== start || start < 0) start = 0;
+    return String(this).slice(start, start + String(searchString).length) === String(searchString);
+  });
+
+  define(String.prototype, "endsWith", function (searchString, endPosition) {
+    if (searchString instanceof RegExp) {
+      throw new TypeError("String.prototype.endsWith cannot take a RegExp");
+    }
+    var value = String(this);
+    var end = endPosition === undefined ? value.length : Number(endPosition);
+    if (end !== end || end > value.length) end = value.length;
+    if (end < 0) end = 0;
+    return value.slice(end - String(searchString).length, end) === String(searchString);
+  });
+
+  define(String.prototype, "repeat", function (count) {
+    var value = String(this);
+    var n = Number(count);
+    if (n !== n || n === Infinity || n === -Infinity) {
+      throw new RangeError("String.prototype.repeat count must be finite");
+    }
+    n = Math.floor(n);
+    if (n < 0) throw new RangeError("String.prototype.repeat count cannot be negative");
+    var result = "";
+    for (var i = 0; i < n; i++) result += value;
+    return result;
+  });
+
+  define(String.prototype, "trimStart", function () {
+    return String(this).replace(/^\\s+/, "");
+  });
+
+  define(String.prototype, "trimEnd", function () {
+    return String(this).replace(/\\s+$/, "");
+  });
+
+  if (typeof Promise !== "undefined" && typeof Promise.prototype.finally !== "function") {
+    define(Promise.prototype, "finally", function (onFinally) {
+      var promise = this;
+      if (typeof onFinally !== "function") return promise.then();
+      return promise.then(
+        function (value) {
+          return Promise.resolve(onFinally()).then(function () { return value; });
+        },
+        function (reason) {
+          return Promise.resolve(onFinally()).then(function () { throw reason; });
+        }
+      );
+    });
+  }
+
+  if (typeof Promise !== "undefined" && typeof Promise.allSettled !== "function") {
+    Promise.allSettled = function (iterable) {
+      return Promise.all(
+        Array.from(iterable).map(function (value) {
+          return Promise.resolve(value).then(
+            function (resolvedValue) { return { status: "fulfilled", value: resolvedValue }; },
+            function (reason) { return { status: "rejected", reason: reason }; }
+          );
+        })
+      );
+    };
+  }
+
+  if (typeof root.TextEncoder === "undefined" && typeof Uint8Array === "function") {
+    root.TextEncoder = function () {};
+    root.TextEncoder.prototype.encode = function (input) {
+      var str = String(input);
+      var bytes = [];
+      for (var i = 0; i < str.length; i++) {
+        var code = str.charCodeAt(i);
+        if (code < 128) {
+          bytes.push(code);
+        } else if (code < 2048) {
+          bytes.push(192 | (code >> 6), 128 | (code & 63));
+        } else if (code >= 55296 && code <= 56319 && i + 1 < str.length) {
+          var next = str.charCodeAt(i + 1);
+          if (next >= 56320 && next <= 57343) {
+            var cp = 65536 + ((code - 55296) << 10) + (next - 56320);
+            bytes.push(240 | (cp >> 18), 128 | ((cp >> 12) & 63), 128 | ((cp >> 6) & 63), 128 | (cp & 63));
+            i++;
+          } else {
+            bytes.push(239, 191, 189);
+          }
+        } else if (code >= 56320 && code <= 57343) {
+          bytes.push(239, 191, 189);
+        } else {
+          bytes.push(224 | (code >> 12), 128 | ((code >> 6) & 63), 128 | (code & 63));
+        }
+      }
+      return new Uint8Array(bytes);
+    };
+    root.TextEncoder.prototype.encodeInto = function (source, destination) {
+      var bytes = this.encode(source);
+      var written = Math.min(bytes.length, destination.length);
+      for (var i = 0; i < written; i++) destination[i] = bytes[i];
+      return { read: source.length, written: written };
+    };
+  }
+
+  if (typeof root.TextDecoder === "undefined" && typeof Uint8Array === "function") {
+    root.TextDecoder = function (label) {
+      this.label = label || "utf-8";
+    };
+    root.TextDecoder.prototype.decode = function (input) {
+      if (input == null) return "";
+      var bytes = input instanceof Uint8Array ? input : new Uint8Array(input);
+      var binary = "";
+      for (var i = 0; i < bytes.length; i += 8192) {
+        binary += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + 8192, bytes.length)));
+      }
+      try {
+        return decodeURIComponent(escape(binary));
+      } catch (error) {
+        return binary;
+      }
+    };
+  }
+
+  if (typeof root.Element !== "undefined" && root.Element.prototype) {
+    define(root.Element.prototype, "remove", function () {
+      if (this.parentNode) this.parentNode.removeChild(this);
+    });
+    define(root.Element.prototype, "closest", function (selector) {
+      var el = this;
+      while (el && el.nodeType === 1) {
+        if (typeof el.matches === "function" && el.matches(selector)) return el;
+        el = el.parentElement || el.parentNode;
+      }
+      return null;
+    });
+  }
+
   if (typeof root.structuredClone !== "function") {
     root.structuredClone = function (value) {
       if (value === undefined) return undefined;
@@ -346,20 +586,29 @@ export const P5_COMPAT_POLYFILL = `<script>
     };
   }
 
-  // Older WebViews ignore the signal option on addEventListener.
-  // p5 uses it to tear down window/document listeners in remove().
+  // Older WebViews ignore the signal option on addEventListener, and
+  // WebViews without a native AbortController reject the polyfilled
+  // signal object entirely ("Failed to convert value to 'AbortSignal'").
+  // p5 uses the signal to tear down window/document listeners in
+  // remove(). Strip the signal before calling the native method (keeping
+  // only the legacy capture flag) and emulate abort removal ourselves.
   if (needsAbortSignalShim && typeof root.EventTarget !== "undefined") {
     var nativeAddEventListener = root.EventTarget.prototype.addEventListener;
     var nativeRemoveEventListener = root.EventTarget.prototype.removeEventListener;
 
     root.EventTarget.prototype.addEventListener = function (type, listener, options) {
-      nativeAddEventListener.call(this, type, listener, options);
-      if (!options || typeof options !== "object" || !options.signal) return;
+      var signal = options && typeof options === "object" ? options.signal : null;
+      if (!signal) {
+        nativeAddEventListener.call(this, type, listener, options);
+        return;
+      }
 
-      var signal = options.signal;
+      var capture = options.capture ? true : false;
+      nativeAddEventListener.call(this, type, listener, capture);
+
       var target = this;
       var remove = function () {
-        nativeRemoveEventListener.call(target, type, listener, options);
+        nativeRemoveEventListener.call(target, type, listener, capture);
       };
 
       if (signal.aborted) {

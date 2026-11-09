@@ -24,7 +24,6 @@ import { getExerciseCodeKey, exerciseReducer, resolveNextTaskCode } from "../../
 import { getP5FunctionNames, ONCE_ONLY_P5_FUNCTIONS } from "../../../data/reference";
 import { getExerciseHtml } from "../../../utils/editor/exerciseHtml";
 import { getFullscreenPreviewHtml } from "../../../utils/editor/fullscreenPreviewHtml";
-import { loadP5RuntimeSource } from "../../../content/service";
 import { EDITOR_THEMES, getThemeSwatches } from "../../../utils/editor/themes";
 import { useStreak } from "../../../hooks/useStreak";
 import { recordCompletion, ACHIEVEMENTS } from "../../../hooks/useAchievements";
@@ -70,8 +69,6 @@ export default function Exercise() {
  const fullscreenWebViewRef = useRef<WebView>(null);
  const [webViewReady, setWebViewReady] = useState(false);
  const [editorViewReady, setEditorViewReady] = useState(false);
- const [p5RuntimeReady, setP5RuntimeReady] = useState(false);
- const p5RuntimeInjectedRef = useRef(new Set<object>());
   const [keyboardVisible, setKeyboardVisible] = useState(true);
   const [useSystemKeyboard, setUseSystemKeyboard] = useState(false);
 
@@ -131,12 +128,11 @@ const [keyboardHeight, setKeyboardHeight] = useState<string>(DEFAULTS.keyboardHe
       wordWrap,
       tasks: state.exercise.tasks,
       activeTaskIndex: state.currentTaskIndex,
-      injectP5Runtime: true,
     });
   }, [state.exercise, state.currentTaskIndex, colorScheme, id, editorTheme, codeFontSize, ctaColor, wordWrap]);
 
   const fullscreenPreviewHtml = useMemo(
-    () => getFullscreenPreviewHtml(state.code, colorScheme === "dark" ? "dark" : "light", { deferP5Runtime: true }),
+    () => getFullscreenPreviewHtml(state.code, colorScheme === "dark" ? "dark" : "light"),
     [state.code, colorScheme]
   );
 
@@ -380,18 +376,6 @@ const [keyboardHeight, setKeyboardHeight] = useState<string>(DEFAULTS.keyboardHe
  }
  }, [course, id, editorViewReady, state.startingCode]);
 
- const injectP5Runtime = useCallback(async (targetWebView: WebView | null) => {
-   if (!targetWebView || p5RuntimeInjectedRef.current.has(targetWebView)) return;
-   try {
-     const source = await loadP5RuntimeSource();
-     p5RuntimeInjectedRef.current.add(targetWebView);
-     targetWebView.postMessage(JSON.stringify({ type: "p5Runtime", source }));
-   } catch {
-     p5RuntimeInjectedRef.current.delete(targetWebView);
-     showToast("p5.js runtime could not be loaded. Please check your connection and try again.", undefined, undefined, "failure");
-   }
- }, [showToast]);
-
  const handleMessage = useCallback(
  (event: { nativeEvent: { data: string } }) => {
  try {
@@ -410,12 +394,9 @@ const [keyboardHeight, setKeyboardHeight] = useState<string>(DEFAULTS.keyboardHe
  case "editorReady":
  setEditorViewReady(msg.ready);
  break;
- case "p5RuntimeReady":
- setP5RuntimeReady(msg.ready !== false);
- break;
- case "p5RuntimeError":
- setP5RuntimeReady(false);
- showToast(msg.error || "p5.js could not start on this device.", undefined, undefined, "failure");
+ case "sketchError":
+ dispatch({ type: "RUN_DONE" });
+ showToast(msg.error || "p5.js could not start.", undefined, undefined, "failure");
  break;
 case "editorTapped":
   if (!useSystemKeyboard) {
@@ -524,17 +505,13 @@ case "editorTapped":
 
   const handleRun = useCallback(() => {
     if (!state.exercise) return;
-    if (!p5RuntimeReady) {
-      showToast("p5.js runtime is still loading. Please wait a moment.", undefined, undefined, "failure");
-      return;
-    }
     dispatch({ type: "RUN_START" });
     runStartTimeRef.current = Date.now();
     if (webViewRef.current && editorViewReady) {
       webViewRef.current.postMessage(JSON.stringify({ type: "runSketch" }));
     }
     setTimeout(() => dispatch({ type: "RUN_DONE" }), 3000);
-  }, [state.exercise, editorViewReady, p5RuntimeReady, showToast]);
+  }, [state.exercise, editorViewReady]);
 
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -864,16 +841,10 @@ return (
    onMessage={handleMessage}
    onLoadStart={() => {
      setEditorViewReady(false);
-     setP5RuntimeReady(false);
-     p5RuntimeInjectedRef.current.clear();
    }}
-   onLoadEnd={() => injectP5Runtime(webViewRef.current)}
    javaScriptEnabled
    domStorageEnabled
    originWhitelist={["*"]}
-   allowFileAccess
-   allowFileAccessFromFileURLs
-   allowUniversalAccessFromFileURLs
    bounces={false}
    {...({
      hideKeyboardAccessoryView: true,
@@ -895,17 +866,9 @@ return (
         source={{ html: fullscreenPreviewHtml }}
         style={styles.fullscreenWebViewInner}
         onMessage={handleMessage}
-        onLoadStart={() => {
-          setP5RuntimeReady(false);
-          p5RuntimeInjectedRef.current.clear();
-        }}
-        onLoadEnd={() => injectP5Runtime(fullscreenWebViewRef.current)}
         javaScriptEnabled
         domStorageEnabled
         originWhitelist={["*"]}
-        allowFileAccess
-        allowFileAccessFromFileURLs
-        allowUniversalAccessFromFileURLs
         scrollEnabled={false}
         bounces={false}
       />

@@ -6,6 +6,7 @@ import {
   checkForContentUpdate,
 } from "../content/service";
 import type { ContentPack } from "../content/types";
+import { P5_RUNTIME_VERSION } from "../utils/editor/p5-runtime.generated";
 
 type BootstrapState =
   | { status: "loading"; progress: number }
@@ -96,7 +97,7 @@ export default function ContentProvider({ children }: { children: ReactNode }) {
     <ContentContext.Provider
       value={{
         contentVersion: state.pack.contentVersion,
-        p5Version: state.pack.p5Version ?? state.pack.p5?.version ?? "",
+        p5Version: P5_RUNTIME_VERSION,
         refreshing,
         updatedVersion: state.updatedVersion,
         dismissUpdate: () =>

@@ -40,6 +40,9 @@ jobs:
       - name: Regenerate editor bundle
         run: npm run bundle-editor
 
+      - name: Regenerate p5 runtime bundle
+        run: npm run bundle-p5
+
       - name: Run checks
         run: npm run check
 

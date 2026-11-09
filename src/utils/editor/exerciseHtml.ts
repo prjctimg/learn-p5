@@ -1,12 +1,11 @@
 import { CODEMIRROR_BUNDLE } from "./codemirror-bundle.generated";
 import { VALIDATION_CORE } from "./validation-core.generated";
-import { getP5InlineSource, getP5ScriptUri } from "../../content/store";
+import { P5_RUNTIME_SOURCE } from "./p5-runtime.generated";
 import { getP5FunctionNames } from "../../data/reference";
 import { Colors } from "../../constants/Colors";
 import { getEditorTheme, EditorThemeColors } from "./themes";
 import { ExerciseTask } from "../../data/types";
 import {
-  escapeScriptContent,
   p5RuntimeScript,
   P5_COMPAT_POLYFILL,
   P5_GLOBAL_FUNCTIONS,
@@ -80,7 +79,6 @@ export function getExerciseHtml(params: {
   tasks?: ExerciseTask[];
   activeTaskIndex?: number;
   disableSystemKeyboard?: boolean;
-  injectP5Runtime?: boolean;
 }): string {
   const colors = Colors[params.colorScheme === "dark" ? "dark" : "light"];
   const ctaColor = params.ctaColor ?? colors.cta;
@@ -93,9 +91,7 @@ export function getExerciseHtml(params: {
   const instructionHtml = parseInstructionHtml(params.instruction);
   const tasksJson = safeJson(params.tasks ?? []);
   const activeTaskIdx = params.activeTaskIndex ?? 0;
-  const p5Script = params.injectP5Runtime
-    ? ""
-    : p5RuntimeScript({ scriptUri: getP5ScriptUri(), inlineSource: getP5InlineSource() });
+  const p5Script = p5RuntimeScript({ inlineSource: P5_RUNTIME_SOURCE });
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -823,7 +819,7 @@ async function renderSketch(containerId, code) {
 
   var p5Ctor = getP5Constructor();
   if (typeof p5Ctor !== 'function') {
-    var missingMessage = 'p5.js could not start on this device. Update Android System WebView (or iOS) and try again.';
+    var missingMessage = 'p5.js could not start. The bundled runtime failed to load — reopen this exercise and check the WebView console for the underlying error.';
     console.error(missingMessage);
     container.innerHTML = '<div style="color:${cta};padding:16px;font-family:\\"JetBrains Mono\\",monospace">\\u26A0 ' + missingMessage + '</div>';
     if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
@@ -888,29 +884,6 @@ function handleMessage(data) {
   try {
     var msg = typeof data === 'string' ? JSON.parse(data) : data;
     switch (msg.type) {
-      case 'p5Runtime':
-        try {
-          if (typeof msg.source === 'string' && msg.source.length > 0) {
-            var runtimeScript = document.createElement('script');
-            runtimeScript.textContent = msg.source;
-            document.head.appendChild(runtimeScript);
-          }
-          P5_CTOR = window.p5;
-          if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-            window.ReactNativeWebView.postMessage(JSON.stringify({
-              type: 'p5RuntimeReady',
-              ready: typeof P5_CTOR === 'function',
-            }));
-          }
-        } catch (e) {
-          if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-            window.ReactNativeWebView.postMessage(JSON.stringify({
-              type: 'p5RuntimeError',
-              error: e && e.message ? String(e.message) : 'p5.js could not start.',
-            }));
-          }
-        }
-        break;
       case 'setCode':
         if (view && msg.code !== view.state.doc.toString()) {
           view.dispatch({

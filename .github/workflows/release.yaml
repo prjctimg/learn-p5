@@ -41,6 +41,9 @@ jobs:
       - name: Regenerate CodeMirror bundle
         run: npm run bundle-editor
 
+      - name: Regenerate p5 runtime bundle
+        run: npm run bundle-p5
+
       - name: Run invariant checks and tests
         run: npm run check
 

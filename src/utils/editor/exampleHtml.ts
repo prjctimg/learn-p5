@@ -1,5 +1,5 @@
-import { getP5InlineSource, getP5ScriptUri } from "../../content/store";
 import { getP5Assets } from "../../content/store";
+import { P5_RUNTIME_SOURCE } from "./p5-runtime.generated";
 import { Colors } from "../../constants/Colors";
 import {
   escapeScriptContent,
@@ -44,7 +44,7 @@ export function getExampleHtml(code: string, colorScheme?: "light" | "dark"): st
     );
   }
 
-  const p5Script = p5RuntimeScript({ scriptUri: getP5ScriptUri(), inlineSource: getP5InlineSource() });
+  const p5Script = p5RuntimeScript({ inlineSource: P5_RUNTIME_SOURCE });
   const safeSketch = escapeScriptContent(sketch);
 
   return `

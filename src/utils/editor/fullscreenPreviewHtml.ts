@@ -1,4 +1,4 @@
-import { getP5InlineSource, getP5ScriptUri } from "../../content/store";
+import { P5_RUNTIME_SOURCE } from "./p5-runtime.generated";
 import {
   p5RuntimeScript,
   P5_COMPAT_POLYFILL,
@@ -22,32 +22,12 @@ function wrapSketch(code: string): string {
 
 export function getFullscreenPreviewHtml(
   code: string,
-  colorScheme?: "light" | "dark",
-  options?: { deferP5Runtime?: boolean }
+  colorScheme?: "light" | "dark"
 ): string {
   const isDark = colorScheme === "dark";
   const bodyBg = isDark ? "#000000" : "#111111";
   const sketch = wrapSketch(stripDescribe(code ?? ""));
-  const p5Script = options?.deferP5Runtime
-    ? ""
-    : p5RuntimeScript({ scriptUri: getP5ScriptUri(), inlineSource: getP5InlineSource() });
-  const deferP5Runtime = options?.deferP5Runtime ?? false;
-  const p5RuntimeLoader = deferP5Runtime
-    ? `<script>
-window.addEventListener('message', function(event) {
-  try {
-    var msg = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
-    if (!msg || msg.type !== 'p5Runtime' || typeof msg.source !== 'string') return;
-    var script = document.createElement('script');
-    script.textContent = msg.source;
-    document.head.appendChild(script);
-    window.dispatchEvent(new Event('p5RuntimeReady'));
-  } catch (e) {
-    window.dispatchEvent(new Event('p5RuntimeError'));
-  }
-});
-</script>`
-    : "";
+  const p5Script = p5RuntimeScript({ inlineSource: P5_RUNTIME_SOURCE });
   const userCode = safeJson(sketch);
   const globalFunctions = JSON.stringify(P5_GLOBAL_FUNCTIONS);
 
@@ -86,7 +66,6 @@ window.addEventListener('message', function(event) {
 <div id="sketch"></div>
 ${P5_COMPAT_POLYFILL}
 ${p5Script}
-${p5RuntimeLoader}
 <script>
 (function() {
   var userCode = ${userCode};
@@ -107,7 +86,7 @@ ${p5RuntimeLoader}
     started = true;
     var P5 = window.p5;
     if (typeof P5 !== 'function') {
-      showError('p5.js could not start on this device. Update Android System WebView (or iOS) and try again.');
+      showError('p5.js could not start. The bundled runtime failed to load — reopen this preview and check the WebView console for the underlying error.');
       return;
     }
 
@@ -125,11 +104,7 @@ ${p5RuntimeLoader}
     }
   }
 
-  if (typeof window.p5 === 'function') {
-    startSketch();
-  } else {
-    window.addEventListener('p5RuntimeReady', startSketch);
-  }
+  startSketch();
 })();
 </script>
 </body>

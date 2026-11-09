@@ -5,52 +5,12 @@ import {
   SUPPORTED_CONTENT_SCHEMA_VERSIONS,
 } from "../constants/Content";
 import { CONTENT_MANIFEST_URL } from "../constants/Content";
-import { parseContentPack, validateP5Source } from "./parse";
-import { CONTENT_DIR, P5_SCRIPT_FILE, P5_TEMP_FILE, readCachedContent, writeCachedContent } from "./storage";
-import { requireContentPack, setContentPack } from "./store";
+import { parseContentPack } from "./parse";
+import { readCachedContent, writeCachedContent } from "./storage";
+import { setContentPack } from "./store";
 import type { ContentManifest, ContentPack } from "./types";
 
 export type ContentProgress = (fraction: number) => void;
-
-let cachedP5RuntimeSource: { key: string; source: string } | null = null;
-
-/**
- * Read the validated runtime artifact text so previews can inject it into
- * the WebView without relying on a `file://` script subresource being
- * loadable from an in-memory document.
- */
-export async function loadP5RuntimeSource(): Promise<string> {
-  const pack = requireContentPack();
-  const cacheKey = [
-    pack.contentVersion,
-    pack.p5Sha256 ?? pack.p5Version ?? pack.p5FileUri ?? "",
-  ].join(":");
-  if (cachedP5RuntimeSource?.key === cacheKey) {
-    return cachedP5RuntimeSource.source;
-  }
-
-  let source: string;
-  const inlineSource = pack.p5?.source;
-  if (typeof inlineSource === "string" && !pack.p5FileUri) {
-    source = inlineSource;
-  } else if (pack.p5FileUri) {
-    if (Platform.OS === "web") {
-      const response = await fetch(pack.p5FileUri);
-      if (!response.ok) {
-        throw new Error(`p5.js runtime download failed (${response.status}).`);
-      }
-      source = await response.text();
-    } else {
-      source = await FileSystem.readAsStringAsync(pack.p5FileUri);
-    }
-  } else {
-    throw new Error("p5.js runtime has not been downloaded.");
-  }
-
-  validateP5Source(source, pack.p5Version ?? pack.p5?.version ?? "");
-  cachedP5RuntimeSource = { key: cacheKey, source };
-  return source;
-}
 
 export interface BootstrapResult {
   pack: ContentPack;
@@ -74,23 +34,17 @@ function validateManifest(manifest: ContentManifest): void {
   if (!SUPPORTED_CONTENT_SCHEMA_VERSIONS.includes(manifest?.schemaVersion as 1 | 2)) {
     throw new Error("This app version cannot read the latest content.");
   }
+  // The p5.js runtime ships in the app bundle (see scripts/bundle-p5.mjs),
+  // so the manifest only needs to describe the course/reference pack.
+  // Older manifests that still carry p5Url/p5Size/p5Sha256 are accepted
+  // and those fields are ignored.
   if (
     typeof manifest.contentVersion !== "string" ||
-    typeof manifest.p5Version !== "string" ||
     typeof manifest.packUrl !== "string" ||
     typeof manifest.packSize !== "number" ||
     typeof manifest.packSha256 !== "string"
   ) {
     throw new Error("The content manifest is incomplete.");
-  }
-  if (manifest.schemaVersion === 2) {
-    if (
-      typeof manifest.p5Url !== "string" ||
-      typeof manifest.p5Size !== "number" ||
-      typeof manifest.p5Sha256 !== "string"
-    ) {
-      throw new Error("The content manifest has no p5.js runtime.");
-    }
   }
 }
 
@@ -172,71 +126,6 @@ async function fetchPackText(
   }
 }
 
-async function downloadP5Runtime(
-  manifest: ContentManifest,
-  onProgress?: ContentProgress
-): Promise<string> {
-  if (
-    typeof manifest.p5Url !== "string" ||
-    typeof manifest.p5Size !== "number" ||
-    typeof manifest.p5Sha256 !== "string"
-  ) {
-    throw new Error("The content manifest has no p5.js runtime.");
-  }
-
-  const p5Url = resolveContentUrl(manifest.p5Url);
-
-  if (Platform.OS === "web") {
-    const response = await fetch(p5Url);
-    if (!response.ok) {
-      throw new Error(`p5.js runtime download failed (${response.status}).`);
-    }
-    const source = await response.text();
-    validateP5Source(source, manifest.p5Version);
-    onProgress?.(1);
-    return p5Url;
-  }
-
-  if (!FileSystem.documentDirectory || !P5_SCRIPT_FILE || !P5_TEMP_FILE) {
-    throw new Error("p5.js runtime storage is unavailable.");
-  }
-
-  await FileSystem.makeDirectoryAsync(CONTENT_DIR!, { intermediates: true });
-  await FileSystem.deleteAsync(P5_TEMP_FILE, { idempotent: true });
-
-  try {
-    const download = FileSystem.createDownloadResumable(
-      p5Url,
-      P5_TEMP_FILE,
-      {},
-      ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
-        if (totalBytesExpectedToWrite > 0) {
-          onProgress?.(totalBytesWritten / totalBytesExpectedToWrite);
-        }
-      }
-    );
-    const result = await download.downloadAsync();
-    if (!result) throw new Error("p5.js runtime download was interrupted.");
-
-    const info = await FileSystem.getInfoAsync(result.uri);
-    if (!info.exists || info.isDirectory) {
-      throw new Error("p5.js runtime download did not produce a file.");
-    }
-    if (manifest.p5Size > 0 && info.size !== manifest.p5Size) {
-      throw new Error("p5.js runtime download was incomplete.");
-    }
-
-    const source = await FileSystem.readAsStringAsync(result.uri);
-    validateP5Source(source, manifest.p5Version);
-
-    await FileSystem.deleteAsync(P5_SCRIPT_FILE, { idempotent: true });
-    await FileSystem.moveAsync({ from: P5_TEMP_FILE, to: P5_SCRIPT_FILE });
-    return P5_SCRIPT_FILE;
-  } finally {
-    await FileSystem.deleteAsync(P5_TEMP_FILE, { idempotent: true });
-  }
-}
-
 function isCachedContentCurrent(
   cached: ContentPack | null,
   manifest: ContentManifest
@@ -244,45 +133,28 @@ function isCachedContentCurrent(
   return Boolean(
     cached &&
       cached.contentVersion === manifest.contentVersion &&
-      cached.p5FileUri &&
-      (!manifest.packSha256 || cached.packSha256 === manifest.packSha256) &&
-      (!manifest.p5Sha256 || cached.p5Sha256 === manifest.p5Sha256)
+      (!manifest.packSha256 || cached.packSha256 === manifest.packSha256)
   );
 }
 
 function hasUsableCachedContent(cached: ContentPack | null): cached is ContentPack {
-  return Boolean(
-    cached &&
-      (cached.p5FileUri ||
-        // Legacy schema 1 caches keep the runtime inline and remain usable
-        // offline while the separate download is prepared.
-        (cached.schemaVersion === 1 && typeof cached.p5?.source === "string"))
-  );
+  return Boolean(cached);
 }
 
 async function downloadAndCommitContent(
   manifest: ContentManifest,
   onProgress?: ContentProgress
 ): Promise<ContentPack> {
-  // Fetch and validate both downloads before writing either, so a failure
-  // leaves the previously working cache untouched.
-  const rawPack = await fetchPackText(manifest, (fraction) =>
-    onProgress?.(fraction * 0.5)
-  );
+  const rawPack = await fetchPackText(manifest, onProgress);
   parseContentPack(rawPack);
-  const p5FileUri = await downloadP5Runtime(manifest, (fraction) =>
-    onProgress?.(0.5 + fraction * 0.5)
-  );
   const pack = await writeCachedContent(rawPack, {
     contentVersion: manifest.contentVersion,
-    p5Version: manifest.p5Version,
+    // p5Version in the cache meta is retained for back-compat with
+    // caches written by older app versions; the runtime version itself
+    // comes from the bundled runtime (P5_RUNTIME_VERSION).
+    p5Version: manifest.p5Version ?? "",
     packSha256: manifest.packSha256 ?? "",
-    p5Sha256: manifest.p5Sha256 ?? "",
-    p5FileUri,
   });
-  pack.p5FileUri = p5FileUri;
-  pack.p5Sha256 = manifest.p5Sha256;
-  pack.p5Version = manifest.p5Version;
   return pack;
 }
 

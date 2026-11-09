@@ -150,9 +150,6 @@ function SymbolDetail({ symbol, onOpenSearch }: { symbol: string; onOpenSearch: 
   pointerEvents="none"
   javaScriptEnabled
   domStorageEnabled
-  allowFileAccess
-  allowFileAccessFromFileURLs
-  allowUniversalAccessFromFileURLs
   bounces={false}
   />
   <View style={[styles.codeBlock, { backgroundColor: colors.surfaceDim, marginTop: 8 }]}>

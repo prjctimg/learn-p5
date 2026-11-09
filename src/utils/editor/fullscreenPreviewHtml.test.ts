@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
-import { getContentPack, setContentPack } from "../../content/store";
 import { getFullscreenPreviewHtml } from "./fullscreenPreviewHtml";
+import { P5_RUNTIME_SOURCE } from "./p5-runtime.generated";
 
 describe("getFullscreenPreviewHtml", () => {
   it("runs learner code through the guarded p5 wrapper", () => {
@@ -10,37 +10,11 @@ describe("getFullscreenPreviewHtml", () => {
     expect(html).toContain("new P5(undefined, container)");
   });
 
-  it("escapes closing script tags in the inlined p5 runtime", () => {
-    const pack = getContentPack();
-    expect(pack).not.toBeNull();
-    try {
-      setContentPack({
-        ...pack!,
-        p5: {
-          version: "2.4.0-rc.1",
-          source: "/*! p5.js v2.4.0-rc.1 */\nvar p5=function(){};\n</script>",
-        },
-      });
-      const html = getFullscreenPreviewHtml("fill(0);");
-      expect(html).toContain("<\\/script>");
-    } finally {
-      setContentPack(pack);
-    }
-  });
-
-  it("loads p5 from a file script tag when a script URI is present", () => {
-    const pack = getContentPack();
-    expect(pack).not.toBeNull();
-    try {
-      setContentPack({
-        ...pack!,
-        p5FileUri: "file:///data/user/0/com.learnp5/files/content/p5.min.js",
-      });
-      const html = getFullscreenPreviewHtml("fill(0);");
-      expect(html).toContain('<script src="file:///data/user/0/com.learnp5/files/content/p5.min.js"></script>');
-      expect(html).not.toContain("var p5=function(){}");
-    } finally {
-      setContentPack(pack);
-    }
+  it("inlines the bundled p5 runtime instead of deferring it via postMessage", () => {
+    const html = getFullscreenPreviewHtml("fill(0);");
+    expect(html).toContain(P5_RUNTIME_SOURCE.slice(0, 200));
+    expect(html).not.toContain('<script src="file://');
+    expect(html).not.toContain("p5Runtime");
+    expect(html).not.toContain("Update Android System WebView");
   });
 });

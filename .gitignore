@@ -32,6 +32,7 @@ coverage
 # Generated artifacts (never commit)
 src/utils/editor/validation-core.generated.ts
 src/utils/editor/codemirror-bundle.generated.ts
+src/utils/editor/p5-runtime.generated.ts
 
 # Agent local state
 .opencode/

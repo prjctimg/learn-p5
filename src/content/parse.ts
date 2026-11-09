@@ -3,12 +3,11 @@ import {
 } from "../constants/Content";
 import type { ContentPack } from "./types";
 
-// Schema 1 packs carry the full p5.js runtime as a string so exercises can
-// run without a network connection. A pack with a missing or truncated
-// runtime is worse than no pack at all: it renders a broken editor and makes
-// `new p5()` fail with an opaque "p5 is not a constructor" error. Keep this
-// check deliberately strict so a bad cache is rejected and can be downloaded
-// again.
+// Legacy schema 1 packs carried the full p5.js runtime as a string. The
+// runtime now ships in the app bundle, but old cached packs are still
+// parsed on upgrade, so keep this validation strict: a missing or
+// truncated runtime in a legacy cache is rejected and re-downloaded
+// rather than rendering a broken editor.
 const MIN_P5_SOURCE_LENGTH = 100_000;
 // The content pack must carry the ES2015-transpiled runtime and its ES5 shim.
 // This marker prevents an old, ES2022-only pack from being cached or run on
@@ -73,8 +72,8 @@ export function parseContentPack(raw: string): ContentPack {
     throw new Error("The downloaded content pack is incomplete.");
   }
 
-  // Schema 1 packs carry the runtime inline. Schema 2+ packs ship it as a
-  // separate p5.min.js download that gets cached and loaded by file.
+  // Schema 1 packs carried the runtime inline. Schema 2+ packs carry no
+  // runtime: p5.js is bundled with the app (scripts/bundle-p5.mjs).
   if (pack.schemaVersion === 1) {
     validateInlineP5Source(pack);
   }

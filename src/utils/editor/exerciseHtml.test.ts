@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
-import { getContentPack, setContentPack } from "../../content/store";
 import { getExerciseHtml } from "./exerciseHtml";
+import { P5_RUNTIME_SOURCE, P5_RUNTIME_VERSION } from "./p5-runtime.generated";
 
 const baseParams = {
   title: "Test",
@@ -19,56 +19,24 @@ describe("getExerciseHtml", () => {
     expect(html).toContain("function getP5Constructor()");
     expect(html).toContain("var runUserCode = new Function('p5'");
     expect(html).toContain("new p5Ctor(undefined, container)");
-    expect(html).toContain("case 'p5Runtime':");
   });
 
-  it("omits the runtime script tag when injection is requested", () => {
-    const pack = getContentPack();
-    expect(pack).not.toBeNull();
-    try {
-      setContentPack({
-        ...pack!,
-        p5FileUri: "file:///data/user/0/com.learnp5/files/content/p5.min.js",
-      });
-      const html = getExerciseHtml({ ...baseParams, injectP5Runtime: true });
-      expect(html).not.toContain('<script src="file:///data/user/0/com.learnp5/files/content/p5.min.js"></script>');
-      expect(html).not.toContain("var p5=function(){}");
-    } finally {
-      setContentPack(pack);
-    }
+  it("inlines the bundled p5 runtime instead of fetching or injecting it", () => {
+    const html = getExerciseHtml(baseParams);
+    expect(P5_RUNTIME_VERSION).toBe("2.4.0-rc.1");
+    expect(html).toContain(P5_RUNTIME_SOURCE.slice(0, 200));
+    expect(html).not.toContain('<script src="file://');
+    expect(html).not.toContain("case 'p5Runtime':");
+    expect(html).not.toContain("p5RuntimeReady");
+    // The ES5 polyfill runs before the runtime so older WebViews can parse it.
+    expect(html.indexOf("learn-p5-runtime-compat")).toBeGreaterThan(-1);
+    expect(html.indexOf("learn-p5-runtime-compat")).toBeLessThan(
+      html.indexOf(P5_RUNTIME_SOURCE.slice(0, 200))
+    );
   });
 
-  it("escapes closing script tags in the inlined p5 runtime", () => {
-    const pack = getContentPack();
-    expect(pack).not.toBeNull();
-    try {
-      setContentPack({
-        ...pack!,
-        p5: {
-          version: "2.4.0-rc.1",
-          source: "/*! p5.js v2.4.0-rc.1 */\nvar p5=function(){};\n</script>",
-        },
-      });
-      const html = getExerciseHtml(baseParams);
-      expect(html).toContain("<\\/script>");
-    } finally {
-      setContentPack(pack);
-    }
-  });
-
-  it("loads p5 from a file script tag when a script URI is present", () => {
-    const pack = getContentPack();
-    expect(pack).not.toBeNull();
-    try {
-      setContentPack({
-        ...pack!,
-        p5FileUri: "file:///data/user/0/com.learnp5/files/content/p5.min.js\"&<onload>",
-      });
-      const html = getExerciseHtml(baseParams);
-      expect(html).toContain('<script src="file:///data/user/0/com.learnp5/files/content/p5.min.js&quot;&amp;&lt;onload&gt;"></script>');
-      expect(html).not.toContain("var p5=function(){}");
-    } finally {
-      setContentPack(pack);
-    }
+  it("does not blame the WebView when the runtime is missing", () => {
+    const html = getExerciseHtml(baseParams);
+    expect(html).not.toContain("Update Android System WebView");
   });
 });

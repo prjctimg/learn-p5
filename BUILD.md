@@ -8,8 +8,12 @@ Expo SDK 55 project. Do not edit generated artifacts directly; regenerate them (
 npm install
 ```
 
-`postinstall` runs the app build generator (validation core).
-The p5.js runtime and course content ship in the separate content pack.
+`postinstall` runs the app build generators (validation core and the
+p5.js runtime). Course content ships in the separate content pack; the
+p5.js runtime is bundled with the app by `bundle-p5` (pinned to
+`2.4.0-rc.1`, transpiled to ES2015, inlined into every WebView preview
+with an ES5 polyfill in `src/utils/editor/p5Html.ts`), so sketches run
+offline and never fetch, download, or postMessage the runtime.
 
 ## Run
 
@@ -24,6 +28,7 @@ npm run web      # expo start --web
 | Script | Purpose |
 |---|---|
 | `bundle-editor` | Build the CodeMirror bundle into `codemirror-bundle.generated.ts` |
+| `bundle-p5` | Build the pinned p5.js runtime into `p5-runtime.generated.ts` (ES2015) |
 | `bundle-validation` | Build the validation core into `validation-core.generated.ts` |
 | `lint` | `expo lint` |
 | `test` | Jest |

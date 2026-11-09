@@ -1,11 +1,12 @@
 {
   "name": "learn-p5",
   "main": "expo-router/entry",
-  "version": "0.6.149",
+  "version": "0.6.150",
   "scripts": {
-    "postinstall": "npm run bundle-validation",
-    "start": "npm run bundle-validation && npm run bundle-editor && expo start",
+    "postinstall": "npm run bundle-validation && npm run bundle-p5",
+    "start": "npm run bundle-validation && npm run bundle-editor && npm run bundle-p5 && expo start",
     "bundle-editor": "node scripts/bundle-editor.mjs",
+    "bundle-p5": "node scripts/bundle-p5.mjs",
     "bundle-validation": "node scripts/bundle-validation.mjs",
     "typecheck": "tsc --noEmit",
     "export:web": "expo export --platform web --output-dir dist",

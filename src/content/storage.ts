@@ -12,8 +12,11 @@ export const CONTENT_DIR = FileSystem.documentDirectory
 const PACK_FILE = CONTENT_DIR ? `${CONTENT_DIR}pack.json` : null;
 const TEMP_FILE = CONTENT_DIR ? `${CONTENT_DIR}pack.tmp.json` : null;
 const META_FILE = CONTENT_DIR ? `${CONTENT_DIR}pack.meta.json` : null;
-export const P5_SCRIPT_FILE = CONTENT_DIR ? `${CONTENT_DIR}p5.min.js` : null;
-export const P5_TEMP_FILE = CONTENT_DIR ? `${CONTENT_DIR}p5.min.js.tmp` : null;
+// Legacy runtime artifact downloaded by older app versions. The bundled
+// runtime supersedes it; clearCachedContent still removes it so devices
+// that upgrade do not keep a stale copy on disk.
+const LEGACY_P5_SCRIPT_FILE = CONTENT_DIR ? `${CONTENT_DIR}p5.min.js` : null;
+const LEGACY_P5_TEMP_FILE = CONTENT_DIR ? `${CONTENT_DIR}p5.min.js.tmp` : null;
 
 function useWebStorage(): boolean {
   return Platform.OS === "web" || !CONTENT_DIR || !PACK_FILE || !TEMP_FILE || !META_FILE;
@@ -99,12 +102,6 @@ export async function readCachedContent(): Promise<ContentPack | null> {
     if (!pack.packSha256) {
       pack.packSha256 = "dev-local";
     }
-    if (!pack.p5FileUri && P5_SCRIPT_FILE && !useWebStorage()) {
-      const p5Info = await FileSystem.getInfoAsync(P5_SCRIPT_FILE);
-      if (p5Info.exists && !p5Info.isDirectory) {
-        pack.p5FileUri = P5_SCRIPT_FILE;
-      }
-    }
     return pack;
   } catch {
     try {
@@ -149,7 +146,11 @@ export async function clearCachedContent(): Promise<void> {
 
   await FileSystem.deleteAsync(PACK_FILE!, { idempotent: true });
   await FileSystem.deleteAsync(TEMP_FILE!, { idempotent: true });
-  await FileSystem.deleteAsync(P5_SCRIPT_FILE!, { idempotent: true });
-  await FileSystem.deleteAsync(P5_TEMP_FILE!, { idempotent: true });
+  if (LEGACY_P5_SCRIPT_FILE) {
+    await FileSystem.deleteAsync(LEGACY_P5_SCRIPT_FILE, { idempotent: true });
+  }
+  if (LEGACY_P5_TEMP_FILE) {
+    await FileSystem.deleteAsync(LEGACY_P5_TEMP_FILE, { idempotent: true });
+  }
   await clearCachedMeta();
 }

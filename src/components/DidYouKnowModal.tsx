@@ -81,9 +81,6 @@ export default function DidYouKnowModal({
                   pointerEvents="none"
                   javaScriptEnabled
                   domStorageEnabled
-                  allowFileAccess
-                  allowFileAccessFromFileURLs
-                  allowUniversalAccessFromFileURLs
                   bounces={false}
                 />
                 <View style={[styles.codeBlock, { backgroundColor: colors.surfaceDim, marginTop: 8 }]}>
