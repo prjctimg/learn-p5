@@ -27,11 +27,6 @@ connection.
 Android APKs are published on the
 [releases page](https://github.com/prjctimg/learn-p5/releases).
 
-## Documentation
-
-- [ROADMAP.md](ROADMAP.md) — feature status
-- [BUILD.md](BUILD.md) — build and scripts
-
 ## Contributors
 
 <!-- CONTRIBUTORS -->
@@ -42,6 +37,4 @@ Android APKs are published on the
 
 ## License
 
-Free software released under the [GPL-3.0-or-later](./LICENSE). Third-party
-licenses and notices are listed in
-[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Free software released under the [GPL-3.0-or-later](./LICENSE).

@@ -37,4 +37,3 @@ src/utils/editor/p5-runtime.generated.ts
 # Agent local state
 .opencode/
 .entire/
-.agents/opencode/
