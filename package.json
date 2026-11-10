@@ -1,7 +1,7 @@
 {
   "name": "learn-p5",
   "main": "expo-router/entry",
-  "version": "0.6.153",
+  "version": "0.6.154",
   "scripts": {
     "postinstall": "npm run bundle-validation && npm run bundle-p5 && npm run bundle-polyfill",
     "start": "npm run bundle-validation && npm run bundle-editor && npm run bundle-p5 && npm run bundle-polyfill && expo start",
@@ -10,8 +10,9 @@
     "bundle-polyfill": "node scripts/bundle-polyfill.mjs",
     "bundle-validation": "node scripts/bundle-validation.mjs",
     "typecheck": "tsc --noEmit",
+    "check-version": "node scripts/check-version.mjs",
     "export:web": "expo export --platform web --output-dir dist",
-    "check": "npm run typecheck && npm test",
+    "check": "npm run check-version && npm run typecheck && npm test",
     "prepare": "husky",
     "android": "expo start --android",
     "web": "expo start --web",

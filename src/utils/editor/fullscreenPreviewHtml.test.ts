@@ -29,4 +29,15 @@ describe("getFullscreenPreviewHtml", () => {
     expect(html).not.toContain('<script src="file://');
     expect(html).not.toContain("p5Runtime");
   });
+
+  it("loads p5 and polyfills as files when URLs are supplied", () => {
+    const html = getFullscreenPreviewHtml("fill(0);", "dark", {
+      p5Url: "p5.min.js",
+      polyfillUrl: "core-js.js",
+    });
+    expect(html).toContain('<script src="p5.min.js"');
+    expect(html).toContain('<script src="core-js.js"');
+    expect(html).not.toContain(P5_RUNTIME_SOURCE.slice(0, 200));
+    expect(html).toContain("fill(0);");
+  });
 });

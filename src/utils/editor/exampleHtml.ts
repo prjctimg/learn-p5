@@ -5,11 +5,9 @@ import {
   escapeScriptContent,
   p5RuntimeScript,
   polyfillScript,
+  type RuntimeAssetUrls,
 } from "./p5Html";
-import {
-  JETBRAINS_MONO_REGULAR_BASE64,
-  JETBRAINS_MONO_BOLD_BASE64,
-} from "../../constants/fontBase64.generated";
+import { fontFaceCss } from "./fontFace";
 
 // Placeholders inserted by the content repo's generate-reference.mjs look like
 // __P5_ASSET__<basename>__P5_ASSET__. At render time we swap them for the
@@ -29,7 +27,11 @@ function substituteAssetPlaceholders(code: string): string {
   });
 }
 
-export function getExampleHtml(code: string, colorScheme?: "light" | "dark"): string {
+export function getExampleHtml(
+  code: string,
+  colorScheme?: "light" | "dark",
+  assets?: RuntimeAssetUrls | null
+): string {
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
   const resolved = substituteAssetPlaceholders(code);
   const needsWrap = !resolved.includes("function setup");
@@ -44,8 +46,15 @@ export function getExampleHtml(code: string, colorScheme?: "light" | "dark"): st
     );
   }
 
-  const p5Script = p5RuntimeScript({ inlineSource: P5_RUNTIME_SOURCE });
-  const polyfill = polyfillScript();
+  const p5Script = p5RuntimeScript({
+    inlineSource: P5_RUNTIME_SOURCE,
+    runtimeUrl: assets?.p5Url,
+  });
+  const polyfill = polyfillScript({ scriptUrl: assets?.polyfillUrl });
+  const fontFaces = fontFaceCss({
+    regularUrl: assets?.fontRegularUrl,
+    boldUrl: assets?.fontBoldUrl,
+  });
   const safeSketch = escapeScriptContent(sketch);
 
   return `
@@ -55,18 +64,7 @@ export function getExampleHtml(code: string, colorScheme?: "light" | "dark"): st
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <style>
-@font-face {
-  font-family: 'JetBrains Mono';
-  font-style: normal;
-  font-weight: 400;
-  src: url(data:font/truetype;charset=utf-8;base64,${JETBRAINS_MONO_REGULAR_BASE64}) format('truetype');
-}
-@font-face {
-  font-family: 'JetBrains Mono';
-  font-style: normal;
-  font-weight: 700;
-  src: url(data:font/truetype;charset=utf-8;base64,${JETBRAINS_MONO_BOLD_BASE64}) format('truetype');
-}
+${fontFaces}
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { background: ${colors.surface}; display: flex; align-items: center; justify-content: center; min-height: 220px; font-family: "JetBrains Mono", monospace; }
 canvas { display: block; max-width: 100%; height: auto; }

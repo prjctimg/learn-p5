@@ -14,10 +14,15 @@ const baseParams = {
 };
 
 describe("getExerciseHtml", () => {
-  it("evaluates learner code directly and shows raw errors", () => {
+  it("evaluates learner code in a fresh scope and shows raw errors", () => {
     const html = getExerciseHtml(baseParams);
     expect(html).toContain('<meta charset="utf-8">');
-    expect(html).toContain("(0, eval)(code)");
+    expect(html).toContain("new Function(code");
+    expect(html).toContain("runUserSketch(code)");
+    expect(html).toContain("__p5ExposedHooks");
+    expect(html).toContain("if (rendered === false) return;");
+    expect(html).toContain("typeof CM === 'undefined'");
+    expect(html).not.toContain("(0, eval)(code)");
     expect(html).toContain("new window.p5()");
     expect(html).toContain("window.__setP5Error");
     expect(html).toContain("rawP5Error");
@@ -40,5 +45,22 @@ describe("getExerciseHtml", () => {
     expect(captureIdx).toBeGreaterThan(-1);
     expect(captureIdx).toBeLessThan(polyfillIdx);
     expect(polyfillIdx).toBeLessThan(p5Idx);
+  });
+
+  it("loads runtime assets as files when URLs are available", () => {
+    const html = getExerciseHtml(baseParams, {
+      baseUrl: "file:///cache/p5-runtime/",
+      p5Url: "p5-2.4.0-rc.1-100.js",
+      polyfillUrl: "core-js-3.51.0-100.js",
+      codemirrorUrl: "codemirror-6-100.js",
+      fontRegularUrl: "jetbrains-mono-regular-1-100.ttf",
+      fontBoldUrl: "jetbrains-mono-bold-1-100.ttf",
+    });
+    expect(html).toContain('<script src="p5-2.4.0-rc.1-100.js"');
+    expect(html).toContain('<script src="core-js-3.51.0-100.js"');
+    expect(html).toContain('<script src="codemirror-6-100.js"');
+    expect(html).toContain('url("jetbrains-mono-regular-1-100.ttf")');
+    expect(html).toContain('url("jetbrains-mono-bold-1-100.ttf")');
+    expect(html).not.toContain(P5_RUNTIME_SOURCE.slice(0, 200));
   });
 });

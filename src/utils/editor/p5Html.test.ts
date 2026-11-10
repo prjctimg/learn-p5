@@ -31,6 +31,24 @@ describe("p5RuntimeScript", () => {
     expect(p5RuntimeScript({ inlineSource: null })).toBe("");
     expect(p5RuntimeScript({})).toBe("");
   });
+
+  it("emits a file script tag with a load-error hook when a URL is supplied", () => {
+    const html = p5RuntimeScript({
+      runtimeUrl: "p5-2.4.0-rc.1-123.min.js",
+      inlineSource: "unused",
+    });
+    expect(html).toContain('<script src="p5-2.4.0-rc.1-123.min.js"');
+    expect(html).toContain("window.__noteP5LoadError");
+    expect(html).not.toContain("unused");
+  });
+});
+
+describe("polyfillScript asset mode", () => {
+  it("loads core-js from a URL when supplied", () => {
+    const html = polyfillScript({ scriptUrl: "core-js-3.51.0-123.js" });
+    expect(html).toContain('<script src="core-js-3.51.0-123.js"');
+    expect(html).toContain("window.__noteP5LoadError");
+  });
 });
 
 describe("errorCaptureScript", () => {
@@ -39,5 +57,7 @@ describe("errorCaptureScript", () => {
     expect(script).toContain("window.__setP5Error");
     expect(script).toContain("window.__getP5Error");
     expect(script).toContain("window.__p5Error");
+    expect(script).toContain("window.__clearP5Error");
+    expect(script).toContain("window.__noteP5LoadError");
   });
 });

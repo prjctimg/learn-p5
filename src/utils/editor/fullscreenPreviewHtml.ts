@@ -4,6 +4,7 @@ import {
   polyfillScript,
   safeJson,
   errorCaptureScript,
+  type RuntimeAssetUrls,
 } from "./p5Html";
 
 function stripDescribe(code: string): string {
@@ -25,14 +26,18 @@ function wrapSketch(code: string): string {
 
 export function getFullscreenPreviewHtml(
   code: string,
-  colorScheme?: "light" | "dark"
+  colorScheme?: "light" | "dark",
+  assets?: RuntimeAssetUrls | null
 ): string {
   const isDark = colorScheme === "dark";
   const bodyBg = isDark ? "#000000" : "#111111";
   const sketch = wrapSketch(stripDescribe(code ?? ""));
   const captureScript = errorCaptureScript();
-  const p5Script = p5RuntimeScript({ inlineSource: P5_RUNTIME_SOURCE });
-  const polyfill = polyfillScript();
+  const p5Script = p5RuntimeScript({
+    inlineSource: P5_RUNTIME_SOURCE,
+    runtimeUrl: assets?.p5Url,
+  });
+  const polyfill = polyfillScript({ scriptUrl: assets?.polyfillUrl });
   const userCode = safeJson(sketch);
 
   return `<!DOCTYPE html>
@@ -80,8 +85,10 @@ ${p5Script}
   var container = document.getElementById('sketch');
 
   function showError(err) {
-    var message = (window.__getP5Error ? window.__getP5Error() : null) ||
-      (err && (err.stack || err.message)) || String(err) || 'Unknown error';
+    var message = (err && (err.stack || err.message)) ? String(err.stack || err.message) :
+      (err ? String(err) : null) ||
+      (window.__getP5Error ? window.__getP5Error() : null) ||
+      'Unknown error';
     container.innerHTML = '';
     var pre = document.createElement('pre');
     pre.id = 'error';
@@ -90,12 +97,13 @@ ${p5Script}
   }
 
   function startSketch() {
+    if (window.__clearP5Error) window.__clearP5Error();
     try {
       if (typeof window.p5 !== 'function') {
         showError(window.__p5Error || 'p5 is not available');
         return;
       }
-      var hookNames = ['preload','setup','draw','remove','windowResized','mousePressed','mouseReleased','mouseClicked','mouseMoved','mouseDragged','mouseWheel','doubleClicked','keyPressed','keyReleased','keyTyped','touchStarted','touchMoved','touchEnded','deviceMoved','deviceTurned','deviceShaken'];
+      var hookNames = ['preload','setup','draw','windowResized','mousePressed','mouseReleased','mouseClicked','mouseMoved','mouseDragged','mouseWheel','doubleClicked','keyPressed','keyReleased','keyTyped','touchStarted','touchMoved','touchEnded','deviceMoved','deviceTurned','deviceShaken'];
       for (var i = 0; i < hookNames.length; i++) {
         try { delete window[hookNames[i]]; } catch (ignored) {}
       }

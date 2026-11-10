@@ -10,11 +10,10 @@ import {
   polyfillScript,
   safeJson,
   errorCaptureScript,
+  scriptTag,
+  type RuntimeAssetUrls,
 } from "./p5Html";
-import {
-  JETBRAINS_MONO_REGULAR_BASE64,
-  JETBRAINS_MONO_BOLD_BASE64,
-} from "../../constants/fontBase64.generated";
+import { fontFaceCss } from "./fontFace";
 
 function buildSymbolPattern(): RegExp | null {
   const names = getP5FunctionNames();
@@ -79,7 +78,7 @@ export function getExerciseHtml(params: {
   tasks?: ExerciseTask[];
   activeTaskIndex?: number;
   disableSystemKeyboard?: boolean;
-}): string {
+}, assets?: RuntimeAssetUrls | null): string {
   const colors = Colors[params.colorScheme === "dark" ? "dark" : "light"];
   const ctaColor = params.ctaColor ?? colors.cta;
   const cta = ctaColor;
@@ -92,8 +91,20 @@ export function getExerciseHtml(params: {
   const tasksJson = safeJson(params.tasks ?? []);
   const activeTaskIdx = params.activeTaskIndex ?? 0;
   const captureScript = errorCaptureScript();
-  const p5Script = p5RuntimeScript({ inlineSource: P5_RUNTIME_SOURCE });
-  const polyfill = polyfillScript();
+  const p5Script = p5RuntimeScript({
+    inlineSource: P5_RUNTIME_SOURCE,
+    runtimeUrl: assets?.p5Url,
+  });
+  const polyfill = polyfillScript({ scriptUrl: assets?.polyfillUrl });
+  const codemirror = scriptTag({
+    source: CODEMIRROR_BUNDLE,
+    url: assets?.codemirrorUrl,
+    label: "CodeMirror",
+  });
+  const fontFaces = fontFaceCss({
+    regularUrl: assets?.fontRegularUrl,
+    boldUrl: assets?.fontBoldUrl,
+  });
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -101,18 +112,7 @@ export function getExerciseHtml(params: {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <style>
-  @font-face {
-    font-family: 'JetBrains Mono';
-    font-style: normal;
-    font-weight: 400;
-    src: url(data:font/truetype;charset=utf-8;base64,${JETBRAINS_MONO_REGULAR_BASE64}) format('truetype');
-  }
-  @font-face {
-    font-family: 'JetBrains Mono';
-    font-style: normal;
-    font-weight: 700;
-    src: url(data:font/truetype;charset=utf-8;base64,${JETBRAINS_MONO_BOLD_BASE64}) format('truetype');
-  }
+${fontFaces}
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { min-height: 100%; background: ${colors.surface}; font-family: "JetBrains Mono", monospace; }
 
@@ -433,7 +433,7 @@ ${
 ${captureScript}
 ${polyfill}
 ${p5Script}
-<script>${CODEMIRROR_BUNDLE}</script>
+${codemirror}
 <script>${VALIDATION_CORE}</script>
 <script>
  ${getBridgeScript(params.startingCode, params.solution, themeColors, params.colorScheme, params.exerciseNumber, ctaColor, params.wordWrap, tasksJson, activeTaskIdx, params.disableSystemKeyboard)}
@@ -479,6 +479,13 @@ function getBridgeScript(startingCode: string, solution: string, theme: EditorTh
   } = theme;
 
   return `
+if (typeof CM === 'undefined') {
+  var cmLoadMessage = (window.__getP5Error ? window.__getP5Error() : 'CodeMirror runtime failed to load');
+  try {
+    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'sketchError', error: cmLoadMessage, container: 'editor' }));
+  } catch (ignored) {}
+  throw new Error(cmLoadMessage);
+}
 var _CM = CM;
 var basicSetup = _CM.basicSetup;
 var EditorView = _CM.EditorView;
@@ -795,11 +802,13 @@ function postOpenRef(symbol) {
 }
 
 function rawP5Error(fallback) {
+  // Prefer the error caught at the failing phase (parse/eval/construct) over
+  // the generic global capture; fall back to the capture when there is none.
+  if (fallback && (fallback.stack || fallback.message)) return String(fallback.stack || fallback.message);
+  if (fallback) return String(fallback);
   try {
     if (window.__getP5Error) return String(window.__getP5Error());
   } catch (ignored) {}
-  if (fallback && (fallback.stack || fallback.message)) return String(fallback.stack || fallback.message);
-  if (fallback) return String(fallback);
   return 'Unknown error';
 }
 
@@ -823,9 +832,42 @@ function showSketchError(container, err, containerId) {
   }
 }
 
+// p5 global-mode lifecycle hooks. User code is evaluated in a fresh function
+// scope so top-level let/const/class declarations are recreated on every run;
+// only these hooks are exposed on window for p5 to call.
+var P5_HOOK_NAMES = ['preload','setup','draw','windowResized','mousePressed','mouseReleased','mouseClicked','mouseMoved','mouseDragged','mouseWheel','doubleClicked','keyPressed','keyReleased','keyTyped','touchStarted','touchMoved','touchEnded','deviceMoved','deviceTurned','deviceShaken'];
+
+function clearExposedHooks() {
+  var previous = window.__p5ExposedHooks || [];
+  for (var i = 0; i < previous.length; i++) {
+    try { delete window[previous[i]]; } catch (ignored) {}
+  }
+  window.__p5ExposedHooks = [];
+}
+
+function runUserSketch(code) {
+  clearExposedHooks();
+  var fields = [];
+  for (var i = 0; i < P5_HOOK_NAMES.length; i++) {
+    var name = P5_HOOK_NAMES[i];
+    fields.push(JSON.stringify(name) + ':typeof ' + name + ' !== "undefined" ? ' + name + ' : undefined');
+  }
+  var factory = new Function(code + '\\n;return {' + fields.join(',') + '};');
+  var hooks = factory();
+  for (var key in hooks) {
+    if (!Object.prototype.hasOwnProperty.call(hooks, key)) continue;
+    if (typeof hooks[key] !== 'function') continue;
+    window[key] = hooks[key];
+    window.__p5ExposedHooks.push(key);
+  }
+}
+
 async function renderSketch(containerId, code) {
   var container = document.getElementById(containerId);
-  if (!container) return;
+  if (!container) return false;
+
+  if (window.__clearP5Error) window.__clearP5Error();
+  window.__p5Running = false;
 
   if (container.__p5) {
     try {
@@ -838,21 +880,16 @@ async function renderSketch(containerId, code) {
   }
   container.innerHTML = '';
 
-  if (!code) return;
+  if (!code) return false;
 
   if (typeof window.p5 !== 'function') {
-    showSketchError(container, window.__p5Error, containerId);
-    return;
+    showSketchError(container, window.__p5Error || (window.__getP5Error ? window.__getP5Error() : null), containerId);
+    return false;
   }
 
   try {
-    // Clear previous global-mode sketch hooks so re-runs don't inherit stale handlers.
-    var hookNames = ['preload','setup','draw','remove','windowResized','mousePressed','mouseReleased','mouseClicked','mouseMoved','mouseDragged','mouseWheel','doubleClicked','keyPressed','keyReleased','keyTyped','touchStarted','touchMoved','touchEnded','deviceMoved','deviceTurned','deviceShaken'];
-    for (var i = 0; i < hookNames.length; i++) {
-      try { delete window[hookNames[i]]; } catch (ignored) {}
-    }
-
-    (0, eval)(code);
+    runUserSketch(code);
+    window.__p5Running = true;
 
     var inst = new window.p5();
     container.__p5 = inst || window.p5.instance || null;
@@ -865,9 +902,12 @@ async function renderSketch(containerId, code) {
       cnv.style.touchAction = 'pan-y';
       cnv.onwheel = null;
     }
+    return true;
   } catch(e) {
-    if (window.__setP5Error) window.__setP5Error(e);
+    window.__p5Running = false;
+    if (window.__setP5Error) window.__setP5Error(e, 'sketch');
     showSketchError(container, e, containerId);
+    return false;
   }
 }
 
@@ -1117,7 +1157,11 @@ function handleMessage(data) {
           }
           break;
         }
-        renderSketch('user-sketch', userCode).then(function() {
+        renderSketch('user-sketch', userCode).then(function(rendered) {
+          // A failed render already displayed/posted the raw error. Do not run
+          // validation on top of it — that used to replace the real cause with
+          // a generic "Sketch did not render" message.
+          if (rendered === false) return;
           if (typeof window.__tutRun === 'function') window.__tutRun();
 
           function validateSync(code, rules) {

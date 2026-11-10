@@ -6,6 +6,7 @@ import { useThemeContext } from "./ThemeProvider";
 import { Colors } from "../constants/Colors";
 import { getP5Symbols, getP5SymbolsByName, P5Symbol } from "../data/reference";
 import { getExampleHtml } from "../utils/editor/exampleHtml";
+import { useRuntimeAssets } from "../hooks/useRuntimeAssets";
 import { highlightSyntax, parseDescription, extractDescribeCaption, stripDescribe } from "../utils/referenceRender";
 import Fuse from "fuse.js";
 
@@ -176,6 +177,7 @@ function SymbolInlineDetail({
 }) {
   const { derivedColors } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const runtimeAssets = useRuntimeAssets();
   const syntaxTokens = highlightSyntax(sym.syntax.replace(/\n/g, " "), colorScheme);
 
   return (
@@ -236,12 +238,18 @@ function SymbolInlineDetail({
                 ) : (
                   <>
                     <WebView
-                      source={{ html: getExampleHtml(ex) }}
+                      source={{
+                        html: getExampleHtml(ex, colorScheme === "dark" ? "dark" : "light", runtimeAssets.urls),
+                        baseUrl: runtimeAssets.urls?.baseUrl ?? undefined,
+                      }}
                       style={[styles.exampleWebView, { backgroundColor: colors.surface }]}
                       scrollEnabled={false}
                       pointerEvents="none"
                       javaScriptEnabled
                       domStorageEnabled
+                      allowFileAccess
+                      allowFileAccessFromFileURLs
+                      allowUniversalAccessFromFileURLs
                       bounces={false}
                     />
                     <View style={[styles.codeBlock, { backgroundColor: colors.surfaceDim, marginTop: 8 }]}>

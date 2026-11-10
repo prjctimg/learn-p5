@@ -24,6 +24,7 @@ import { getExerciseCodeKey, exerciseReducer, resolveNextTaskCode } from "../../
 import { getP5FunctionNames, ONCE_ONLY_P5_FUNCTIONS } from "../../../data/reference";
 import { getExerciseHtml } from "../../../utils/editor/exerciseHtml";
 import { getFullscreenPreviewHtml } from "../../../utils/editor/fullscreenPreviewHtml";
+import { useRuntimeAssets } from "../../../hooks/useRuntimeAssets";
 import { EDITOR_THEMES, getThemeSwatches } from "../../../utils/editor/themes";
 import { useStreak } from "../../../hooks/useStreak";
 import { recordCompletion, ACHIEVEMENTS } from "../../../hooks/useAchievements";
@@ -112,8 +113,10 @@ const [keyboardHeight, setKeyboardHeight] = useState<string>(DEFAULTS.keyboardHe
 
   const [toastTone, setToastTone] = useState<"success" | "failure" | undefined>(undefined);
 
+  const runtimeAssets = useRuntimeAssets({ editor: true });
+
   const exerciseHtml = useMemo(() => {
-  if (!state.exercise) return null;
+  if (!state.exercise || !runtimeAssets.ready) return null;
     return getExerciseHtml({
       title: state.exercise.title,
       moduleName: state.exercise.module,
@@ -128,12 +131,16 @@ const [keyboardHeight, setKeyboardHeight] = useState<string>(DEFAULTS.keyboardHe
       wordWrap,
       tasks: state.exercise.tasks,
       activeTaskIndex: state.currentTaskIndex,
-    });
-  }, [state.exercise, state.currentTaskIndex, colorScheme, id, editorTheme, codeFontSize, ctaColor, wordWrap]);
+    }, runtimeAssets.urls);
+  }, [state.exercise, state.currentTaskIndex, colorScheme, id, editorTheme, codeFontSize, ctaColor, wordWrap, runtimeAssets.ready, runtimeAssets.urls]);
 
   const fullscreenPreviewHtml = useMemo(
-    () => getFullscreenPreviewHtml(state.code, colorScheme === "dark" ? "dark" : "light"),
-    [state.code, colorScheme]
+    () => getFullscreenPreviewHtml(
+      state.code,
+      colorScheme === "dark" ? "dark" : "light",
+      runtimeAssets.urls
+    ),
+    [state.code, colorScheme, runtimeAssets.urls]
   );
 
  const styles = useMemo(
@@ -836,7 +843,7 @@ return (
   {exerciseHtml && (
    <WebView
    ref={webViewRef}
-   source={{ html: exerciseHtml }}
+   source={{ html: exerciseHtml, baseUrl: runtimeAssets.urls?.baseUrl ?? undefined }}
    style={styles.webview}
    onMessage={handleMessage}
    onLoadStart={() => {
@@ -844,6 +851,9 @@ return (
    }}
    javaScriptEnabled
    domStorageEnabled
+   allowFileAccess
+   allowFileAccessFromFileURLs
+   allowUniversalAccessFromFileURLs
    originWhitelist={["*"]}
    bounces={false}
    {...({
@@ -863,11 +873,14 @@ return (
     <View style={styles.fullscreenContainer}>
       <WebView
         ref={fullscreenWebViewRef}
-        source={{ html: fullscreenPreviewHtml }}
+        source={{ html: fullscreenPreviewHtml, baseUrl: runtimeAssets.urls?.baseUrl ?? undefined }}
         style={styles.fullscreenWebViewInner}
         onMessage={handleMessage}
         javaScriptEnabled
         domStorageEnabled
+        allowFileAccess
+        allowFileAccessFromFileURLs
+        allowUniversalAccessFromFileURLs
         originWhitelist={["*"]}
         scrollEnabled={false}
         bounces={false}

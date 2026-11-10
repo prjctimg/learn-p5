@@ -49,4 +49,18 @@ describe("getExampleHtml", () => {
     );
     expect(html).not.toContain('<script src="file://');
   });
+
+  it("loads p5, polyfills, and fonts as files when URLs are supplied", () => {
+    const html = getExampleHtml("fill(0);", "light", {
+      p5Url: "p5.min.js",
+      polyfillUrl: "core-js.js",
+      fontRegularUrl: "regular.ttf",
+      fontBoldUrl: "bold.ttf",
+    });
+    expect(html).toContain('<script src="p5.min.js"');
+    expect(html).toContain('<script src="core-js.js"');
+    expect(html).toContain('url("regular.ttf")');
+    expect(html).toContain('url("bold.ttf")');
+    expect(html).not.toContain(P5_RUNTIME_SOURCE.slice(0, 200));
+  });
 });

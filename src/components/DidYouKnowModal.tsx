@@ -7,6 +7,7 @@ import { Colors } from "../constants/Colors";
 import { P5Symbol } from "../data/reference";
 import { highlightSyntax } from "../utils/referenceRender";
 import { getExampleHtml } from "../utils/editor/exampleHtml";
+import { useRuntimeAssets } from "../hooks/useRuntimeAssets";
 
 interface DidYouKnowModalProps {
   visible: boolean;
@@ -37,6 +38,7 @@ export default function DidYouKnowModal({
   const { colorScheme, derivedColors } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
   const scheme = colorScheme === "dark" ? "dark" : "light";
+  const runtimeAssets = useRuntimeAssets();
 
   const description = useMemo(() => (symbol ? trimDescription(symbol.description) : ""), [symbol]);
   const exampleCode = useMemo(() => symbol?.examples?.[0] ?? "", [symbol]);
@@ -75,12 +77,18 @@ export default function DidYouKnowModal({
             {canRender ? (
               <>
                 <WebView
-                  source={{ html: getExampleHtml(exampleCode, scheme) }}
+                  source={{
+                    html: getExampleHtml(exampleCode, scheme, runtimeAssets.urls),
+                    baseUrl: runtimeAssets.urls?.baseUrl ?? undefined,
+                  }}
                   style={[styles.preview, { backgroundColor: colors.surface }]}
                   scrollEnabled={false}
                   pointerEvents="none"
                   javaScriptEnabled
                   domStorageEnabled
+                  allowFileAccess
+                  allowFileAccessFromFileURLs
+                  allowUniversalAccessFromFileURLs
                   bounces={false}
                 />
                 <View style={[styles.codeBlock, { backgroundColor: colors.surfaceDim, marginTop: 8 }]}>

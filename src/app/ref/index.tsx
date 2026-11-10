@@ -13,6 +13,7 @@ import { useShakeDetection } from "../../hooks/useShakeDetection";
 import ReportErrorModal from "../../components/ReportErrorModal";
 import SearchOverlay from "../../components/SearchOverlay";
 import { getExampleHtml } from "../../utils/editor/exampleHtml";
+import { useRuntimeAssets } from "../../hooks/useRuntimeAssets";
 import { highlightSyntax, parseDescription, extractDescribeCaption, stripDescribe } from "../../utils/referenceRender";
 
 function buildModuleGroups(symbols: P5Symbol[]) {
@@ -34,6 +35,7 @@ function SymbolDetail({ symbol, onOpenSearch }: { symbol: string; onOpenSearch: 
   const sym = symbolsByName[symbol];
   const { colorScheme, derivedColors } = useThemeContext();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const runtimeAssets = useRuntimeAssets();
   const currentIndex = sym ? symbols.indexOf(sym) : -1;
   const prevSym = currentIndex > 0 ? symbols[currentIndex - 1] : null;
   const nextSym = currentIndex >= 0 && currentIndex < symbols.length - 1 ? symbols[currentIndex + 1] : null;
@@ -144,12 +146,18 @@ function SymbolDetail({ symbol, onOpenSearch }: { symbol: string; onOpenSearch: 
 ) : (
   <>
   <WebView
-  source={{ html: getExampleHtml(ex) }}
+  source={{
+    html: getExampleHtml(ex, colorScheme === "dark" ? "dark" : "light", runtimeAssets.urls),
+    baseUrl: runtimeAssets.urls?.baseUrl ?? undefined,
+  }}
   style={[styles.exampleWebView, { backgroundColor: colors.surface }]}
   scrollEnabled={false}
   pointerEvents="none"
   javaScriptEnabled
   domStorageEnabled
+  allowFileAccess
+  allowFileAccessFromFileURLs
+  allowUniversalAccessFromFileURLs
   bounces={false}
   />
   <View style={[styles.codeBlock, { backgroundColor: colors.surfaceDim, marginTop: 8 }]}>
