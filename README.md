@@ -4,6 +4,8 @@
 [![Android build](https://github.com/prjctimg/learn-p5/actions/workflows/release.yaml/badge.svg)](https://github.com/prjctimg/learn-p5/actions/workflows/release.yaml)
 [![GitHub release](https://img.shields.io/github/v/release/prjctimg/learn-p5)](https://github.com/prjctimg/learn-p5/releases)
 
+![](learn-p5.png)
+
 Explore the p5.js API by completing simple code exercises in a visual REPL-like
 environment. Available on Android with iOS support coming soon.
 
