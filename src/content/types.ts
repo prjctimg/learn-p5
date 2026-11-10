@@ -28,49 +28,21 @@ export interface ContentPack {
   schemaVersion: number;
   contentVersion: string;
   generatedAt: string;
-  /**
-   * Inline runtime source in legacy schema 1 packs. The p5.js runtime
-   * now ships in the app bundle (see scripts/bundle-p5.mjs), so newer
-   * packs carry no runtime at all; this field is only retained so old
-   * cached packs can still be parsed, and it is ignored at runtime.
-   */
-  p5?: { version: string; source: string };
   p5Assets: Record<string, string>;
   courses: Course[];
   reference: ContentReference;
-  /**
-   * Manifest hash that produced this pack. It is attached at runtime and is
-   * not part of the downloaded JSON. Keeping it lets the app notice when a
-   * re-uploaded pack reuses the same contentVersion.
-   */
   packSha256?: string;
-  /**
-   * Legacy runtime-only fields describing a p5 file downloaded by older
-   * app versions. Retained so old cache metadata can still be read; new
-   * caches never set them and the bundled runtime is used instead.
-   */
-  p5FileUri?: string;
-  p5Sha256?: string;
-  p5Version?: string;
 }
 
 export interface ContentCacheMeta {
   contentVersion: string;
-  p5Version: string;
   packSha256: string;
-  p5Sha256?: string;
-  p5FileUri?: string;
 }
 
 export interface ContentManifest {
   schemaVersion: number;
   contentVersion: string;
   generatedAt: string;
-  /** Legacy field from manifests that also shipped the p5 runtime. */
-  p5Version?: string;
-  p5Url?: string;
-  p5Size?: number;
-  p5Sha256?: string;
   packUrl: string;
   packSize: number;
   packSha256: string;

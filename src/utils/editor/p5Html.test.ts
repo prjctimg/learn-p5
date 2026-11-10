@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@jest/globals";
-import { polyfillScript, p5RuntimeScript } from "./p5Html";
+import { polyfillScript, p5RuntimeScript, errorCaptureScript } from "./p5Html";
 import { CORE_JS_BUNDLE, CORE_JS_VERSION } from "./polyfill.generated";
 
 describe("polyfillScript", () => {
@@ -12,21 +12,32 @@ describe("polyfillScript", () => {
     expect(script).not.toContain("</script>var");
   });
 
-  it("is non-empty and runs before the p5 runtime in exercise HTML", () => {
-    // Cheap sanity check that the generated bundle is a real script
-    // body, not empty text: it should parse as a function body.
+  it("is non-empty and parses as script content", () => {
     expect(() => new Function(CORE_JS_BUNDLE)).not.toThrow();
   });
 });
 
 describe("p5RuntimeScript", () => {
   it("inlines the bundled runtime and escapes closing script tags", () => {
-    const html = p5RuntimeScript({ inlineSource: "var p5=function(){};\n</script>" });
-    expect(html).toBe("<script>var p5=function(){};\n<\\/script></script>");
+    const html = p5RuntimeScript({
+      inlineSource: "var p5=function(){};\n</script>",
+    });
+    expect(html).toBe(
+      "<script>var p5=function(){};\n<\\/script></script>"
+    );
   });
 
   it("returns an empty string when no runtime source is given", () => {
     expect(p5RuntimeScript({ inlineSource: null })).toBe("");
     expect(p5RuntimeScript({})).toBe("");
+  });
+});
+
+describe("errorCaptureScript", () => {
+  it("installs raw error capture helpers", () => {
+    const script = errorCaptureScript();
+    expect(script).toContain("window.__setP5Error");
+    expect(script).toContain("window.__getP5Error");
+    expect(script).toContain("window.__p5Error");
   });
 });

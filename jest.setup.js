@@ -19,10 +19,9 @@ jest.mock("@react-native-async-storage/async-storage", () =>
 // Initialize test content pack for tests
 const { setContentPack } = require("./src/content/store");
 setContentPack({
-  schemaVersion: 1,
+  schemaVersion: 2,
   contentVersion: "test",
   generatedAt: new Date().toISOString(),
-  p5: { version: "2.4.0-rc.1", source: "var p5=function(){};" },
   p5Assets: {},
   courses: [],
   reference: {

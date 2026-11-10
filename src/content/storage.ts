@@ -12,14 +12,15 @@ export const CONTENT_DIR = FileSystem.documentDirectory
 const PACK_FILE = CONTENT_DIR ? `${CONTENT_DIR}pack.json` : null;
 const TEMP_FILE = CONTENT_DIR ? `${CONTENT_DIR}pack.tmp.json` : null;
 const META_FILE = CONTENT_DIR ? `${CONTENT_DIR}pack.meta.json` : null;
-// Legacy runtime artifact downloaded by older app versions. The bundled
-// runtime supersedes it; clearCachedContent still removes it so devices
-// that upgrade do not keep a stale copy on disk.
-const LEGACY_P5_SCRIPT_FILE = CONTENT_DIR ? `${CONTENT_DIR}p5.min.js` : null;
-const LEGACY_P5_TEMP_FILE = CONTENT_DIR ? `${CONTENT_DIR}p5.min.js.tmp` : null;
 
 function useWebStorage(): boolean {
-  return Platform.OS === "web" || !CONTENT_DIR || !PACK_FILE || !TEMP_FILE || !META_FILE;
+  return (
+    Platform.OS === "web" ||
+    !CONTENT_DIR ||
+    !PACK_FILE ||
+    !TEMP_FILE ||
+    !META_FILE
+  );
 }
 
 async function readCachedMeta(): Promise<ContentCacheMeta | null> {
@@ -37,18 +38,8 @@ async function readCachedMeta(): Promise<ContentCacheMeta | null> {
     const meta = JSON.parse(raw) as ContentCacheMeta;
     if (
       typeof meta?.contentVersion !== "string" ||
-      typeof meta?.p5Version !== "string" ||
       typeof meta?.packSha256 !== "string"
     ) {
-      return null;
-    }
-    if (meta.packSha256 !== undefined && typeof meta.packSha256 !== "string") {
-      return null;
-    }
-    if (meta.p5Sha256 !== undefined && typeof meta.p5Sha256 !== "string") {
-      return null;
-    }
-    if (meta.p5FileUri !== undefined && typeof meta.p5FileUri !== "string") {
       return null;
     }
     return meta;
@@ -92,12 +83,6 @@ export async function readCachedContent(): Promise<ContentPack | null> {
     const meta = await readCachedMeta();
     if (meta && meta.contentVersion === pack.contentVersion) {
       pack.packSha256 = meta.packSha256;
-      pack.p5Sha256 = meta.p5Sha256;
-      if (meta.p5FileUri) pack.p5FileUri = meta.p5FileUri;
-      if (meta.p5Version) pack.p5Version = meta.p5Version;
-    }
-    if (!pack.p5Version && pack.p5?.version) {
-      pack.p5Version = pack.p5.version;
     }
     if (!pack.packSha256) {
       pack.packSha256 = "dev-local";
@@ -119,9 +104,6 @@ export async function writeCachedContent(
 ): Promise<ContentPack> {
   const pack = parseContentPack(raw);
   pack.packSha256 = meta.packSha256;
-  pack.p5Sha256 = meta.p5Sha256;
-  pack.p5Version = meta.p5Version;
-  pack.p5FileUri = meta.p5FileUri;
 
   if (useWebStorage()) {
     await AsyncStorage.setItem(WEB_PACK_KEY, raw);
@@ -146,11 +128,5 @@ export async function clearCachedContent(): Promise<void> {
 
   await FileSystem.deleteAsync(PACK_FILE!, { idempotent: true });
   await FileSystem.deleteAsync(TEMP_FILE!, { idempotent: true });
-  if (LEGACY_P5_SCRIPT_FILE) {
-    await FileSystem.deleteAsync(LEGACY_P5_SCRIPT_FILE, { idempotent: true });
-  }
-  if (LEGACY_P5_TEMP_FILE) {
-    await FileSystem.deleteAsync(LEGACY_P5_TEMP_FILE, { idempotent: true });
-  }
   await clearCachedMeta();
 }

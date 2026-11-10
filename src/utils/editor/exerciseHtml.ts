@@ -8,8 +8,8 @@ import { ExerciseTask } from "../../data/types";
 import {
   p5RuntimeScript,
   polyfillScript,
-  P5_GLOBAL_FUNCTIONS,
   safeJson,
+  errorCaptureScript,
 } from "./p5Html";
 import {
   JETBRAINS_MONO_REGULAR_BASE64,
@@ -91,6 +91,7 @@ export function getExerciseHtml(params: {
   const instructionHtml = parseInstructionHtml(params.instruction);
   const tasksJson = safeJson(params.tasks ?? []);
   const activeTaskIdx = params.activeTaskIndex ?? 0;
+  const captureScript = errorCaptureScript();
   const p5Script = p5RuntimeScript({ inlineSource: P5_RUNTIME_SOURCE });
   const polyfill = polyfillScript();
 
@@ -429,6 +430,7 @@ ${
 </div>
 
 
+${captureScript}
 ${polyfill}
 ${p5Script}
 <script>${CODEMIRROR_BUNDLE}</script>
@@ -495,15 +497,6 @@ var lineWrapping = _CM.EditorView.lineWrapping;
 var prettierLib = _CM.prettier;
 var prettierEstree = _CM.prettierPluginEstree;
 var prettierAcorn = _CM.prettierPluginAcorn;
-
-var P5_CTOR;
-function getP5Constructor() {
-  if (typeof window.p5 === 'function') {
-    P5_CTOR = window.p5;
-  }
-  return P5_CTOR;
-}
-var P5_GLOBAL_FUNCTIONS = ${JSON.stringify(P5_GLOBAL_FUNCTIONS)};
 
 var WORD_WRAP = ${wordWrap ?? false};
 var DISABLE_SYSTEM_KEYBOARD = ${disableSystemKeyboard ? "true" : "false"};
@@ -801,6 +794,35 @@ function postOpenRef(symbol) {
   }
 }
 
+function rawP5Error(fallback) {
+  try {
+    if (window.__getP5Error) return String(window.__getP5Error());
+  } catch (ignored) {}
+  if (fallback && (fallback.stack || fallback.message)) return String(fallback.stack || fallback.message);
+  if (fallback) return String(fallback);
+  return 'Unknown error';
+}
+
+function showSketchError(container, err, containerId) {
+  var message = rawP5Error(err);
+  console.error(message);
+  if (container) {
+    container.innerHTML = '';
+    var pre = document.createElement('pre');
+    pre.style.color = '${cta}';
+    pre.style.padding = '16px';
+    pre.style.margin = '0';
+    pre.style.whiteSpace = 'pre-wrap';
+    pre.style.fontFamily = '"JetBrains Mono", monospace';
+    pre.style.fontSize = '12px';
+    pre.textContent = message;
+    container.appendChild(pre);
+  }
+  if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'sketchError', error: message, container: containerId }));
+  }
+}
+
 async function renderSketch(containerId, code) {
   var container = document.getElementById(containerId);
   if (!container) return;
@@ -818,49 +840,34 @@ async function renderSketch(containerId, code) {
 
   if (!code) return;
 
-  var p5Ctor = getP5Constructor();
-  if (typeof p5Ctor !== 'function') {
-    var missingMessage = 'p5.js could not start. The bundled runtime failed to load — reopen this exercise and check the WebView console for the underlying error.';
-    console.error(missingMessage);
-    container.innerHTML = '<div style="color:${cta};padding:16px;font-family:\\"JetBrains Mono\\",monospace">\\u26A0 ' + missingMessage + '</div>';
-    if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-      window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'sketchError', error: missingMessage, container: containerId }));
-    }
+  if (typeof window.p5 !== 'function') {
+    showSketchError(container, window.__p5Error, containerId);
     return;
   }
 
-  var tagId = 'sketch-script-' + containerId;
-  var oldScript = document.getElementById(tagId);
-  if (oldScript) oldScript.remove();
-
-  for (var i = 0; i < P5_GLOBAL_FUNCTIONS.length; i++) {
-    try { delete window[P5_GLOBAL_FUNCTIONS[i]]; } catch (ignored) {}
-  }
-
   try {
-    // Run learner code in its own scope with the p5 constructor as a local
-    // binding. This prevents a top-level "var p5 = new p5(...)" from replacing
-    // the global constructor before the bridge creates its own instance.
-    var expose = '';
-    for (var j = 0; j < P5_GLOBAL_FUNCTIONS.length; j++) {
-      var name = P5_GLOBAL_FUNCTIONS[j];
-      expose += 'if (typeof ' + name + ' === "function") window.' + name + ' = ' + name + ';\\n';
+    // Clear previous global-mode sketch hooks so re-runs don't inherit stale handlers.
+    var hookNames = ['preload','setup','draw','remove','windowResized','mousePressed','mouseReleased','mouseClicked','mouseMoved','mouseDragged','mouseWheel','doubleClicked','keyPressed','keyReleased','keyTyped','touchStarted','touchMoved','touchEnded','deviceMoved','deviceTurned','deviceShaken'];
+    for (var i = 0; i < hookNames.length; i++) {
+      try { delete window[hookNames[i]]; } catch (ignored) {}
     }
-    var runUserCode = new Function('p5', code + '\\n' + expose);
-    runUserCode.call(window, p5Ctor);
 
-    container.__p5 = new p5Ctor(undefined, container);
-    var cnv = container.querySelector('canvas');
+    (0, eval)(code);
+
+    var inst = new window.p5();
+    container.__p5 = inst || window.p5.instance || null;
+
+    var cnv = (container.__p5 && container.__p5.canvas) ? container.__p5.canvas : document.querySelector('canvas');
     if (cnv) {
+      if (cnv.parentNode !== container) {
+        container.appendChild(cnv);
+      }
       cnv.style.touchAction = 'pan-y';
       cnv.onwheel = null;
     }
   } catch(e) {
-    console.error('Sketch render error:', e);
-    container.innerHTML = '<div style="color:${cta};padding:16px;font-family:\\"JetBrains Mono\\",monospace">\\u26A0 ' + e.message + '</div>';
-    if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-      window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'sketchError', error: e.message, container: containerId }));
-    }
+    if (window.__setP5Error) window.__setP5Error(e);
+    showSketchError(container, e, containerId);
   }
 }
 

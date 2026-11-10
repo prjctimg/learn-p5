@@ -2,7 +2,7 @@ import * as FileSystem from "expo-file-system/legacy";
 import { Platform } from "react-native";
 import {
   CONTENT_MANIFEST_TIMEOUT_MS,
-  SUPPORTED_CONTENT_SCHEMA_VERSIONS,
+  CONTENT_SCHEMA_VERSION,
 } from "../constants/Content";
 import { CONTENT_MANIFEST_URL } from "../constants/Content";
 import { parseContentPack } from "./parse";
@@ -31,13 +31,9 @@ function resolveContentUrl(url: string): string {
 }
 
 function validateManifest(manifest: ContentManifest): void {
-  if (!SUPPORTED_CONTENT_SCHEMA_VERSIONS.includes(manifest?.schemaVersion as 1 | 2)) {
-    throw new Error("This app version cannot read the latest content.");
+  if (manifest?.schemaVersion !== CONTENT_SCHEMA_VERSION) {
+    throw new Error("Unsupported content manifest schema.");
   }
-  // The p5.js runtime ships in the app bundle (see scripts/bundle-p5.mjs),
-  // so the manifest only needs to describe the course/reference pack.
-  // Older manifests that still carry p5Url/p5Size/p5Sha256 are accepted
-  // and those fields are ignored.
   if (
     typeof manifest.contentVersion !== "string" ||
     typeof manifest.packUrl !== "string" ||
@@ -149,10 +145,6 @@ async function downloadAndCommitContent(
   parseContentPack(rawPack);
   const pack = await writeCachedContent(rawPack, {
     contentVersion: manifest.contentVersion,
-    // p5Version in the cache meta is retained for back-compat with
-    // caches written by older app versions; the runtime version itself
-    // comes from the bundled runtime (P5_RUNTIME_VERSION).
-    p5Version: manifest.p5Version ?? "",
     packSha256: manifest.packSha256 ?? "",
   });
   return pack;

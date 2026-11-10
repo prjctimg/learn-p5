@@ -44,13 +44,16 @@ const colorCourse: Course = {
 
 function fixturePack(): ContentPack {
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     contentVersion: "fixture",
     generatedAt: new Date().toISOString(),
-    p5: { version: "2.4.0-rc.1", source: "var p5=function(){};" },
     p5Assets: {},
     courses: [shapeCourse, colorCourse],
-    reference: { byName: {}, functionNames: [], metadata: { generatedAt: "", p5Version: "", symbolCount: 0 } },
+    reference: {
+      byName: {},
+      functionNames: [],
+      metadata: { generatedAt: "", p5Version: "", symbolCount: 0 },
+    },
   };
 }
 

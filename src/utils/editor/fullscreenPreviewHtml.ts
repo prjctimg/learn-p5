@@ -2,8 +2,8 @@ import { P5_RUNTIME_SOURCE } from "./p5-runtime.generated";
 import {
   p5RuntimeScript,
   polyfillScript,
-  P5_GLOBAL_FUNCTIONS,
   safeJson,
+  errorCaptureScript,
 } from "./p5Html";
 
 function stripDescribe(code: string): string {
@@ -15,7 +15,10 @@ function stripDescribe(code: string): string {
 function wrapSketch(code: string): string {
   const hasSetup = /function\s+setup\s*\(/.test(code);
   if (!hasSetup) {
-    return `function setup() {\n${code.split("\n").map((l) => "  " + l).join("\n")}\n}`;
+    return `function setup() {\n${code
+      .split("\n")
+      .map((l) => "  " + l)
+      .join("\n")}\n}`;
   }
   return code;
 }
@@ -27,10 +30,10 @@ export function getFullscreenPreviewHtml(
   const isDark = colorScheme === "dark";
   const bodyBg = isDark ? "#000000" : "#111111";
   const sketch = wrapSketch(stripDescribe(code ?? ""));
+  const captureScript = errorCaptureScript();
   const p5Script = p5RuntimeScript({ inlineSource: P5_RUNTIME_SOURCE });
   const polyfill = polyfillScript();
   const userCode = safeJson(sketch);
-  const globalFunctions = JSON.stringify(P5_GLOBAL_FUNCTIONS);
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -58,50 +61,54 @@ export function getFullscreenPreviewHtml(
     font-family: monospace;
     font-size: 14px;
     padding: 24px;
-    text-align: center;
+    text-align: left;
     white-space: pre-wrap;
+    width: 100%;
+    max-height: 100%;
+    overflow: auto;
   }
 </style>
 </head>
 <body>
 <div id="sketch"></div>
+${captureScript}
 ${polyfill}
 ${p5Script}
 <script>
 (function() {
   var userCode = ${userCode};
-  var globalFunctions = ${globalFunctions};
   var container = document.getElementById('sketch');
-  var started = false;
 
-  function showError(message) {
+  function showError(err) {
+    var message = (window.__getP5Error ? window.__getP5Error() : null) ||
+      (err && (err.stack || err.message)) || String(err) || 'Unknown error';
     container.innerHTML = '';
-    var error = document.createElement('div');
-    error.id = 'error';
-    error.textContent = message;
-    container.appendChild(error);
+    var pre = document.createElement('pre');
+    pre.id = 'error';
+    pre.textContent = message;
+    container.appendChild(pre);
   }
 
   function startSketch() {
-    if (started) return;
-    started = true;
-    var P5 = window.p5;
-    if (typeof P5 !== 'function') {
-      showError('p5.js could not start. The bundled runtime failed to load — reopen this preview and check the WebView console for the underlying error.');
-      return;
-    }
-
     try {
-      var expose = '';
-      for (var i = 0; i < globalFunctions.length; i++) {
-        var name = globalFunctions[i];
-        expose += 'if (typeof ' + name + ' === "function") window.' + name + ' = ' + name + ';\\n';
+      if (typeof window.p5 !== 'function') {
+        showError(window.__p5Error || 'p5 is not available');
+        return;
       }
-      var runUserCode = new Function('p5', userCode + '\\n' + expose);
-      runUserCode.call(window, P5);
-      container.__p5 = new P5(undefined, container);
+      var hookNames = ['preload','setup','draw','remove','windowResized','mousePressed','mouseReleased','mouseClicked','mouseMoved','mouseDragged','mouseWheel','doubleClicked','keyPressed','keyReleased','keyTyped','touchStarted','touchMoved','touchEnded','deviceMoved','deviceTurned','deviceShaken'];
+      for (var i = 0; i < hookNames.length; i++) {
+        try { delete window[hookNames[i]]; } catch (ignored) {}
+      }
+      (0, eval)(userCode);
+      var inst = new window.p5();
+      container.__p5 = inst || window.p5.instance || null;
+      var canvas = container.__p5 && container.__p5.canvas ? container.__p5.canvas : document.querySelector('canvas');
+      if (canvas && canvas.parentNode !== container) {
+        container.appendChild(canvas);
+      }
     } catch (e) {
-      showError((e && e.message) ? e.message : String(e));
+      if (window.__setP5Error) window.__setP5Error(e);
+      showError(e);
     }
   }
 
