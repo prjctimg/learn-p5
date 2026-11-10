@@ -4,12 +4,13 @@ import { P5_RUNTIME_SOURCE } from "./p5-runtime.generated";
 import { CORE_JS_BUNDLE } from "./polyfill.generated";
 
 describe("getFullscreenPreviewHtml", () => {
-  it("evaluates learner code globally and reports raw errors", () => {
+  it("evaluates learner code in a fresh, per-instance scope and reports raw errors", () => {
     const html = getFullscreenPreviewHtml(
       "function setup() { createCanvas(100, 100); }"
     );
-    expect(html).toContain("(0, eval)(userCode)");
-    expect(html).toContain("new window.p5()");
+    expect(html).toContain("with (__p5scope)");
+    expect(html).toContain("new window.p5(function(p)");
+    expect(html).not.toContain("document.querySelector('canvas')");
     expect(html).toContain("window.__setP5Error");
     expect(html).toContain("showError");
     expect(html).not.toContain("bundled runtime failed to load");

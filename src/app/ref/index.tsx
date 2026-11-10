@@ -1,10 +1,10 @@
 import { useLocalSearchParams, useRouter, useIsFocused } from "expo-router";
-import { useRef, useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { View, Text, FlatList, ScrollView, Pressable, StyleSheet, Linking } from "react-native";
 
-import { WebView } from "react-native-webview";
 import Header from "../../components/Header";
 import Breadcrumbs from "../../components/Breadcrumbs";
+import ExamplePreview from "../../components/ExamplePreview";
 import { getP5Symbols, getP5SymbolsByName, P5Symbol } from "../../data/reference";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useThemeContext } from "../../components/ThemeProvider";
@@ -12,7 +12,6 @@ import { Colors } from "../../constants/Colors";
 import { useShakeDetection } from "../../hooks/useShakeDetection";
 import ReportErrorModal from "../../components/ReportErrorModal";
 import SearchOverlay from "../../components/SearchOverlay";
-import { getExampleHtml } from "../../utils/editor/exampleHtml";
 import { useRuntimeAssets } from "../../hooks/useRuntimeAssets";
 import { highlightSyntax, parseDescription, extractDescribeCaption, stripDescribe } from "../../utils/referenceRender";
 
@@ -135,40 +134,18 @@ function SymbolDetail({ symbol, onOpenSearch }: { symbol: string; onOpenSearch: 
   <Text style={[styles.exampleCaption, { color: colors.textSecondary, marginBottom: 6 }]}>
     {caption || `Example ${i + 1}`}
   </Text>
-  {sym.norender ? (
-  <View style={[styles.codeBlock, { backgroundColor: colors.surfaceDim }]}>
-  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 13, lineHeight: 20 }}>
-  {highlightSyntax(code, colorScheme).map((t, i) => (
-  <Text key={i} style={{ color: t.color }}>{t.text}</Text>
-  ))}
-  </Text>
-  </View>
-) : (
-  <>
-  <WebView
-  source={{
-    html: getExampleHtml(ex, colorScheme === "dark" ? "dark" : "light", runtimeAssets.urls),
-    baseUrl: runtimeAssets.urls?.baseUrl ?? undefined,
-  }}
-  style={[styles.exampleWebView, { backgroundColor: colors.surface }]}
-  scrollEnabled={false}
-  pointerEvents="none"
-  javaScriptEnabled
-  domStorageEnabled
-  allowFileAccess
-  allowFileAccessFromFileURLs
-  allowUniversalAccessFromFileURLs
-  bounces={false}
+  <ExamplePreview
+  code={code}
+  previewCode={ex}
+  colorScheme={colorScheme === "dark" ? "dark" : "light"}
+  assets={runtimeAssets}
+  norender={Boolean(sym.norender)}
+  previewHeight={260}
+  delayMs={i * 200}
+  codeFontSize={13}
+  codeLineHeight={20}
+  previewStyle={styles.exampleWebView}
   />
-  <View style={[styles.codeBlock, { backgroundColor: colors.surfaceDim, marginTop: 8 }]}>
-  <Text style={{ fontFamily: "JetBrainsMono", fontSize: 13, lineHeight: 20 }}>
-  {highlightSyntax(code, colorScheme).map((t, i) => (
-  <Text key={i} style={{ color: t.color }}>{t.text}</Text>
-  ))}
-  </Text>
-  </View>
-  </>
-)}
   </View>
   );})}
   </>

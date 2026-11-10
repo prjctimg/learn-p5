@@ -1,12 +1,10 @@
 import { useMemo } from "react";
 import { View, Text, Modal, Pressable, ScrollView, StyleSheet } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { WebView } from "react-native-webview";
 import { useThemeContext } from "./ThemeProvider";
 import { Colors } from "../constants/Colors";
 import { P5Symbol } from "../data/reference";
-import { highlightSyntax } from "../utils/referenceRender";
-import { getExampleHtml } from "../utils/editor/exampleHtml";
+import ExamplePreview from "./ExamplePreview";
 import { useRuntimeAssets } from "../hooks/useRuntimeAssets";
 
 interface DidYouKnowModalProps {
@@ -74,31 +72,19 @@ export default function DidYouKnowModal({
               <Text style={[styles.description, { color: colors.textSecondary }]}>{description}</Text>
             )}
 
-            {canRender ? (
-              <>
-                <WebView
-                  source={{
-                    html: getExampleHtml(exampleCode, scheme, runtimeAssets.urls),
-                    baseUrl: runtimeAssets.urls?.baseUrl ?? undefined,
-                  }}
-                  style={[styles.preview, { backgroundColor: colors.surface }]}
-                  scrollEnabled={false}
-                  pointerEvents="none"
-                  javaScriptEnabled
-                  domStorageEnabled
-                  allowFileAccess
-                  allowFileAccessFromFileURLs
-                  allowUniversalAccessFromFileURLs
-                  bounces={false}
-                />
-                <View style={[styles.codeBlock, { backgroundColor: colors.surfaceDim, marginTop: 8 }]}>
-                  <Text style={styles.codeText}>
-                    {highlightSyntax(exampleCode, scheme).map((t, j) => (
-                      <Text key={j} style={{ color: t.color }}>{t.text}</Text>
-                    ))}
-                  </Text>
-                </View>
-              </>
+            {exampleCode ? (
+              <ExamplePreview
+                code={exampleCode}
+                colorScheme={scheme}
+                assets={runtimeAssets}
+                norender={!canRender}
+                previewHeight={200}
+                delayMs={100}
+                codeFontSize={12}
+                codeLineHeight={18}
+                previewStyle={styles.preview}
+                codeBlockStyle={styles.codeBlock}
+              />
             ) : (
               <View style={[styles.codeBlock, { backgroundColor: colors.surfaceDim }]}>
                 <Text style={styles.codeText}>{exampleCode}</Text>

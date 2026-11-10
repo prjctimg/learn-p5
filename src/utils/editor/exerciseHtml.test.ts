@@ -14,16 +14,17 @@ const baseParams = {
 };
 
 describe("getExerciseHtml", () => {
-  it("evaluates learner code in a fresh scope and shows raw errors", () => {
+  it("evaluates learner code in a fresh, per-instance scope and shows raw errors", () => {
     const html = getExerciseHtml(baseParams);
     expect(html).toContain('<meta charset="utf-8">');
-    expect(html).toContain("new Function(code");
-    expect(html).toContain("runUserSketch(code)");
-    expect(html).toContain("__p5ExposedHooks");
+    expect(html).toContain("new Function(");
+    expect(html).toContain("with (__p5scope)");
+    expect(html).toContain("runUserSketch(code, p)");
+    expect(html).toContain("new window.p5(makeSketch(code), container)");
+    expect(html).not.toContain("document.querySelector('canvas')");
     expect(html).toContain("if (rendered === false) return;");
     expect(html).toContain("typeof CM === 'undefined'");
     expect(html).not.toContain("(0, eval)(code)");
-    expect(html).toContain("new window.p5()");
     expect(html).toContain("window.__setP5Error");
     expect(html).toContain("rawP5Error");
     expect(html).not.toContain("bundled runtime failed to load");

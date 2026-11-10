@@ -17,9 +17,9 @@ const tips = [
   },
   {
     icon: "vibrate",
-    title: "Shake for Quick Actions",
+    title: "Shake to Report a Bug",
     description:
-      "Shake your device to report an error from any screen. During an exercise, shake opens the quick actions menu — get hints, view references, or reset your code.",
+      "Shake your device firmly to open the bug report dialog from any screen. The detector ignores accidental bumps, so you can put your phone down without triggering it.",
   },
   {
     icon: "gesture-swipe-right",

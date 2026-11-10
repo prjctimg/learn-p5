@@ -96,6 +96,29 @@ ${p5Script}
     container.appendChild(pre);
   }
 
+  var hookNames = ['preload','setup','draw','windowResized','mousePressed','mouseReleased','mouseClicked','mouseMoved','mouseDragged','mouseWheel','doubleClicked','keyPressed','keyReleased','keyTyped','touchStarted','touchMoved','touchEnded','deviceMoved','deviceTurned','deviceShaken'];
+
+  function runUserSketch(code, instance) {
+    var fields = [];
+    for (var i = 0; i < hookNames.length; i++) {
+      var name = hookNames[i];
+      fields.push(JSON.stringify(name) + ':typeof ' + name + ' !== "undefined" ? ' + name + ' : undefined');
+    }
+    // Evaluate the sketch in a fresh scope, with the p5 instance exposed as
+    // the unqualified API (background(), createCanvas(), ...). This keeps
+    // global-style learner code working without binding the sketch to window.
+    var factory = new Function(
+      '__p5scope',
+      'with (__p5scope) { return (function() {' + code + '\\n;return {' + fields.join(',') + '};})(); }'
+    );
+    var hooks = factory(instance);
+    for (var key in hooks) {
+      if (!Object.prototype.hasOwnProperty.call(hooks, key)) continue;
+      if (typeof hooks[key] !== 'function') continue;
+      instance[key] = hooks[key];
+    }
+  }
+
   function startSketch() {
     if (window.__clearP5Error) window.__clearP5Error();
     try {
@@ -103,14 +126,11 @@ ${p5Script}
         showError(window.__p5Error || 'p5 is not available');
         return;
       }
-      var hookNames = ['preload','setup','draw','windowResized','mousePressed','mouseReleased','mouseClicked','mouseMoved','mouseDragged','mouseWheel','doubleClicked','keyPressed','keyReleased','keyTyped','touchStarted','touchMoved','touchEnded','deviceMoved','deviceTurned','deviceShaken'];
-      for (var i = 0; i < hookNames.length; i++) {
-        try { delete window[hookNames[i]]; } catch (ignored) {}
-      }
-      (0, eval)(userCode);
-      var inst = new window.p5();
+      var inst = new window.p5(function(p) {
+        runUserSketch(userCode, p);
+      }, container);
       container.__p5 = inst || window.p5.instance || null;
-      var canvas = container.__p5 && container.__p5.canvas ? container.__p5.canvas : document.querySelector('canvas');
+      var canvas = container.__p5 && container.__p5.canvas;
       if (canvas && canvas.parentNode !== container) {
         container.appendChild(canvas);
       }

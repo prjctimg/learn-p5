@@ -1,6 +1,4 @@
-import { useMemo } from "react";
 import { View, Text, Pressable, Linking, StyleSheet, ScrollView } from "react-native";
-import { WebView } from "react-native-webview";
 import { Svg, Path } from "react-native-svg";
 import { Colors } from "../../constants/Colors";
 import { Spacing } from "../../constants/Spacing";
@@ -8,23 +6,9 @@ import { Typography } from "../../constants/Typography";
 import Header from "../../components/Header";
 import { useThemeContext } from "../../components/ThemeProvider";
 import { APP_VERSION } from "../../constants/Version";
-import { P5_RUNTIME_SOURCE, P5_RUNTIME_VERSION } from "../../utils/editor/p5-runtime.generated";
-import {
-  p5RuntimeScript,
-  polyfillScript,
-  type RuntimeAssetUrls,
-} from "../../utils/editor/p5Html";
-import { useRuntimeAssets } from "../../hooks/useRuntimeAssets";
+import { P5_RUNTIME_VERSION } from "../../utils/editor/p5-runtime.generated";
 
-// Official Processing logo colors, from processing.org/favicon.svg and
-// processing4/app/src/main/resources/logo.svg. The upstream .pde still uses
-// the previous palette, so these are the current authoritative values.
-const PROCESSING_LOGO_COLORS = {
-  blue: "4,104,255",
-  darkBlue: "31,52,171",
-  lightBlue: "133,174,255",
-} as const;
-
+// p5.js logo paths, from p5js.org's favicon/mark.
 const p5LogoPaths = [
  "M16.254,27.631v7.998h0.359c0.715-1.113,1.65-2.248,2.805-3.402c1.153-1.154,2.567-2.188,4.239-3.105c1.671-0.912,3.561-1.67,5.671-2.268c2.107-0.596,4.477-0.896,7.103-0.896c4.06,0,7.8,0.777,11.223,2.328c3.422,1.555,6.368,3.684,8.836,6.389c2.466,2.707,4.376,5.891,5.73,9.551c1.353,3.662,2.03,7.602,2.03,11.82s-0.657,8.178-1.971,11.879c-1.312,3.701-3.185,6.924-5.611,9.67c-2.429,2.746-5.372,4.938-8.835,6.566c-3.463,1.631-7.384,2.447-11.76,2.447c-4.06,0-7.781-0.836-11.163-2.506c-3.385-1.672-5.99-3.939-7.82-6.807h-0.238v36.295H2.525V27.631H16.254z M49.684,56.045c0-2.229-0.339-4.438-1.015-6.627c-0.678-2.188-1.692-4.158-3.045-5.91c-1.354-1.748-3.064-3.162-5.134-4.238c-2.07-1.074-4.497-1.611-7.282-1.611c-2.627,0-4.976,0.557-7.044,1.672c-2.07,1.115-3.842,2.549-5.313,4.297c-1.474,1.752-2.587,3.742-3.343,5.971c-0.758,2.229-1.134,4.459-1.134,6.686c0,2.229,0.376,4.438,1.134,6.625c0.756,2.191,1.869,4.16,3.343,5.912c1.472,1.75,3.243,3.164,5.313,4.236c2.068,1.076,4.417,1.611,7.044,1.611c2.785,0,5.212-0.555,7.282-1.67c2.069-1.115,3.78-2.547,5.134-4.299c1.353-1.75,2.367-3.74,3.045-5.969C49.345,60.502,49.684,58.273,49.684,56.045z",
  "M189.333,24.893v63.506c0,3.422-0.279,6.666-0.836,9.73c-0.559,3.064-1.611,5.73-3.164,8c-1.551,2.27-3.662,4.078-6.328,5.432c-2.668,1.354-6.148,2.029-10.447,2.029c-1.193,0-2.387-0.08-3.582-0.238c-1.193-0.16-2.148-0.32-2.865-0.479l1.195-12.178c0.637,0.16,1.312,0.279,2.029,0.359c0.717,0.078,1.352,0.119,1.91,0.119c1.67,0,3.023-0.318,4.059-0.955c1.033-0.639,1.83-1.514,2.389-2.627c0.555-1.115,0.914-2.408,1.074-3.881c0.158-1.473,0.238-3.043,0.238-4.715V24.893H189.333z",
@@ -33,24 +17,28 @@ const p5LogoPaths = [
  "M124.086,45.836c-1.473-3.301-3.521-6.088-6.148-8.357c-2.626-2.268-5.711-4-9.252-5.193c-3.543-1.193-7.384-1.791-11.521-1.791c-1.513,0-3.204,0.082-5.074,0.238c-1.871,0.162-3.482,0.439-4.835,0.838l0.835-18.268h34.504V0.41H74.481l-1.433,46.201c1.271-0.635,2.725-1.232,4.357-1.791c1.631-0.555,3.302-1.053,5.014-1.49c1.711-0.438,3.463-0.775,5.254-1.016c1.791-0.238,3.481-0.357,5.074-0.357c2.307,0,4.576,0.258,6.805,0.775c2.228,0.518,4.238,1.434,6.029,2.746s3.242,3.045,4.358,5.193c1.113,2.148,1.671,4.855,1.671,8.119c0,2.547-0.418,4.836-1.254,6.865c-0.835,2.027-1.97,3.721-3.401,5.072c-1.434,1.355-3.104,2.389-5.016,3.104c-1.91,0.719-3.939,1.076-6.089,1.076c-3.819,0-7.124-1.016-9.909-3.045c-2.787-2.029-4.775-4.715-5.97-8.059l-0.159,0.059l-10.368,9.715c2.097,3.42,4.8,6.281,8.14,8.553c4.854,3.301,10.823,4.955,17.909,4.955c4.218,0,8.197-0.678,11.938-2.029c3.74-1.352,7.004-3.303,9.79-5.852c2.785-2.545,4.994-5.67,6.627-9.371c1.63-3.701,2.446-7.898,2.446-12.596C126.295,52.939,125.559,49.141,124.086,45.836z",
 ];
 
-function buildProcessingHtml(assets?: RuntimeAssetUrls | null): string {
-  const p5Script = p5RuntimeScript({
-    inlineSource: P5_RUNTIME_SOURCE,
-    runtimeUrl: assets?.p5Url,
-  });
-  const polyfill = polyfillScript({ scriptUrl: assets?.polyfillUrl });
-  return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><style>*{margin:0;padding:0;box-sizing:border-box}html,body{width:100%;height:100%;overflow:hidden;background:transparent;display:flex;align-items:center;justify-content:center}canvas{display:block}</style></head><body>' + polyfill + p5Script + '<script>new p5(function(p){p.setup=function(){p.createCanvas(250,250)};var t=0;p.draw=function(){p.clear();var u=p.width/8;p.strokeCap(p.SQUARE);p.strokeWeight(1.5*u);p.stroke(' + PROCESSING_LOGO_COLORS.blue + ');var off=p.sin(t)*u*0.3;p.bezier(4*u,1*u,7*u+off,1*u+off,7*u,5*u,4*u,5*u);p.stroke(' + PROCESSING_LOGO_COLORS.darkBlue + ');p.line(1*u,6*u,4*u,2*u);p.stroke(' + PROCESSING_LOGO_COLORS.lightBlue + ');p.line(1*u,3*u,2*u,5*u);t+=0.03}})<\/script></body></html>';
-}
+const SUPPORTERS: { name: string; url: string }[] = [
+  { name: "Processing Foundation", url: "https://processingfoundation.org" },
+  { name: "Sovereign Tech Fund", url: "https://www.sovereigntechfund.de/" },
+  { name: "Mozilla Foundation", url: "https://foundation.mozilla.org/en/" },
+  { name: "NYU ITP", url: "https://tisch.nyu.edu/itp" },
+  { name: "UCLA DMA", url: "https://dma.ucla.edu/" },
+  { name: "National Endowment for the Arts", url: "https://www.arts.gov/" },
+  {
+    name: "The Frank-Ratchye STUDIO for Creative Inquiry at Carnegie Mellon University",
+    url: "https://studioforcreativeinquiry.org/",
+  },
+  {
+    name: "Clinic for Open Source Arts (COSA) at the University of Denver",
+    url: "https://clinicopensourcearts.org/",
+  },
+  { name: "New York City Department of Education", url: "https://www.schools.nyc.gov/" },
+  { name: "Butter", url: "https://www.usebutter.com/" },
+];
 
 export default function About() {
  const { colorScheme, derivedColors } = useThemeContext();
  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
-
- const runtimeAssets = useRuntimeAssets();
- const sketchHtml = useMemo(
-  () => (runtimeAssets.ready ? buildProcessingHtml(runtimeAssets.urls) : null),
-  [runtimeAssets.ready, runtimeAssets.urls]
- );
 
  return (
  <View style={[styles.container, { backgroundColor: colors.surface }]}>
@@ -62,18 +50,30 @@ export default function About() {
  >
  <View style={[styles.sectionCard, { backgroundColor: colors.surfaceDim }]}>
  <Text style={[styles.sectionHeading, { color: colors.onSurface }]}>
- What is p5.js?
+ What is p5.js
  </Text>
  <Svg width={100} height={46} viewBox="0 0 250 114" style={styles.logo}>
  {p5LogoPaths.map((d, i) => (
  <Path key={`about-p5-path-${i}`} d={d} fill={derivedColors.primary} />
-))}
+ ))}
  </Svg>
  <Text style={[styles.definitionText, { color: colors.textSecondary }]}>
- p5.js is a JavaScript library for creative coding, with a focus on making coding
- accessible and inclusive for artists, designers, educators, beginners, and anyone else!
- p5.js is free and open-source because we believe software, and the tools to learn it,
- should be accessible to everyone.
+ p5.js is a friendly tool for learning to code and make art. It is a free and
+ open-source JavaScript library built by an inclusive, nurturing community.
+ p5.js welcomes artists, designers, beginners, educators, and anyone else!
+ </Text>
+ <Text style={[styles.paragraph, { color: colors.textSecondary }]}>
+ p5.js prioritizes accessibility, inclusivity, community, and joy. It makes
+ sketching with code as intuitive as sketching in a notebook. p5.js supports
+ audio-visual, interactive, and experimental works for the web. It is
+ accessible in many languages and has expansive documentation with visual
+ examples. You can expand p5.js with many community-created libraries, and the
+ project always appreciates contributions in all forms.
+ </Text>
+ <Text style={[styles.paragraph, { color: colors.textSecondary }]}>
+ p5.js encourages iterative coding for creative expression. We value open
+ source and access for all. Our community provides inspiration and support to
+ learn, create, imagine, design, share, and code freely.
  </Text>
  <Pressable
  onPress={() => Linking.openURL("https://p5js.org")}
@@ -88,48 +88,32 @@ export default function About() {
 
  <View style={[styles.sectionCard, { backgroundColor: colors.surfaceDim }]}>
  <Text style={[styles.sectionHeading, { color: colors.onSurface }]}>
- What is Processing?
+ Supporters
  </Text>
-
- {sketchHtml ? (
-  <WebView
-  source={{ html: sketchHtml, baseUrl: runtimeAssets.urls?.baseUrl ?? undefined }}
-  style={styles.sketchBox}
-  javaScriptEnabled
-  allowFileAccess
-  allowFileAccessFromFileURLs
-  allowUniversalAccessFromFileURLs
-  scrollEnabled={false}
-  bounces={false}
-  pointerEvents="none"
-  />
- ) : (
-  <View style={styles.sketchBox} />
- )}
-
-
  <Text style={[styles.definitionText, { color: colors.textSecondary }]}>
- Processing is a flexible software sketchbook and a language for learning how to code
- within the context of the visual arts. Since 2001, Processing has promoted software
- literacy within the visual arts and visual literacy within technology. There are tens
- of thousands of students, artists, designers, researchers, and hobbyists who use
- Processing for learning and prototyping.
+ p5.js is made possible by the generous support of these organizations and
+ communities.
  </Text>
+ <View style={styles.supporterList}>
+ {SUPPORTERS.map((supporter) => (
  <Pressable
- onPress={() => Linking.openURL("https://processing.org")}
+ key={supporter.name}
+ onPress={() => Linking.openURL(supporter.url)}
  accessibilityRole="link"
- accessibilityLabel="Visit processing.org"
+ accessibilityLabel={`Visit ${supporter.name}`}
  >
- <Text style={[styles.link, { color: derivedColors.primary }]}>
- Visit processing.org →
+ <Text style={[styles.supporterLink, { color: derivedColors.primary }]}>
+ {supporter.name} →
  </Text>
  </Pressable>
+ ))}
+ </View>
  </View>
 
  <View style={[styles.versionBadge, { backgroundColor: colors.surfaceDim }]}>
-  <Text style={[styles.versionText, { color: colors.textSecondary }]}>
-    {APP_VERSION} • p5.js v{P5_RUNTIME_VERSION}
-  </Text>
+   <Text style={[styles.versionText, { color: colors.textSecondary }]}>
+     {APP_VERSION} • p5.js v{P5_RUNTIME_VERSION}
+   </Text>
  </View>
 
 
@@ -161,10 +145,10 @@ const styles = StyleSheet.create({
   sectionHeading: {
     fontFamily: "JetBrainsMono",
     fontSize: 20,
- fontWeight: "700",
- marginBottom: Spacing.md,
- textAlign: "left",
- },
+  fontWeight: "700",
+  marginBottom: Spacing.md,
+  textAlign: "left",
+  },
  logo: {
  marginBottom: Spacing.md,
  },
@@ -172,20 +156,32 @@ const styles = StyleSheet.create({
     ...Typography.body,
     fontFamily: "JetBrainsMono",
     textAlign: "left",
- lineHeight: 22,
- },
+  lineHeight: 22,
+  },
+  paragraph: {
+    ...Typography.body,
+    fontFamily: "JetBrainsMono",
+    textAlign: "left",
+    lineHeight: 22,
+    marginTop: Spacing.md,
+  },
+  supporterList: {
+    marginTop: Spacing.md,
+    alignSelf: "stretch",
+  },
+  supporterLink: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 13,
+    fontWeight: "700",
+    textDecorationLine: "underline",
+    marginTop: Spacing.sm,
+  },
   link: {
     fontFamily: "JetBrainsMono",
     fontSize: 13,
  fontWeight: "700",
  textDecorationLine: "underline",
  marginTop: Spacing.md,
- },
- sketchBox: {
- width: 200,
- height: 200,
- marginTop: Spacing.lg,
- backgroundColor: "transparent",
  },
  versionBadge: {
  borderRadius: 9999,

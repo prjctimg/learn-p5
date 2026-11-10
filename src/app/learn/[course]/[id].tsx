@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useReducer, useMemo, useCallback } from "react";
 import { View, Text, Pressable, StyleSheet, Modal, Switch, ScrollView, StatusBar } from "react-native";
-import { useLocalSearchParams, useRouter, useFocusEffect, useIsFocused } from "expo-router";
+import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -15,7 +15,6 @@ import ProgrammingKeyboard from "../../../components/ProgrammingKeyboard";
 import Toast from "../../../components/Toast";
 import Breadcrumbs from "../../../components/Breadcrumbs";
 import StreakToast from "../../../components/StreakToast";
-import ShakeModal from "../../../components/ShakeModal";
 import SearchOverlay from "../../../components/SearchOverlay";
 import TaskCompletePulse from "../../../components/TaskCompletePulse";
 import NextExerciseOverlay from "../../../components/NextExerciseOverlay";
@@ -28,8 +27,6 @@ import { useRuntimeAssets } from "../../../hooks/useRuntimeAssets";
 import { EDITOR_THEMES, getThemeSwatches } from "../../../utils/editor/themes";
 import { useStreak } from "../../../hooks/useStreak";
 import { recordCompletion, ACHIEVEMENTS } from "../../../hooks/useAchievements";
-
-import { useShakeDetection } from "../../../hooks/useShakeDetection";
 
 /** Advance to the next exercise in the course, or back to the course list. */
 function advanceToNextExercise(
@@ -89,7 +86,6 @@ const [keyboardHeight, setKeyboardHeight] = useState<string>(DEFAULTS.keyboardHe
   const [courseTitle, setCourseTitle] = useState<string>("");
   const streak = useStreak();
   const [streakToastVisible, setStreakToastVisible] = useState(false);
-  const [shakeModalVisible, setShakeModalVisible] = useState(false);
   const [searchVisible, setSearchVisible] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
 
@@ -554,16 +550,6 @@ case "editorTapped":
     });
   }, []);
 
-  const handleShake = useCallback(() => {
-    setShakeModalVisible(true);
-  }, []);
-
-  const isFocused = useIsFocused();
-
-  useShakeDetection(handleShake, {
-    enabled: isFocused && !state.loading && !!state.exercise,
-  });
-
   useEffect(() => {
     if (editorViewReady && webViewRef.current && state.exercise?.tasks) {
       const task = state.exercise.tasks[state.currentTaskIndex];
@@ -934,56 +920,6 @@ return (
   onDismiss={() => setStreakToastVisible(false)}
   />
 
-  <ShakeModal
-  visible={shakeModalVisible}
-  onDismiss={() => setShakeModalVisible(false)}
-  title="Exercise"
-  subtitle="What would you like to do?"
-  actions={[
-    {
-      icon: "lightbulb-outline",
-      label: "Get Hint",
-      variant: "primary",
-      onPress: () => {
-        setShakeModalVisible(false);
-        const hint = "Read the instructions above and check the reference for function syntax.";
-        showToast(hint, "Open Ref", () => {
-          if (exerciseSymbols.length > 0) {
-            router.push(`/ref?symbol=${exerciseSymbols[0]}`);
-          }
-        });
-      },
-    },
-    {
-      icon: "restart",
-      label: "Reset Code",
-      variant: "secondary",
-      onPress: () => {
-        setShakeModalVisible(false);
-        handleReset();
-      },
-    },
-    {
-      icon: "book-open-variant",
-      label: "View Reference",
-      variant: "secondary",
-      onPress: () => {
-        setShakeModalVisible(false);
-        if (exerciseSymbols.length > 0) {
-          router.push(`/ref?symbol=${exerciseSymbols[0]}`);
-        } else {
-          router.push("/ref");
-        }
-      },
-    },
-    {
-      icon: "close",
-      label: "Dismiss",
-      variant: "ghost",
-      onPress: () => setShakeModalVisible(false),
-    },
-  ]}
-  />
   <SearchOverlay
     visible={searchVisible}
     inline

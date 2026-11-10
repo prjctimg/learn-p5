@@ -832,34 +832,37 @@ function showSketchError(container, err, containerId) {
   }
 }
 
-// p5 global-mode lifecycle hooks. User code is evaluated in a fresh function
-// scope so top-level let/const/class declarations are recreated on every run;
-// only these hooks are exposed on window for p5 to call.
+// p5 lifecycle hooks that learner code can define. User code is evaluated in a
+// fresh function scope so top-level let/const/class declarations are recreated
+// on every run. The function body is wrapped in a with-scope over the p5
+// instance so learners keep writing global-style sketches (background(),
+// createCanvas(), etc.) while each preview runs as its own p5 instance. Global
+// mode would bind every sketch to window and make simultaneous user/solution
+// previews draw into the same canvas.
 var P5_HOOK_NAMES = ['preload','setup','draw','windowResized','mousePressed','mouseReleased','mouseClicked','mouseMoved','mouseDragged','mouseWheel','doubleClicked','keyPressed','keyReleased','keyTyped','touchStarted','touchMoved','touchEnded','deviceMoved','deviceTurned','deviceShaken'];
 
-function clearExposedHooks() {
-  var previous = window.__p5ExposedHooks || [];
-  for (var i = 0; i < previous.length; i++) {
-    try { delete window[previous[i]]; } catch (ignored) {}
-  }
-  window.__p5ExposedHooks = [];
-}
-
-function runUserSketch(code) {
-  clearExposedHooks();
+function runUserSketch(code, instance) {
   var fields = [];
   for (var i = 0; i < P5_HOOK_NAMES.length; i++) {
     var name = P5_HOOK_NAMES[i];
     fields.push(JSON.stringify(name) + ':typeof ' + name + ' !== "undefined" ? ' + name + ' : undefined');
   }
-  var factory = new Function(code + '\\n;return {' + fields.join(',') + '};');
-  var hooks = factory();
+  var factory = new Function(
+    '__p5scope',
+    'with (__p5scope) { return (function() {' + code + '\\n;return {' + fields.join(',') + '};})(); }'
+  );
+  var hooks = factory(instance);
   for (var key in hooks) {
     if (!Object.prototype.hasOwnProperty.call(hooks, key)) continue;
     if (typeof hooks[key] !== 'function') continue;
-    window[key] = hooks[key];
-    window.__p5ExposedHooks.push(key);
+    instance[key] = hooks[key];
   }
+}
+
+function makeSketch(code) {
+  return function(p) {
+    runUserSketch(code, p);
+  };
 }
 
 async function renderSketch(containerId, code) {
@@ -888,17 +891,18 @@ async function renderSketch(containerId, code) {
   }
 
   try {
-    runUserSketch(code);
     window.__p5Running = true;
 
-    var inst = new window.p5();
+    // Pass the preview box as p5's user node so p5 creates/removes its canvas
+    // inside this container only. Never fall back to document.querySelector:
+    // that can adopt another preview's canvas when setup is still async.
+    var inst = new window.p5(makeSketch(code), container);
     container.__p5 = inst || window.p5.instance || null;
+    if (!container.__p5) throw new Error('p5 did not create a sketch instance');
 
-    var cnv = (container.__p5 && container.__p5.canvas) ? container.__p5.canvas : document.querySelector('canvas');
+    var cnv = container.__p5.canvas;
     if (cnv) {
-      if (cnv.parentNode !== container) {
-        container.appendChild(cnv);
-      }
+      if (cnv.parentNode !== container) container.appendChild(cnv);
       cnv.style.touchAction = 'pan-y';
       cnv.onwheel = null;
     }

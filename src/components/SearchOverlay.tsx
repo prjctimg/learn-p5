@@ -1,11 +1,10 @@
 import { useRef, useMemo, useState, useCallback, useEffect } from "react";
 import { View, Text, FlatList, Pressable, StyleSheet, TextInput, Modal, Keyboard, ScrollView } from "react-native";
-import { WebView } from "react-native-webview";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useThemeContext } from "./ThemeProvider";
 import { Colors } from "../constants/Colors";
 import { getP5Symbols, getP5SymbolsByName, P5Symbol } from "../data/reference";
-import { getExampleHtml } from "../utils/editor/exampleHtml";
+import ExamplePreview from "./ExamplePreview";
 import { useRuntimeAssets } from "../hooks/useRuntimeAssets";
 import { highlightSyntax, parseDescription, extractDescribeCaption, stripDescribe } from "../utils/referenceRender";
 import Fuse from "fuse.js";
@@ -227,40 +226,17 @@ function SymbolInlineDetail({
                 <Text style={[styles.exampleCaption, { color: colors.textSecondary, marginBottom: 6 }]}>
                   {caption || `Example ${i + 1}`}
                 </Text>
-                {sym.norender ? (
-                  <View style={[styles.codeBlock, { backgroundColor: colors.surfaceDim }]}>
-                    <Text style={{ fontFamily: "JetBrainsMono", fontSize: 12, lineHeight: 18 }}>
-                      {highlightSyntax(code, colorScheme).map((t, j) => (
-                        <Text key={j} style={{ color: t.color }}>{t.text}</Text>
-                      ))}
-                    </Text>
-                  </View>
-                ) : (
-                  <>
-                    <WebView
-                      source={{
-                        html: getExampleHtml(ex, colorScheme === "dark" ? "dark" : "light", runtimeAssets.urls),
-                        baseUrl: runtimeAssets.urls?.baseUrl ?? undefined,
-                      }}
-                      style={[styles.exampleWebView, { backgroundColor: colors.surface }]}
-                      scrollEnabled={false}
-                      pointerEvents="none"
-                      javaScriptEnabled
-                      domStorageEnabled
-                      allowFileAccess
-                      allowFileAccessFromFileURLs
-                      allowUniversalAccessFromFileURLs
-                      bounces={false}
-                    />
-                    <View style={[styles.codeBlock, { backgroundColor: colors.surfaceDim, marginTop: 8 }]}>
-                      <Text style={{ fontFamily: "JetBrainsMono", fontSize: 12, lineHeight: 18 }}>
-                        {highlightSyntax(code, colorScheme).map((t, j) => (
-                          <Text key={j} style={{ color: t.color }}>{t.text}</Text>
-                        ))}
-                      </Text>
-                    </View>
-                  </>
-                )}
+                <ExamplePreview
+                  code={code}
+                  previewCode={ex}
+                  colorScheme={colorScheme === "dark" ? "dark" : "light"}
+                  assets={runtimeAssets}
+                  norender={Boolean(sym.norender)}
+                  previewHeight={200}
+                  delayMs={i * 200}
+                  previewStyle={styles.exampleWebView}
+                  codeBlockStyle={styles.codeBlock}
+                />
               </View>
               );
             })}
