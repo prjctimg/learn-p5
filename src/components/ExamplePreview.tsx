@@ -11,7 +11,7 @@ import { WebView } from "react-native-webview";
 import { Colors, type ColorScheme } from "../constants/Colors";
 import type { RuntimeAssetsState } from "../hooks/useRuntimeAssets";
 import { getExampleHtml } from "../utils/editor/exampleHtml";
-import { highlightSyntax } from "../utils/referenceRender";
+import { highlightSyntax, sanitizeCode } from "../utils/referenceRender";
 
 interface ExamplePreviewProps {
   /** Code shown in the syntax-highlighted block below the preview. */
@@ -51,6 +51,8 @@ export default function ExamplePreview({
   codeBlockStyle,
 }: ExamplePreviewProps) {
   const colors = Colors[colorScheme];
+  const safeCode = useMemo(() => sanitizeCode(code), [code]);
+  const safePreviewCode = useMemo(() => sanitizeCode(previewCode ?? code), [code, previewCode]);
   const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {

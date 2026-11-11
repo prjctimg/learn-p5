@@ -5,9 +5,10 @@ import { useThemeContext } from "./ThemeProvider";
 import { Colors, type ColorScheme } from "../constants/Colors";
 import { getP5Symbols, getP5SymbolsByName } from "../data/reference";
 import type { ContentSymbol } from "../types";
+import DescriptionContent from "./DescriptionContent";
 import ExamplePreview from "./ExamplePreview";
 import { useRuntimeAssets } from "../hooks/useRuntimeAssets";
-import { highlightSyntax, parseDescription } from "../utils/referenceRender";
+import { highlightSyntax, sanitizeCode } from "../utils/referenceRender";
 import { extractDescribeCaption, stripDescribe } from "../utils/describe";
 import Fuse from "fuse.js";
 
@@ -199,9 +200,18 @@ function SymbolInlineDetail({
         </Pressable>
       </View>
       <ScrollView style={styles.detailScroll} contentContainerStyle={{ paddingBottom: 16 }}>
-        <Text style={[styles.detailDescription, { color: colors.textSecondary }]}>
-          {parseDescription(sym.description, onSymbolPress, colors, derivedColors.primary)}
-        </Text>
+        <DescriptionContent
+          text={sym.description}
+          onSymbolPress={onSymbolPress}
+          colorScheme={colorScheme}
+          assets={runtimeAssets}
+          accentColor={derivedColors.primary}
+          textStyle={styles.detailDescription}
+          previewHeight={200}
+          norender={sym.itemtype === "property"}
+          previewStyle={styles.exampleWebView}
+          codeBlockStyle={styles.codeBlock}
+        />
 
         <Text style={[styles.detailSection, { color: colors.onSurface }]}>Usage</Text>
         <View style={[styles.syntaxBox, { backgroundColor: colors.surfaceDim, borderLeftColor: derivedColors.primary }]}>
@@ -216,8 +226,9 @@ function SymbolInlineDetail({
           <>
             <Text style={[styles.detailSection, { color: colors.onSurface }]}>Examples</Text>
             {sym.examples.map((ex, i) => {
-              const caption = extractDescribeCaption(ex);
-              const code = stripDescribe(ex);
+              const source = sanitizeCode(ex);
+              const caption = extractDescribeCaption(source);
+              const code = stripDescribe(source);
               return (
               <View key={i} style={{ marginBottom: 12 }}>
                 <Text style={[styles.exampleCaption, { color: colors.textSecondary, marginBottom: 6 }]}>
@@ -225,7 +236,7 @@ function SymbolInlineDetail({
                 </Text>
                 <ExamplePreview
                   code={code}
-                  previewCode={ex}
+                  previewCode={source}
                   colorScheme={colorScheme}
                   assets={runtimeAssets}
                   norender={sym.itemtype === "property"}
