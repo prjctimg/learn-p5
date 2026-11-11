@@ -3,7 +3,6 @@ import {
   p5RuntimeScript,
   polyfillScript,
   safeJson,
-  errorCaptureScript,
   type RuntimeAssetUrls,
 } from "./p5Html";
 
@@ -32,7 +31,6 @@ export function getFullscreenPreviewHtml(
   const isDark = colorScheme === "dark";
   const bodyBg = isDark ? "#000000" : "#111111";
   const sketch = wrapSketch(stripDescribe(code ?? ""));
-  const captureScript = errorCaptureScript();
   const p5Script = p5RuntimeScript({
     inlineSource: P5_RUNTIME_SOURCE,
     runtimeUrl: assets?.p5Url,
@@ -61,40 +59,16 @@ export function getFullscreenPreviewHtml(
     justify-content: center;
   }
   #sketch canvas { display: block; }
-  #error {
-    color: #FF5252;
-    font-family: monospace;
-    font-size: 14px;
-    padding: 24px;
-    text-align: left;
-    white-space: pre-wrap;
-    width: 100%;
-    max-height: 100%;
-    overflow: auto;
-  }
 </style>
 </head>
 <body>
 <div id="sketch"></div>
-${captureScript}
 ${polyfill}
 ${p5Script}
 <script>
 (function() {
   var userCode = ${userCode};
   var container = document.getElementById('sketch');
-
-  function showError(err) {
-    var message = (err && (err.stack || err.message)) ? String(err.stack || err.message) :
-      (err ? String(err) : null) ||
-      (window.__getP5Error ? window.__getP5Error() : null) ||
-      'Unknown error';
-    container.innerHTML = '';
-    var pre = document.createElement('pre');
-    pre.id = 'error';
-    pre.textContent = message;
-    container.appendChild(pre);
-  }
 
   var hookNames = ['preload','setup','draw','windowResized','mousePressed','mouseReleased','mouseClicked','mouseMoved','mouseDragged','mouseWheel','doubleClicked','keyPressed','keyReleased','keyTyped','touchStarted','touchMoved','touchEnded','deviceMoved','deviceTurned','deviceShaken'];
 
@@ -120,10 +94,9 @@ ${p5Script}
   }
 
   function startSketch() {
-    if (window.__clearP5Error) window.__clearP5Error();
     try {
       if (typeof window.p5 !== 'function') {
-        showError(window.__p5Error || 'p5 is not available');
+        console.error('p5 is not available');
         return;
       }
       var inst = new window.p5(function(p) {
@@ -135,8 +108,7 @@ ${p5Script}
         container.appendChild(canvas);
       }
     } catch (e) {
-      if (window.__setP5Error) window.__setP5Error(e);
-      showError(e);
+      console.error('Preview render error:', e);
     }
   }
 

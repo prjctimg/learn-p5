@@ -9,7 +9,6 @@ import {
   p5RuntimeScript,
   polyfillScript,
   safeJson,
-  errorCaptureScript,
   scriptTag,
   type RuntimeAssetUrls,
 } from "./p5Html";
@@ -90,7 +89,6 @@ export function getExerciseHtml(params: {
   const instructionHtml = parseInstructionHtml(params.instruction);
   const tasksJson = safeJson(params.tasks ?? []);
   const activeTaskIdx = params.activeTaskIndex ?? 0;
-  const captureScript = errorCaptureScript();
   const p5Script = p5RuntimeScript({
     inlineSource: P5_RUNTIME_SOURCE,
     runtimeUrl: assets?.p5Url,
@@ -99,7 +97,6 @@ export function getExerciseHtml(params: {
   const codemirror = scriptTag({
     source: CODEMIRROR_BUNDLE,
     url: assets?.codemirrorUrl,
-    label: "CodeMirror",
   });
   const fontFaces = fontFaceCss({
     regularUrl: assets?.fontRegularUrl,
@@ -430,7 +427,6 @@ ${
 </div>
 
 
-${captureScript}
 ${polyfill}
 ${p5Script}
 ${codemirror}
@@ -480,11 +476,7 @@ function getBridgeScript(startingCode: string, solution: string, theme: EditorTh
 
   return `
 if (typeof CM === 'undefined') {
-  var cmLoadMessage = (window.__getP5Error ? window.__getP5Error() : 'CodeMirror runtime failed to load');
-  try {
-    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'sketchError', error: cmLoadMessage, container: 'editor' }));
-  } catch (ignored) {}
-  throw new Error(cmLoadMessage);
+  throw new Error('CodeMirror runtime failed to load');
 }
 var _CM = CM;
 var basicSetup = _CM.basicSetup;
@@ -801,37 +793,6 @@ function postOpenRef(symbol) {
   }
 }
 
-function rawP5Error(fallback) {
-  // Prefer the error caught at the failing phase (parse/eval/construct) over
-  // the generic global capture; fall back to the capture when there is none.
-  if (fallback && (fallback.stack || fallback.message)) return String(fallback.stack || fallback.message);
-  if (fallback) return String(fallback);
-  try {
-    if (window.__getP5Error) return String(window.__getP5Error());
-  } catch (ignored) {}
-  return 'Unknown error';
-}
-
-function showSketchError(container, err, containerId) {
-  var message = rawP5Error(err);
-  console.error(message);
-  if (container) {
-    container.innerHTML = '';
-    var pre = document.createElement('pre');
-    pre.style.color = '${cta}';
-    pre.style.padding = '16px';
-    pre.style.margin = '0';
-    pre.style.whiteSpace = 'pre-wrap';
-    pre.style.fontFamily = '"JetBrains Mono", monospace';
-    pre.style.fontSize = '12px';
-    pre.textContent = message;
-    container.appendChild(pre);
-  }
-  if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'sketchError', error: message, container: containerId }));
-  }
-}
-
 // p5 lifecycle hooks that learner code can define. User code is evaluated in a
 // fresh function scope so top-level let/const/class declarations are recreated
 // on every run. The function body is wrapped in a with-scope over the p5
@@ -869,9 +830,6 @@ async function renderSketch(containerId, code) {
   var container = document.getElementById(containerId);
   if (!container) return false;
 
-  if (window.__clearP5Error) window.__clearP5Error();
-  window.__p5Running = false;
-
   if (container.__p5) {
     try {
       await Promise.race([
@@ -886,13 +844,11 @@ async function renderSketch(containerId, code) {
   if (!code) return false;
 
   if (typeof window.p5 !== 'function') {
-    showSketchError(container, window.__p5Error || (window.__getP5Error ? window.__getP5Error() : null), containerId);
+    console.error('p5 is not available');
     return false;
   }
 
   try {
-    window.__p5Running = true;
-
     // Pass the preview box as p5's user node so p5 creates/removes its canvas
     // inside this container only. Never fall back to document.querySelector:
     // that can adopt another preview's canvas when setup is still async.
@@ -908,9 +864,7 @@ async function renderSketch(containerId, code) {
     }
     return true;
   } catch(e) {
-    window.__p5Running = false;
-    if (window.__setP5Error) window.__setP5Error(e, 'sketch');
-    showSketchError(container, e, containerId);
+    console.error('Sketch render error:', e);
     return false;
   }
 }
@@ -1162,9 +1116,7 @@ function handleMessage(data) {
           break;
         }
         renderSketch('user-sketch', userCode).then(function(rendered) {
-          // A failed render already displayed/posted the raw error. Do not run
-          // validation on top of it — that used to replace the real cause with
-          // a generic "Sketch did not render" message.
+          // Do not run validation when the preview could not start.
           if (rendered === false) return;
           if (typeof window.__tutRun === 'function') window.__tutRun();
 

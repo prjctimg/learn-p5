@@ -38,14 +38,6 @@ export function escapeHtmlAttribute(value: string): string {
     .replace(/>/g, "&gt;");
 }
 
-function escapeInlineString(value: string): string {
-  return value
-    .replace(/\\/g, "\\\\")
-    .replace(/'/g, "\\'")
-    .replace(/</g, "\\u003c")
-    .replace(/\r?\n/g, " ");
-}
-
 /**
  * Emit a classic script tag for a real asset file, or inline the bundled
  * source when no URL is available (web/tests). Classic scripts execute in
@@ -55,86 +47,17 @@ function escapeInlineString(value: string): string {
 export function scriptTag({
   source,
   url,
-  label,
 }: {
   source?: string | null;
   url?: string | null;
-  label: string;
 }): string {
   if (typeof url === "string" && url.length > 0) {
-    const safeUrl = escapeHtmlAttribute(url);
-    const safeLabel = escapeInlineString(label);
-    return `<script src="${safeUrl}" onerror="window.__noteP5LoadError && window.__noteP5LoadError('${safeLabel}', this.src)"></script>`;
+    return `<script src="${escapeHtmlAttribute(url)}"></script>`;
   }
   if (typeof source === "string" && source.length > 0) {
     return `<script>${escapeScriptContent(source)}</script>`;
   }
   return "";
-}
-
-/**
- * Install a global error capture before any runtime/user scripts run so load
- * and execution failures can be reported as-is (stack/message) instead of
- * being guessed from missing globals. Resource load failures are recorded
- * separately with the failing URL.
- */
-export function errorCaptureScript(): string {
-  return `<script>
-(function(){
-  window.__p5Error = null;
-  window.__p5ErrorPhase = null;
-  window.__p5LoadErrors = [];
-  window.__p5Running = false;
-  window.__noteP5LoadError = function(label, src){
-    var message = 'Failed to load ' + label + (src ? ' (' + src + ')' : '');
-    try { window.__p5LoadErrors.push(message); } catch (_) {}
-    window.__p5Error = message;
-    window.__p5ErrorPhase = 'load';
-  };
-  window.__setP5Error = function(err, phase){
-    var text;
-    try {
-      if (err && (err.stack || err.message)) {
-        text = err.stack || String(err.message);
-      } else if (typeof err === 'string') {
-        text = err;
-      } else {
-        text = String(err);
-      }
-    } catch (_) {
-      try { text = String(err); } catch(_e) { text = 'Unknown error'; }
-    }
-    window.__p5Error = text;
-    window.__p5ErrorPhase = phase || 'runtime';
-  };
-  window.__clearP5Error = function(){
-    window.__p5Error = null;
-    window.__p5ErrorPhase = null;
-  };
-  window.__getP5Error = function(){
-    if (window.__p5Error) return String(window.__p5Error);
-    if (typeof window.p5 !== 'function') {
-      var detail = 'p5 is not available (typeof window.p5 === ' + typeof window.p5 + ')';
-      if (window.__p5LoadErrors && window.__p5LoadErrors.length) {
-        detail += '\\n' + window.__p5LoadErrors.join('\\n');
-      }
-      return detail;
-    }
-    return 'Unknown error';
-  };
-  window.addEventListener('error', function(e){
-    // Only attribute uncaught errors while a sketch is actually running; the
-    // editor and tooling share this document.
-    if (!window.__p5Running) return;
-    var err = e && e.error ? e.error : (e && e.message ? e.message : e);
-    window.__setP5Error(err, 'sketch');
-  }, true);
-  window.addEventListener('unhandledrejection', function(e){
-    if (!window.__p5Running) return;
-    window.__setP5Error(e ? e.reason : e, 'sketch');
-  });
-})();
-</script>`;
 }
 
 /**
@@ -152,7 +75,6 @@ export function p5RuntimeScript({
   return scriptTag({
     source: inlineSource,
     url: runtimeUrl,
-    label: "p5 runtime",
   });
 }
 
@@ -170,6 +92,5 @@ export function polyfillScript({
   return scriptTag({
     source: inlineSource,
     url: scriptUrl,
-    label: "core-js polyfills",
   });
 }

@@ -397,10 +397,6 @@ const [keyboardHeight, setKeyboardHeight] = useState<string>(DEFAULTS.keyboardHe
  case "editorReady":
  setEditorViewReady(msg.ready);
  break;
- case "sketchError":
- dispatch({ type: "RUN_DONE" });
- showToast(msg.error || "p5.js could not start.", undefined, undefined, "failure");
- break;
 case "editorTapped":
   if (!useSystemKeyboard) {
     setKeyboardVisible(true);
