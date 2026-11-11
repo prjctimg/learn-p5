@@ -1,33 +1,74 @@
 # Learn P5
 
-[![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0--or--later-blue.svg)](./LICENSE)
 [![Android build](https://github.com/prjctimg/learn-p5/actions/workflows/release.yaml/badge.svg)](https://github.com/prjctimg/learn-p5/actions/workflows/release.yaml)
 [![GitHub release](https://img.shields.io/github/v/release/prjctimg/learn-p5)](https://github.com/prjctimg/learn-p5/releases)
 
 ![](learn-p5.png)
 
-Explore the p5.js API by completing simple code exercises in a visual REPL-like
-environment. Available on Android with iOS support coming soon.
+> [!warning]
+>
+> This app is still in development (no stable v1 release yet), behaviour and the
+> UI presentation may change and/or break.
+
+## Friendly mobile app for learning p5.js
+
+**Learn P5** aims to make learning (creative) coding with p5.js a casual and
+paced experience. The app provides exercises for exploring each documented
+symbol in the p5.js public API including solution preview and a code block for
+editing your solution. It builds around the p5.js library and **it is not meant
+to be a replacement for the [web editor](https://editor.p5js.org)**.
+
+The exercises are based on the examples and official documentation from the
+p5.js source itself and can be found
+[in this repository](https://github.com/prjctimg/learn-p5-content) and they
+cover every public exported module.
+
+Learn P5 is inspired by the (now deprecated) Grasshopper app by Google's Area120
+lab.
 
 [This is a Google Summer of Code (2026) project](https://summerofcode.withgoogle.com/programs/2026/projects/wmrV9qBT)
-project for [Processing Foundation](https://processingfoundation.org).
+for [Processing Foundation](https://processingfoundation.org).
 
-## What is this
+## Installing
 
-Each exercise presents a small p5.js task with a live canvas preview. The editor
-provides syntax highlighting, p5.js-aware autocomplete, and a context-aware
-programming keyboard. Exercises are validated against the p5.js reference and
-unlock sequentially. It is not a replacement for the p5.js web editor.
+> [!note] Only Android builds are available at the moment, iOS 🍎 support is
+> planned and coming soon.
 
-## Who is this for
+Grab a release build from the
+[GitHub releases page](https://github.com/prjctimg/learn-p5/releases/latest).
 
-Anyone who wants to learn p5.js at a relaxed pace, on the go, without a network
-connection.
+Google Playstore and F-Droid releases are under review and coming soon.
 
-## Try it
+> [!warn]
+>
+> Your device may warn you about (or even block you) installing apps from
+> unknown sources. To fix this allow apps from the source (in this case the
+> browser you used to download) to be installed and then retry the installation.
+>
+> If Google Play Protect is enabled, just scan the app or simply skip the scan
+> to install faster.
 
-Android APKs are published on the
-[releases page](https://github.com/prjctimg/learn-p5/releases).
+## Code of Conduct
+
+Open source works because people from all walks of life contribute their
+perspectives to it, this project believes that we can build around this empathy
+and mutual respect.
+
+Please refer to the Code of Conduct before interacting with this project to keep
+our community constructive and welcoming at all times.
+
+## Contributing
+
+All contributions are welcome to the project, whether it's improvements to the
+app code or the exercise content.
+
+See the [contributing guidelines](./CONTRIBUTING.md) for more information on how
+to contribute to the project.
+
+## Acknowledgements
+
+This project would not be possible without the feedback, prior work and guidance
+from the Processing and p5.js communities at large.
 
 ## Contributors
 
