@@ -27,19 +27,21 @@ Learn P5 is inspired by the (now deprecated) Grasshopper app by Google's Area120
 lab.
 
 [This is a Google Summer of Code (2026) project](https://summerofcode.withgoogle.com/programs/2026/projects/wmrV9qBT)
-for [Processing Foundation](https://processingfoundation.org).
+for the [Processing Foundation](https://processingfoundation.org).
 
 ## Installing
 
-> [!note] Only Android builds are available at the moment, iOS 🍎 support is
-> planned and coming soon.
+> [!note]
+>
+> Only Android builds are available at the moment, iOS 🍎 support is planned and
+> coming soon.
 
 Grab a release build from the
 [GitHub releases page](https://github.com/prjctimg/learn-p5/releases/latest).
 
 Google Playstore and F-Droid releases are under review and coming soon.
 
-> [!warn]
+> [!warning]
 >
 > Your device may warn you about (or even block you) installing apps from
 > unknown sources. To fix this allow apps from the source (in this case the
@@ -68,7 +70,8 @@ to contribute to the project.
 ## Acknowledgements
 
 This project would not be possible without the feedback, prior work and guidance
-from the Processing and p5.js communities at large.
+from the [Processing](https://processingfoundation.org) and
+[p5.js](https://p5js.org) communities at large.
 
 ## Contributors
 
