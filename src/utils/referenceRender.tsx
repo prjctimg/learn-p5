@@ -1,15 +1,7 @@
 import { Text } from "react-native";
-import { getP5FunctionNames } from "../data/reference";
+import { buildP5SymbolPattern } from "../data/reference";
+import type { ColorScheme } from "../constants/Colors";
 import { getEditorTheme } from "./editor/themes";
-
-function buildSymbolPattern(): RegExp | null {
-  const names = getP5FunctionNames();
-  if (names.length === 0) return null;
-  return new RegExp(
-    `\\b(${names.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b(?=\\()`,
-    "g"
-  );
-}
 
 const P5_CONSTANTS = [
   "WIDTH", "HEIGHT", "PI", "TWO_PI", "HALF_PI", "QUARTER_PI", "TAU", "EPSILON",
@@ -23,7 +15,6 @@ const P5_CONSTANTS = [
   "EXCLUSION", "DARKEST", "LIGHTEST", "OVERLAY", "HARD_LIGHT", "SOFT_LIGHT",
   "DODGE", "BURN",
   "LINEAR", "QUADRATIC", "CUBIC", "EXPONENTIAL", "SINE", "COSINE",
-  "MITER", "BEVEL", "ROUND",
   "ARROW", "CROSS", "HAND", "MOVE", "TEXT", "WAIT",
   "SHIFT", "CONTROL", "ALT", "OPTION", "BACKSPACE", "DELETE", "ENTER", "RETURN",
   "TAB", "ESCAPE", "UP_ARROW", "DOWN_ARROW", "LEFT_ARROW", "RIGHT_ARROW",
@@ -35,17 +26,14 @@ const P5_CONSTANTS = [
 
 const P5_CONSTANTS_PATTERN = P5_CONSTANTS.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
 
-export function highlightSyntax(code: string, colorScheme?: "light" | "dark"): { text: string; color: string }[] {
+export function highlightSyntax(code: string, colorScheme?: ColorScheme): { text: string; color: string }[] {
   const theme = getEditorTheme("p5-learn", colorScheme || "dark");
   const COMMENT_RE = /(\/\/[^\n]*|\/\*[\s\S]*?\*\/)/g;
   const STRING_RE = /("[^"\\]*(?:\\.[^"\\]*)*"|'[^'\\]*(?:\\.[^'\\]*)*'|`[^`\\]*(?:\\.[^`\\]*)*`)/g;
   const KEYWORD_RE = /\b(function|if|else|for|while|do|switch|case|break|continue|return|new|delete|typeof|instanceof|in|of|class|extends|super|try|catch|finally|throw)\b/g;
   const DECL_RE = /\b(let|const|var|static)\b/g;
   const LITERAL_RE = /\b(true|false|null|undefined|this|NaN|Infinity)\b/g;
-  const functionNames = getP5FunctionNames();
-  const P5_RE = functionNames.length
-    ? new RegExp(`\\b(${functionNames.join("|")})\\b(?=\\s*\\()`, "g")
-    : /$^/g;
+  const P5_RE = buildP5SymbolPattern() ?? /$^/g;
   const CONST_RE = new RegExp(`\\b(${P5_CONSTANTS_PATTERN})\\b`, "g");
   const NUMBER_RE = /\b0[xX][0-9a-fA-F]+\b|\b\d+(\.\d+)?(?:[eE][+-]?\d+)?\b/g;
   const OP_RE = /(=>|<=|>=|===|!==|==|!=|&&|\|\||[-+*/%&|^!<>=]|[{[\]();,.])/g;
@@ -87,18 +75,6 @@ export function highlightSyntax(code: string, colorScheme?: "light" | "dark"): {
   return tokens.length > 0 ? tokens : [{ text: code, color: theme.fg }];
 }
 
-const DESCRIBE_RE = /describe\s*\(\s*(["'])((?:(?!\1).)*)\1\s*\)\s*;?\s*/g;
-
-export function extractDescribeCaption(code: string): string | null {
-  DESCRIBE_RE.lastIndex = 0;
-  const match = DESCRIBE_RE.exec(code);
-  return match ? match[2] : null;
-}
-
-export function stripDescribe(code: string): string {
-  return code.replace(DESCRIBE_RE, "").trim();
-}
-
 export function parseDescription(
   text: string,
   onSymbolPress: (name: string) => void,
@@ -111,7 +87,7 @@ export function parseDescription(
   let lastIndex = 0;
   let match: RegExpExecArray | null;
   const seenSymbols = new Set<string>();
-  const symbolPattern = buildSymbolPattern();
+  const symbolPattern = buildP5SymbolPattern();
 
   if (!symbolPattern) {
     return [

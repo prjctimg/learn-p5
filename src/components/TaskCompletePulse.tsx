@@ -28,7 +28,7 @@ export default function TaskCompletePulse({
   duration = 1100,
 }: TaskCompletePulseProps) {
   const { colorScheme, derivedColors } = useThemeContext();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const colors = Colors[colorScheme];
 
   const scale = useSharedValue(0.6);
   const opacity = useSharedValue(0);

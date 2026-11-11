@@ -5,8 +5,8 @@ import {
   loadExercise,
 } from "./courseLoader";
 import { setContentPack } from "../content/store";
-import type { ContentPack } from "../content/types";
-import type { Course } from "../data/types";
+import type { ContentPack } from "../types";
+import type { Course } from "../types";
 
 // Course content is not vendored in this repo (it ships in the downloadable
 // pack from learn-p5-content), so tests use inline fixtures instead of files.

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "@jest/globals";
 import { isExerciseLocked } from "./isExerciseLocked";
-import type { Exercise } from "../data/types";
+import type { Exercise } from "../types";
 
 const exercises: Exercise[] = [
   { id: "e1", title: "One", module: "m", description: "d", instruction: "i", startingCode: "", solution: "" },

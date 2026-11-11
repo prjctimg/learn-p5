@@ -18,7 +18,7 @@ export default function Header({ title, subtitle, right, showBack = true, onBack
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { colorScheme } = useThemeContext();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const colors = Colors[colorScheme];
   const { openDrawer } = useDrawerContext();
 
   const handleBack = onBack ?? (() => router.back());

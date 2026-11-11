@@ -1,5 +1,5 @@
 import { CONTENT_SCHEMA_VERSION } from "../constants/Content";
-import type { ContentPack } from "./types";
+import type { ContentPack } from "../types";
 
 export function parseContentPack(raw: string): ContentPack {
   const pack = JSON.parse(raw) as ContentPack;

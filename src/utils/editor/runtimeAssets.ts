@@ -49,15 +49,9 @@ async function ensureFile(
   return write;
 }
 
-/**
- * Write the bundled runtime sources to an app-private cache directory so the
- * WebViews can load them with real `<script src>`/URL references instead of
- * inlining several megabytes into every HTML document.
- *
- * Returns relative file names plus the `baseUrl` that resolves them. On web
- * (or if writing is unavailable) it returns null and callers fall back to
- * inlining the same bundled sources.
- */
+// Cache bundled runtime sources so WebViews can load them by URL instead of
+// inlining several megabytes into every document. Returns null when files are
+// unavailable and callers should fall back to inline sources.
 export async function ensureRuntimeAssets(
   options: RuntimeAssetOptions = {}
 ): Promise<RuntimeAssetUrls | null> {

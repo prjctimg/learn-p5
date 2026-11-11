@@ -2,11 +2,13 @@ import { useRef, useMemo, useState, useCallback, useEffect } from "react";
 import { View, Text, FlatList, Pressable, StyleSheet, TextInput, Modal, Keyboard, ScrollView } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useThemeContext } from "./ThemeProvider";
-import { Colors } from "../constants/Colors";
-import { getP5Symbols, getP5SymbolsByName, P5Symbol } from "../data/reference";
+import { Colors, type ColorScheme } from "../constants/Colors";
+import { getP5Symbols, getP5SymbolsByName } from "../data/reference";
+import type { ContentSymbol } from "../types";
 import ExamplePreview from "./ExamplePreview";
 import { useRuntimeAssets } from "../hooks/useRuntimeAssets";
-import { highlightSyntax, parseDescription, extractDescribeCaption, stripDescribe } from "../utils/referenceRender";
+import { highlightSyntax, parseDescription } from "../utils/referenceRender";
+import { extractDescribeCaption, stripDescribe } from "../utils/describe";
 import Fuse from "fuse.js";
 
 interface SearchOverlayProps {
@@ -21,9 +23,9 @@ interface SearchOverlayProps {
 
 export default function SearchOverlay({ visible, onClose, inline = false, onSelectSymbol }: SearchOverlayProps) {
   const { colorScheme, derivedColors } = useThemeContext();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const colors = Colors[colorScheme];
   const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState<P5Symbol | null>(null);
+  const [selected, setSelected] = useState<ContentSymbol | null>(null);
   const inputRef = useRef<TextInput>(null);
 
   const symbols = useMemo(() => getP5Symbols(), []);
@@ -55,7 +57,7 @@ export default function SearchOverlay({ visible, onClose, inline = false, onSele
     onClose();
   }, [onClose]);
 
-  const handleSelect = useCallback((sym: P5Symbol) => {
+  const handleSelect = useCallback((sym: ContentSymbol) => {
     if (inline) {
       setSelected(sym);
       Keyboard.dismiss();
@@ -65,13 +67,8 @@ export default function SearchOverlay({ visible, onClose, inline = false, onSele
     }
   }, [inline, onSelectSymbol, handleClose]);
 
-  // The Modal is always mounted (only its 'visible' flag flips), so the
-  // static 'autoFocus' prop on the TextInput only fires on first render. To
-  // make the system keyboard appear reliably on EVERY open — including the
-  // Run-button long-press path from [id].tsx — focus the input imperatively
-  // whenever the overlay becomes visible. A short delay lets the Modal's
-  // fade-in animation start before we focus (focusing on a not-yet-attached
-  // node is a no-op on Android).
+  // The modal stays mounted, so focus the input each time it opens. The short
+  // delay lets the fade-in finish before focusing on Android.
   useEffect(() => {
     if (!visible) return;
     setQuery("");
@@ -168,14 +165,14 @@ function SymbolInlineDetail({
   onClose,
   onSymbolPress,
 }: {
-  sym: P5Symbol;
-  colorScheme: "light" | "dark";
+  sym: ContentSymbol;
+  colorScheme: ColorScheme;
   onBack: () => void;
   onClose: () => void;
   onSymbolPress: (name: string) => void;
 }) {
   const { derivedColors } = useThemeContext();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const colors = Colors[colorScheme];
   const runtimeAssets = useRuntimeAssets();
   const syntaxTokens = highlightSyntax(sym.syntax.replace(/\n/g, " "), colorScheme);
 
@@ -229,9 +226,9 @@ function SymbolInlineDetail({
                 <ExamplePreview
                   code={code}
                   previewCode={ex}
-                  colorScheme={colorScheme === "dark" ? "dark" : "light"}
+                  colorScheme={colorScheme}
                   assets={runtimeAssets}
-                  norender={Boolean(sym.norender)}
+                  norender={sym.itemtype === "property"}
                   previewHeight={200}
                   delayMs={i * 200}
                   previewStyle={styles.exampleWebView}
@@ -243,10 +240,10 @@ function SymbolInlineDetail({
           </>
         )}
 
-        {sym.parameters.length > 0 && (
+        {sym.params.length > 0 && (
           <>
             <Text style={[styles.detailSection, { color: colors.onSurface }]}>Parameters</Text>
-            {sym.parameters.map((p) => (
+            {sym.params.map((p) => (
               <View key={p.name} style={styles.paramRow}>
                 <Text style={[styles.paramName, { color: colors.onSurface }]}>{p.name}</Text>
                 <Text style={[styles.paramDesc, { color: colors.textSecondary }]}>

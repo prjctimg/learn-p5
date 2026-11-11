@@ -6,7 +6,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Button from "../../../components/Button";
 import Breadcrumbs from "../../../components/Breadcrumbs";
 import { loadCourse } from "../../../utils/courseLoader";
-import { Course } from "../../../data/types";
+import { Course } from "../../../types";
 import { useThemeContext } from "../../../components/ThemeProvider";
 import { Colors } from "../../../constants/Colors";
 import { STORAGE_KEYS } from "../../../constants/StorageKeys";
@@ -20,7 +20,7 @@ export default function CourseDetail() {
   const [completedExercises, setCompletedExercises] = useState<string[]>([]);
  const [error, setError] = useState<string | null>(null);
  const { colorScheme, derivedColors } = useThemeContext();
- const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+ const colors = Colors[colorScheme];
 
  const loadData = useCallback(async () => {
  if (!course) return;

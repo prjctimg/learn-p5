@@ -38,7 +38,7 @@ export default function DrawerContent({ onClose }: DrawerContentProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { colorScheme, derivedColors } = useThemeContext();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const colors = Colors[colorScheme];
   const isActive = (route: string) =>
     pathname === route || pathname.startsWith(route + "/");
 

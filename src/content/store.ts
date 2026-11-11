@@ -1,4 +1,4 @@
-import type { ContentPack } from "./types";
+import type { ContentPack } from "../types";
 
 let currentPack: ContentPack | null = null;
 

@@ -5,7 +5,7 @@ import {
   bootstrapContent,
   checkForContentUpdate,
 } from "../content/service";
-import type { ContentPack } from "../content/types";
+import type { ContentPack } from "../types";
 import { P5_RUNTIME_VERSION } from "../utils/editor/p5-runtime.generated";
 
 type BootstrapState =

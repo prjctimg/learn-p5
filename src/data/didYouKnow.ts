@@ -1,4 +1,5 @@
-import { getP5Symbols, P5Symbol } from "./reference";
+import { getP5Symbols } from "./reference";
+import type { ContentSymbol } from "../types";
 
 // Intro-course vocabulary excluded from "Did You Know" picks so the modal
 // only surfaces rarely used or advanced library symbols.
@@ -139,18 +140,18 @@ const BASIC_SYMBOLS = new Set([
   "println",
 ]);
 
-function isAdvancedSymbol(sym: P5Symbol): boolean {
+function isAdvancedSymbol(sym: ContentSymbol): boolean {
   return (
     !BASIC_SYMBOLS.has(sym.name) &&
     !sym.name.endsWith("Hook") &&
-    !sym.norender &&
+    sym.itemtype !== "property" &&
     Array.isArray(sym.examples) &&
     sym.examples.length > 0 &&
     sym.description.trim().length > 0
   );
 }
 
-export function pickRandomAdvancedSymbol(exclude?: string): P5Symbol | null {
+export function pickRandomAdvancedSymbol(exclude?: string): ContentSymbol | null {
   const pool = getP5Symbols().filter(isAdvancedSymbol);
   if (pool.length === 0) return null;
   const filtered = exclude ? pool.filter((s) => s.name !== exclude) : pool;

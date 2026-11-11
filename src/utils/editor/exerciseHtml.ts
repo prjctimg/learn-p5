@@ -1,10 +1,11 @@
 import { CODEMIRROR_BUNDLE } from "./codemirror-bundle.generated";
 import { VALIDATION_CORE } from "./validation-core.generated";
 import { P5_RUNTIME_SOURCE } from "./p5-runtime.generated";
-import { getP5FunctionNames } from "../../data/reference";
-import { Colors } from "../../constants/Colors";
+import { buildP5SymbolPattern, getP5FunctionNames } from "../../data/reference";
+import { Colors, type ColorScheme } from "../../constants/Colors";
 import { getEditorTheme, EditorThemeColors } from "./themes";
-import { ExerciseTask } from "../../data/types";
+import { ExerciseTask } from "../../types";
+import { hexToRgb } from "../colorUtils";
 import {
   p5RuntimeScript,
   polyfillScript,
@@ -14,21 +15,12 @@ import {
 } from "./p5Html";
 import { fontFaceCss } from "./fontFace";
 
-function buildSymbolPattern(): RegExp | null {
-  const names = getP5FunctionNames();
-  if (names.length === 0) return null;
-  return new RegExp(
-    `\\b(${names.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b(?=\\()`,
-    "g"
-  );
-}
-
 function parseInstructionHtml(text: string): string {
   if (!text) return "";
   let html = "";
   let lastIndex = 0;
   let match: RegExpExecArray | null;
-  const symbolPattern = buildSymbolPattern();
+  const symbolPattern = buildP5SymbolPattern();
 
   if (!symbolPattern) return escapeHtml(text);
 
@@ -58,10 +50,6 @@ function escapeHtml(text: string): string {
     .replace(/'/g, "&#039;");
 }
 
-function jsString(s: string): string {
-  return safeJson(s);
-}
-
 export function getExerciseHtml(params: {
   title: string;
   moduleName: string;
@@ -69,7 +57,7 @@ export function getExerciseHtml(params: {
   exerciseNumber: number;
   startingCode: string;
   solution: string;
-  colorScheme: "light" | "dark";
+  colorScheme: ColorScheme;
   editorTheme?: string;
   codeFontSize?: number;
   ctaColor?: string;
@@ -78,11 +66,10 @@ export function getExerciseHtml(params: {
   activeTaskIndex?: number;
   disableSystemKeyboard?: boolean;
 }, assets?: RuntimeAssetUrls | null): string {
-  const colors = Colors[params.colorScheme === "dark" ? "dark" : "light"];
+  const colors = Colors[params.colorScheme];
   const ctaColor = params.ctaColor ?? colors.cta;
-  const cta = ctaColor;
-  const ctaH = cta.replace('#', '');
-  const ctaRgb = `${parseInt(ctaH.substring(0,2),16)},${parseInt(ctaH.substring(2,4),16)},${parseInt(ctaH.substring(4,6),16)}`;
+  const { r, g, b } = hexToRgb(ctaColor);
+  const ctaRgb = `${r},${g},${b}`;
   const themeColors = getEditorTheme(params.editorTheme || "p5-learn", params.colorScheme, ctaColor);
   const editorBg = themeColors.bg;
   const fontSize = params.codeFontSize ?? 22;
@@ -146,7 +133,7 @@ ${fontFaces}
   .symbol {
     font-weight: 700;
     text-decoration: underline;
-    color: ${cta};
+    color: ${ctaColor};
     cursor: pointer;
   }
 
@@ -270,7 +257,7 @@ ${fontFaces}
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: ${cta};
+    color: ${ctaColor};
     background: rgba(${ctaRgb}, 0.12);
     padding: 2px 6px;
     border-radius: 3px;
@@ -432,7 +419,7 @@ ${p5Script}
 ${codemirror}
 <script>${VALIDATION_CORE}</script>
 <script>
- ${getBridgeScript(params.startingCode, params.solution, themeColors, params.colorScheme, params.exerciseNumber, ctaColor, params.wordWrap, tasksJson, activeTaskIdx, params.disableSystemKeyboard)}
+ ${getBridgeScript(params.startingCode, params.solution, themeColors, params.exerciseNumber, ctaColor, params.wordWrap, tasksJson, activeTaskIdx, params.disableSystemKeyboard)}
 </script>
 
 ${params.exerciseNumber === 1 ? `
@@ -450,12 +437,12 @@ ${params.exerciseNumber === 1 ? `
 </html>`;
 }
 
-function getBridgeScript(startingCode: string, solution: string, theme: EditorThemeColors, colorScheme: "light" | "dark", exerciseNumber?: number, ctaColor?: string, wordWrap?: boolean, tasksJson?: string, activeTaskIdx?: number, disableSystemKeyboard?: boolean): string {
-  const codeArg = jsString(startingCode);
-  const solutionArg = jsString(solution);
+function getBridgeScript(startingCode: string, solution: string, theme: EditorThemeColors, exerciseNumber?: number, ctaColor?: string, wordWrap?: boolean, tasksJson?: string, activeTaskIdx?: number, disableSystemKeyboard?: boolean): string {
+  const codeArg = safeJson(startingCode);
+  const solutionArg = safeJson(solution);
   const cta = ctaColor ?? '#FF69B4';
-  const ctaH = cta.replace('#', '');
-  const ctaRgb = `${parseInt(ctaH.substring(0,2),16)},${parseInt(ctaH.substring(2,4),16)},${parseInt(ctaH.substring(4,6),16)}`;
+  const { r, g, b } = hexToRgb(cta);
+  const ctaRgb = `${r},${g},${b}`;
 
   const {
     bg: editorBg,
@@ -599,11 +586,11 @@ var p5FnPlugin = ViewPlugin.fromClass(P5FnPlugin, {
 
 var p5Theme = EditorView.theme({
   '&': { backgroundColor: '${editorBg}', color: '${fg}' },
-  '.cm-content': { caretColor: '${cta}', fontFamily: "'JetBrains Mono', monospace" },
+  '.cm-content': { caretColor: '${ctaColor}', fontFamily: "'JetBrains Mono', monospace" },
   '.cm-gutters': { backgroundColor: '${editorBg}', color: '${gutterFg}', borderRight: '1px solid ${gutterBorder}' },
   '.cm-activeLineGutter': { backgroundColor: '${activeBg}' },
   '.cm-activeLine': { backgroundColor: '${activeBg}' },
-  '.cm-cursor': { borderLeft: '2px solid ${cta}', animation: 'cm-blink 1s step-end infinite' },
+  '.cm-cursor': { borderLeft: '2px solid ${ctaColor}', animation: 'cm-blink 1s step-end infinite' },
   '@keyframes cm-blink': { '50%': { borderLeftColor: 'transparent' } },
   '.cm-selectionBackground': { backgroundColor: '${selBg}' },
   '.cm-matchingBracket': { backgroundColor: 'rgba(${ctaRgb}, 0.3)' },
@@ -762,7 +749,7 @@ function initEditor() {
     console.error('Editor init failed:', e);
     var editorEl = document.getElementById('editor');
     if (editorEl) {
-      editorEl.innerHTML = '<div style="color:${cta};padding:16px;font-family:\\"JetBrains Mono\\",monospace">\\u26A0 Editor failed to load. Check your connection.</div>';
+      editorEl.innerHTML = '<div style="color:${ctaColor};padding:16px;font-family:\\"JetBrains Mono\\",monospace">\\u26A0 Editor failed to load. Check your connection.</div>';
     }
     postReady();
     postEditorReady();

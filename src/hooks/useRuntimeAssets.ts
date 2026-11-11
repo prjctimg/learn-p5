@@ -6,18 +6,10 @@ import {
 import type { RuntimeAssetUrls } from "../utils/editor/p5Html";
 
 export interface RuntimeAssetsState {
-  /** True once asset preparation has finished (successfully or not). */
   ready: boolean;
-  /** Relative file URLs + base URL, or null to inline the bundled sources. */
   urls: RuntimeAssetUrls | null;
-  error: string | null;
 }
 
-/**
- * Prepare the app-private runtime files used by the preview WebViews. Falls
- * back to inline bundled sources when file assets are unavailable (web, tests,
- * or an unexpected filesystem error).
- */
 export function useRuntimeAssets(
   options: RuntimeAssetOptions = {}
 ): RuntimeAssetsState {
@@ -25,7 +17,6 @@ export function useRuntimeAssets(
   const [state, setState] = useState<RuntimeAssetsState>({
     ready: false,
     urls: null,
-    error: null,
   });
 
   useEffect(() => {
@@ -33,13 +24,13 @@ export function useRuntimeAssets(
     ensureRuntimeAssets({ editor })
       .then((urls) => {
         if (cancelled) return;
-        setState({ ready: true, urls, error: null });
+        setState({ ready: true, urls });
       })
       .catch((err) => {
         if (cancelled) return;
         const message = err instanceof Error ? err.message : String(err);
         console.warn("[useRuntimeAssets] Falling back to inline runtime:", message);
-        setState({ ready: true, urls: null, error: message });
+        setState({ ready: true, urls: null });
       });
     return () => {
       cancelled = true;

@@ -20,7 +20,7 @@ export default function Button({
   accessibilityLabel,
 }: ButtonProps) {
   const { colorScheme, ctaColor } = useThemeContext();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const colors = Colors[colorScheme];
 
   return (
     <Pressable

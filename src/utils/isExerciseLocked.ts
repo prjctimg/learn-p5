@@ -1,4 +1,4 @@
-import { Exercise } from "../data/types";
+import { Exercise } from "../types";
 
 export function isExerciseLocked(
   completedExercises: string[],

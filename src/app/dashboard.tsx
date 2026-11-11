@@ -10,14 +10,13 @@ import Header from "../components/Header";
 import Toast from "../components/Toast";
 import StreakToast from "../components/StreakToast";
 import { loadAllCourses } from "../utils/courseLoader";
-import { Exercise, Course } from "../data/types";
+import type { ContentSymbol, Course, Exercise } from "../types";
 import { isExerciseLocked } from "../utils/isExerciseLocked";
 import { getStreakFromStorage, useStreak } from "../hooks/useStreak";
 import { useAchievements, ACHIEVEMENTS } from "../hooks/useAchievements";
 import AchievementBadgeModal from "../components/AchievementBadgeModal";
 import DidYouKnowModal from "../components/DidYouKnowModal";
 import { pickRandomAdvancedSymbol } from "../data/didYouKnow";
-import { P5Symbol } from "../data/reference";
 import { useShakeDetection } from "../hooks/useShakeDetection";
 import ReportErrorModal from "../components/ReportErrorModal";
 
@@ -40,11 +39,10 @@ function getGreeting(): string {
 export default function Dashboard() {
  const router = useRouter();
  const { colorScheme, ctaColor, derivedColors } = useThemeContext();
- const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+ const colors = Colors[colorScheme];
  const [completedExercises, setCompletedExercises] = useState<string[]>([]);
  const [courses, setCourses] = useState<Course[]>([]);
  const [streakCount, setStreakCount] = useState(0);
- const [streakLongest, setStreakLongest] = useState(0);
  const streak = useStreak();
  const [streakToastVisible, setStreakToastVisible] = useState(false);
 const { unlocked: unlockedAchievements, unlockedAt, refresh: refreshAchievements } = useAchievements();
@@ -60,7 +58,7 @@ const { unlocked: unlockedAchievements, unlockedAt, refresh: refreshAchievements
  const [animatedStreak, setAnimatedStreak] = useState(0);
   const [shakeModalVisible, setShakeModalVisible] = useState(false);
   const [dykVisible, setDykVisible] = useState(false);
-  const [dykSymbol, setDykSymbol] = useState<P5Symbol | null>(null);
+  const [dykSymbol, setDykSymbol] = useState<ContentSymbol | null>(null);
   const isFocused = useIsFocused();
 
  useShakeDetection(
@@ -91,9 +89,8 @@ const { unlocked: unlockedAchievements, unlockedAt, refresh: refreshAchievements
  }
  });
  loadAllCourses().then(setCourses);
- getStreakFromStorage().then(({ count, longest }) => {
+ getStreakFromStorage().then(({ count }) => {
  setStreakCount(count);
- setStreakLongest(longest);
  });
  refreshAchievements();
  }, [])

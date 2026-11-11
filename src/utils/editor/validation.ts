@@ -1,31 +1,8 @@
-import type { ValidationRule } from "../../data/types";
+import type { PixelSample, ValidationRule } from "../../types";
 
-/**
- * Single source of truth for exercise validation.
- *
- * All validation semantics live here and nowhere else. The module is
- * dependency-free at runtime: it walks an opaque syntax-tree provided by the
- * caller, so the exact same code runs inside the exercise WebView (which reuses
- * the CodeMirror tree that is already on the page) and inside the Node build
- * checks (which feed it a @lezer/javascript parse).
- *
- * Tree shape conventions follow @lezer/javascript:
- *   - CallExpression / NewExpression -> first child is VariableName (plain
- *     call) or MemberExpression (member call); a direct `ArgList` child holds
- *     the arguments.
- *   - FunctionDeclaration -> first VariableDefinition child is the name.
- *   - VariableDeclaration -> VariableDefinition whose initializer is an
- *     ArrowFunction / FunctionExpression is a function definition.
- *   - MethodDeclaration / Property / FieldDeclaration -> a PropertyDefinition
- *     name whose value is (or is followed by) a function body.
- */
-
-export type RuleType =
-  | "functionCall"
-  | "functionExists"
-  | "canvasSize"
-  | "pixelMatch"
-  | "expectedPixels";
+// Runs both in the exercise WebView and in the Node content checks. Tree shape
+// follows @lezer/javascript.
+export type RuleType = ValidationRule["type"];
 
 export const RULE_TYPES: readonly RuleType[] = [
   "functionCall",
@@ -505,13 +482,6 @@ export function schemaErrors(rules: ValidationRule[] | undefined | null): string
 // ---------------------------------------------------------------------------
 // Pixel matching helpers (shared by the renderer and tests)
 // ---------------------------------------------------------------------------
-
-export interface PixelSample {
-  x: number;
-  y: number;
-  expected: [number, number, number];
-  tolerance?: number;
-}
 
 /**
  * Per-channel max-difference color comparison. A pixel passes when every

@@ -1,4 +1,46 @@
-import type { Course } from "../data/types";
+export type Rgb = [number, number, number];
+
+export interface PixelSample {
+  x: number;
+  y: number;
+  expected: Rgb;
+  tolerance?: number;
+}
+
+export type ValidationRule =
+  | { type: "functionCall"; name: string; exactArgs?: number; minArgs?: number }
+  | { type: "functionExists"; name: string }
+  | { type: "canvasSize"; width: number; height: number }
+  | { type: "pixelMatch"; x: number; y: number; expected: Rgb; tolerance?: number }
+  | { type: "expectedPixels"; points: PixelSample[]; minPassFraction?: number };
+
+export interface ExerciseTask {
+  id: string;
+  title: string;
+  instruction: string;
+  validation: ValidationRule[];
+  startingCode?: string;
+  solution?: string;
+}
+
+export interface Exercise {
+  id: string;
+  title: string;
+  module: string;
+  description: string;
+  instruction: string;
+  startingCode?: string;
+  solution?: string;
+  tasks?: ExerciseTask[];
+}
+
+export interface Course {
+  slug: string;
+  title: string;
+  moduleName: string;
+  description: string;
+  exercises: Exercise[];
+}
 
 export interface ContentSymbol {
   name: string;
@@ -34,11 +76,6 @@ export interface ContentPack {
   packSha256?: string;
 }
 
-export interface ContentCacheMeta {
-  contentVersion: string;
-  packSha256: string;
-}
-
 export interface ContentManifest {
   schemaVersion: number;
   contentVersion: string;
@@ -49,3 +86,5 @@ export interface ContentManifest {
   courseCount: number;
   symbolCount: number;
 }
+
+export type ContentCacheMeta = Pick<ContentManifest, "contentVersion" | "packSha256">;

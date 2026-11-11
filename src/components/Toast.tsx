@@ -35,7 +35,7 @@ export default function Toast({
   const translateY = useRef(new Animated.Value(HIDDEN_Y)).current;
   const insets = useSafeAreaInsets();
   const { colorScheme } = useThemeContext();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const colors = Colors[colorScheme];
   const effectiveIconColor =
     iconColor ?? (tone === "failure" ? colors.error : colors.success);
   // Success/info notifications render as a floating rounded card; failures

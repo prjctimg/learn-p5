@@ -1,53 +1,51 @@
-import { Fonts } from "./Fonts";
-
 export const Typography = {
   display: {
-    fontFamily: Fonts.display,
+    fontFamily: "JetBrainsMono",
     fontSize: 32,
     fontWeight: "700" as const,
   },
   headline: {
-    fontFamily: Fonts.headline,
+    fontFamily: "JetBrainsMono",
     fontSize: 24,
     fontWeight: "700" as const,
   },
   title: {
-    fontFamily: Fonts.headline,
+    fontFamily: "JetBrainsMono",
     fontSize: 18,
     fontWeight: "700" as const,
   },
   body: {
-    fontFamily: Fonts.body,
+    fontFamily: "JetBrainsMono",
     fontSize: 16,
     fontWeight: "400" as const,
   },
   bodySmall: {
-    fontFamily: Fonts.body,
+    fontFamily: "JetBrainsMono",
     fontSize: 15,
     fontWeight: "400" as const,
   },
   label: {
-    fontFamily: Fonts.label,
+    fontFamily: "JetBrainsMono",
     fontSize: 14,
     fontWeight: "600" as const,
   },
   labelSmall: {
-    fontFamily: Fonts.label,
+    fontFamily: "JetBrainsMono",
     fontSize: 13,
     fontWeight: "600" as const,
   },
   mono: {
-    fontFamily: Fonts.mono,
+    fontFamily: "JetBrainsMono",
     fontSize: 16,
     fontWeight: "400" as const,
   },
   monoSmall: {
-    fontFamily: Fonts.mono,
+    fontFamily: "JetBrainsMono",
     fontSize: 14,
     fontWeight: "400" as const,
   },
   monoLabel: {
-    fontFamily: Fonts.mono,
+    fontFamily: "JetBrainsMono",
     fontSize: 13,
     fontWeight: "700" as const,
   },

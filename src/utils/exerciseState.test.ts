@@ -6,7 +6,7 @@ import {
   resolveNextTaskCode,
   ExerciseState,
 } from "./exerciseState";
-import { Exercise } from "../data/types";
+import { Exercise } from "../types";
 
 function makeExercise(overrides: Partial<Exercise> = {}): Exercise {
   return {

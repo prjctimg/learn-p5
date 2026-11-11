@@ -1,0 +1,16 @@
+import { rgbToHex } from "../utils/colorUtils";
+
+const ACCENT_COLORS = [
+  [237, 34, 93],
+  [156, 39, 176],
+  [33, 150, 243],
+  [0, 150, 136],
+  [255, 152, 0],
+  [63, 81, 181],
+  [0, 188, 212],
+  [255, 87, 34],
+  [76, 175, 80],
+  [233, 30, 99],
+] as const;
+
+export const ACCENT_COLOR_HEX = ACCENT_COLORS.map(([r, g, b]) => rgbToHex(r, g, b));

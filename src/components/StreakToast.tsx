@@ -49,7 +49,7 @@ export default function StreakToast({
  const [displayCount, setDisplayCount] = useState(streakCount - 1);
  const insets = useSafeAreaInsets();
  const { colorScheme, derivedColors } = useThemeContext();
- const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+ const colors = Colors[colorScheme];
 
  const animateIn = useCallback(() => {
  translateY.setValue(-200);

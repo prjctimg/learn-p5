@@ -14,7 +14,7 @@ interface TimePickerProps {
 
 export default function TimePicker({ hour, minute, onTimeChange }: TimePickerProps) {
  const { colorScheme } = useThemeContext();
- const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+ const colors = Colors[colorScheme];
  const [show, setShow] = useState(false);
 
  const date = new Date();
@@ -61,7 +61,7 @@ export default function TimePicker({ hour, minute, onTimeChange }: TimePickerPro
  mode="time"
  display={Platform.OS === "ios" ? "spinner" : "default"}
  onChange={handleChange}
- themeVariant={colorScheme === "dark" ? "dark" : "light"}
+ themeVariant={colorScheme}
  />
  </View>
 )}

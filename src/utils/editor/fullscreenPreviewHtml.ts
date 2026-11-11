@@ -1,16 +1,12 @@
 import { P5_RUNTIME_SOURCE } from "./p5-runtime.generated";
+import { stripDescribe } from "../describe";
+import type { ColorScheme } from "../../constants/Colors";
 import {
   p5RuntimeScript,
   polyfillScript,
   safeJson,
   type RuntimeAssetUrls,
 } from "./p5Html";
-
-function stripDescribe(code: string): string {
-  return code
-    .replace(/describe\s*\(\s*(["'])((?:(?!\1).)*)\1\s*\)\s*;?\s*/g, "")
-    .trim();
-}
 
 function wrapSketch(code: string): string {
   const hasSetup = /function\s+setup\s*\(/.test(code);
@@ -25,7 +21,7 @@ function wrapSketch(code: string): string {
 
 export function getFullscreenPreviewHtml(
   code: string,
-  colorScheme?: "light" | "dark",
+  colorScheme?: ColorScheme,
   assets?: RuntimeAssetUrls | null
 ): string {
   const isDark = colorScheme === "dark";

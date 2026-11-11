@@ -1,9 +1,6 @@
 import { describe, it, expect } from "@jest/globals";
-import {
-  highlightSyntax,
-  stripDescribe,
-  extractDescribeCaption,
-} from "./referenceRender";
+import { highlightSyntax } from "./referenceRender";
+import { extractDescribeCaption, stripDescribe } from "./describe";
 
 describe("highlightSyntax", () => {
   it("returns the raw code as a single default-colored token when nothing matches", () => {

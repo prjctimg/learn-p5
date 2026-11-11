@@ -1,4 +1,4 @@
-import { Course, Exercise } from "../data/types";
+import { Course, Exercise } from "../types";
 import { getContentPack } from "../content/store";
 
 let cachedCourses: Course[] | null = null;

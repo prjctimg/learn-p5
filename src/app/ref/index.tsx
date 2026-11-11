@@ -5,7 +5,8 @@ import { View, Text, FlatList, ScrollView, Pressable, StyleSheet, Linking } from
 import Header from "../../components/Header";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import ExamplePreview from "../../components/ExamplePreview";
-import { getP5Symbols, getP5SymbolsByName, P5Symbol } from "../../data/reference";
+import { getP5Symbols, getP5SymbolsByName } from "../../data/reference";
+import type { ContentSymbol } from "../../types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useThemeContext } from "../../components/ThemeProvider";
 import { Colors } from "../../constants/Colors";
@@ -13,10 +14,11 @@ import { useShakeDetection } from "../../hooks/useShakeDetection";
 import ReportErrorModal from "../../components/ReportErrorModal";
 import SearchOverlay from "../../components/SearchOverlay";
 import { useRuntimeAssets } from "../../hooks/useRuntimeAssets";
-import { highlightSyntax, parseDescription, extractDescribeCaption, stripDescribe } from "../../utils/referenceRender";
+import { highlightSyntax, parseDescription } from "../../utils/referenceRender";
+import { extractDescribeCaption, stripDescribe } from "../../utils/describe";
 
-function buildModuleGroups(symbols: P5Symbol[]) {
-  return symbols.reduce<{ module: string; symbols: P5Symbol[] }[]>((acc, sym) => {
+function buildModuleGroups(symbols: ContentSymbol[]) {
+  return symbols.reduce<{ module: string; symbols: ContentSymbol[] }[]>((acc, sym) => {
     const existing = acc.find((g) => g.module === sym.module);
     if (existing) {
       existing.symbols.push(sym);
@@ -33,7 +35,7 @@ function SymbolDetail({ symbol, onOpenSearch }: { symbol: string; onOpenSearch: 
   const symbols = useMemo(() => getP5Symbols(), []);
   const sym = symbolsByName[symbol];
   const { colorScheme, derivedColors } = useThemeContext();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const colors = Colors[colorScheme];
   const runtimeAssets = useRuntimeAssets();
   const currentIndex = sym ? symbols.indexOf(sym) : -1;
   const prevSym = currentIndex > 0 ? symbols[currentIndex - 1] : null;
@@ -137,9 +139,9 @@ function SymbolDetail({ symbol, onOpenSearch }: { symbol: string; onOpenSearch: 
   <ExamplePreview
   code={code}
   previewCode={ex}
-  colorScheme={colorScheme === "dark" ? "dark" : "light"}
+  colorScheme={colorScheme}
   assets={runtimeAssets}
-  norender={Boolean(sym.norender)}
+  norender={sym.itemtype === "property"}
   previewHeight={260}
   delayMs={i * 200}
   codeFontSize={13}
@@ -151,7 +153,7 @@ function SymbolDetail({ symbol, onOpenSearch }: { symbol: string; onOpenSearch: 
   </>
 )}
 
- {sym.parameters.length > 0 && (
+ {sym.params.length > 0 && (
  <>
  <Text style={[styles.sectionTitle, { color: colors.onSurface, marginBottom: 12 }]}>
  Parameters
@@ -159,7 +161,7 @@ function SymbolDetail({ symbol, onOpenSearch }: { symbol: string; onOpenSearch: 
  </>
 )}
 
- {sym.parameters.map((item, i) => (
+ {sym.params.map((item, i) => (
  <View key={item.name}>
  <View style={[styles.flexRow, styles.paramRow]}>
  <View style={styles.flex1}>
@@ -176,7 +178,7 @@ function SymbolDetail({ symbol, onOpenSearch }: { symbol: string; onOpenSearch: 
  </Text>
  </View>
  </View>
- {i < sym.parameters.length - 1 && (
+ {i < sym.params.length - 1 && (
  <View style={{ height: 1, backgroundColor: colors.outlineVariant + "30" }} />
  )}
  </View>
@@ -248,7 +250,7 @@ export default function Reference() {
   const { symbol } = useLocalSearchParams<{ symbol?: string }>();
   const router = useRouter();
   const { colorScheme, derivedColors } = useThemeContext();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const colors = Colors[colorScheme];
   const moduleGroups = useMemo(() => buildModuleGroups(getP5Symbols()), []);
   const [searchVisible, setSearchVisible] = useState(false);
   const [shakeModalVisible, setShakeModalVisible] = useState(false);

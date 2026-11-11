@@ -37,7 +37,7 @@ export default function AchievementBadgeModal({
   onDismiss,
 }: Props) {
   const { colorScheme, derivedColors } = useThemeContext();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const colors = Colors[colorScheme];
   const { width: screenWidth } = useWindowDimensions();
   const listRef = useRef<FlatList>(null);
   const [currentIndex, setCurrentIndex] = useState(startIndex);

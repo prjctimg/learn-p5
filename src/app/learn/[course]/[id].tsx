@@ -62,7 +62,7 @@ export default function Exercise() {
  completedTasks: [],
  });
  const { colorScheme, toggleTheme, ctaColor, derivedColors } = useThemeContext();
- const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+ const colors = Colors[colorScheme];
  const webViewRef = useRef<WebView>(null);
  const fullscreenWebViewRef = useRef<WebView>(null);
  const [webViewReady, setWebViewReady] = useState(false);
@@ -120,7 +120,7 @@ const [keyboardHeight, setKeyboardHeight] = useState<string>(DEFAULTS.keyboardHe
       exerciseNumber: parseInt(id?.replace("exercise-", "") ?? "1", 10),
       startingCode: state.exercise.startingCode ?? "",
       solution: state.exercise.tasks?.[state.currentTaskIndex]?.solution ?? state.exercise.solution ?? "",
-      colorScheme: colorScheme === "dark" ? "dark" : "light",
+      colorScheme: colorScheme,
       editorTheme,
       codeFontSize,
       ctaColor,
@@ -133,7 +133,7 @@ const [keyboardHeight, setKeyboardHeight] = useState<string>(DEFAULTS.keyboardHe
   const fullscreenPreviewHtml = useMemo(
     () => getFullscreenPreviewHtml(
       state.code,
-      colorScheme === "dark" ? "dark" : "light",
+      colorScheme,
       runtimeAssets.urls
     ),
     [state.code, colorScheme, runtimeAssets.urls]
@@ -531,12 +531,6 @@ case "editorTapped":
       handleRun();
     }
   }, [handleRun]);
-
-  const handleFormat = useCallback(() => {
-  if (webViewRef.current && editorViewReady) {
-  webViewRef.current.postMessage(JSON.stringify({ type: "format" }));
-  }
-  }, [editorViewReady]);
 
   useEffect(() => {
     streak.consumePendingToast().then((data) => {
@@ -951,13 +945,9 @@ return (
   <ProgrammingKeyboard
   onInsert={handleInsert}
   exerciseSymbols={exerciseSymbols}
-  onToggleKeyboard={handleToggleKeyboard}
   onToggleQwerty={handleQwertyRequest}
   onBackspace={handleBackspace}
   onNewline={handleNewline}
-  onFormat={handleFormat}
-  onOpenReference={(symbol) => router.push(`/ref?symbol=${symbol}`)}
-  keyboardVisible={keyboardVisible && !useSystemKeyboard}
   usedFunctions={usedFunctions}
   height={DEFAULTS.keyboardHeightPixels[keyboardHeight] ?? DEFAULTS.keyboardHeightPixels.medium}
   />
@@ -1059,7 +1049,7 @@ return (
  <Text style={[styles.modalSectionTitle, { color: colors.textSecondary }]}>Editor Theme</Text>
  <View style={[styles.modalRow, { flexWrap: "wrap", gap: 6 }]}>
  {Object.entries(EDITOR_THEMES).map(([key, theme]) => {
- const swatches = getThemeSwatches(key, colorScheme === "dark" ? "dark" : "light");
+ const swatches = getThemeSwatches(key, colorScheme);
  return (
  <Pressable
  key={key}

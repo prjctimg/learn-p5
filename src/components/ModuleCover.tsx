@@ -29,7 +29,7 @@ const COVER_SIZE = 96;
 
 export default function ModuleCover({ slug, color, locked, completed }: ModuleCoverProps) {
   const { colorScheme } = useThemeContext();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const colors = Colors[colorScheme];
 
   // One shared rotation/phase driver — each variant wires its own transforms
   // off these shared values so the whole cover animates as one piece.

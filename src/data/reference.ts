@@ -1,67 +1,38 @@
-import type { ContentReference, ContentSymbol } from "../content/types";
+import type { ContentReference, ContentSymbol } from "../types";
 import { requireContentPack } from "../content/store";
 
-export type GeneratedSymbol = ContentSymbol;
+let cachedReference: ContentReference | null = null;
+let cachedSymbols: ContentSymbol[] = [];
 
-export type ReferenceData = ContentReference;
-
-export type P5Symbol = {
-  name: string;
-  module: string;
-  description: string;
-  syntax: string;
-  parameters: { name: string; type: string; description: string }[];
-  examples?: string[];
-  norender?: boolean;
-};
-
-let cachedReference: ReferenceData | null = null;
-let cachedSymbols: P5Symbol[] = [];
-let cachedByName: Record<string, P5Symbol> = {};
-
-function toP5Symbol(sym: GeneratedSymbol): P5Symbol {
-  return {
-    name: sym.name,
-    module: sym.module,
-    description: sym.description,
-    syntax: sym.syntax,
-    parameters: sym.params.map((p) => ({
-      name: p.name,
-      type: p.type,
-      description: p.description,
-    })),
-    examples: sym.examples,
-    norender: sym.itemtype === "property",
-  };
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function ensureReferenceCache(): void {
-  const data = requireContentPack().reference;
-  if (data === cachedReference) return;
-  cachedReference = data;
-  cachedSymbols = Object.values(data.byName).map(toP5Symbol);
-  cachedByName = {};
-  for (const view of cachedSymbols) {
-    cachedByName[view.name] = view;
-  }
-}
-
-export function getReferenceData(): ReferenceData {
+export function getReferenceData(): ContentReference {
   return requireContentPack().reference;
 }
 
-export function getP5Symbols(): P5Symbol[] {
-  ensureReferenceCache();
+export function getP5Symbols(): ContentSymbol[] {
+  const reference = getReferenceData();
+  if (reference !== cachedReference) {
+    cachedReference = reference;
+    cachedSymbols = Object.values(reference.byName);
+  }
   return cachedSymbols;
 }
 
-export function getP5SymbolsByName(): Record<string, P5Symbol> {
-  ensureReferenceCache();
-  return cachedByName;
+export function getP5SymbolsByName(): Record<string, ContentSymbol> {
+  return getReferenceData().byName;
 }
 
 export function getP5FunctionNames(): string[] {
   return getReferenceData().functionNames;
+}
+
+export function buildP5SymbolPattern(): RegExp | null {
+  const names = getP5FunctionNames();
+  if (names.length === 0) return null;
+  return new RegExp(`\\b(${names.map(escapeRegExp).join("|")})\\b(?=\\s*\\()`, "g");
 }
 
 export const ONCE_ONLY_P5_FUNCTIONS: string[] = [
@@ -78,8 +49,7 @@ export const ONCE_ONLY_P5_FUNCTIONS: string[] = [
   "keyPressed",
   "keyReleased",
   "keyTyped",
-  // p5 2.0 routes touch through the pointer-backed mouse* events, so touch*
-  // handlers are deliberately absent.
+  // p5 2.0 routes touch through the pointer-backed mouse* events.
   "deviceMoved",
   "deviceTurned",
   "deviceShaken",

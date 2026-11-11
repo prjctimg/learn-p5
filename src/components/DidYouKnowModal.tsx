@@ -3,13 +3,13 @@ import { View, Text, Modal, Pressable, ScrollView, StyleSheet } from "react-nati
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useThemeContext } from "./ThemeProvider";
 import { Colors } from "../constants/Colors";
-import { P5Symbol } from "../data/reference";
+import type { ContentSymbol } from "../types";
 import ExamplePreview from "./ExamplePreview";
 import { useRuntimeAssets } from "../hooks/useRuntimeAssets";
 
 interface DidYouKnowModalProps {
   visible: boolean;
-  symbol: P5Symbol | null;
+  symbol: ContentSymbol | null;
   onNext: () => void;
   onDismiss: () => void;
 }
@@ -34,13 +34,12 @@ export default function DidYouKnowModal({
   onDismiss,
 }: DidYouKnowModalProps) {
   const { colorScheme, derivedColors } = useThemeContext();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
-  const scheme = colorScheme === "dark" ? "dark" : "light";
-  const runtimeAssets = useRuntimeAssets();
+  const colors = Colors[colorScheme];
+    const runtimeAssets = useRuntimeAssets();
 
   const description = useMemo(() => (symbol ? trimDescription(symbol.description) : ""), [symbol]);
   const exampleCode = useMemo(() => symbol?.examples?.[0] ?? "", [symbol]);
-  const canRender = Boolean(symbol && !symbol.norender && exampleCode);
+  const canRender = Boolean(symbol && symbol.itemtype !== "property" && exampleCode);
 
   if (!visible || !symbol) return null;
 
@@ -75,7 +74,7 @@ export default function DidYouKnowModal({
             {exampleCode ? (
               <ExamplePreview
                 code={exampleCode}
-                colorScheme={scheme}
+                colorScheme={colorScheme}
                 assets={runtimeAssets}
                 norender={!canRender}
                 previewHeight={200}

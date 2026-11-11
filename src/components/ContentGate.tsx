@@ -18,7 +18,7 @@ export default function ContentGate({
   onRetry,
 }: ContentGateProps) {
   const { colorScheme, derivedColors } = useThemeContext();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const colors = Colors[colorScheme];
   const percent = Math.round(Math.min(1, Math.max(0, progress)) * 100);
 
   return (

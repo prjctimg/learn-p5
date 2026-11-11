@@ -2,13 +2,12 @@ import { createContext, useContext, useState, useEffect, useCallback, useMemo, t
 import { useColorScheme as useRNColorScheme } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DEFAULTS } from "../constants/Defaults";
+import type { ColorScheme } from "../constants/Colors";
 import { STORAGE_KEYS } from "../constants/StorageKeys";
 import { deriveColorsFromAccent, type DerivedColors } from "../utils/colorUtils";
 
-type ThemeColorScheme = "light" | "dark";
-
 interface ThemeContextValue {
-  colorScheme: ThemeColorScheme;
+  colorScheme: ColorScheme;
   toggleTheme: () => void;
   ctaColor: string;
   setCtaColor: (color: string) => void;
@@ -33,7 +32,7 @@ interface ThemeProviderProps {
 
 export default function ThemeProvider({ children }: ThemeProviderProps) {
   const systemScheme = useRNColorScheme();
-  const [userScheme, setUserScheme] = useState<ThemeColorScheme | null>(null);
+  const [userScheme, setUserScheme] = useState<ColorScheme | null>(null);
   const [ctaColor, setStoredCtaColor] = useState(DEFAULTS.ctaColor);
 
   useEffect(() => {
@@ -49,7 +48,7 @@ export default function ThemeProvider({ children }: ThemeProviderProps) {
       .catch(() => {});
   }, []);
 
-  const colorScheme: ThemeColorScheme = userScheme ?? (systemScheme === "dark" ? "dark" : "light");
+  const colorScheme: ColorScheme = userScheme ?? (systemScheme === "dark" ? "dark" : "light");
 
   useEffect(() => {
     if (userScheme !== null) {

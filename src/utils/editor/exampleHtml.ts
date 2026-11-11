@@ -1,6 +1,6 @@
 import { getP5Assets } from "../../content/store";
 import { P5_RUNTIME_SOURCE } from "./p5-runtime.generated";
-import { Colors } from "../../constants/Colors";
+import { Colors, type ColorScheme } from "../../constants/Colors";
 import {
   escapeScriptContent,
   p5RuntimeScript,
@@ -29,10 +29,10 @@ function substituteAssetPlaceholders(code: string): string {
 
 export function getExampleHtml(
   code: string,
-  colorScheme?: "light" | "dark",
+  colorScheme?: ColorScheme,
   assets?: RuntimeAssetUrls | null
 ): string {
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const colors = Colors[colorScheme ?? "light"];
   const resolved = substituteAssetPlaceholders(code);
   const needsWrap = !resolved.includes("function setup");
 

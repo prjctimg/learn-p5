@@ -83,14 +83,8 @@ export const Colors = {
   },
 } as const;
 
-// Dedicated palette for the custom keyboards, kept separate from the flat
-// theme record so consumers that treat Colors[scheme] as Record<string,string>
-// stay type-safe. Values aligned to Stitch Virtual Keyboard UI
-// (projects/3964689377051300116/screens/41c14c27e617436dbed6c73430283862):
-// dark: container #111111, standard key #333333, special key #222222,
-// pressed #444444, text #FFFFFF, shift accent #60a5fa.
-// Light inverts the charcoal palette for a11y while keeping the same
-// blue accent and 8px radius.
+export type ColorScheme = keyof typeof Colors;
+
 export const KeyboardColors = {
   light: {
     background: "#F5F5F5",

@@ -1,3 +1,5 @@
+import type { ColorScheme } from "../../constants/Colors";
+
 export interface EditorThemeColors {
   name: string;
   bg: string;
@@ -217,13 +219,13 @@ function darkenHex(hex: string, factor: number): string {
   return `#${dr.toString(16).padStart(2, "0")}${dg.toString(16).padStart(2, "0")}${db.toString(16).padStart(2, "0")}`;
 }
 
-export function getThemeSwatches(themeId: string, colorScheme: "light" | "dark"): string[] {
+export function getThemeSwatches(themeId: string, colorScheme: ColorScheme): string[] {
   const themeDef = EDITOR_THEMES[themeId] || EDITOR_THEMES["p5-learn"];
   const colors = colorScheme === "dark" ? themeDef.dark : themeDef.light;
   return [colors.keyword, colors.string, colors.number, colors.type];
 }
 
-export function getEditorTheme(themeId: string, colorScheme: "light" | "dark", ctaColor?: string): EditorThemeColors {
+export function getEditorTheme(themeId: string, colorScheme: ColorScheme, ctaColor?: string): EditorThemeColors {
   const themeDef = EDITOR_THEMES[themeId] || EDITOR_THEMES["p5-learn"];
   const base = colorScheme === "dark" ? { ...themeDef.dark } : { ...themeDef.light };
 

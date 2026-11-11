@@ -2,7 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as FileSystem from "expo-file-system/legacy";
 import { Platform } from "react-native";
 import { parseContentPack } from "./parse";
-import type { ContentCacheMeta, ContentPack } from "./types";
+import type { ContentCacheMeta, ContentPack } from "../types";
 
 const WEB_PACK_KEY = "content_pack_data_v1";
 const WEB_META_KEY = "content_pack_meta_v1";

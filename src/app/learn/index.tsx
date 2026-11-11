@@ -1,11 +1,11 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, FlatList, StyleSheet } from "react-native";
 import { useRouter, useIsFocused } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Header from "../../components/Header";
 import ExerciseCard from "../../components/ExerciseCard";
 import { loadAllCourses } from "../../utils/courseLoader";
-import { Course } from "../../data/types";
+import { Course } from "../../types";
 import { useThemeContext } from "../../components/ThemeProvider";
 import { Colors } from "../../constants/Colors";
 import { STORAGE_KEYS } from "../../constants/StorageKeys";
@@ -21,7 +21,7 @@ export default function Learn() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { colorScheme, derivedColors } = useThemeContext();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const colors = Colors[colorScheme];
   const [shakeModalVisible, setShakeModalVisible] = useState(false);
   const isFocused = useIsFocused();
 

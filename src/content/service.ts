@@ -2,13 +2,12 @@ import * as FileSystem from "expo-file-system/legacy";
 import { Platform } from "react-native";
 import {
   CONTENT_MANIFEST_TIMEOUT_MS,
+  CONTENT_MANIFEST_URL,
   CONTENT_SCHEMA_VERSION,
 } from "../constants/Content";
-import { CONTENT_MANIFEST_URL } from "../constants/Content";
-import { parseContentPack } from "./parse";
 import { readCachedContent, writeCachedContent } from "./storage";
 import { setContentPack } from "./store";
-import type { ContentManifest, ContentPack } from "./types";
+import type { ContentManifest, ContentPack } from "../types";
 
 export type ContentProgress = (fraction: number) => void;
 
@@ -133,16 +132,11 @@ function isCachedContentCurrent(
   );
 }
 
-function hasUsableCachedContent(cached: ContentPack | null): cached is ContentPack {
-  return Boolean(cached);
-}
-
 async function downloadAndCommitContent(
   manifest: ContentManifest,
   onProgress?: ContentProgress
 ): Promise<ContentPack> {
   const rawPack = await fetchPackText(manifest, onProgress);
-  parseContentPack(rawPack);
   const pack = await writeCachedContent(rawPack, {
     contentVersion: manifest.contentVersion,
     packSha256: manifest.packSha256 ?? "",
@@ -159,7 +153,7 @@ export async function bootstrapContent(
   try {
     manifest = await fetchContentManifest();
   } catch (error) {
-    if (hasUsableCachedContent(cached)) {
+    if (cached) {
       setContentPack(cached);
       return { pack: cached, updated: false };
     }
@@ -176,7 +170,7 @@ export async function bootstrapContent(
     setContentPack(pack);
     return { pack, updated: !!cached };
   } catch (error) {
-    if (hasUsableCachedContent(cached)) {
+    if (cached) {
       setContentPack(cached);
       return { pack: cached, updated: false };
     }

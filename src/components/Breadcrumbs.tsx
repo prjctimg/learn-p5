@@ -16,7 +16,7 @@ interface BreadcrumbsProps {
 export default function Breadcrumbs({ segments }: BreadcrumbsProps) {
   const router = useRouter();
   const { colorScheme, derivedColors } = useThemeContext();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const colors = Colors[colorScheme];
 
   return (
     <View style={styles.container}>

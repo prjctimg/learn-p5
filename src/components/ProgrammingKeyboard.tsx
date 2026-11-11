@@ -11,13 +11,9 @@ import { getP5Functions, getP5FunctionLabels, pairedSymbols, singleSymbols, P5Fu
 interface ProgrammingKeyboardProps {
  onInsert: (text: string, cursorOffset?: number) => void;
  exerciseSymbols?: string[];
- onToggleKeyboard?: () => void;
  onToggleQwerty?: () => void;
  onBackspace?: () => void;
  onNewline?: () => void;
- onFormat?: () => void;
- onOpenReference?: (symbol: string) => void;
- keyboardVisible?: boolean;
  usedFunctions?: string[];
  height?: number;
 }
@@ -25,10 +21,10 @@ interface ProgrammingKeyboardProps {
 const BACKSPACE_DELAY = 300;
 const BACKSPACE_INTERVAL = 60;
 
-export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], onToggleKeyboard, onToggleQwerty, onBackspace, onNewline, onFormat, onOpenReference, keyboardVisible = true, usedFunctions = [], height = 280 }: ProgrammingKeyboardProps) {
+export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], onToggleQwerty, onBackspace, onNewline, usedFunctions = [], height = 280 }: ProgrammingKeyboardProps) {
  const { colorScheme } = useThemeContext();
- const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
- const kb = KeyboardColors[colorScheme === "dark" ? "dark" : "light"];
+ const colors = Colors[colorScheme];
+ const kb = KeyboardColors[colorScheme];
  const [hintType, setHintType] = useState<"string" | "array" | null>(null);
  const [popupSymbol, setPopupSymbol] = useState<string | null>(null);
  const popupAnim = useRef(new Animated.Value(0)).current;
@@ -277,7 +273,7 @@ export default function ProgrammingKeyboard({ onInsert, exerciseSymbols = [], on
    <>
    <Text style={[popupTextStyles.popupTitle, { color: kb.text, backgroundColor: kb.toolbarKey, borderColor: colors.outlineVariant}]}>{ref.syntax}</Text>
    <Text style={[popupTextStyles.popupDesc, { color: kb.textMuted }]}>{ref.description}</Text>
-   {ref.parameters.map(p => (
+   {ref.params.map(p => (
    <Text key={p.name} style={[popupTextStyles.popupParam, { color: kb.textMuted }]}>
      <Text style={{ fontFamily: "JetBrainsMono", color: kb.accent, fontWeight: "700" }}>{p.name}</Text>
      {' '}<Text style={{ fontFamily: "JetBrainsMono", fontSize: 11, color: kb.accent }}>({p.type})</Text>: {p.description}

@@ -31,7 +31,7 @@ export default function ExerciseCard({
   onContinue,
 }: ExerciseCardProps) {
   const { colorScheme, derivedColors } = useThemeContext();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const colors = Colors[colorScheme];
 
   return (
   <Pressable

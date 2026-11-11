@@ -73,7 +73,7 @@ const tips = [
 
 export default function Tips() {
   const { colorScheme, derivedColors } = useThemeContext();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const colors = Colors[colorScheme];
   const [shakeModalVisible, setShakeModalVisible] = useState(false);
   const isFocused = useIsFocused();
 

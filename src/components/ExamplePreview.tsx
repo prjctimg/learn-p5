@@ -8,7 +8,7 @@ import {
   type ViewStyle,
 } from "react-native";
 import { WebView } from "react-native-webview";
-import { Colors } from "../constants/Colors";
+import { Colors, type ColorScheme } from "../constants/Colors";
 import type { RuntimeAssetsState } from "../hooks/useRuntimeAssets";
 import { getExampleHtml } from "../utils/editor/exampleHtml";
 import { highlightSyntax } from "../utils/referenceRender";
@@ -16,7 +16,7 @@ import { highlightSyntax } from "../utils/referenceRender";
 interface ExamplePreviewProps {
   /** Code shown in the syntax-highlighted block below the preview. */
   code: string;
-  colorScheme: "light" | "dark";
+  colorScheme: ColorScheme;
   assets: RuntimeAssetsState;
   /** Full example source used by the WebView (defaults to `code`). */
   previewCode?: string;

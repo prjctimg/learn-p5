@@ -37,7 +37,7 @@ export default function NextExerciseOverlay({
   onAdvance,
 }: NextExerciseOverlayProps) {
   const { colorScheme, derivedColors } = useThemeContext();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const colors = Colors[colorScheme];
 
   const [remaining, setRemaining] = useState(countdownSeconds);
   const overlayOpacity = useSharedValue(0);

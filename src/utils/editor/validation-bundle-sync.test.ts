@@ -2,8 +2,7 @@ import { describe, it, expect } from "@jest/globals";
 import { parser } from "@lezer/javascript";
 import { VALIDATION_CORE } from "./validation-core.generated";
 import * as src from "./validation";
-import type { ValidationRule } from "../../data/types";
-import type { PixelSample } from "./validation";
+import type { PixelSample, ValidationRule } from "../../types";
 
 /**
  * Guard against a stale `validation-core.generated.ts`. The bundle is the

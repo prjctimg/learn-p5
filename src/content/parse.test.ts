@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 import { parseContentPack } from "./parse";
-import type { ContentPack } from "./types";
+import type { ContentPack } from "../types";
 
 function validPack(overrides: Partial<ContentPack> = {}): ContentPack {
   return {

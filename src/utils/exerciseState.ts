@@ -1,4 +1,4 @@
-import { Exercise } from "../data/types";
+import { Exercise } from "../types";
 
 /**
  * Per-exercise editor state and the AsyncStorage key that persists it.

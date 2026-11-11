@@ -15,7 +15,7 @@ import ReportErrorModal from "../../components/ReportErrorModal";
 import { useContent } from "../../contexts/ContentContext";
 
 import { EDITOR_THEMES, getThemeSwatches } from "../../utils/editor/themes";
-import { PROCESSING_COLOR_HEX } from "../../constants/ProcessingColors";
+import { ACCENT_COLOR_HEX } from "../../constants/AccentColors";
 
 const SETTINGS_KEYS = {
   dailyReminder: STORAGE_KEYS.settingDailyReminder,
@@ -72,7 +72,7 @@ const createStyles = (colors: Record<string, string>) =>
 export default function Settings() {
   const { colorScheme, toggleTheme, ctaColor, setCtaColor, derivedColors } = useThemeContext();
   const router = useRouter();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const colors = Colors[colorScheme];
   const styles = createStyles(colors);
   const { contentVersion, p5Version, refreshing, checkForUpdates } = useContent();
   const [dailyReminder, setDailyReminder] = useState(false);
@@ -251,7 +251,7 @@ export default function Settings() {
               <Text style={styles.settingTitle}>Accent Color</Text>
               <Text style={styles.settingDescription}>Choose a CTA color for buttons and highlights</Text>
             </View>
-            {PROCESSING_COLOR_HEX.map((hex) => (
+            {ACCENT_COLOR_HEX.map((hex) => (
               <Pressable
                 key={hex}
                 onPress={() => setCtaColor(hex)}
@@ -378,7 +378,7 @@ export default function Settings() {
               <Text style={styles.settingDescription}>Choose a color theme for the code editor</Text>
             </View>
             {Object.entries(EDITOR_THEMES).map(([key, theme]) => {
-              const swatches = getThemeSwatches(key, colorScheme === "dark" ? "dark" : "light");
+              const swatches = getThemeSwatches(key, colorScheme);
               return (
                 <Pressable
                   key={key}

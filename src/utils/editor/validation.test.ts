@@ -18,7 +18,7 @@ import {
   RULE_TYPES,
 } from "./validation";
 import { analyzeCode } from "../../test/lezerAdapter";
-import type { ValidationRule } from "../../data/types";
+import type { ValidationRule } from "../../types";
 
 function evalRules(code: string, rules: ValidationRule[]) {
   return evaluateRules(analyzeCode(code), rules);
