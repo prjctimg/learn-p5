@@ -1,5 +1,9 @@
 import { describe, it, expect } from "@jest/globals";
-import { highlightSyntax } from "./referenceRender";
+import {
+  highlightSyntax,
+  parseDescriptionBlocks,
+  sanitizeCode,
+} from "./referenceRender";
 import { extractDescribeCaption, stripDescribe } from "./describe";
 
 describe("highlightSyntax", () => {
@@ -43,6 +47,81 @@ describe("highlightSyntax", () => {
     const code = "function draw() {\n  background(0);\n  // done\n}";
     const tokens = highlightSyntax(code, "dark");
     expect(tokens.map((t) => t.text).join("")).toBe(code);
+  });
+});
+
+describe("parseDescriptionBlocks", () => {
+  it("finds every fenced block even when adjacent to prose and each other", () => {
+    const blocks = parseDescriptionBlocks(
+      "Before```js example\ncircle(1);\n```After```js\nline(2);\n```End"
+    );
+
+    expect(blocks).toEqual([
+      { type: "text", text: "Before" },
+      { type: "code", code: "circle(1);", language: "js", example: true },
+      { type: "text", text: "After" },
+      { type: "code", code: "line(2);", language: "js", example: false },
+      { type: "text", text: "End" },
+    ]);
+  });
+
+  it("converts adjacent HTML code blocks before parsing", () => {
+    const blocks = parseDescriptionBlocks(
+      '<pre><code class="language-js example">circle(1);</code></pre>' +
+        '<pre><code class="language-js">line(2);</code></pre>'
+    );
+
+    expect(blocks.filter((block) => block.type === "code")).toEqual([
+      { type: "code", code: "circle(1);", language: "js", example: true },
+      { type: "code", code: "line(2);", language: "js", example: false },
+    ]);
+  });
+
+  it("only flags the example token after the language", () => {
+    const [block] = parseDescriptionBlocks("```js example\ncircle(1);\n```");
+    expect(block).toEqual({ type: "code", code: "circle(1);", language: "js", example: true });
+  });
+
+  it("leaves unmatched fences as text", () => {
+    const blocks = parseDescriptionBlocks("Before ```js\ncircle(1);");
+    expect(blocks).toEqual([{ type: "text", text: "Before ```js\ncircle(1);" }]);
+  });
+});
+
+describe("sanitizeCode", () => {
+  it("removes malformed HTML wrappers without dropping trailing code", () => {
+    const code = sanitizeCode(`<div>
+<code>
+let x = 1;
+</code>
+</div>
+function draw() {
+  circle(x, 1, 2);
+}`);
+
+    expect(code).toBe("let x = 1;\n\n\nfunction draw() {\n  circle(x, 1, 2);\n}");
+    expect(code).not.toMatch(/<\/?div|<\/?code/);
+  });
+
+  it("keeps HTML-looking strings and comparison operators inside examples", () => {
+    const code = sanitizeCode(`<div>
+<code>
+let div = createDiv('<h3>p5*js</h3>');
+if (mouseX < width && mouseY > 0) {
+  circle(1, 1, 2);
+}
+</code>
+</div>`);
+
+    expect(code).toContain("<h3>p5*js</h3>");
+    expect(code).toContain("mouseX < width && mouseY > 0");
+    expect(code).not.toMatch(/^\s*<div>/);
+  });
+
+  it("decodes entities in code before highlighting", () => {
+    const code = sanitizeCode("<code>if (a &lt; b) text('&amp;');</code>");
+    expect(code).toBe("if (a < b) text('&');");
+    expect(highlightSyntax(code, "dark").map((token) => token.text).join("")).toBe(code);
   });
 });
 

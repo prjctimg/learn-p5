@@ -75,10 +75,10 @@ export default function ExamplePreview({
 
   const html = useMemo(() => {
     if (!showPreview || norender || !assets.ready) return null;
-    return getExampleHtml(previewCode ?? code, colorScheme, assets.urls);
-  }, [showPreview, norender, assets.ready, assets.urls, previewCode, code, colorScheme]);
+    return getExampleHtml(safePreviewCode, colorScheme, assets.urls);
+  }, [showPreview, norender, assets.ready, assets.urls, safePreviewCode, colorScheme]);
 
-  const tokens = useMemo(() => highlightSyntax(code, colorScheme), [code, colorScheme]);
+  const tokens = useMemo(() => highlightSyntax(safeCode, colorScheme), [safeCode, colorScheme]);
 
   return (
     <View>
