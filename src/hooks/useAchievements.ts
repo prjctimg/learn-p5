@@ -108,9 +108,9 @@ export async function recordCompletion(
 
   grant("first-strokes", () => events.length >= 1);
   grant("daily-3", () => todays.length >= 3);
-  grant("quickdraw", () => events.some((e) => (e.durationMs ?? Infinity) < 30000));
+  grant("quickdraw", () => (durationMs ?? Infinity) < 30000 || events.some((e) => (e.durationMs ?? Infinity) < 30000));
 
-  // On a Roll: 3 events within any 10-minute window.
+  // On a Roll: 3 distinct exercise completions within any 10-minute window.
   grant("on-a-roll", () => {
     if (events.length < 3) return false;
     const sorted = [...events].sort((a, b) => a.ts - b.ts);

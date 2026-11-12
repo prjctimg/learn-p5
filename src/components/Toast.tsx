@@ -54,8 +54,8 @@ export default function Toast({
       const timer = setTimeout(() => {
         Animated.spring(translateY, {
           toValue: HIDDEN_Y,
-          tension: 200,
-          friction: 14,
+          tension: 70,
+          friction: 12,
           useNativeDriver: true,
         }).start(() => onDismiss?.());
       }, duration);
@@ -69,8 +69,8 @@ export default function Toast({
   const handleAction = () => {
     Animated.spring(translateY, {
       toValue: HIDDEN_Y,
-      tension: 200,
-      friction: 14,
+      tension: 70,
+      friction: 12,
       useNativeDriver: true,
     }).start(() => {
       onDismiss?.();

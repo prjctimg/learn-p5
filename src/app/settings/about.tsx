@@ -47,17 +47,20 @@ export default function About() {
 
         <View style={[styles.card, { backgroundColor: colors.surfaceDim }]}>
           <Text style={[styles.heading, { color: colors.onSurface }]}>
-            What this app does
+            What does this app do ?
           </Text>
           <Text style={[styles.body, { color: colors.textSecondary }]}>
             Learn P5 allows you to learn the p5.js library using simple code
             exercises and access the API reference fully offline.
+
+            It also has a trivia for least used symbols to help users discover hidden gems of p5.js!
+            This app is still in active development and may crash during use, please shake your phone to use the bug report feature if this happens (whilst you're in this app).
           </Text>
         </View>
 
         <View style={[styles.versionBadge, { backgroundColor: colors.surfaceDim }]}>
           <Text style={[styles.versionText, { color: colors.textSecondary }]}>
-            {APP_VERSION} • p5.js v{P5_RUNTIME_VERSION}
+            {APP_VERSION} | p5.js v{P5_RUNTIME_VERSION}
           </Text>
         </View>
       </ScrollView>

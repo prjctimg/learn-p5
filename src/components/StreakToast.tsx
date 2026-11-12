@@ -93,35 +93,35 @@ export default function StreakToast({
  }, [streakCount, tierProgress, translateY, opacity, progressAnim, countAnim]);
 
  const animateOut = useCallback(() => {
- Animated.parallel([
- Animated.spring(translateY, {
- toValue: -200,
- tension: 180,
- friction: 10,
- useNativeDriver: true,
- }),
- Animated.timing(opacity, {
- toValue: 0,
- duration: 150,
- useNativeDriver: true,
- }),
- ]).start(() => onDismiss());
+  Animated.parallel([
+   Animated.spring(translateY, {
+    toValue: -200,
+    tension: 70,
+    friction: 12,
+    useNativeDriver: true,
+   }),
+   Animated.timing(opacity, {
+    toValue: 0,
+    duration: 450,
+    useNativeDriver: true,
+   }),
+  ]).start(() => onDismiss());
  }, [translateY, opacity, onDismiss]);
 
  useEffect(() => {
- if (!visible) return;
+  if (!visible) return;
 
- const listener = animateIn();
+  const listener = animateIn();
 
- const timer = setTimeout(() => {
- if (countAnim) countAnim.removeListener(listener);
- animateOut();
- }, 5000);
+  const timer = setTimeout(() => {
+   if (countAnim) countAnim.removeListener(listener);
+   animateOut();
+  }, 5600);
 
- return () => {
- clearTimeout(timer);
- countAnim.removeListener(listener);
- };
+  return () => {
+   clearTimeout(timer);
+   countAnim.removeListener(listener);
+  };
  }, [visible]);
 
  const progressWidth = progressAnim.interpolate({

@@ -632,7 +632,10 @@ case "editorTapped":
    // by surprise. Fall back to the legacy toast if the course data isn't
    // available to compute the next title.
    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+   let cancelled = false;
+   let overlayTimer: ReturnType<typeof setTimeout> | null = null;
    loadCourse(course).then((courseData) => {
+     if (cancelled) return;
      if (!courseData) {
        showToast("✓ Exercise completed!", "Next →", handleToastNext, "success");
        return;
@@ -643,7 +646,11 @@ case "editorTapped":
      } else {
        setNextTitle(null); // last exercise of the module
      }
-     setNextOverlayVisible(true);
+     // Give the user a moment to appreciate their solution before the
+     // countdown overlay appears and eventually advances.
+     overlayTimer = setTimeout(() => {
+       if (!cancelled) setNextOverlayVisible(true);
+     }, 1800);
    });
 
    (async () => {
@@ -652,8 +659,8 @@ case "editorTapped":
    if (newlyUnlocked.length > 0) {
      const first = ACHIEVEMENTS.find((a) => a.id === newlyUnlocked[0]);
      if (first) {
-       // Defer slightly so the completion overlay doesn't overlap.
-       setTimeout(() => showToast(`🏆 ${first.title} unlocked`, undefined, undefined, "success"), 3200);
+       // Defer slightly so the completion overlay/countdown doesn't overlap.
+       setTimeout(() => showToast(`🏆 ${first.title} unlocked`, undefined, undefined, "success"), 7000);
      }
    }
 
@@ -679,6 +686,11 @@ case "editorTapped":
    }
    }
    })();
+
+   return () => {
+     cancelled = true;
+     if (overlayTimer) clearTimeout(overlayTimer);
+   };
    }, [state.completed, state.exercise, course, webViewReady, handleToastNext, showToast]);
 
   const exerciseSymbols = useMemo(() => {

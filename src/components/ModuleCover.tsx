@@ -13,6 +13,7 @@ import { Svg, Path, Circle, Line, Rect, Polygon, Ellipse as SvgEllipse } from "r
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useThemeContext } from "./ThemeProvider";
 import { Colors } from "../constants/Colors";
+import ShapesCoursePreview from "./ShapesCoursePreview";
 
 // The p5.js asterisk path (same as ExerciseCard/SplashScreen).
 const ASTERISK_PATH =
@@ -76,6 +77,16 @@ export default function ModuleCover({ slug, color, locked, completed }: ModuleCo
           color={color}
         />
       </CoverShell>
+    );
+  }
+
+  // For the Shapes course, show a live p5 canvas preview so the card
+  // demonstrates the actual primitives with accent-colored fills.
+  if (slug === "shapes") {
+    return (
+      <View style={[styles.canvasShell, { backgroundColor: color + "1A" }]}>
+        <ShapesCoursePreview colorScheme={colorScheme} accentColor={color} height={140} />
+      </View>
     );
   }
 
@@ -446,6 +457,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 28,
+  },
+  canvasShell: {
+    width: "100%",
+    height: 140,
+    overflow: "hidden",
   },
   stage: {
     width: COVER_SIZE,

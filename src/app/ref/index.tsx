@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter, useIsFocused } from "expo-router";
 import { useMemo, useState, useCallback } from "react";
-import { View, Text, FlatList, ScrollView, Pressable, StyleSheet, Linking } from "react-native";
+import { View, Text, FlatList, ScrollView, Pressable, StyleSheet, Linking, TextInput } from "react-native";
+import Fuse from "fuse.js";
 
 import Header from "../../components/Header";
 import Breadcrumbs from "../../components/Breadcrumbs";
@@ -13,10 +14,36 @@ import { useThemeContext } from "../../components/ThemeProvider";
 import { Colors } from "../../constants/Colors";
 import { useShakeDetection } from "../../hooks/useShakeDetection";
 import ReportErrorModal from "../../components/ReportErrorModal";
-import SearchOverlay from "../../components/SearchOverlay";
 import { useRuntimeAssets } from "../../hooks/useRuntimeAssets";
 import { highlightSyntax, sanitizeCode } from "../../utils/referenceRender";
 import { extractDescribeCaption, stripDescribe } from "../../utils/describe";
+
+const MODULE_DESCRIPTIONS: Record<string, string> = {
+  Shape: "2D primitives and drawing basics for composing sketches.",
+  Shapes: "2D primitives and drawing basics for composing sketches.",
+  Color: "Set fills, strokes, and color modes for your canvas.",
+  Typography: "Load and draw text with fonts and alignment controls.",
+  Image: "Load, display, and manipulate images and pixels.",
+  Transform: "Translate, rotate, scale, and transform the coordinate system.",
+  Environment: "Control canvas size, frame rate, and runtime environment.",
+  Rendering: "Create and manage drawing surfaces and renderers.",
+  Math: "Math helpers, vectors, noise, and calculations for sketches.",
+  Data: "Work with data structures, conversion, and storage helpers.",
+  Events: "Respond to mouse, keyboard, touch, and other input events.",
+  IO: "Load and save files, data, and external resources.",
+  Structure: "Organize sketch structure with setup, draw, and helpers.",
+  DOM: "Create and control HTML elements alongside the canvas.",
+  Constants: "Built-in constants for angles, modes, and common values.",
+  Foundation: "Core p5.js types and foundational utilities.",
+  "3D": "3D primitives, materials, lights, and camera controls.",
+  Lights: "Lighting functions for 3D scenes.",
+  Material: "Materials and surface appearance for 3D geometry.",
+  Camera: "Camera controls and perspective for 3D sketches.",
+};
+
+function getModuleDescription(name: string): string {
+  return MODULE_DESCRIPTIONS[name] || `Symbols in the ${name} module.`;
+}
 
 function buildModuleGroups(symbols: ContentSymbol[]) {
   return symbols.reduce<{ module: string; symbols: ContentSymbol[] }[]>((acc, sym) => {
@@ -30,7 +57,7 @@ function buildModuleGroups(symbols: ContentSymbol[]) {
   }, []);
 }
 
-function SymbolDetail({ symbol, onOpenSearch }: { symbol: string; onOpenSearch: () => void }) {
+function SymbolDetail({ symbol }: { symbol: string }) {
   const router = useRouter();
   const symbolsByName = useMemo(() => getP5SymbolsByName(), []);
   const symbols = useMemo(() => getP5Symbols(), []);
@@ -248,16 +275,8 @@ function SymbolDetail({ symbol, onOpenSearch }: { symbol: string; onOpenSearch: 
  </Text>
  </Pressable>
 </ScrollView>
- <Pressable
-   onPress={onOpenSearch}
-   style={[styles.searchFab, { backgroundColor: derivedColors.primary }]}
-   accessibilityRole="button"
-   accessibilityLabel="Search symbols"
- >
-   <MaterialCommunityIcons name="magnify" size={24} color={colors.onPrimary} />
- </Pressable>
- </View>
- );
+  </View>
+  );
 }
 
 export default function Reference() {
@@ -265,162 +284,269 @@ export default function Reference() {
   const router = useRouter();
   const { colorScheme, derivedColors } = useThemeContext();
   const colors = Colors[colorScheme];
-  const moduleGroups = useMemo(() => buildModuleGroups(getP5Symbols()), []);
-  const [searchVisible, setSearchVisible] = useState(false);
+  const symbols = useMemo(() => getP5Symbols(), []);
+  const moduleGroups = useMemo(() => buildModuleGroups(symbols), [symbols]);
   const [shakeModalVisible, setShakeModalVisible] = useState(false);
   const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>({});
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const [query, setQuery] = useState("");
   const isFocused = useIsFocused();
 
-   const toggleModule = useCallback((module: string) => {
-     setExpandedModules((prev) => ({ ...prev, [module]: !prev[module] }));
-   }, []);
+  const toggleModule = useCallback((module: string) => {
+    setExpandedModules((prev) => ({ ...prev, [module]: !prev[module] }));
+  }, []);
 
-   useShakeDetection(
-     useCallback(() => setShakeModalVisible(true), []),
-     { enabled: isFocused, haptic: true }
-   );
+  useShakeDetection(
+    useCallback(() => setShakeModalVisible(true), []),
+    { enabled: isFocused, haptic: true }
+  );
 
-  const handleSelectSymbol = useCallback((name: string) => {
-    router.push(`/ref?symbol=${name}`);
-  }, [router]);
+  const fuse = useMemo(
+    () =>
+      new Fuse(symbols, {
+        keys: [
+          { name: "name", weight: 2 },
+          { name: "description", weight: 1 },
+          { name: "module", weight: 1 },
+        ],
+        threshold: 0.4,
+      }),
+    [symbols]
+  );
 
-   if (symbol) {
-     return (
-       <>
-         <SymbolDetail symbol={symbol} onOpenSearch={() => setSearchVisible(true)} />
-         <SearchOverlay
-           visible={searchVisible}
-           onClose={() => setSearchVisible(false)}
-           onSelectSymbol={handleSelectSymbol}
-         />
-          <ReportErrorModal
-            visible={shakeModalVisible}
-            onDismiss={() => setShakeModalVisible(false)}
-            route="/ref"
-            context={symbol}
+  const filteredSymbols = useMemo(() => {
+    const q = query.trim();
+    if (!q) return null;
+    return fuse.search(q).map((r) => r.item);
+  }, [query, fuse]);
+
+  if (symbol) {
+    return (
+      <>
+        <SymbolDetail symbol={symbol} />
+        <ReportErrorModal
+          visible={shakeModalVisible}
+          onDismiss={() => setShakeModalVisible(false)}
+          route="/ref"
+          context={symbol}
+        />
+      </>
+    );
+  }
+
+  const renderListModules = () => (
+    <FlatList
+      style={[styles.flex1, { paddingHorizontal: 16 }]}
+      contentContainerStyle={{ paddingTop: 8, paddingBottom: 32 }}
+      data={moduleGroups}
+      keyExtractor={(item) => item.module}
+      renderItem={({ item: group }) => {
+        const isExpanded = expandedModules[group.module] ?? false;
+        return (
+          <View style={{ marginBottom: 16 }}>
+            <Pressable
+              onPress={() => toggleModule(group.module)}
+              style={({ pressed }) => [
+                styles.flexRow,
+                { alignItems: "center", paddingVertical: 10, opacity: pressed ? 0.6 : 1 },
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel={isExpanded ? `Collapse ${group.module}` : `Expand ${group.module}`}
+            >
+              <MaterialCommunityIcons
+                name={isExpanded ? "chevron-down" : "chevron-right"}
+                size={18}
+                color={colors.onSurface}
+                style={{ marginRight: 6 }}
+              />
+              <Text style={[styles.moduleGroupTitle, { color: colors.onSurface }]}>
+                {group.module}
+              </Text>
+            </Pressable>
+            {isExpanded &&
+              group.symbols.map((sym) => (
+                <Pressable
+                  key={sym.name}
+                  onPress={() => router.push(`/ref?symbol=${sym.name}`)}
+                  style={({ pressed }) => [styles.flexRow, styles.symbolRow, pressed && { opacity: 0.6 }]}
+                  accessibilityRole="button"
+                  accessibilityLabel={`View reference for ${sym.name}`}
+                >
+                  <Text style={[styles.monoSm, { color: derivedColors.primary, flex: 1 }]}>
+                    {sym.name}()
+                  </Text>
+                </Pressable>
+              ))}
+          </View>
+        );
+      }}
+    />
+  );
+
+  const renderGridModules = () => (
+    <FlatList
+      style={[styles.flex1, { paddingHorizontal: 16 }]}
+      contentContainerStyle={{ paddingTop: 8, paddingBottom: 32 }}
+      data={moduleGroups}
+      keyExtractor={(item) => item.module}
+      numColumns={2}
+      columnWrapperStyle={{ gap: 12 }}
+      renderItem={({ item: group }) => (
+        <Pressable
+          onPress={() => {
+            setViewMode("list");
+            setExpandedModules((prev) => ({ ...prev, [group.module]: true }));
+          }}
+          style={({ pressed }) => [
+            styles.gridCard,
+            { backgroundColor: colors.surfaceDim, opacity: pressed ? 0.85 : 1 },
+          ]}
+          accessibilityRole="button"
+          accessibilityLabel={`${group.module} module, ${group.symbols.length} symbols`}
+        >
+          <Text style={[styles.gridModuleTitle, { color: colors.onSurface }]} numberOfLines={1}>
+            {group.module}
+          </Text>
+          <Text style={[styles.gridCount, { color: derivedColors.primary }]}>
+            {group.symbols.length} symbol{group.symbols.length === 1 ? "" : "s"}
+          </Text>
+          <Text style={[styles.gridDescription, { color: colors.textSecondary }]} numberOfLines={3}>
+            {getModuleDescription(group.module)}
+          </Text>
+        </Pressable>
+      )}
+    />
+  );
+
+  const renderSearchResults = () => (
+    <FlatList
+      style={[styles.flex1, { paddingHorizontal: 16 }]}
+      contentContainerStyle={{ paddingTop: 8, paddingBottom: 32 }}
+      data={filteredSymbols ?? []}
+      keyExtractor={(item) => item.name}
+      ListEmptyComponent={
+        <View style={{ paddingVertical: 24, alignItems: "center" }}>
+          <Text style={[styles.bodySm, { color: colors.textSecondary }]}>No symbols found.</Text>
+        </View>
+      }
+      renderItem={({ item: sym }) => (
+        <Pressable
+          onPress={() => router.push(`/ref?symbol=${sym.name}`)}
+          style={({ pressed }) => [styles.flexRow, styles.symbolRow, pressed && { opacity: 0.6 }]}
+          accessibilityRole="button"
+          accessibilityLabel={`View reference for ${sym.name}`}
+        >
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.monoSm, { color: derivedColors.primary }]}>{sym.name}()</Text>
+            <Text style={[styles.resultModule, { color: colors.textSecondary }]}>{sym.module}</Text>
+          </View>
+        </Pressable>
+      )}
+    />
+  );
+
+  return (
+    <View style={[styles.flex1, { backgroundColor: colors.surface }]}>
+      <Header title="Reference" showBack={false} />
+      <View style={styles.breadcrumbRow}>
+        <View style={{ flex: 1 }}>
+          <View style={styles.breadcrumbInner}>
+            <Text style={[styles.breadcrumbLabel, { color: colors.onSurface }]}>Reference</Text>
+          </View>
+        </View>
+        <View style={styles.viewToggle}>
+          <Pressable
+            onPress={() => setViewMode("list")}
+            style={({ pressed }) => [
+              styles.toggleBtn,
+              viewMode === "list" && { backgroundColor: derivedColors.primary + "22" },
+              pressed && { opacity: 0.7 },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="List view"
+          >
+            <MaterialCommunityIcons
+              name="format-list-bulleted"
+              size={18}
+              color={viewMode === "list" ? derivedColors.primary : colors.textSecondary}
+            />
+          </Pressable>
+          <Pressable
+            onPress={() => setViewMode("grid")}
+            style={({ pressed }) => [
+              styles.toggleBtn,
+              viewMode === "grid" && { backgroundColor: derivedColors.primary + "22" },
+              pressed && { opacity: 0.7 },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Grid view"
+          >
+            <MaterialCommunityIcons
+              name="view-grid-outline"
+              size={18}
+              color={viewMode === "grid" ? derivedColors.primary : colors.textSecondary}
+            />
+          </Pressable>
+        </View>
+      </View>
+
+      <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
+        <View style={[styles.inlineSearch, { backgroundColor: colors.surfaceContainer, borderColor: colors.outlineVariant }]}>
+          <MaterialCommunityIcons name="magnify" size={18} color={colors.onSurfaceVariant} />
+          <TextInput
+            value={query}
+            onChangeText={setQuery}
+            placeholder="Search symbols..."
+            placeholderTextColor={colors.onSurfaceVariant}
+            style={[styles.inlineSearchInput, { color: colors.onSurface }]}
+            autoCapitalize="none"
+            autoCorrect={false}
+            accessibilityRole="search"
+            accessibilityLabel="Search p5 reference"
           />
-        </>
-      );
-    }
+          {query.length > 0 && (
+            <Pressable onPress={() => setQuery("")} accessibilityRole="button" accessibilityLabel="Clear search">
+              <MaterialCommunityIcons name="close-circle" size={18} color={colors.onSurfaceVariant} />
+            </Pressable>
+          )}
+        </View>
+      </View>
 
-   return (
-   <View style={[styles.flex1, { backgroundColor: colors.surface }]}>
-   <Header title="Reference" showBack={false} />
-   <Breadcrumbs segments={[{ label: "Reference" }]} />
-   <FlatList
-   style={[styles.flex1, { paddingHorizontal: 16 }]}
-   contentContainerStyle={{ paddingTop: 12, paddingBottom: 80 }}
-     ListHeaderComponent={
-       <View style={{ marginBottom: 12 }} />
-     }
-   data={moduleGroups}
-   keyExtractor={(item) => item.module}
-   renderItem={({ item: group }) => {
-   const isExpanded = expandedModules[group.module] ?? false;
-   return (
-   <View style={{ marginBottom: 16 }}>
-   <Pressable
-     onPress={() => toggleModule(group.module)}
-     style={({ pressed }) => [
-       styles.flexRow,
-       { alignItems: "center", paddingVertical: 10, opacity: pressed ? 0.6 : 1 },
-     ]}
-     accessibilityRole="button"
-     accessibilityLabel={isExpanded ? `Collapse ${group.module}` : `Expand ${group.module}`}
-   >
-     <MaterialCommunityIcons
-       name={isExpanded ? "chevron-down" : "chevron-right"}
-       size={18}
-       color={colors.onSurface}
-       style={{ marginRight: 6 }}
-     />
-     <Text style={[styles.moduleGroupTitle, { color: colors.onSurface }]}>
-       {group.module}
-     </Text>
-   </Pressable>
-   {isExpanded && group.symbols.map((sym) => (
-   <Pressable
-   key={sym.name}
-   onPress={() => router.push(`/ref?symbol=${sym.name}`)}
-   style={({ pressed }) => [
-   styles.flexRow,
-   styles.symbolRow,
-   pressed && { opacity: 0.6 },
-   ]}
-   accessibilityRole="button"
-   accessibilityLabel={`View reference for ${sym.name}`}
-    >
-     <Text style={[styles.monoSm, { color: derivedColors.primary, flex: 1 }]}>
-     {sym.name}()
-     </Text>
-     </Pressable>
-))}
-     </View>
-   );}}
-   />
-  <Pressable
-    onPress={() => setSearchVisible(true)}
-    style={[styles.searchFab, { backgroundColor: derivedColors.primary }]}
-    accessibilityRole="button"
-    accessibilityLabel="Search symbols"
-  >
-    <MaterialCommunityIcons name="magnify" size={24} color={colors.onPrimary} />
-  </Pressable>
-  <SearchOverlay
-    visible={searchVisible}
-    onClose={() => setSearchVisible(false)}
-    onSelectSymbol={handleSelectSymbol}
-  />
-  <ReportErrorModal
-    visible={shakeModalVisible}
-    onDismiss={() => setShakeModalVisible(false)}
-    route="/ref"
-  />
-  </View>
+      {filteredSymbols ? renderSearchResults() : viewMode === "grid" ? renderGridModules() : renderListModules()}
+
+      <ReportErrorModal
+        visible={shakeModalVisible}
+        onDismiss={() => setShakeModalVisible(false)}
+        route="/ref"
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
  flex1: { flex: 1 },
  flexRow: { flexDirection: "row" },
- searchContainer: {
- flexDirection: "row",
- alignItems: "center",
- marginHorizontal: 16,
- marginTop: 12,
- paddingHorizontal: 12,
- height: 40,
- borderRadius: 10,
- borderWidth: 1,
- gap: 8,
- },
- searchInput: {
- flex: 1,
- fontSize: 14,
- height: 40,
- padding: 0,
- },
  headlineXl: {
- fontFamily: "JetBrainsMono",
- fontSize: 20,
- fontWeight: "700",
+  fontFamily: "JetBrainsMono",
+  fontSize: 20,
+  fontWeight: "700",
  },
  bodySm: {
- fontFamily: "JetBrainsMono",
- fontSize: 16,
+  fontFamily: "JetBrainsMono",
+  fontSize: 16,
  },
  bodyBase: {
- fontFamily: "JetBrainsMono",
- fontSize: 16,
+  fontFamily: "JetBrainsMono",
+  fontSize: 16,
  },
  bodyXs: {
- fontFamily: "JetBrainsMono",
- fontSize: 12,
+  fontFamily: "JetBrainsMono",
+  fontSize: 12,
  },
  monoSm: {
- fontFamily: "JetBrainsMono",
- fontSize: 16,
- fontWeight: "700",
+  fontFamily: "JetBrainsMono",
+  fontSize: 16,
+  fontWeight: "700",
  },
   browseButton: {
   paddingHorizontal: 24,
@@ -428,37 +554,37 @@ const styles = StyleSheet.create({
   borderRadius: 12,
   },
   browseButtonText: {
- fontFamily: "JetBrainsMono",
- fontWeight: "900",
- fontSize: 13,
- textTransform: "uppercase",
- letterSpacing: 0.5,
+  fontFamily: "JetBrainsMono",
+  fontWeight: "900",
+  fontSize: 13,
+  textTransform: "uppercase",
+  letterSpacing: 0.5,
  },
  symbolNameCode: {
- paddingHorizontal: 12,
- paddingVertical: 6,
- borderRadius: 6,
+  paddingHorizontal: 12,
+  paddingVertical: 6,
+  borderRadius: 6,
  },
  symbolNameText: {
- fontFamily: "JetBrainsMono",
- fontSize: 30,
- fontWeight: "900",
+  fontFamily: "JetBrainsMono",
+  fontSize: 30,
+  fontWeight: "900",
  },
  moduleBadge: {
- paddingHorizontal: 8,
- paddingVertical: 2,
- borderRadius: 4,
+  paddingHorizontal: 8,
+  paddingVertical: 2,
+  borderRadius: 4,
  },
  moduleBadgeText: {
- fontFamily: "JetBrainsMono",
- fontSize: 12,
- textTransform: "uppercase",
- letterSpacing: 0.5,
+  fontFamily: "JetBrainsMono",
+  fontSize: 12,
+  textTransform: "uppercase",
+  letterSpacing: 0.5,
  },
  sectionTitle: {
- fontFamily: "JetBrainsMono",
- fontSize: 18,
- fontWeight: "700",
+  fontFamily: "JetBrainsMono",
+  fontSize: 18,
+  fontWeight: "700",
  },
   syntaxBox: {
   paddingHorizontal: 16,
@@ -466,13 +592,13 @@ const styles = StyleSheet.create({
   borderLeftWidth: 3,
   },
  syntaxText: {
- fontFamily: "JetBrainsMono",
- fontSize: 16,
+  fontFamily: "JetBrainsMono",
+  fontSize: 16,
  },
  codeBlock: {
- paddingHorizontal: 16,
- paddingVertical: 12,
- borderRadius: 8,
+  paddingHorizontal: 16,
+  paddingVertical: 12,
+  borderRadius: 8,
  },
   exampleWebView: {
   height: 260,
@@ -486,82 +612,139 @@ const styles = StyleSheet.create({
   fontStyle: "italic",
   },
  paramRow: {
- paddingVertical: 12,
+  paddingVertical: 12,
  },
  paramNameText: {
- fontFamily: "JetBrainsMono",
- fontSize: 16,
- fontWeight: "700",
+  fontFamily: "JetBrainsMono",
+  fontSize: 16,
+  fontWeight: "700",
  },
  paramDescText: {
- fontFamily: "JetBrainsMono",
- fontSize: 16,
+  fontFamily: "JetBrainsMono",
+  fontSize: 16,
  },
  paramTypeText: {
- fontFamily: "JetBrainsMono",
- fontSize: 12,
- textTransform: "uppercase",
- letterSpacing: 0.5,
+  fontFamily: "JetBrainsMono",
+  fontSize: 12,
+  textTransform: "uppercase",
+  letterSpacing: 0.5,
  },
  refListTitle: {
- fontFamily: "JetBrainsMono",
- fontSize: 24,
- fontWeight: "700",
+  fontFamily: "JetBrainsMono",
+  fontSize: 24,
+  fontWeight: "700",
  },
  moduleGroupTitle: {
- fontFamily: "JetBrainsMono",
- fontSize: 18,
- fontWeight: "700",
- textTransform: "uppercase",
- letterSpacing: 0.5,
+  fontFamily: "JetBrainsMono",
+  fontSize: 18,
+  fontWeight: "700",
+  textTransform: "uppercase",
+  letterSpacing: 0.5,
  },
  symbolRow: {
- alignItems: "center",
- paddingVertical: 12,
+  alignItems: "center",
+  paddingVertical: 12,
  },
  navButton: {
- flex: 1,
- flexDirection: "row",
- alignItems: "center",
- gap: 4,
- paddingHorizontal: 12,
- paddingVertical: 10,
- borderRadius: 8,
- maxWidth: "45%",
+  flex: 1,
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 4,
+  paddingHorizontal: 12,
+  paddingVertical: 10,
+  borderRadius: 8,
+  maxWidth: "45%",
  },
  navButtonText: {
- fontFamily: "JetBrainsMono",
- fontSize: 12,
- fontWeight: "700",
+  fontFamily: "JetBrainsMono",
+  fontSize: 12,
+  fontWeight: "700",
  },
  officialDocsLink: {
- flexDirection: "row",
- alignItems: "center",
- justifyContent: "center",
- gap: 6,
- marginTop: 24,
- paddingHorizontal: 16,
- paddingVertical: 12,
- borderRadius: 8,
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 6,
+  marginTop: 24,
+  paddingHorizontal: 16,
+  paddingVertical: 12,
+  borderRadius: 8,
  },
  officialDocsText: {
- fontFamily: "JetBrainsMono",
- fontSize: 13,
- fontWeight: "700",
+  fontFamily: "JetBrainsMono",
+  fontSize: 13,
+  fontWeight: "700",
  },
- searchFab: {
-   position: "absolute",
-   right: 20,
-   bottom: 24,
-   width: 56,
-   height: 56,
-   borderRadius: 28,
-   alignItems: "center",
-   justifyContent: "center",
-   elevation: 4,
-   shadowColor: "#000",
-   shadowOffset: { width: 0, height: 2 },
-   shadowOpacity: 0.25,
-   shadowRadius: 4,
- },
+  breadcrumbRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    gap: 8,
+  },
+  breadcrumbInner: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  breadcrumbLabel: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  viewToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  toggleBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  inlineSearch: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    height: 40,
+    borderRadius: 10,
+    borderWidth: 1,
+    gap: 8,
+  },
+  inlineSearchInput: {
+    flex: 1,
+    fontSize: 14,
+    height: 40,
+    padding: 0,
+  },
+  gridCard: {
+    flex: 1,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 12,
+    minHeight: 120,
+  },
+  gridModuleTitle: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 15,
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+  gridCount: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 12,
+    fontWeight: "700",
+    marginBottom: 6,
+  },
+  gridDescription: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 12,
+    lineHeight: 17,
+  },
+  resultModule: {
+    fontFamily: "JetBrainsMono",
+    fontSize: 12,
+    marginTop: 2,
+  },
 });

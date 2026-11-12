@@ -1,7 +1,7 @@
 {
   "name": "learn-p5",
   "main": "expo-router/entry",
-  "version": "0.6.158",
+  "version": "0.6.159",
   "scripts": {
     "postinstall": "npm run bundle-validation && npm run bundle-p5 && npm run bundle-polyfill",
     "start": "npm run bundle-validation && npm run bundle-editor && npm run bundle-p5 && npm run bundle-polyfill && expo start",

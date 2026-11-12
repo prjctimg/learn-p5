@@ -75,6 +75,17 @@ setContentPack({
   },
 });
 
+// react-native-webview has no native module in Jest; render a simple host view.
+jest.mock("react-native-webview", () => {
+  const React = require("react");
+  const { View } = require("react-native");
+  const WebView = React.forwardRef((props, ref) =>
+    React.createElement(View, { ...props, ref })
+  );
+  WebView.displayName = "WebView";
+  return { WebView };
+});
+
 // react-native-svg ships no jest mock; map its elements to host components so
 // SVG-based components (ModuleCover, ExerciseCard) render under jest.
 const { View, Text } = require("react-native");

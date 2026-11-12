@@ -32,7 +32,7 @@ const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 export default function NextExerciseOverlay({
   visible,
   nextTitle,
-  countdownSeconds = 3,
+  countdownSeconds = 5,
   onCancel,
   onAdvance,
 }: NextExerciseOverlayProps) {

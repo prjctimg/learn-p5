@@ -56,8 +56,8 @@ Open source works because people from all walks of life contribute their
 perspectives to it, this project believes that we can build around this empathy
 and mutual respect.
 
-Please refer to the Code of Conduct before interacting with this project to keep
-our community constructive and welcoming at all times.
+This project uses the
+[same Code of Conduct as p5.js](https://p5js.org/code-of-conduct/).
 
 ## Contributing
 
