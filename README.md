@@ -43,12 +43,11 @@ Google Playstore and F-Droid releases are under review and coming soon.
 
 > [!warning]
 >
-> Your device may warn you about (or even block you) installing apps from
-> unknown sources. To fix this allow apps from the source (in this case the
-> browser you used to download) to be installed and then retry the installation.
+> These are beta testing releases and are currently not signed by Google Play
+> Store.
 >
-> If Google Play Protect is enabled, just scan the app or simply skip the scan
-> to install faster.
+> To minimize risks, be sure to get the release APK from this repository's
+> releases page and scan the app using Google Play Protect.
 
 ## Code of Conduct
 
