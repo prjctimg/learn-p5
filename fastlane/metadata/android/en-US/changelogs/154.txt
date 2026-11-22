@@ -1,0 +1,3 @@
+- Replace daily reminders with a FOSS local notification implementation
+- Improve F-Droid/Play submission metadata and privacy documentation
+- Fix lint warnings and web storage handling
