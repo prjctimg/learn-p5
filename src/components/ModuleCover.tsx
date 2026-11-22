@@ -49,7 +49,7 @@ export default function ModuleCover({ slug, color, locked, completed }: ModuleCo
       -1,
       true,
     );
-  }, []);
+  }, [breath, phase, rotation]);
 
   // Variant selection by slug. Falls back to the rotating asterisk.
   const Variant = useMemo(() => pickVariant(slug), [slug]);

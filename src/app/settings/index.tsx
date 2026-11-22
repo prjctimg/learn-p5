@@ -3,7 +3,7 @@ import { View, Text, Switch, Pressable, ScrollView, StyleSheet, Alert } from "re
 import { useRouter, useIsFocused } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Notifications from "expo-notifications";
+import notifee, { TriggerType, RepeatFrequency, AndroidImportance, AuthorizationStatus } from "@psync/notifee";
 import Header from "../../components/Header";
 import TimePicker from "../../components/TimePicker";
 import { useThemeContext } from "../../components/ThemeProvider";
@@ -131,25 +131,42 @@ export default function Settings() {
   }, [checkForUpdates]);
 
   const scheduleNotification = useCallback(async (hour: number, minute: number) => {
-    // Reschedule only once permission is actually granted. Cancelling first
-    // and ignoring the result left the toggle silently on with no reminder
-    // scheduled when the user had denied permission.
-    const { status } = await Notifications.requestPermissionsAsync();
-    if (status !== "granted") {
+    const settings = await notifee.requestPermission();
+    if (settings.authorizationStatus < AuthorizationStatus.AUTHORIZED) {
       throw new Error("Notification permission not granted");
     }
-    await Notifications.cancelAllScheduledNotificationsAsync();
-    await Notifications.scheduleNotificationAsync({
-      content: {
+
+    const channelId = await notifee.createChannel({
+      id: "daily-reminder",
+      name: "Daily Reminder",
+      importance: AndroidImportance.DEFAULT,
+    });
+
+    await notifee.cancelTriggerNotifications();
+
+    const date = new Date();
+    date.setHours(hour, minute, 0, 0);
+    if (date.getTime() <= Date.now()) {
+      date.setDate(date.getDate() + 1);
+    }
+
+    await notifee.createTriggerNotification(
+      {
+        id: "daily-reminder",
         title: "Time to code!",
         body: "Keep your streak alive — practice your p5.js skills today.",
+        android: {
+          channelId,
+          pressAction: { id: "default" },
+        },
       },
-      trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.DAILY,
-        hour,
-        minute,
-      },
-    });
+      {
+        type: TriggerType.TIMESTAMP,
+        timestamp: date.getTime(),
+        repeatFrequency: RepeatFrequency.DAILY,
+        alarmManager: { allowWhileIdle: true },
+      }
+    );
   }, []);
 
   const toggleDailyReminder = async (value: boolean) => {
@@ -168,7 +185,7 @@ export default function Settings() {
         return;
       }
     } else {
-      await Notifications.cancelAllScheduledNotificationsAsync();
+      await notifee.cancelTriggerNotifications();
     }
     setDailyReminder(value);
     await AsyncStorage.setItem(SETTINGS_KEYS.dailyReminder, value.toString());

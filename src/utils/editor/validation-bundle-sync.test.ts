@@ -33,7 +33,7 @@ interface BundleExports {
 function loadBundle(): BundleExports {
   const sandbox: { __VAL_CORE?: BundleExports } = {};
   // Matches how the content repo's check-exercises.mjs executes the artifact.
-  // eslint-disable-next-line no-new-func
+   
   new Function("globalThis", VALIDATION_CORE)(sandbox);
   return sandbox.__VAL_CORE as BundleExports;
 }
@@ -70,7 +70,7 @@ const ruleSets: ValidationRule[][] = [
   ],
 ];
 
-const invalidRules: Array<Array<Record<string, unknown>>> = [
+const invalidRules: Record<string, unknown>[][] = [
   [{ type: "bogus" }],
   [{ type: "canvasSize", width: 400 }],
   [{ type: "functionCall", name: 123 }],

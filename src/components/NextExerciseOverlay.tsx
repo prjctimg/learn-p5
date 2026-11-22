@@ -67,7 +67,7 @@ export default function NextExerciseOverlay({
     }, 1000);
 
     return () => clearInterval(tick);
-  }, [visible]);
+  }, [cardScale, countdownSeconds, dashOffset, onAdvance, overlayOpacity, visible]);
 
   const ringAnimatedProps = useAnimatedProps(() => ({
     strokeDashoffset: dashOffset.value,

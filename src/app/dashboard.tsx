@@ -93,7 +93,7 @@ const { unlocked: unlockedAchievements, unlockedAt, refresh: refreshAchievements
  setStreakCount(count);
  });
  refreshAchievements();
- }, [])
+ }, [refreshAchievements])
  );
 
  useEffect(() => {
@@ -103,7 +103,7 @@ const { unlocked: unlockedAchievements, unlockedAt, refresh: refreshAchievements
  }
  });
 refreshAchievements();
-  }, []);
+  }, [refreshAchievements, streak]);
 
   useEffect(() => {
   const timer = setTimeout(async () => {
@@ -199,7 +199,7 @@ refreshAchievements();
  completedAnim.removeListener(completedListener);
  streakAnim.removeListener(streakListener);
  };
- }, [level, completedCount, streakCount]);
+ }, [completedAnim, completedCount, level, levelAnim, streakAnim, streakCount]);
 
  const styles = useMemo(
  () =>
@@ -378,7 +378,7 @@ progressBarOuter: {
  textAlign: "center",
  },
  }),
- [colorScheme]
+ [colors.onPrimary, colors.onSurface, colors.surface, colors.surfaceDim, colors.textSecondary, derivedColors.primary]
 );
 
  return (

@@ -6,6 +6,7 @@ import { useDrawerContext } from "../contexts/DrawerContext";
 import { renderWithProviders } from "../test/renderWithProviders";
 import { mockRouter } from "../test/expoRouterMock";
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 jest.mock("expo-router", () => require("../test/expoRouterMock").mockRouterModule);
 
 function DrawerProbe() {

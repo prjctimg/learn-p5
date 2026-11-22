@@ -65,7 +65,7 @@ describe("recordCompletion", () => {
     advanceMinutes(60 * 24); // next day
     await recordCompletion("ex-a"); // different day, counted again
     const eventsRaw = await AsyncStorage.getItem("completion_events");
-    const events = JSON.parse(eventsRaw ?? "[]") as Array<{ exerciseId: string }>;
+    const events = JSON.parse(eventsRaw ?? "[]") as { exerciseId: string }[];
     expect(events.filter((e) => e.exerciseId === "ex-a")).toHaveLength(2);
   });
 

@@ -8,6 +8,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  workflows: write
 
 jobs:
   update:
@@ -15,23 +16,15 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 26
+
       - name: Update actions
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          UPDATED=false
-          for i in 1 2 3; do
-            echo "Attempt $i to update GitHub Actions..."
-            if npx --yes actions-up@2.0.0 --yes --style preserve; then
-              UPDATED=true
-              break
-            fi
-            if [ "$i" -lt 3 ]; then sleep 10; fi
-          done
-          if [ "$UPDATED" != "true" ]; then
-            echo "Failed to update GitHub Actions after 3 attempts"
-            exit 1
-          fi
+        run: npx --yes actions-up@2.0.0 --yes --style preserve
 
       - name: Create pull request
         uses: peter-evans/create-pull-request@v8

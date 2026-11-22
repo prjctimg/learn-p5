@@ -13,7 +13,7 @@ const PACK_FILE = CONTENT_DIR ? `${CONTENT_DIR}pack.json` : null;
 const TEMP_FILE = CONTENT_DIR ? `${CONTENT_DIR}pack.tmp.json` : null;
 const META_FILE = CONTENT_DIR ? `${CONTENT_DIR}pack.meta.json` : null;
 
-function useWebStorage(): boolean {
+function isWebStorage(): boolean {
   return (
     Platform.OS === "web" ||
     !CONTENT_DIR ||
@@ -26,7 +26,7 @@ function useWebStorage(): boolean {
 async function readCachedMeta(): Promise<ContentCacheMeta | null> {
   try {
     let raw: string | null = null;
-    if (useWebStorage()) {
+    if (isWebStorage()) {
       raw = await AsyncStorage.getItem(WEB_META_KEY);
     } else {
       const info = await FileSystem.getInfoAsync(META_FILE!);
@@ -50,7 +50,7 @@ async function readCachedMeta(): Promise<ContentCacheMeta | null> {
 
 async function writeCachedMeta(meta: ContentCacheMeta): Promise<void> {
   const raw = JSON.stringify(meta);
-  if (useWebStorage()) {
+  if (isWebStorage()) {
     await AsyncStorage.setItem(WEB_META_KEY, raw);
     return;
   }
@@ -58,7 +58,7 @@ async function writeCachedMeta(meta: ContentCacheMeta): Promise<void> {
 }
 
 async function clearCachedMeta(): Promise<void> {
-  if (useWebStorage()) {
+  if (isWebStorage()) {
     await AsyncStorage.removeItem(WEB_META_KEY);
     return;
   }
@@ -69,7 +69,7 @@ export async function readCachedContent(): Promise<ContentPack | null> {
   try {
     let raw: string | null = null;
 
-    if (useWebStorage()) {
+    if (isWebStorage()) {
       raw = await AsyncStorage.getItem(WEB_PACK_KEY);
     } else {
       const info = await FileSystem.getInfoAsync(PACK_FILE!);
@@ -105,7 +105,7 @@ export async function writeCachedContent(
   const pack = parseContentPack(raw);
   pack.packSha256 = meta.packSha256;
 
-  if (useWebStorage()) {
+  if (isWebStorage()) {
     await AsyncStorage.setItem(WEB_PACK_KEY, raw);
     await writeCachedMeta(meta);
     return pack;
@@ -120,7 +120,7 @@ export async function writeCachedContent(
 }
 
 export async function clearCachedContent(): Promise<void> {
-  if (useWebStorage()) {
+  if (isWebStorage()) {
     await AsyncStorage.removeItem(WEB_PACK_KEY);
     await clearCachedMeta();
     return;

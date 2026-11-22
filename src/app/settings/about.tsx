@@ -54,7 +54,7 @@ export default function About() {
             exercises and access the API reference fully offline.
 
             It also has a trivia for least used symbols to help users discover hidden gems of p5.js!
-            This app is still in active development and may crash during use, please shake your phone to use the bug report feature if this happens (whilst you're in this app).
+            This app is still in active development and may crash during use, please shake your phone to use the bug report feature if this happens (whilst you&apos;re in this app).
           </Text>
         </View>
 

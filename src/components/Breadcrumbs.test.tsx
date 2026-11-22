@@ -4,6 +4,7 @@ import Breadcrumbs from "./Breadcrumbs";
 import { renderWithProviders } from "../test/renderWithProviders";
 import { mockRouter } from "../test/expoRouterMock";
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 jest.mock("expo-router", () => require("../test/expoRouterMock").mockRouterModule);
 
 describe("Breadcrumbs", () => {

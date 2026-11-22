@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { StyleSheet, View, Text } from "react-native";
 import Animated, {
   useSharedValue,
@@ -32,6 +32,8 @@ export default function TaskCompletePulse({
 
   const scale = useSharedValue(0.6);
   const opacity = useSharedValue(0);
+  const onDoneRef = useRef(onDone);
+  onDoneRef.current = onDone;
 
   useEffect(() => {
     if (!visible) return;
@@ -46,9 +48,9 @@ export default function TaskCompletePulse({
       withTiming(1, { duration: 160 }),
       withDelay(duration - 260, withTiming(0, { duration: 260 })),
     );
-    const t = setTimeout(() => runOnJS(onDone)(), duration);
+    const t = setTimeout(() => runOnJS(onDoneRef.current)(), duration);
     return () => clearTimeout(t);
-  }, [visible]);
+  }, [duration, opacity, scale, visible]);
 
   const cardStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],

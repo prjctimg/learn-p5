@@ -57,20 +57,20 @@ export default function Learn() {
       .finally(() => setLoading(false));
   }, []);
 
-  const isCourseCompleted = (course: Course): boolean => {
+  const isCourseCompleted = useCallback((course: Course): boolean => {
     if (completedCourses.includes(course.slug)) return true;
     if (course.exercises.length === 0) return false;
     return course.exercises.every((l) =>
       completedExercises.includes(`${course.slug}/${l.id}`)
     );
-  };
+  }, [completedCourses, completedExercises]);
 
   const currentSlug = useMemo(() => {
     for (const c of courses) {
       if (!isCourseCompleted(c)) return c.slug;
     }
     return null;
-  }, [courses, completedExercises, completedCourses]);
+  }, [courses, isCourseCompleted]);
 
   // The single "current" (first incomplete) course is the blocker for every
   // locked card under the sequential completion model. Surface its title so a
@@ -85,7 +85,7 @@ export default function Learn() {
     const active = courses.filter((c) => !isCourseCompleted(c));
     const completed = courses.filter((c) => isCourseCompleted(c));
     return [...active, ...completed];
-  }, [courses, completedExercises, completedCourses]);
+  }, [courses, isCourseCompleted]);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.surface }]}>

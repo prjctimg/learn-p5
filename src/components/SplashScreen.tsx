@@ -63,7 +63,7 @@ function Snowflake({ config, screenHeight }: { config: SnowflakeConfig; screenHe
       -1,
       true,
     );
-  }, []);
+  }, [config.duration, config.initialDelay, config.size, config.wobbleAmount, config.wobbleDuration, screenHeight, translateX, translateY]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [

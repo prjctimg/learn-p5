@@ -22,7 +22,7 @@ export default function SideDrawer() {
       duration: 300,
     }));
     backdropOpacity.set(withTiming(isOpen ? 0.5 : 0, { duration: 300 }));
-  }, [isOpen]);
+  }, [backdropOpacity, isOpen, translateX]);
 
   const backdropStyle = useAnimatedStyle(() => ({
     opacity: backdropOpacity.value,

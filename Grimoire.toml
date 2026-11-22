@@ -1,0 +1,76 @@
+version = "1"
+
+[sigil.install]
+description = "Install dependencies and generate bundled runtime artifacts"
+language = "shell"
+run = "npm ci"
+
+[sigil.start]
+description = "Start Expo dev server (regenerates bundles)"
+language = "shell"
+run = "npm start"
+
+[sigil.android]
+description = "Start Expo on Android"
+language = "shell"
+run = "npm run android"
+
+[sigil.web]
+description = "Start Expo on web"
+language = "shell"
+run = "npm run web"
+
+[sigil.lint]
+description = "Run ESLint"
+language = "shell"
+run = "npm run lint"
+
+[sigil.typecheck]
+description = "Run TypeScript type checks"
+language = "shell"
+run = "npm run typecheck"
+
+[sigil.test]
+description = "Run Jest tests"
+language = "shell"
+run = "npm test"
+
+[sigil.check]
+description = "Run version consistency, typecheck, and tests"
+language = "shell"
+run = "npm run check"
+
+[sigil.ci]
+description = "Run CI-quality checks (lint, check, web export)"
+language = "shell"
+run = "npm run lint && npm run check && npm run export:web"
+
+[sigil.bundle-editor]
+description = "Regenerate CodeMirror editor bundle"
+language = "shell"
+run = "npm run bundle-editor"
+
+[sigil.bundle-p5]
+description = "Regenerate p5 runtime bundle"
+language = "shell"
+run = "npm run bundle-p5"
+
+[sigil.bundle-polyfill]
+description = "Regenerate polyfill bundle"
+language = "shell"
+run = "npm run bundle-polyfill"
+
+[sigil.bundle-validation]
+description = "Regenerate validation bundle"
+language = "shell"
+run = "npm run bundle-validation"
+
+[sigil.export-web]
+description = "Export static web build"
+language = "shell"
+run = "npm run export:web"
+
+[sigil.prebuild-android]
+description = "Generate native Android project (Expo CNG)"
+language = "shell"
+run = "npx expo prebuild --platform android --clean"

@@ -18,30 +18,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: 26
           cache: npm
 
       - name: Install dependencies
-        run: |
-          NPM_INSTALLED=false
-          for i in 1 2 3; do
-            echo "Attempt $i to install npm dependencies..."
-            if npm ci; then
-              NPM_INSTALLED=true
-              break
-            fi
-            if [ "$i" -lt 3 ]; then sleep 10; fi
-          done
-          if [ "$NPM_INSTALLED" != "true" ]; then
-            echo "Failed to install npm dependencies after 3 attempts"
-            exit 1
-          fi
+        run: npm ci
 
       - name: Regenerate editor bundle
         run: npm run bundle-editor
-
-      - name: Regenerate p5 runtime bundle
-        run: npm run bundle-p5
 
       - name: Run checks
         run: npm run check

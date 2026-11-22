@@ -61,6 +61,8 @@ export default function Exercise() {
  currentTaskIndex: 0,
  completedTasks: [],
  });
+ const stateCodeRef = useRef(state.code);
+ stateCodeRef.current = state.code;
  const { colorScheme, toggleTheme, ctaColor, derivedColors } = useThemeContext();
  const colors = Colors[colorScheme];
  const webViewRef = useRef<WebView>(null);
@@ -327,7 +329,7 @@ const [keyboardHeight, setKeyboardHeight] = useState<string>(DEFAULTS.keyboardHe
  gap: 8,
  },
  }),
- [colorScheme]
+ [colors.onPrimary, colors.onSurface, colors.outlineVariant, colors.surface, colors.surfaceContainerHigh, colors.textSecondary, derivedColors.primary]
 );
 
   useEffect(() => {
@@ -439,7 +441,7 @@ case "editorTapped":
  }
  } catch {}
  },
- [router, course, id, handleReset]
+ [course, handleReset, id, router, showToast, state.exercise?.tasks, useSystemKeyboard]
 );
 
  const pendingInserts = useRef<{ text: string; cursorOffset?: number }[]>([]);
@@ -538,7 +540,7 @@ case "editorTapped":
         setStreakToastVisible(true);
       }
     });
-  }, []);
+  }, [streak]);
 
   useEffect(() => {
     if (editorViewReady && webViewRef.current && state.exercise?.tasks) {
@@ -553,8 +555,9 @@ case "editorTapped":
         // replaces the editor contents with that seed; otherwise the current
         // editor code is carried forward. Dispatching SET_CODE keeps React's
         // state (and the draft-save effect) in sync when a seed applies.
-        const nextCode = resolveNextTaskCode(task.startingCode, state.code);
-        if (nextCode != null && nextCode !== state.code) {
+        const currentCode = stateCodeRef.current;
+        const nextCode = resolveNextTaskCode(task.startingCode, currentCode);
+        if (nextCode != null && nextCode !== currentCode) {
           dispatch({ type: "SET_CODE", code: nextCode });
         }
         webViewRef.current.postMessage(
@@ -567,7 +570,7 @@ case "editorTapped":
         );
       }
     }
-  }, [state.currentTaskIndex, editorViewReady, state.exercise]);
+  }, [editorViewReady, state.currentTaskIndex, state.exercise]);
 
   useFocusEffect(
  useCallback(() => {
@@ -691,7 +694,7 @@ case "editorTapped":
      cancelled = true;
      if (overlayTimer) clearTimeout(overlayTimer);
    };
-   }, [state.completed, state.exercise, course, webViewReady, handleToastNext, showToast]);
+   }, [course, handleToastNext, id, showToast, state.completed, state.exercise, webViewReady]);
 
   const exerciseSymbols = useMemo(() => {
   if (!state.exercise) return [];

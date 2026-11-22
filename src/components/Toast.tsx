@@ -36,6 +36,8 @@ export default function Toast({
   const insets = useSafeAreaInsets();
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme];
+  const onDismissRef = useRef(onDismiss);
+  onDismissRef.current = onDismiss;
   const effectiveIconColor =
     iconColor ?? (tone === "failure" ? colors.error : colors.success);
   // Success/info notifications render as a floating rounded card; failures
@@ -57,14 +59,14 @@ export default function Toast({
           tension: 70,
           friction: 12,
           useNativeDriver: true,
-        }).start(() => onDismiss?.());
+        }).start(() => onDismissRef.current?.());
       }, duration);
 
       return () => clearTimeout(timer);
     } else {
       translateY.setValue(HIDDEN_Y);
     }
-  }, [visible]);
+  }, [duration, translateY, visible]);
 
   const handleAction = () => {
     Animated.spring(translateY, {

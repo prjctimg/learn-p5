@@ -122,7 +122,7 @@ export default function StreakToast({
    clearTimeout(timer);
    countAnim.removeListener(listener);
   };
- }, [visible]);
+ }, [animateIn, animateOut, countAnim, visible]);
 
  const progressWidth = progressAnim.interpolate({
  inputRange: [0, 1],

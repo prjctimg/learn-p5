@@ -1,0 +1,3 @@
+- Improve local development and CI workflows.
+- Package/app metadata updates for release readiness.
+- Lint and quality fixes.

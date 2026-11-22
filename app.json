@@ -11,7 +11,7 @@
       "icon": "./assets/p5.icon"
     },
     "android": {
-      "package": "com.learnp5",
+      "package": "com.prjctimg.learnp5",
       "versionCode": 153,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
@@ -49,7 +49,8 @@
         }
       ],
       "expo-font",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "@psync/notifee"
     ],
     "experiments": {
       "typedRoutes": true,
