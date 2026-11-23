@@ -1,0 +1,2 @@
+- Fix CI and release builds by resolving React peer dependency conflict
+- Fix update-actions workflow validation error

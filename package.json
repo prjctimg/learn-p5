@@ -1,7 +1,7 @@
 {
   "name": "learn-p5",
   "main": "expo-router/entry",
-  "version": "0.6.160",
+  "version": "0.6.161",
   "license": "GPL-3.0-or-later",
   "scripts": {
     "postinstall": "npm run bundle-validation && npm run bundle-p5 && npm run bundle-polyfill",
@@ -44,8 +44,8 @@
     "expo-sensors": "~55.0.13",
     "expo-status-bar": "~2.2.3",
     "fuse.js": "7.1.0",
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
     "react-native": "0.83.6",
     "react-native-gesture-handler": "~2.30.0",
     "react-native-reanimated": "4.2.1",
