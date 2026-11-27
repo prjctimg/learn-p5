@@ -23,7 +23,7 @@ jobs:
       - name: Checkout automata scripts
         uses: actions/checkout@v7
         with:
-          repository: prjctimg/automata
+          repository: craftty-org/automata
           path: automata
           ref: main
 
