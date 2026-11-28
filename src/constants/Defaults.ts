@@ -10,4 +10,6 @@ export const DEFAULTS = {
     tall: 360,
   } as Record<string, number>,
   ctaColor: "#FF69B4",
+  playgroundDefaultSketchName: "My Sketch",
+  playgroundMaxFrameCaptures: 60,
 };

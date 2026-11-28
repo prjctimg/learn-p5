@@ -88,3 +88,92 @@ export interface ContentManifest {
 }
 
 export type ContentCacheMeta = Pick<ContentManifest, "contentVersion" | "packSha256">;
+
+// Playground / Sketchspace
+
+export type SketchFileKind = "code" | "asset" | "data";
+
+export interface SketchFile {
+  id: string;
+  name: string;
+  path: string; // sketch-relative path, e.g. assets/cat.png or sketch.js
+  kind: SketchFileKind;
+  mimeType: string;
+  size: number;
+  /** Local file URI on device/web blob URL reference; binary assets stay local. */
+  uri: string;
+  /** For small text/data files we may keep inline content for web fallback. */
+  content?: string;
+  source: "local" | "github";
+  updatedAt: string;
+}
+
+export interface SketchAddon {
+  id: string;
+  name: string;
+  url: string;
+  version?: string;
+  enabled: boolean;
+  /** p5 compatibility status evaluated against bundled runtime. */
+  compatibility: "compatible" | "untested" | "incompatible" | "unknown";
+  compatibilityMessage?: string;
+  addedAt: string;
+}
+
+export interface Sketch {
+  id: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+  entryFile: string; // sketch-relative path, default sketch.js
+  files: SketchFile[];
+  addons: SketchAddon[];
+  gistId?: string;
+  gistUrl?: string;
+  lastSyncedAt?: string;
+  lastSyncedGistUpdatedAt?: string;
+}
+
+export interface SketchspaceIndex {
+  version: 1;
+  sketches: Sketch[];
+  activeSketchId?: string;
+}
+
+export interface GitHubUser {
+  login: string;
+  name?: string | null;
+  avatarUrl?: string | null;
+}
+
+export interface GitHubAuthState {
+  accessToken: string;
+  scope?: string;
+  tokenType?: string;
+  user: GitHubUser;
+}
+
+export interface P5AddonCatalogEntry {
+  id: string;
+  name: string;
+  description: string;
+  url: string;
+  homepage?: string;
+  version?: string;
+  /** p5 major versions this addon declares support for, e.g. [1] or [1,2]. */
+  p5Major?: number[];
+  /** Specific p5 versions known tested. */
+  testedP5Versions?: string[];
+  notes?: string;
+}
+
+export interface FrameCaptureRequest {
+  frames: number[];
+  width?: number;
+  height?: number;
+}
+
+export interface CapturedFrame {
+  frame: number;
+  dataUrl: string; // image/png data URL
+}

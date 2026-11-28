@@ -50,7 +50,10 @@
       ],
       "expo-font",
       "@react-native-community/datetimepicker",
-      "@psync/notifee"
+      "@psync/notifee",
+      "expo-web-browser",
+      "expo-secure-store",
+      "expo-sharing"
     ],
     "experiments": {
       "typedRoutes": true,

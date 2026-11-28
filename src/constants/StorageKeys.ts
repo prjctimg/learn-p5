@@ -20,4 +20,7 @@ export const STORAGE_KEYS = {
   settingDailyReminder: "setting_dailyReminder",
   settingNotificationHour: "setting_notificationHour",
   settingNotificationMinute: "setting_notificationMinute",
+  playgroundIndex: "playground_index",
+  playgroundActiveSketchId: "playground_active_sketch_id",
+  playgroundGithubAuth: "playground_github_auth_meta",
 };
